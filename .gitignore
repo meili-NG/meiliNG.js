@@ -102,3 +102,17 @@ dist
 
 # TernJS port file
 .tern-port
+
+## Remove OS Specific Files
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+
+# Linux
+.Trashes
+
+# Windows
+ehthumbs.db
+Thumbs.db

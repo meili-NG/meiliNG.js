@@ -1,0 +1,40 @@
+{
+  "name": "meiling",
+  "version": "0.0.1",
+  "description": "An easy-to-use, open-source oAuth2 Authentication Provider",
+  "main": "dist/",
+  "repository": "https://github.com/Stella-IT/meiling",
+  "author": "Alex4386 <psh010209@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.7",
+    "@typescript-eslint/eslint-plugin": "^4.7.0",
+    "@typescript-eslint/parser": "^4.7.0",
+    "eslint": "^7.13.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "husky": "^4.3.0",
+    "lint-staged": "^10.5.1",
+    "prettier": "^2.1.2",
+    "ts-node": "^9.0.0"
+  },
+  "scripts": {
+    "debug": "ts-node ./src/",
+    "build": "tsc",
+    "start": "tsc && node ./dist/",
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --fix"
+    ]
+  }
+}

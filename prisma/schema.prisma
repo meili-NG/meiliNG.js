@@ -9,3 +9,138 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 }
+
+model User {
+  id                    String                        @id @default(uuid())
+  emails                Email[]
+  phones                Phone[]
+  groups                Group[]
+  permissions           Permission[]
+  ownedClients          OAuthClient[]
+  authorizedClients     OAuthClientAuthorization[]
+  isActive              Boolean                       @default(true)
+  createdAt             DateTime                      @default(now())
+  lastLogin             DateTime                      @default(now())
+}
+
+model Email {
+  id                    String                        @id @default(uuid())
+  username              String                        @unique
+  email                 String
+  addedAt               DateTime                      @default(now())
+  verified              Boolean                       @default(false)
+}
+
+model Phone {
+  id                    String                        @id @default(uuid())
+  phone                 String
+  addedAt               DateTime                      @default(now())
+}
+
+enum AuthorizationMethod {
+  PGP_KEY
+  OTP
+  PASSWORD
+  SSH_KEY
+  SMS
+  EMAIL
+  SECURITY_KEY
+}
+
+model Authorization {
+  id                    String                        @id @default(uuid())
+  method                AuthorizationMethod
+  data                  Json?
+  allowSingleFactor     Boolean                       @default(false)
+  allowTwoFactor        Boolean                       @default(false)
+  allowPasswordReset    Boolean                       @default(false)
+}
+
+model Group {
+  id                    String                        @id @default(uuid())
+  name                  String
+  permissions           Permission[]
+}
+
+enum OAuthClientType {
+  PUBLIC
+  PRIVATE
+}
+
+model OAuthClient {
+  id                    String                        @id @default(uuid())
+  type                  OAuthClientType
+  name                  String
+  image                 String
+  secrets               OAuthClientAuth[]
+  permissions           Permission[]
+  privacy               OAuthPrivacy
+  terms                 OAuthTerms
+}
+
+model OAuthPrivacy {
+  id                    String                        @id @default(uuid())
+  policy                Policy     
+  registeredBy          User
+}
+
+model OAuthTerms {
+  id                    String                        @id @default(uuid())
+  policy                Policy     
+  registeredBy          User
+}
+
+model OAuthClientAuth {
+  id                    String                        @id @default(uuid())
+  secret                String
+  issuer                User
+  issuedAt              DateTime                      @default(now())
+}
+
+model OAuthClientAuthorization {
+  id                    String                        @id @default(uuid())
+  user                  User
+  client                OAuthClient
+  permissions           Permission[]
+  authorizedAt          DateTime                      @default(now())
+  lastUpdatedAt         DateTime                      @default(now())
+}
+
+model Permission {
+  name                  String                        @id
+}
+
+model Policy {
+  id                    String                        @id @default(uuid())
+  name                  String
+  versions              PolicyVersion[]
+  lastUpdatedAt         DateTime                      @default(now())
+}
+
+model PolicyVersion {
+  id                    String                        @id @default(uuid())
+  url                   String
+  releasedAt            DateTime                      @default(now())
+}
+
+model PolicyConsent {
+  id                    String                        @id @default(uuid())
+  user                  User
+  policy                Policy
+  consent               Boolean                       @default(false)
+}
+
+enum OAuthTokenType {
+  ACCESS_TOKEN
+  REFRESH_TOKEN
+  ACCOUNT_TOKEN
+}
+
+model OAuthToken {
+  token                 String                        @id @default(uuid())
+  type                  OAuthTokenType
+  authorization         OAuthClientAuthorization?
+  issuedAt              DateTime                      @default(now())
+}
+
+

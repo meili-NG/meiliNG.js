@@ -29,6 +29,8 @@ model Email {
   email                 String
   addedAt               DateTime                      @default(now())
   verified              Boolean                       @default(false)
+  allowUse              Boolean                       @default(true)
+  isPrimary             Boolean                       @default(true)
 }
 
 model Phone {

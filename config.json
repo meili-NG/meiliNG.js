@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "allowLogin": [
+    "https://meiling-dev.stella-it.com"
+  ]
+}

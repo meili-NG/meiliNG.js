@@ -21,6 +21,7 @@ model User {
   authorizedClients     OAuthClientAuthorization[]
   auths                 Authorization[]
   isActive              Boolean                       @default(true)
+  useTwoFactor          Boolean                       @default(false)
   createdAt             DateTime                      @default(now())
   lastLogin             DateTime                      @default(now())
   lastAuthenticated     DateTime                      @default(now())

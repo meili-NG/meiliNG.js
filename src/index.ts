@@ -5,6 +5,7 @@ import { registerRootEndpoints } from './routes';
 import { Config } from './interface';
 import FastifySession from 'fastify-secure-session';
 import ChildProcess from 'child_process';
+import { validatePGPSign } from './common/validate';
 
 const packageJson = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf-8' }));
 export const config = JSON.parse(fs.readFileSync('config.json', { encoding: 'utf-8' })) as Config;

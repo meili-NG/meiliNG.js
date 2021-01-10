@@ -1,7 +1,8 @@
 import crypto from 'crypto';
+import { config } from '..';
 
-const availableCharacters = 'QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890';
-const defaultTokenLength = 128;
+const availableCharacters = config.token.default.chars;
+const defaultTokenLength = config.token.default.length;
 
 export function getCryptographicallySafeRandomInteger(bound?: number): number {
   if (bound === undefined) bound = Number.MAX_SAFE_INTEGER;
@@ -12,9 +13,9 @@ export function getCryptographicallySafeRandomInteger(bound?: number): number {
   return array[0] % bound;
 }
 
-export function generateToken(chars?: string, length?: number) {
-  if (chars === undefined) chars = availableCharacters;
+export function generateToken(length?: number, chars?: string) {
   if (length === undefined) length = defaultTokenLength;
+  if (chars === undefined) chars = availableCharacters;
 
   let token = '';
   for (let i = 0; i < length; i++) {

@@ -10,5 +10,11 @@
     "ACCOUNT_TOKEN": -1
   },
   "sessionCookieKeyPath": "./meiling-cookie-key",
-  "errorFormatURL": "https://opensource.stella-it.com/developers/docs/meiling/error/{{errorCode}}.html"
+  "errorFormatURL": "https://opensource.stella-it.com/developers/docs/meiling/error/{{errorCode}}.html",
+  "token": {
+    "default": {
+      "chars": "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890",
+      "length": 128
+    }
+  }
 }

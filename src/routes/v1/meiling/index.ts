@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { meilingV1LoginHandler } from './login';
-import { meilingV1UserHandler } from './user';
+import { meilingV1SigninHandler } from './signin';
+import { meilingV1SignupHandler } from './signup';
+import { meilingV1UserInfoHandler } from './user';
 
 export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string) {
   app.get(baseURI, (req, rep) => {
@@ -11,6 +12,8 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
     });
   });
 
-  app.get(baseURI + '/user', meilingV1UserHandler);
-  app.get(baseURI + '/login', meilingV1LoginHandler);
+  app.get(baseURI + '/user', meilingV1UserInfoHandler);
+
+  app.get(baseURI + '/signin', meilingV1SigninHandler);
+  app.get(baseURI + '/signup', meilingV1SignupHandler);
 }

@@ -2,9 +2,12 @@ import { User, OAuthClientAuthorization, OAuthClient, Email, Phone } from '@pris
 import { prisma } from '../';
 import { getAppInfoByClientId } from './client';
 
-interface UserObject extends User {
+interface UserBaseObject extends User {
   emails: Email[];
   phones: Phone[];
+}
+
+interface UserAllObject extends UserBaseObject {
   authorizedApps: ClientAuthorizationObject[];
   createdApps: OAuthClient[];
 }
@@ -31,7 +34,14 @@ export function runUserAction(user: User | string) {
   });
 }
 
-export async function getUserByID(uuid: string) {
+export async function getUserInfo(user: User | string): Promise<UserBaseObject | undefined> {
+  let uuid;
+  if (typeof user === 'string') {
+    uuid = user;
+  } else {
+    uuid = user.id;
+  }
+
   const userDatabase = await prisma.user.findFirst({
     where: {
       id: uuid,
@@ -39,43 +49,40 @@ export async function getUserByID(uuid: string) {
   });
   if (!userDatabase) return;
 
-  const emailDatabase = await prisma.email.findMany({
+  const emails = await prisma.email.findMany({
     where: {
       User: userDatabase,
     },
   });
 
-  const phoneDatabase = await prisma.phone.findMany({
+  const phones = await prisma.phone.findMany({
     where: {
       User: userDatabase,
     },
   });
+
+  const userObj: UserBaseObject = {
+    ...userDatabase,
+    emails,
+    phones,
+  };
+}
+
+export async function getAllUserByID(user: User | string): Promise<UserBaseObject | undefined> {
+  const baseUser = await getUserInfo(user);
+  if (!baseUser) return;
 
   const authorizedAppsDatabase = await prisma.oAuthClientAuthorization.findMany({
     where: {
-      user: userDatabase,
+      userId: baseUser.id,
     },
   });
 
   const createdAppsDatabase = await prisma.oAuthClientAuthorization.findMany({
     where: {
-      user: userDatabase,
+      userId: baseUser.id,
     },
   });
-
-  const emails = [];
-
-  for (const email of emailDatabase) {
-    if (email.verified && !email.isPrimary) {
-      emails.push(email);
-    }
-  }
-
-  const phones = [];
-
-  for (const phone of phoneDatabase) {
-    phones.push(phone);
-  }
 
   const authorizedApps = [];
 
@@ -100,13 +107,33 @@ export async function getUserByID(uuid: string) {
     }
   }
 
-  const user: UserObject = {
-    ...userDatabase,
+  const userObj: UserAllObject = {
+    ...baseUser,
     authorizedApps,
     createdApps,
-    emails,
-    phones,
   };
 
-  return user;
+  return userObj;
+}
+
+export async function getAuthenticationMethods(user: User | string) {
+  let uuid;
+  if (typeof user === 'string') {
+    uuid = user;
+  } else {
+    uuid = user.id;
+  }
+
+  const auths = await prisma.authorization.findMany({
+    where: {
+      userId: uuid,
+    },
+  });
+
+  const authenticationMethods = [];
+  for (const auth of auths) {
+    authenticationMethods.push(auth.method);
+  }
+
+  return authenticationMethods;
 }

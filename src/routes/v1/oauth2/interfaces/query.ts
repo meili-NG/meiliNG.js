@@ -30,16 +30,17 @@ export type OAuth2QueryTokenParameters =
   | OAuth2QueryTokenRefreshTokenParameters;
 //  | OAuth2QueryTokenSAMLParameters;
 
-export type OAuth2ErrorResponseError =
-  | 'invalid_request'
-  | 'invalid_client'
-  | 'invalid_grant'
-  | 'unauthorized_client'
-  | 'unsupported_grant_type'
-  | 'invalid_scope';
+export enum OAuth2ErrorResponseType {
+  INVALID_REQUEST = 'invalid_request',
+  INVALID_CLIENT = 'invalid_client',
+  INVALID_GRANT = 'invalid_grant',
+  UNAUTHORIZED_CLIENT = 'unauthorized_client',
+  UNSUPPORTED_GRANT_TYPE = 'unsupported_grant_type',
+  INVALID_SCOPE = 'invalid_scope',
+}
 
 export interface OAuth2ErrorResponse {
-  error: OAuth2ErrorResponseError;
+  error: OAuth2ErrorResponseType;
   error_description?: string;
   error_uri?: string;
 }

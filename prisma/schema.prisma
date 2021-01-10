@@ -12,6 +12,7 @@ generator client {
 
 model User {
   id                    String                        @id @default(uuid())
+  username              String                        @unique
   emails                Email[]
   phones                Phone[]
   groups                Group[]
@@ -26,7 +27,6 @@ model User {
 
 model Email {
   id                    String                        @id @default(uuid())
-  username              String                        @unique
   email                 String
   addedAt               DateTime                      @default(now())
   verified              Boolean                       @default(false)
@@ -77,20 +77,8 @@ model OAuthClient {
   image                 String
   secrets               OAuthClientAuth[]
   permissions           Permission[]
-  privacy               OAuthPrivacy
-  terms                 OAuthTerms
-}
-
-model OAuthPrivacy {
-  id                    String                        @id @default(uuid())
-  policy                Policy     
-  registeredBy          User
-}
-
-model OAuthTerms {
-  id                    String                        @id @default(uuid())
-  policy                Policy     
-  registeredBy          User
+  privacy               String
+  terms                 String
 }
 
 model OAuthClientAuth {

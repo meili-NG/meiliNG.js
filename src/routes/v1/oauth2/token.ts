@@ -2,14 +2,14 @@ import { OAuthToken, OAuthClientAuthorization, OAuthTokenType } from '@prisma/cl
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { config, prisma } from '../../..';
-import { OAuth2QueryTokenParameters } from './interfaces';
-import { sendOAuth2Error } from './index';
+import { OAuth2ErrorResponseType, OAuth2QueryTokenParameters } from './interfaces';
+import { sendOAuth2Error } from './error';
 
 export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply) {
   const query = req.query as OAuth2QueryTokenParameters;
 
   if (query.client_id === undefined || query.client_secret === undefined || query.grant_type === undefined) {
-    sendOAuth2Error(rep, 'invalid_request');
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST);
     return;
   }
 
@@ -20,7 +20,7 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
   });
 
   if (client === null) {
-    sendOAuth2Error(rep, 'invalid_client');
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT);
     return;
   }
 
@@ -37,13 +37,21 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
     });
 
     if (token === null) {
-      sendOAuth2Error(rep, 'invalid_grant', 'provided authorization code is invalid or had been used.');
+      sendOAuth2Error(
+        rep,
+        OAuth2ErrorResponseType.INVALID_GRANT,
+        'provided authorization code is invalid or had been used.',
+      );
       return;
     }
 
     if (config?.invalidate?.AUTHORIZATION_CODE >= 0) {
       if (new Date().getTime() - token.issuedAt.getTime() > config.invalidate.AUTHORIZATION_CODE) {
-        sendOAuth2Error(rep, 'invalid_grant', 'provided authorization code has been invalidated, please reissue one.');
+        sendOAuth2Error(
+          rep,
+          OAuth2ErrorResponseType.INVALID_GRANT,
+          'provided authorization code has been invalidated, please reissue one.',
+        );
         return;
       }
     }
@@ -57,18 +65,26 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
     });
 
     if (token === null) {
-      sendOAuth2Error(rep, 'invalid_grant', 'provided refresh token is invalid or had been used.');
+      sendOAuth2Error(
+        rep,
+        OAuth2ErrorResponseType.INVALID_GRANT,
+        'provided refresh token is invalid or had been used.',
+      );
       return;
     }
 
     if (config?.invalidate?.REFRESH_TOKEN >= 0) {
       if (new Date().getTime() - token.issuedAt.getTime() > config.invalidate.REFRESH_TOKEN) {
-        sendOAuth2Error(rep, 'invalid_grant', 'provided refresh token has been invalidated, please reissue one.');
+        sendOAuth2Error(
+          rep,
+          OAuth2ErrorResponseType.INVALID_GRANT,
+          'provided refresh token has been invalidated, please reissue one.',
+        );
         return;
       }
     }
   } else {
-    sendOAuth2Error(rep, 'unsupported_grant_type');
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.UNSUPPORTED_GRANT_TYPE);
     return;
   }
 
@@ -79,7 +95,7 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
   })) as OAuthClientAuthorization;
 
   if (oAuthAuthorization === null) {
-    sendOAuth2Error(rep, 'invalid_grant', 'unable to find authorization request');
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'unable to find authorization request');
     return;
   }
 
@@ -90,7 +106,7 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
   });
 
   if (user === null) {
-    sendOAuth2Error(rep, 'invalid_grant', 'unable to find user to authenticate');
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'unable to find user to authenticate');
     return;
   }
 

@@ -20,7 +20,6 @@ model User {
   ownedClients          OAuthClient[]
   authorizedClients     OAuthClientAuthorization[]
   auths                 Authorization[]
-  password              String
   isActive              Boolean                       @default(true)
   createdAt             DateTime                      @default(now())
   lastLogin             DateTime                      @default(now())

@@ -9,5 +9,6 @@
     "REFRESH_TOKEN": 604800,
     "ACCOUNT_TOKEN": -1
   },
-  "sessionCookieKeyPath": "./meiling-cookie-key"
+  "sessionCookieKeyPath": "./meiling-cookie-key",
+  "errorFormatURL": "https://opensource.stella-it.com/developers/docs/meiling/error/{{errorCode}}.html"
 }

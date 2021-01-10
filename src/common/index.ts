@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { config } from '..';
 
 const availableCharacters = 'QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890';
 const defaultTokenLength = 128;
@@ -22,4 +23,13 @@ export function generateToken(chars?: string, length?: number) {
   }
 
   return token;
+}
+
+export function buildErrorCodeURL(code?: string) {
+  if (code !== undefined) {
+    const tmpErrorURL = config.errorFormatURL;
+    return tmpErrorURL.replace(/\{\{errorCode\}\}/g, code);
+  } else {
+    return undefined;
+  }
 }

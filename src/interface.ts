@@ -7,4 +7,5 @@ export interface Config {
     [token in OAuthTokenType]: number;
   };
   sessionCookieKeyPath: string;
+  errorFormatURL: string;
 }

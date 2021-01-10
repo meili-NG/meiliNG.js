@@ -3,9 +3,10 @@ import { registerV1MeilingEndpoints } from './meiling';
 import { registerV1OAuth2Endpoints } from './oauth2';
 
 export function registerV1Endpoints(app: FastifyInstance, baseURI: string) {
-  app.get(baseURI, (req, res) => {
-    res.send({
-      yo: 'sans',
+  app.get(baseURI, (req, rep) => {
+    rep.send({
+      version: 1,
+      engine: 'Meiling Engine',
     });
   });
 

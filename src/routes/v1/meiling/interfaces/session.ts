@@ -1,4 +1,4 @@
-interface MeilingV1Session {
+export interface MeilingV1Session {
   user?: {
     id: string;
   };

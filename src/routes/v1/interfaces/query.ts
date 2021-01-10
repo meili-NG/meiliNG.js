@@ -1,15 +1,10 @@
-export type OAuth2QueryResponseType = 'code';
-export type OAuth2QueryAccessType = 'online' | 'offline';
-export type OAuth2QueryGrantType =
-  | 'access_token'
-  | 'refresh_token'
-  | 'authorization_code'
-  | 'password'
-  | 'client_credentials'
-  | 'urn:ietf:params:oauth:grant-type:saml2-bearer';
-
-export type OAuth2QueryBoolean = 'true' | 'false';
-export type OAuth2QueryPrompt = 'none' | 'consent' | 'select_account';
+import {
+  OAuth2QueryResponseType,
+  OAuth2QueryAccessType,
+  OAuth2QueryBoolean,
+  OAuth2QueryPrompt,
+  OAuth2QueryGrantType,
+} from './type';
 
 export interface OAuth2QueryBaseParameters {
   client_id: string;
@@ -32,10 +27,8 @@ export interface OAuth2QueryAuthParameters extends OAuth2QueryBaseParameters {
 
 export type OAuth2QueryTokenParameters =
   | OAuth2QueryTokenAuthorizationCodeParameters
-  | OAuth2QueryTokenRefreshTokenParameters
-  | OAuth2QueryTokenPasswordParameters
-  | OAuth2QueryTokenClientCredentialsParameters
-  | OAuth2QueryTokenSAMLParameters;
+  | OAuth2QueryTokenRefreshTokenParameters;
+//  | OAuth2QueryTokenSAMLParameters;
 
 export type OAuth2ErrorResponseError =
   | 'invalid_request'
@@ -66,19 +59,9 @@ export interface OAuth2QueryTokenRefreshTokenParameters extends OAuth2QueryToken
   refresh_token: string;
 }
 
-export interface OAuth2QueryTokenPasswordParameters extends OAuth2QueryTokenBaseParameters {
-  grant_type: 'password';
-  username: string;
-  password: string;
-  scope: string;
-}
-
-export interface OAuth2QueryTokenClientCredentialsParameters extends OAuth2QueryTokenBaseParameters {
-  grant_type: 'client_credentials';
-  scope: string;
-}
-
+/*
 export interface OAuth2QueryTokenSAMLParameters extends OAuth2QueryTokenBaseParameters {
   grant_type: 'urn:ietf:params:oauth:grant-type:saml2-bearer';
   scope: string;
 }
+*/

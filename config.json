@@ -2,5 +2,12 @@
   "version": "0.0.1",
   "allowLogin": [
     "https://meiling-dev.stella-it.com"
-  ]
+  ],
+  "invalidate": {
+    "AUTHORIZATION_CODE": 300,
+    "ACCESS_TOKEN": 7200,
+    "REFRESH_TOKEN": 604800,
+    "ACCOUNT_TOKEN": -1
+  },
+  "sessionCookieKeyPath": "./meiling-cookie-key"
 }

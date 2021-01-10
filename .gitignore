@@ -116,3 +116,6 @@ dist
 # Windows
 ehthumbs.db
 Thumbs.db
+
+# Meiling Engine Session Key
+meiling-cookie-key

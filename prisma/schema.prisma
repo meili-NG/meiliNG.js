@@ -21,6 +21,7 @@ model User {
   isActive              Boolean                       @default(true)
   createdAt             DateTime                      @default(now())
   lastLogin             DateTime                      @default(now())
+  lastAuthenticated     DateTime                      @default(now())
 }
 
 model Email {
@@ -136,12 +137,13 @@ enum OAuthTokenType {
   ACCESS_TOKEN
   REFRESH_TOKEN
   ACCOUNT_TOKEN
+  AUTHORIZATION_CODE
 }
 
 model OAuthToken {
   token                 String                        @id @default(uuid())
   type                  OAuthTokenType
-  authorization         OAuthClientAuthorization?
+  authorization         OAuthClientAuthorization
   issuedAt              DateTime                      @default(now())
 }
 

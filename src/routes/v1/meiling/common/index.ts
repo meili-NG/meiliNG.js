@@ -1,7 +1,8 @@
 import { User, Authorization, AuthorizationMethod } from '@prisma/client';
 import { prisma } from '../../../..';
 import { generateToken } from '../../../../common';
-import { AuthorizationJSONObject } from '../../../../common/user';
+import { AuthorizationJSONObject, AuthorizationOTPObject, AuthorizationPGPSSHKeyObject } from '../../../../common/user';
+import { validateOTP, validatePGPSign } from '../../../../common/validate';
 import { MeilingV1ExtendedAuthMethods, MeilingV1SigninType } from '../interfaces/query';
 
 export function getAuthenticationV1ToDatabaseEquivalent(method: MeilingV1ExtendedAuthMethods): AuthorizationMethod {
@@ -88,7 +89,7 @@ export function generateChallengeV1(signinMethod: MeilingV1ExtendedAuthMethods) 
   }
 }
 
-export function verifyChallengeV1(
+export async function verifyChallengeV1(
   signinMethod: MeilingV1ExtendedAuthMethods,
   challenge: string,
   challengeResponse: any,
@@ -96,12 +97,13 @@ export function verifyChallengeV1(
 ) {
   switch (signinMethod) {
     case MeilingV1ExtendedAuthMethods.PGP_SIGNATURE:
-
+      return validatePGPSign(challenge, challengeResponse, (data as AuthorizationPGPSSHKeyObject).data.key);
     case MeilingV1ExtendedAuthMethods.SECURITY_KEY:
       break;
     case MeilingV1ExtendedAuthMethods.SMS:
     case MeilingV1ExtendedAuthMethods.EMAIL:
       return challenge.trim() === challengeResponse.trim();
     case MeilingV1ExtendedAuthMethods.OTP:
+      return validateOTP(challengeResponse, (data as AuthorizationOTPObject).data.secret);
   }
 }

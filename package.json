@@ -11,6 +11,7 @@
     "fastify": "^3.9.2",
     "fastify-secure-session": "^2.3.0",
     "openpgp": "^4.10.9",
+    "speakeasy": "^2.0.0",
     "typescript": "^4.0.5"
   },
   "devDependencies": {
@@ -19,6 +20,7 @@
     "@types/bcrypt": "^3.0.0",
     "@types/node": "^14.14.7",
     "@types/openpgp": "^4.4.14",
+    "@types/speakeasy": "^2.0.5",
     "@typescript-eslint/eslint-plugin": "^4.7.0",
     "@typescript-eslint/parser": "^4.7.0",
     "eslint": "^7.13.0",

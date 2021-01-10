@@ -1,4 +1,5 @@
 import * as OpenPGP from 'openpgp';
+import * as SpeakEasy from 'speakeasy';
 
 export async function validatePGPSign(challenge: string, challengeResponse: string, publicKeyArmored: string) {
   let message;
@@ -25,4 +26,12 @@ export async function validatePGPSign(challenge: string, challengeResponse: stri
   }
 
   return recoveredChallenge.trim() == challenge.trim() && isSignaturesValid;
+}
+
+export function validateOTP(challengeResponse: string, secret: string) {
+  return SpeakEasy.totp.verify({
+    secret,
+    encoding: 'base32',
+    token: challengeResponse.trim(),
+  });
 }

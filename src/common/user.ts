@@ -41,14 +41,14 @@ interface AuthorizationPasswordObject {
   };
 }
 
-interface AuthorizationPGPSSHKeyObject {
+export interface AuthorizationPGPSSHKeyObject {
   type: 'PGP_KEY' | 'SSH_KEY';
   data: {
     key: string;
   };
 }
 
-interface AuthorizationOTPObject {
+export interface AuthorizationOTPObject {
   type: 'OTP';
   data: {
     secret: string;

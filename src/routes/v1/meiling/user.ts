@@ -1,9 +1,8 @@
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
-import { getAllUserByID } from '../../../common/user';
 import { getLoggedInMeilingV1Session, getMeilingV1Session } from './common';
 import { sendMeilingError } from './error';
-import { MeilingV1ErrorType, MeilingV1Session } from './interfaces';
+import { MeilingV1ErrorType } from './interfaces';
 
 export async function meilingV1UserInfoHandler(req: FastifyRequest, rep: FastifyReply) {
   const currentlyLoggedInUsers = await getLoggedInMeilingV1Session(req);

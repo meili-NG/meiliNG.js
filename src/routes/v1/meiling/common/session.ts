@@ -89,6 +89,7 @@ export async function logoutMeilingV1Session(req: FastifyRequest, user: User | s
 
 export async function getLoggedInMeilingV1Session(req: FastifyRequest) {
   const session = getMeilingV1Session(req);
+
   if (session.user === undefined) {
     session.user = [];
   }
@@ -97,7 +98,9 @@ export async function getLoggedInMeilingV1Session(req: FastifyRequest) {
 
   for (const user of session.user) {
     const thisUser = await getUserInfo(user.id);
-    users.push(thisUser);
+    if (thisUser !== null && thisUser !== undefined) {
+      users.push(thisUser);
+    }
   }
 
   return users;

@@ -1,7 +1,5 @@
-import { FastifyInstance, FastifyReply } from 'fastify';
-import { buildErrorCodeURL } from '../../../common';
+import { FastifyInstance } from 'fastify';
 import { oAuth2AuthHandler } from './auth';
-import { OAuth2ErrorResponseType } from './interfaces';
 import { oAuth2TokenHandler } from './token';
 
 export function registerV1OAuth2Endpoints(app: FastifyInstance, baseURI: string) {

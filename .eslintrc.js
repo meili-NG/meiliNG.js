@@ -25,5 +25,7 @@ module.exports = {
   rules: {
     // put your eslint rules here:
     // e.g. "@typescript-eslint/explicit-function-return-type": "off",
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': ['warn'],
   },
 };

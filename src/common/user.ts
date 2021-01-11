@@ -116,6 +116,8 @@ export async function getUserInfo(user: User | string): Promise<UserBaseObject |
     emails,
     phones,
   };
+
+  return userObj;
 }
 
 export async function getAllUserByID(user: User | string): Promise<UserBaseObject | undefined> {
@@ -208,7 +210,14 @@ export async function findMatchingUsersByUsernameOrEmail(username: string, passw
 
       for (const passwordDatum of passwordData) {
         if (passwordDatum.data === null) continue;
-        const passwordDatumJSON = JSON.parse(passwordDatum.data as string) as AuthorizationJSONObject;
+
+        let passwordDatumJSON;
+
+        if (typeof passwordDatum.data === 'string') {
+          passwordDatumJSON = JSON.parse(passwordDatum.data as string) as AuthorizationJSONObject;
+        } else {
+          passwordDatumJSON = (passwordDatum.data as unknown) as AuthorizationJSONObject;
+        }
 
         if (passwordDatumJSON.type !== 'PASSWORD') continue;
         const result = await bcrypt.compare(password, passwordDatumJSON.data.hash);
@@ -224,4 +233,34 @@ export async function findMatchingUsersByUsernameOrEmail(username: string, passw
   }
 
   return matchingUsers;
+}
+
+export async function updateLastSignIn(user_uuid: User | string) {
+  const user = await getUserPlainInfo(user_uuid);
+
+  if (user) {
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        lastSignIn: new Date(),
+      },
+    });
+  }
+}
+
+export async function updateLastAuth(user_uuid: User | string) {
+  const user = await getUserPlainInfo(user_uuid);
+
+  if (user) {
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        lastAuthenticated: new Date(),
+      },
+    });
+  }
 }

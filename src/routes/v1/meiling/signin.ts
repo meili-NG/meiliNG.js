@@ -1,25 +1,28 @@
-import { Authorization, AuthorizationMethod, User } from '@prisma/client';
+import { Authorization, User } from '@prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
-import { findMatchingUsersByUsernameOrEmail, getUserPlainInfo } from '../../../common/user';
+import {
+  findMatchingUsersByUsernameOrEmail,
+  getUserPlainInfo,
+  updateLastAuth,
+  updateLastSignIn,
+} from '../../../common/user';
 import {
   generateChallengeV1,
   getAuthenticationMethodsV1,
   getDatabaseEquivalentFromAuthenticationV1,
   getAuthenticationV1FromDatabaseEquivalent,
   verifyChallengeV1,
+  shouldSendChallengeV1,
 } from './common';
 import {
-  getMeilingV1ExtendedAuthSession,
   getMeilingV1Session,
-  hasMeilingV1ExtendedAuthSession,
   loginMeilingV1Session,
   setMeilingV1ExtendedAuthSession,
   setMeilingV1ExtendedAuthSessionMethodAndChallenge,
-  setMeilingV1Session,
 } from './common/session';
 import { sendMeilingError } from './error';
-import { MeilingV1Session, MeilingV1ErrorType } from './interfaces';
+import { MeilingV1ErrorType } from './interfaces';
 import { MeilingV1ExtendedAuthMethods, MeilingV1SignInBody, MeilingV1SigninType } from './interfaces/query';
 
 function getMeilingAvailableAuthMethods(authMethods: Authorization[]) {
@@ -39,18 +42,17 @@ function getMeilingAvailableAuthMethods(authMethods: Authorization[]) {
 
 export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyReply) {
   const session = getMeilingV1Session(req);
+  let body;
 
   if (typeof req.body !== 'string') {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'invalid request type.');
-    return;
-  }
-
-  let body;
-  try {
-    body = JSON.parse(req.body) as MeilingV1SignInBody;
-  } catch (e) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'body is not a valid JSON.');
-    return;
+    body = req.body as MeilingV1SignInBody;
+  } else {
+    try {
+      body = JSON.parse(req.body) as MeilingV1SignInBody;
+    } catch (e) {
+      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'body is not a valid JSON.');
+      return;
+    }
   }
 
   let userToLogin: User;
@@ -195,7 +197,7 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
 
       rep.send({
         type: body.type,
-        challenge,
+        challenge: shouldSendChallengeV1(signinMethod) ? challenge : undefined,
       });
 
       setMeilingV1ExtendedAuthSessionMethodAndChallenge(req, signinMethod, challenge);
@@ -279,6 +281,9 @@ please request this endpoint without challengeResponse field to request challeng
 
   await loginMeilingV1Session(req, userToLogin);
   setMeilingV1ExtendedAuthSession(req, undefined);
+
+  updateLastAuth(userToLogin);
+  updateLastSignIn(userToLogin);
 
   rep.status(200).send({
     success: true,

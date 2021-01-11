@@ -17,6 +17,20 @@ export function generateChallengeV1(signinMethod: MeilingV1ExtendedAuthMethods) 
   }
 }
 
+export function shouldSendChallengeV1(signinMethod: MeilingV1ExtendedAuthMethods) {
+  switch (signinMethod) {
+    case MeilingV1ExtendedAuthMethods.PGP_SIGNATURE:
+    case MeilingV1ExtendedAuthMethods.SECURITY_KEY:
+      return true;
+    case MeilingV1ExtendedAuthMethods.SMS:
+    case MeilingV1ExtendedAuthMethods.EMAIL:
+      return false;
+    case MeilingV1ExtendedAuthMethods.OTP:
+    default:
+      return undefined;
+  }
+}
+
 export async function verifyChallengeV1(
   signinMethod: MeilingV1ExtendedAuthMethods,
   challenge: string | undefined,

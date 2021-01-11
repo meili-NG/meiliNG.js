@@ -10,6 +10,7 @@
     "bcrypt": "^5.0.0",
     "fastify": "^3.9.2",
     "fastify-secure-session": "^2.3.0",
+    "nodemon": "^2.0.7",
     "openpgp": "^4.10.9",
     "speakeasy": "^2.0.0",
     "typescript": "^4.0.5"
@@ -29,13 +30,12 @@
     "husky": "^4.3.0",
     "lint-staged": "^10.5.1",
     "prettier": "^2.1.2",
-    "ts-node": "^9.0.0",
-    "ts-node-dev": "^1.1.1"
+    "ts-node": "^9.0.0"
   },
   "scripts": {
     "debug": "ts-node ./src/",
     "build": "tsc",
-    "start:dev": "ts-node-dev ./src/",
+    "start:dev": "nodemon",
     "start": "tsc && NODE_ENV=production node ./dist/",
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
     "studio": "prisma studio",
@@ -43,7 +43,8 @@
     "migrate:dev": "prisma migrate dev --preview-feature",
     "migrate:reset": "prisma migrate reset --preview-feature",
     "migrate:redeploy": "prisma migrate reset --preview-feature; rm -rf ./prisma/migrations/; prisma migrate dev --preview-feature",
-    "generate": "prisma generate"
+    "generate": "prisma generate",
+    "postinstall": "prisma generate"
   },
   "husky": {
     "hooks": {

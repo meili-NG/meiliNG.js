@@ -190,6 +190,8 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
       return;
     }
 
+    console.log('5', getMeilingV1Session(req));
+
     // response of challenge
     const challengeResponse = body?.data?.challengeResponse;
 
@@ -216,6 +218,8 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
       return;
     }
 
+    console.log('4', getMeilingV1Session(req));
+
     // validate current method is same with session's extendedAuthentication
     const extendedAuthSession = session.extendedAuthentication;
     if (extendedAuthSession.method !== body.data?.method) {
@@ -237,8 +241,10 @@ please request this endpoint without challengeResponse field to request challeng
       return;
     }
 
+    console.log('3', getMeilingV1Session(req));
+
     const authMethodCheckPromises = [];
-    const authMethodUsers: string[] = [];
+    const authMethodCheckUsers: string[] = [];
 
     // authMethod
     for (const authMethod of authMethods) {
@@ -256,11 +262,13 @@ please request this endpoint without challengeResponse field to request challeng
           if (authMethod.userId !== null) {
             // add promise to array
             authMethodCheckPromises.push(verifyChallengeV1(signinMethod, challenge, challengeResponse, data));
-            authMethodUsers.push(authMethod.userId);
+            authMethodCheckUsers.push(authMethod.userId);
           }
         }
       }
     }
+
+    console.log('2', getMeilingV1Session(req));
 
     const authMethodCheckResults = await Promise.all(authMethodCheckPromises);
     const authMethodCheckIndex = authMethodCheckResults
@@ -268,17 +276,20 @@ please request this endpoint without challengeResponse field to request challeng
       .filter((n) => n !== undefined) as number[];
 
     for (const index of authMethodCheckIndex) {
-      const userId = authMethodUsers[index];
+      const userId = authMethodCheckUsers[index];
+      console.log(userId);
 
       if (userId !== null) {
         if (authorizedUsers.filter((n) => n.id === userId).length === 0) {
           const user = await getUserPlainInfo(userId);
-          if (user !== null) {
-            authorizedUsers.push();
+          if (user !== null && user !== undefined) {
+            authorizedUsers.push(user);
           }
         }
       }
     }
+
+    console.log('1', getMeilingV1Session(req));
 
     if (authorizedUsers.length === 1) {
       userToLogin = authorizedUsers[0];
@@ -290,7 +301,7 @@ please request this endpoint without challengeResponse field to request challeng
       );
       return;
     } else {
-      sendMeilingError(rep, MeilingV1ErrorType.WRONG_USERNAME, 'Wrong username.');
+      sendMeilingError(rep, MeilingV1ErrorType.AUTHENTICATION_SIGNIN_FAILED, 'No matching users');
       return;
     }
   } else {

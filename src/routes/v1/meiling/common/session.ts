@@ -74,15 +74,25 @@ export async function logoutMeilingV1Session(req: FastifyRequest, user: User | s
   const session = getMeilingV1Session(req);
   if (session.user === undefined) {
     session.user = [];
+  } else {
+    const userData = await getUserPlainInfo(user);
+    console.log('userData', userData);
+
+    if (userData === null || userData === undefined) {
+      return;
+    }
+
+    const accountsToLogout = session.user.filter((a) => a.id !== userData.id);
+    console.log(accountsToLogout);
+
+    session.user = accountsToLogout;
   }
 
-  const userData = await getUserPlainInfo(user);
-  if (userData === null || userData === undefined) {
-    return;
-  }
+  console.log(session);
 
-  const accountsToLogout = session.user.filter((user) => user.id !== userData.id);
-  session.user = accountsToLogout;
+  if (session.user.length === 0) {
+    session.user = undefined;
+  }
 
   setMeilingV1Session(req, session);
 }

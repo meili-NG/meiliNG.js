@@ -14,12 +14,14 @@ interface MeilingV1SignInTwoFactorAuth {
   type: MeilingV1SigninType.TWO_FACTOR_AUTH;
   method?: MeilingV1ExtendedAuthMethods;
   challenge?: string;
+  challengeTimeout?: string;
 }
 
 interface MeilingV1SignInPasswordLess {
   type: MeilingV1SigninType.PASSWORDLESS;
   method?: MeilingV1ExtendedAuthMethods;
   challenge?: string;
+  challengeTimeout?: string;
 }
 
 export type MeilingV1SessionExtendedAuthentication = MeilingV1SignInPasswordLess | MeilingV1SignInTwoFactorAuth;

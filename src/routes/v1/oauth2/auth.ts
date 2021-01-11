@@ -6,22 +6,6 @@ import { OAuth2QueryAuthParameters, OAuth2ErrorResponseType } from './interfaces
 export function oAuth2AuthHandler(req: FastifyRequest, rep: FastifyReply) {
   const query = req.query as OAuth2QueryAuthParameters;
 
-  /* 
-    // Verification Mechanism
-    
-    const clientId = query?.client_id;
-    const redirectUri = query?.redirect_uri;
-    const responseType = query?.response_type;
-    const scope = query?.scope;
-
-    if (!(clientId && redirectUri && responseType && scope)) {
-      rep.code(400).send('');
-      return;
-    } 
-  */
-
-  // ===
-
   let queryCount = 0;
   let str = '';
 

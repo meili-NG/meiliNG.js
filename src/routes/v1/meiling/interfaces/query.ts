@@ -32,12 +32,12 @@ export interface MeilingV1SignInTwoFactor {
 interface MeilingV1SignInPasswordLess {
   type: MeilingV1SigninType.PASSWORDLESS;
   data?: MeilingV1SignInAuthenticateData;
-  context: {
-    username: string;
+  context?: {
+    username?: string;
   };
 }
 
 interface MeilingV1SignInAuthenticateData {
-  method: MeilingV1ExtendedAuthMethods;
+  method?: MeilingV1ExtendedAuthMethods;
   challengeResponse?: string;
 }

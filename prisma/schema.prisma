@@ -23,7 +23,7 @@ model User {
   isActive              Boolean                       @default(true)
   useTwoFactor          Boolean                       @default(false)
   createdAt             DateTime                      @default(now())
-  lastLogin             DateTime                      @default(now())
+  lastSignIn            DateTime                      @default(now())
   lastAuthenticated     DateTime                      @default(now())
 }
 

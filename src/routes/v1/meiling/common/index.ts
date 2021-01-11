@@ -5,7 +5,7 @@ import { AuthorizationJSONObject, AuthorizationOTPObject, AuthorizationPGPSSHKey
 import { validateOTP, validatePGPSign } from '../../../../common/validate';
 import { MeilingV1ExtendedAuthMethods, MeilingV1SigninType } from '../interfaces/query';
 
-export function getAuthenticationV1ToDatabaseEquivalent(method: MeilingV1ExtendedAuthMethods): AuthorizationMethod {
+export function getDatabaseEquivalentFromAuthenticationV1(method: MeilingV1ExtendedAuthMethods): AuthorizationMethod {
   switch (method) {
     case MeilingV1ExtendedAuthMethods.SMS:
       return 'SMS';
@@ -20,7 +20,7 @@ export function getAuthenticationV1ToDatabaseEquivalent(method: MeilingV1Extende
   }
 }
 
-export function getDataBaseAuthenticationToAuthenticationV1(
+export function getAuthenticationV1FromDatabaseEquivalent(
   method: AuthorizationMethod,
 ): MeilingV1ExtendedAuthMethods | null {
   switch (method) {
@@ -40,40 +40,42 @@ export function getDataBaseAuthenticationToAuthenticationV1(
 }
 
 export async function getAuthenticationMethodsV1(
-  user: User | string,
-  signinMethod?: MeilingV1SigninType,
+  user?: User | string,
+  signinType?: MeilingV1SigninType,
+  signinMethod?: MeilingV1ExtendedAuthMethods,
 ): Promise<Authorization[]> {
   let uuid;
-  if (typeof user === 'string') {
-    uuid = user;
+  if (user !== undefined) {
+    if (typeof user === 'string') {
+      uuid = user;
+    } else {
+      uuid = user.id;
+    }
   } else {
-    uuid = user.id;
+    uuid = undefined;
   }
 
   let auths;
 
-  if (signinMethod !== undefined) {
+  if (signinType !== undefined) {
     auths = await prisma.authorization.findMany({
       where: {
         userId: uuid,
-        allowSingleFactor: signinMethod === MeilingV1SigninType.PASSWORDLESS ? true : undefined,
-        allowTwoFactor: signinMethod === MeilingV1SigninType.TWO_FACTOR_AUTH ? true : undefined,
+        allowSingleFactor: signinType === MeilingV1SigninType.PASSWORDLESS ? true : undefined,
+        allowTwoFactor: signinType === MeilingV1SigninType.TWO_FACTOR_AUTH ? true : undefined,
+        method: signinMethod !== undefined ? getDatabaseEquivalentFromAuthenticationV1(signinMethod) : undefined,
       },
     });
   } else {
     auths = await prisma.authorization.findMany({
       where: {
         userId: uuid,
+        method: signinMethod !== undefined ? getDatabaseEquivalentFromAuthenticationV1(signinMethod) : undefined,
       },
     });
   }
 
-  const authenticationMethods = [];
-  for (const auth of auths) {
-    authenticationMethods.push(auth);
-  }
-
-  return authenticationMethods;
+  return auths;
 }
 
 export function generateChallengeV1(signinMethod: MeilingV1ExtendedAuthMethods) {
@@ -85,7 +87,8 @@ export function generateChallengeV1(signinMethod: MeilingV1ExtendedAuthMethods) 
     case MeilingV1ExtendedAuthMethods.EMAIL:
       return generateToken(6, '0123456789');
     case MeilingV1ExtendedAuthMethods.OTP:
-      return null;
+    default:
+      return undefined;
   }
 }
 

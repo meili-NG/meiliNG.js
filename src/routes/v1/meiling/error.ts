@@ -10,8 +10,8 @@ export function sendMeilingError(rep: FastifyReply, type: MeilingV1ErrorType, de
       statusCode = 401;
       break;
 
-    case MeilingV1ErrorType.ALREADY_LOGGED_IN:
-    case MeilingV1ErrorType.ALREADY_LOGGED_OUT:
+    case MeilingV1ErrorType.ALREADY_SIGNED_IN:
+    case MeilingV1ErrorType.ALREADY_SIGNED_OUT:
       statusCode = 406;
       break;
 

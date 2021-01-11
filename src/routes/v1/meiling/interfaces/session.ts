@@ -1,11 +1,12 @@
-import { MeilingV1ExtendedAuthMethods } from './query';
+import { MeilingV1ExtendedAuthMethods, MeilingV1SigninType } from './query';
 
 export interface MeilingV1Session {
   user?: {
-    id: string;
+    ids: string[];
   };
   extendedAuthentication?: {
-    id: string;
+    id?: string;
+    type: MeilingV1SigninType;
     method: MeilingV1ExtendedAuthMethods;
     challenge: string;
   };

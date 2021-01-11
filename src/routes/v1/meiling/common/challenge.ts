@@ -19,18 +19,18 @@ export function generateChallengeV1(signinMethod: MeilingV1ExtendedAuthMethods) 
 
 export async function verifyChallengeV1(
   signinMethod: MeilingV1ExtendedAuthMethods,
-  challenge: string,
+  challenge: string | undefined,
   challengeResponse: any,
   data?: AuthorizationJSONObject,
 ) {
   switch (signinMethod) {
     case MeilingV1ExtendedAuthMethods.PGP_SIGNATURE:
-      return validatePGPSign(challenge, challengeResponse, (data as AuthorizationPGPSSHKeyObject).data.key);
+      return validatePGPSign(challenge as string, challengeResponse, (data as AuthorizationPGPSSHKeyObject).data.key);
     case MeilingV1ExtendedAuthMethods.SECURITY_KEY:
       break;
     case MeilingV1ExtendedAuthMethods.SMS:
     case MeilingV1ExtendedAuthMethods.EMAIL:
-      return challenge.trim() === challengeResponse.trim();
+      return (challenge as string).trim() === challengeResponse.trim();
     case MeilingV1ExtendedAuthMethods.OTP:
       return validateOTP(challengeResponse, (data as AuthorizationOTPObject).data.secret);
   }

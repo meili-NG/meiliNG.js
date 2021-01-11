@@ -1,8 +1,8 @@
 import crypto from 'crypto';
 import { config } from '..';
 
-const availableCharacters = config.token.default.chars;
-const defaultTokenLength = config.token.default.length;
+const getDefaultAvailableCharacters = () => config.token.default.chars;
+const getDefaultTokenLength = () => config.token.default.length;
 
 export function getCryptographicallySafeRandomInteger(bound?: number): number {
   if (bound === undefined) bound = Number.MAX_SAFE_INTEGER;
@@ -14,8 +14,8 @@ export function getCryptographicallySafeRandomInteger(bound?: number): number {
 }
 
 export function generateToken(length?: number, chars?: string) {
-  if (length === undefined) length = defaultTokenLength;
-  if (chars === undefined) chars = availableCharacters;
+  if (length === undefined) length = getDefaultTokenLength();
+  if (chars === undefined) chars = getDefaultAvailableCharacters();
 
   let token = '';
   for (let i = 0; i < length; i++) {

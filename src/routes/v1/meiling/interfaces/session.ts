@@ -9,9 +9,17 @@ export interface MeilingLoggedInUser {
   id: string;
 }
 
-export interface MeilingV1SessionExtendedAuthentication {
-  id?: string;
-  type: MeilingV1SigninType;
-  method: MeilingV1ExtendedAuthMethods;
-  challenge: string;
+interface MeilingV1SignInTwoFactorAuth {
+  id: string;
+  type: MeilingV1SigninType.TWO_FACTOR_AUTH;
+  method?: MeilingV1ExtendedAuthMethods;
+  challenge?: string;
 }
+
+interface MeilingV1SignInPasswordLess {
+  type: MeilingV1SigninType.PASSWORDLESS;
+  method?: MeilingV1ExtendedAuthMethods;
+  challenge?: string;
+}
+
+export type MeilingV1SessionExtendedAuthentication = MeilingV1SignInPasswordLess | MeilingV1SignInTwoFactorAuth;

@@ -6,4 +6,6 @@ import { MeilingV1Session, MeilingV1ErrorType } from './interfaces';
 
 export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyReply) {
   const session = getMeilingV1Session(req);
+
+  sendMeilingError(rep, MeilingV1ErrorType.NOT_IMPLMENETED);
 }

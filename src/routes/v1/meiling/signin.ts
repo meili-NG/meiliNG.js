@@ -13,6 +13,10 @@ import {
   getMeilingV1ExtendedAuthSession,
   getMeilingV1Session,
   hasMeilingV1ExtendedAuthSession,
+  loginMeilingV1Session,
+  setMeilingV1ExtendedAuthSession,
+  setMeilingV1ExtendedAuthSessionMethodAndChallenge,
+  setMeilingV1Session,
 } from './common/session';
 import { sendMeilingError } from './error';
 import { MeilingV1Session, MeilingV1ErrorType } from './interfaces';
@@ -92,6 +96,11 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
           MeilingV1ErrorType.TWO_FACTOR_AUTHENTICATION_REQUIRED,
           'two factor authentication is required.',
         );
+
+        setMeilingV1ExtendedAuthSession(req, {
+          id: user.id,
+          type: MeilingV1SigninType.TWO_FACTOR_AUTH,
+        });
         return;
       }
     }
@@ -100,16 +109,16 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
     const authMethods = [];
 
     if (body.type === MeilingV1SigninType.TWO_FACTOR_AUTH) {
-      if (hasMeilingV1ExtendedAuthSession(session)) {
+      if (session.extendedAuthentication?.type !== MeilingV1SigninType.TWO_FACTOR_AUTH) {
         sendMeilingError(
           rep,
           MeilingV1ErrorType.TWO_FACTOR_AUTHENTICATION_REQUEST_NOT_GENERATED,
-          'two factor authentication request is not generated yet. please check your login request.',
+          'two factor authentication request is not generated yet or overrided by passwordless login. please check your login request.',
         );
         return;
       }
 
-      const userId = getMeilingV1ExtendedAuthSession(session)?.id;
+      const userId = session.extendedAuthentication.id;
 
       if (userId === undefined) {
         sendMeilingError(
@@ -150,12 +159,18 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
       } else {
         authMethods.push(...(await getAuthenticationMethodsV1(undefined, body.type, signinMethod)));
       }
+
+      setMeilingV1ExtendedAuthSession(req, {
+        type: MeilingV1SigninType.PASSWORDLESS,
+      });
     }
+
+    const availableMethods = await getMeilingAvailableAuthMethods(authMethods);
 
     // which passwordless-login methods are available for this user?
     if (signinMethod === undefined) {
       rep.send({
-        methods: await getMeilingAvailableAuthMethods(authMethods),
+        methods: availableMethods,
       });
       return;
     }
@@ -163,6 +178,11 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
     // check signinMethod is valid
     if (getDatabaseEquivalentFromAuthenticationV1(signinMethod) === undefined) {
       sendMeilingError(rep, MeilingV1ErrorType.INVALID_SIGNIN_METHOD, 'invalid signin method: ' + signinMethod);
+      return;
+    }
+
+    if (!availableMethods.includes(signinMethod)) {
+      sendMeilingError(rep, MeilingV1ErrorType.INVALID_SIGNIN_METHOD, 'unsupported signin method: ' + signinMethod);
       return;
     }
 
@@ -177,6 +197,8 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
         type: body.type,
         challenge,
       });
+
+      setMeilingV1ExtendedAuthSessionMethodAndChallenge(req, signinMethod, challenge);
       return;
     }
 
@@ -205,6 +227,11 @@ please request this endpoint without challengeResponse field to request challeng
     // challenge value from session
     const challenge = extendedAuthSession.challenge;
     const authorizedUsers: User[] = [];
+
+    if (challenge !== undefined) {
+      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, `challenge is missing.`);
+      return;
+    }
 
     // authMethod
     for (const authMethod of authMethods) {
@@ -250,5 +277,10 @@ please request this endpoint without challengeResponse field to request challeng
     return;
   }
 
-  req.session.set('meiling-v1', session);
+  await loginMeilingV1Session(req, userToLogin);
+  setMeilingV1ExtendedAuthSession(req, undefined);
+
+  rep.status(200).send({
+    success: true,
+  });
 }

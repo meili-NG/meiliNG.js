@@ -21,12 +21,31 @@ export function setMeilingV1Session(req: FastifyRequest, data: MeilingV1Session)
   req.session.set(sessionName, data);
 }
 
-export function setMeilingV1ExtendedAuthSession(req: FastifyRequest, extAuth: MeilingV1SessionExtendedAuthentication) {
+export function setMeilingV1ExtendedAuthSession(
+  req: FastifyRequest,
+  extAuth: MeilingV1SessionExtendedAuthentication | undefined,
+) {
   const prevSession = getMeilingV1Session(req);
   const session = {
     ...prevSession,
     extendedAuthentication: extAuth,
   } as MeilingV1Session;
+
+  setMeilingV1Session(req, session);
+}
+
+export function setMeilingV1ExtendedAuthSessionMethodAndChallenge(
+  req: FastifyRequest,
+  method?: MeilingV1ExtendedAuthMethods,
+  challenge?: string | undefined,
+) {
+  const session = getMeilingV1Session(req);
+
+  if (session.extendedAuthentication) {
+    session.extendedAuthentication.method = method === undefined ? session.extendedAuthentication.method : method;
+    session.extendedAuthentication.challenge =
+      challenge === undefined ? session.extendedAuthentication.challenge : challenge;
+  }
 
   setMeilingV1Session(req, session);
 }

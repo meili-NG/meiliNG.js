@@ -93,16 +93,17 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
 
       if (twoFactorMethods.length > 0) {
         // set the session for two factor authentication
-        sendMeilingError(
-          rep,
-          MeilingV1ErrorType.TWO_FACTOR_AUTHENTICATION_REQUIRED,
-          'two factor authentication is required.',
-        );
 
         setMeilingV1ExtendedAuthSession(req, {
           id: user.id,
           type: MeilingV1SigninType.TWO_FACTOR_AUTH,
         });
+
+        sendMeilingError(
+          rep,
+          MeilingV1ErrorType.TWO_FACTOR_AUTHENTICATION_REQUIRED,
+          'two factor authentication is required.',
+        );
         return;
       }
     }
@@ -195,12 +196,12 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
     if (challengeResponse === undefined) {
       const challenge = generateChallengeV1(signinMethod);
 
+      setMeilingV1ExtendedAuthSessionMethodAndChallenge(req, signinMethod, challenge);
+
       rep.send({
         type: body.type,
         challenge: shouldSendChallengeV1(signinMethod) ? challenge : undefined,
       });
-
-      setMeilingV1ExtendedAuthSessionMethodAndChallenge(req, signinMethod, challenge);
       return;
     }
 
@@ -230,7 +231,7 @@ please request this endpoint without challengeResponse field to request challeng
     const challenge = extendedAuthSession.challenge;
     const authorizedUsers: User[] = [];
 
-    if (challenge !== undefined) {
+    if (challenge === undefined) {
       sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, `challenge is missing.`);
       return;
     }
@@ -241,8 +242,12 @@ please request this endpoint without challengeResponse field to request challeng
       if (getAuthenticationV1FromDatabaseEquivalent(authMethod.method) === signinMethod) {
         // check database is not corrupted.
         if (authMethod.data !== null) {
-          const data = JSON.parse(authMethod.data as string);
-
+          let data;
+          if (typeof data === 'string') {
+            data = JSON.parse(authMethod.data as string);
+          } else {
+            data = authMethod.data;
+          }
           // run challenge
           if (await verifyChallengeV1(signinMethod, challenge, challengeResponse, data)) {
             // get userId and push to authorizedUsers

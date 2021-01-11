@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
-import { getUserInfo, getUserPlainInfo } from '../../../../common/user';
+import { getUserInfo, getUserPlainInfo, updateLastAuth } from '../../../../common/user';
 import { MeilingV1Session, MeilingV1SessionExtendedAuthentication } from '../interfaces';
 import { MeilingV1ExtendedAuthMethods } from '../interfaces/query';
 
@@ -100,6 +100,7 @@ export async function getLoggedInMeilingV1Session(req: FastifyRequest) {
     const thisUser = await getUserInfo(user.id);
     if (thisUser !== null && thisUser !== undefined) {
       users.push(thisUser);
+      updateLastAuth(thisUser);
     }
   }
 

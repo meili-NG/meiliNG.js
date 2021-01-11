@@ -77,7 +77,7 @@ export function runUserAction(user: User | string) {
   });
 }
 
-export async function getUserInfo(user: User | string): Promise<UserBaseObject | undefined> {
+export async function getUserPlainInfo(user: User | string): Promise<User | undefined> {
   let uuid;
   if (typeof user === 'string') {
     uuid = user;
@@ -90,6 +90,13 @@ export async function getUserInfo(user: User | string): Promise<UserBaseObject |
       id: uuid,
     },
   });
+  if (!userDatabase) return;
+
+  return userDatabase;
+}
+
+export async function getUserInfo(user: User | string): Promise<UserBaseObject | undefined> {
+  const userDatabase = await getUserPlainInfo(user);
   if (!userDatabase) return;
 
   const emails = await prisma.email.findMany({

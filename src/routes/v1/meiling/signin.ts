@@ -3,6 +3,7 @@ import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import {
   findMatchingUsersByUsernameOrEmail,
+  getUserInfo,
   getUserPlainInfo,
   updateLastAuth,
   updateLastSignIn,
@@ -236,6 +237,9 @@ please request this endpoint without challengeResponse field to request challeng
       return;
     }
 
+    const authMethodCheckPromises = [];
+    const authMethodUsers: string[] = [];
+
     // authMethod
     for (const authMethod of authMethods) {
       // if authMethod is current authMethod:
@@ -248,19 +252,29 @@ please request this endpoint without challengeResponse field to request challeng
           } else {
             data = authMethod.data;
           }
-          // run challenge
-          if (await verifyChallengeV1(signinMethod, challenge, challengeResponse, data)) {
-            // get userId and push to authorizedUsers
-            const userId = authMethod.userId;
-            if (userId !== null) {
-              const user = await getUserPlainInfo(userId);
-              if (user !== null && user !== undefined) {
-                if (authorizedUsers.map((authUser) => authUser.id === user.id).indexOf(true) < 0) {
-                  authorizedUsers.push(user);
-                }
-                break;
-              }
-            }
+
+          if (authMethod.userId !== null) {
+            // add promise to array
+            authMethodCheckPromises.push(verifyChallengeV1(signinMethod, challenge, challengeResponse, data));
+            authMethodUsers.push(authMethod.userId);
+          }
+        }
+      }
+    }
+
+    const authMethodCheckResults = await Promise.all(authMethodCheckPromises);
+    const authMethodCheckIndex = authMethodCheckResults
+      .map((n, i) => (n === true ? i : undefined))
+      .filter((n) => n !== undefined) as number[];
+
+    for (const index of authMethodCheckIndex) {
+      const userId = authMethodUsers[index];
+
+      if (userId !== null) {
+        if (authorizedUsers.filter((n) => n.id === userId).length === 0) {
+          const user = await getUserPlainInfo(userId);
+          if (user !== null) {
+            authorizedUsers.push();
           }
         }
       }

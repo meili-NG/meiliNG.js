@@ -17,14 +17,19 @@ interface MeilingV1Signup {
 }
 
 export async function meilingV1SignoutHandler(req: FastifyRequest, rep: FastifyReply) {
-  const uuid = (req.query as any).uuid;
+  const uuid = (req.query as any)?.uuid ? (req.query as any)?.uuid : (req.params as any).uuid;
   const user = getMeilingV1Session(req).user;
 
-  if (user && user.length > 0 && uuid && user.filter((n) => n.id === uuid).length > 0) {
+  if (user && user.length > 0) {
     if (uuid === undefined) {
-      setMeilingV1Session(req, {});
+      await logoutMeilingV1Session(req);
     } else {
-      await logoutMeilingV1Session(req, uuid);
+      if (uuid && user.filter((n) => n.id === uuid).length > 0) {
+        await logoutMeilingV1Session(req, uuid);
+      } else {
+        sendMeilingError(rep, MeilingV1ErrorType.ALREADY_SIGNED_OUT, 'you are already signed out.');
+        return;
+      }
     }
   } else {
     sendMeilingError(rep, MeilingV1ErrorType.ALREADY_SIGNED_OUT, 'you are already signed out.');

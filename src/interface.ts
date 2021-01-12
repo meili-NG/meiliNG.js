@@ -11,7 +11,11 @@ export interface Config {
   invalidate: {
     [token in OAuthTokenType]: number;
   };
-  sessionCookieKeyPath: string;
+  session: {
+    sessionKeyPath: string;
+    tokenDataPath: string;
+    maxAge: number;
+  };
   errorFormatURL: string;
   token: {
     default: TokenGeneratorConfig;

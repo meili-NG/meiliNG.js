@@ -48,7 +48,7 @@ const easteregg = {
 function handleRoot(req: FastifyRequest, rep: FastifyReply) {
   const helloWorld = {
     hello: 'world',
-    ...(isDevelopment ? easteregg : {}),
+    ...(isDevelopment ? eastereggDev : easteregg),
   };
 
   rep.send(helloWorld);

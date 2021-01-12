@@ -9,7 +9,7 @@ import {
   AuthorizationMethod,
 } from '@prisma/client';
 import { prisma } from '../';
-import { getAppInfoByClientId } from './client';
+import { getAppInfoByClientId, getOAuthAuthorizationInfo } from './client';
 import bcrypt from 'bcrypt';
 import { generateToken } from './token';
 import { MeilingV1SigninType } from '../routes/v1/meiling/interfaces/query';
@@ -99,17 +99,19 @@ export async function getUserInfo(user: User | string): Promise<UserBaseObject |
   const userDatabase = await getUserPlainInfo(user);
   if (!userDatabase) return;
 
-  const emails = await prisma.email.findMany({
+  const emailsPromise = prisma.email.findMany({
     where: {
       User: userDatabase,
     },
   });
 
-  const phones = await prisma.phone.findMany({
+  const phonesPromise = prisma.phone.findMany({
     where: {
       User: userDatabase,
     },
   });
+
+  const [emails, phones] = await Promise.all([emailsPromise, phonesPromise]);
 
   const userObj: UserBaseObject = {
     ...userDatabase,
@@ -120,43 +122,43 @@ export async function getUserInfo(user: User | string): Promise<UserBaseObject |
   return userObj;
 }
 
-export async function getAllUserByID(user: User | string): Promise<UserBaseObject | undefined> {
+export async function getAllUserInfo(user: User | string): Promise<UserBaseObject | undefined> {
   const baseUser = await getUserInfo(user);
   if (!baseUser) return;
 
-  const authorizedAppsDatabase = await prisma.oAuthClientAuthorization.findMany({
-    where: {
-      userId: baseUser.id,
-    },
-  });
+  const [authorizedAppsDatabase, createdAppsDatabase] = await Promise.all([
+    prisma.oAuthClientAuthorization.findMany({
+      where: {
+        userId: baseUser.id,
+      },
+    }),
 
-  const createdAppsDatabase = await prisma.oAuthClientAuthorization.findMany({
-    where: {
-      userId: baseUser.id,
-    },
-  });
+    prisma.oAuthClientAuthorization.findMany({
+      where: {
+        userId: baseUser.id,
+      },
+    }),
+  ]);
+
+  const authorizedAppPromises: Promise<any>[] = [];
+  const createdAppPromises: Promise<any>[] = [];
+
+  authorizedAppsDatabase.map((n) => authorizedAppPromises.push(getAppInfoByClientId(n.oAuthClientId)));
+  createdAppsDatabase.map((n) => createdAppPromises.push(getOAuthAuthorizationInfo(n)));
+
+  const [authorizedAppsPromisesPromise, createdAppsPromisesPromise] = await Promise.all([
+    Promise.all(authorizedAppPromises),
+    Promise.all(createdAppPromises),
+  ]);
 
   const authorizedApps = [];
-
-  for (const authorizedApp of authorizedAppsDatabase) {
-    const client = await getAppInfoByClientId(authorizedApp.userId);
-
-    if (client) {
-      authorizedApps.push({
-        client,
-        ...authorizedApp,
-      });
-    }
-  }
-
   const createdApps = [];
 
-  for (const createdApp of createdAppsDatabase) {
-    const client = await getAppInfoByClientId(createdApp.userId);
-
-    if (client) {
-      createdApps.push(client);
-    }
+  for (const authorizedApp of await authorizedAppsPromisesPromise) {
+    authorizedApps.push(authorizedApp);
+  }
+  for (const cratedApp of await createdAppsPromisesPromise) {
+    createdApps.push(cratedApp);
   }
 
   const userObj: UserAllObject = {
@@ -170,30 +172,47 @@ export async function getAllUserByID(user: User | string): Promise<UserBaseObjec
 
 export async function findMatchingUsersByUsernameOrEmail(username: string, password?: string): Promise<User[]> {
   const auths = [];
+  const userIds = [];
 
-  const userByUsername = await prisma.user.findMany({
+  const usersByUsername = await prisma.user.findMany({
     where: {
       username,
     },
   });
 
-  auths.push(...userByUsername);
+  for (const user of usersByUsername) {
+    userIds.push(user.id);
+    auths.push(user);
+  }
 
-  const userByEmail = await prisma.email.findMany({
+  const usersByEmail = await prisma.email.findMany({
     where: {
       email: username,
+      verified: true,
+      allowUse: true,
     },
   });
 
-  for (const email of userByEmail) {
-    if (email.userId) {
-      const user = await prisma.user.findMany({
-        where: {
-          id: email.userId,
-        },
-      });
+  const userPromisesByEmails = [];
 
-      auths.push(...user);
+  for (const email of usersByEmail) {
+    if (email.userId) {
+      if (!userIds.includes(email.userId)) {
+        const userPromise = prisma.user.findFirst({
+          where: {
+            id: email.userId,
+          },
+        });
+
+        userPromisesByEmails.push(userPromise);
+      }
+    }
+  }
+
+  const result = await Promise.all(userPromisesByEmails);
+  for (const user of result) {
+    if (user !== null) {
+      auths.push(user);
     }
   }
 

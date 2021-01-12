@@ -1,6 +1,7 @@
 {
   "version": "0.0.1",
   "allowLogin": [
+    "http://localhost:3000",
     "https://meiling-dev.stella-it.com"
   ],
   "invalidate": {
@@ -9,7 +10,11 @@
     "REFRESH_TOKEN": 604800,
     "ACCOUNT_TOKEN": -1
   },
-  "sessionCookieKeyPath": "./meiling-cookie-key",
+  "session": {
+    "sessionKeyPath": "./meiling-cookie-key",
+    "tokenDataPath": "./tokenSession.json",
+    "maxAge": 604800000
+  },
   "errorFormatURL": "https://opensource.stella-it.com/developers/docs/meiling/error/{{errorCode}}.html",
   "token": {
     "default": {

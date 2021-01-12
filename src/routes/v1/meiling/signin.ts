@@ -10,13 +10,14 @@ import {
 } from '../../../common/user';
 import {
   generateChallengeV1,
-  getAuthenticationMethodsV1,
+  getExtendedAuthenticationMethodsV1,
   getDatabaseEquivalentFromAuthenticationV1,
   getAuthenticationV1FromDatabaseEquivalent,
   verifyChallengeV1,
   shouldSendChallengeV1,
 } from './common';
 import {
+  checkPreviouslyLoggedinMeilingV1Session,
   getMeilingV1Session,
   loginMeilingV1Session,
   setMeilingV1ExtendedAuthSession,
@@ -57,8 +58,47 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
   }
 
   let userToLogin: User;
+  if (body.type === MeilingV1SigninType.USERNAME_CHECK) {
+    const username = body?.data?.username;
 
-  if (body.type === MeilingV1SigninType.USERNAME_AND_PASSWORD) {
+    if (username === undefined) {
+      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'body is missing username.');
+      return;
+    }
+
+    const users = await findMatchingUsersByUsernameOrEmail(username);
+
+    if (users.length === 1 && (await checkPreviouslyLoggedinMeilingV1Session(req, users[0]))) {
+      const user = await getUserInfo(users[0]);
+
+      if (user) {
+        rep.send({
+          success: true,
+          data: {
+            id: user.id,
+            profileUrl: user.profileUrl,
+            emails: user.emails,
+            name: user.name,
+            username: user.username,
+          },
+        });
+      } else {
+        rep.send({
+          success: false,
+        });
+      }
+    } else if (users.length === 0) {
+      rep.send({
+        success: false,
+      });
+    } else {
+      rep.send({
+        success: true,
+      });
+    }
+
+    return;
+  } else if (body.type === MeilingV1SigninType.USERNAME_AND_PASSWORD) {
     const username = body?.data?.username;
     const password = body?.data?.password;
 
@@ -90,7 +130,7 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
 
     const user = userToLogin;
     if (user.useTwoFactor) {
-      const twoFactorMethods = await getAuthenticationMethodsV1(user, body.type);
+      const twoFactorMethods = await getExtendedAuthenticationMethodsV1(user, body.type);
 
       if (twoFactorMethods.length > 0) {
         // set the session for two factor authentication
@@ -144,7 +184,7 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
         return;
       }
 
-      authMethods.push(...(await getAuthenticationMethodsV1(user, body.type, signinMethod)));
+      authMethods.push(...(await getExtendedAuthenticationMethodsV1(user, body.type, signinMethod)));
     } else if (body.type === MeilingV1SigninType.PASSWORDLESS) {
       const username = body?.context?.username;
 
@@ -157,11 +197,11 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
         }
 
         for (const user of users) {
-          const thisMethods = await getAuthenticationMethodsV1(user, body.type);
+          const thisMethods = await getExtendedAuthenticationMethodsV1(user, body.type);
           authMethods.push(...thisMethods);
         }
       } else {
-        authMethods.push(...(await getAuthenticationMethodsV1(undefined, body.type, signinMethod)));
+        authMethods.push(...(await getExtendedAuthenticationMethodsV1(undefined, body.type, signinMethod)));
       }
 
       setMeilingV1ExtendedAuthSession(req, {
@@ -190,8 +230,6 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
       return;
     }
 
-    console.log('5', getMeilingV1Session(req));
-
     // response of challenge
     const challengeResponse = body?.data?.challengeResponse;
 
@@ -218,8 +256,6 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
       return;
     }
 
-    console.log('4', getMeilingV1Session(req));
-
     // validate current method is same with session's extendedAuthentication
     const extendedAuthSession = session.extendedAuthentication;
     if (extendedAuthSession.method !== body.data?.method) {
@@ -240,8 +276,6 @@ please request this endpoint without challengeResponse field to request challeng
       sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, `challenge is missing.`);
       return;
     }
-
-    console.log('3', getMeilingV1Session(req));
 
     const authMethodCheckPromises = [];
     const authMethodCheckUsers: string[] = [];
@@ -268,8 +302,6 @@ please request this endpoint without challengeResponse field to request challeng
       }
     }
 
-    console.log('2', getMeilingV1Session(req));
-
     const authMethodCheckResults = await Promise.all(authMethodCheckPromises);
     const authMethodCheckIndex = authMethodCheckResults
       .map((n, i) => (n === true ? i : undefined))
@@ -288,8 +320,6 @@ please request this endpoint without challengeResponse field to request challeng
         }
       }
     }
-
-    console.log('1', getMeilingV1Session(req));
 
     if (authorizedUsers.length === 1) {
       userToLogin = authorizedUsers[0];

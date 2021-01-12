@@ -1,25 +1,61 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { isDevelopment } from '../../..';
 import { findMatchingUsersByUsernameOrEmail } from '../../../common/user';
-import { getMeilingV1Session } from './common';
+import {
+  createMeilingV1Token,
+  getMeilingV1Session,
+  getMeilingV1Token,
+  isMeilingV1Token,
+  setMeilingV1Session,
+} from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
 import { meilingV1SigninHandler } from './signin';
 import { meilingV1SignoutHandler } from './signout';
 import { meilingV1SignupHandler } from './signup';
-import { meilingV1UserInfoHandler } from './user';
+import { registerV1MeilingUserEndpoints } from './users';
 
 export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string) {
-  app.get(baseURI + '/user', meilingV1UserInfoHandler);
-  app.get(baseURI + '/user/exist', meilingV1UserExistHandler);
-
   app.post(baseURI + '/signin', meilingV1SigninHandler);
   app.post(baseURI + '/signup', meilingV1SignupHandler);
+
   app.get(baseURI + '/signout', meilingV1SignoutHandler);
-  app.get(baseURI + '/session', (req, rep) => {
-    if ((req.query as any)?.token === 'HongMeiling') {
-      rep.send(getMeilingV1Session(req));
+  app.get(baseURI + '/signout/:uuid', meilingV1SignoutHandler);
+
+  app.get(baseURI + '/session', async (req, rep) => {
+    const session = await getMeilingV1Session(req);
+
+    if ((req.query as any)?.token === 'HongMeiling' && isDevelopment) {
+      rep.send(session);
+      return;
     } else {
-      rep.redirect('https://www.youtube.com/watch?v=2B-2lv2ZGBE');
+      if (req.headers.authorization) {
+        if (isMeilingV1Token(getMeilingV1Token(req))) {
+          rep.send({
+            success: true,
+          });
+          return;
+        } else {
+          rep.send({
+            success: false,
+          });
+          return;
+        }
+      } else if (
+        session === null ||
+        session === undefined ||
+        (JSON.stringify(session) === '{}' && req.headers.authorization === undefined)
+      ) {
+        rep.send({
+          success: true,
+          token: createMeilingV1Token(),
+        });
+        return;
+      } else {
+        rep.send({
+          success: true,
+        });
+      }
     }
   });
 
@@ -30,6 +66,8 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
       api: 'Meiling Endpoints',
     });
   });
+
+  registerV1MeilingUserEndpoints(app, baseURI + '/users');
 }
 
 async function meilingV1UserExistHandler(req: FastifyRequest, rep: FastifyReply) {

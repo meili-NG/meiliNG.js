@@ -40,7 +40,7 @@ export function getAuthenticationV1FromDatabaseEquivalent(
   }
 }
 
-export async function getAuthenticationMethodsV1(
+export async function getExtendedAuthenticationMethodsV1(
   user?: User | string,
   signinType?: MeilingV1SigninType,
   signinMethod?: MeilingV1ExtendedAuthMethods,

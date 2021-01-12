@@ -5,7 +5,8 @@ import { registerRootEndpoints } from './routes';
 import { Config } from './interface';
 import FastifySession from 'fastify-secure-session';
 import ChildProcess from 'child_process';
-import { validatePGPSign } from './common/validate';
+import fastifyCors from 'fastify-cors';
+import { loadMeilingV1SessionTokens } from './routes/v1/meiling/common';
 
 const packageJson = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf-8' }));
 export const config = JSON.parse(fs.readFileSync('config.json', { encoding: 'utf-8' })) as Config;
@@ -17,24 +18,38 @@ export const VERSION = packageJson.version;
 
 export const isDevelopment = env === 'development';
 
-if (!fs.existsSync(config.sessionCookieKeyPath)) {
-  console.log(`Session Secret Cookie Key was not found at ${config.sessionCookieKeyPath}. Generating one.`);
+if (!fs.existsSync(config.session.sessionKeyPath)) {
+  console.log(`Session Secret Cookie Key was not found at ${config.session.sessionKeyPath}. Generating one.`);
   const output = ChildProcess.execSync('./node_modules/.bin/secure-session-gen-key');
-  fs.writeFileSync(config.sessionCookieKeyPath, output);
-  console.log(`Generated key file ${config.sessionCookieKeyPath}. Continue.`);
+  fs.writeFileSync(config.session.sessionKeyPath, output);
+  console.log(`Generated key file ${config.session.sessionKeyPath}. Continue.`);
   console.log();
 }
+
+loadMeilingV1SessionTokens();
 
 const app = fastify({
   logger: true,
 });
 
+/*
 app.register(FastifySession, {
   cookieName: 'meiling-engine-session',
-  key: fs.readFileSync(config.sessionCookieKeyPath),
+  key: fs.readFileSync(config.session.sessionKeyPath),
   cookie: {
     path: '/',
+    maxAge: config.session.maxAge,
   },
+});
+*/
+
+app.register(fastifyCors, {
+  /*
+  origin: isDevelopment ? (origin, callback) => {
+    callback(null, true);
+  } : config.allowLogin,
+  */
+  origin: ['http://localhost:3000'],
 });
 
 registerRootEndpoints(app, '/');

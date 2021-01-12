@@ -3,6 +3,7 @@ import { MeilingV1ExtendedAuthMethods, MeilingV1SigninType } from './query';
 export interface MeilingV1Session {
   user?: MeilingLoggedInUser[];
   extendedAuthentication?: MeilingV1SessionExtendedAuthentication;
+  previouslyLoggedIn?: MeilingLoggedInUser[];
 }
 
 export interface MeilingLoggedInUser {

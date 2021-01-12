@@ -12,16 +12,25 @@ generator client {
 
 model User {
   id                    String                        @id @default(uuid())
+
   username              String                        @unique
+  name                  String
   emails                Email[]
   phones                Phone[]
+
+  profileUrl            String
+
   groups                Group[]
   permissions           Permission[]
+
   ownedClients          OAuthClient[]
   authorizedClients     OAuthClientAuthorization[]
+
   auths                 Authorization[]
+
   isActive              Boolean                       @default(true)
   useTwoFactor          Boolean                       @default(false)
+  
   createdAt             DateTime                      @default(now())
   lastSignIn            DateTime                      @default(now())
   lastAuthenticated     DateTime                      @default(now())

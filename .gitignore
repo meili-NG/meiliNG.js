@@ -119,3 +119,7 @@ Thumbs.db
 
 # Meiling Engine Session Key
 meiling-cookie-key
+
+# Temporary stuff
+/prisma/migrations
+tokenSession.json

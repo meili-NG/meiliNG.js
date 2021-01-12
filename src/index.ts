@@ -44,12 +44,11 @@ app.register(FastifySession, {
 */
 
 app.register(fastifyCors, {
-  /*
-  origin: isDevelopment ? (origin, callback) => {
-    callback(null, true);
-  } : config.allowLogin,
-  */
-  origin: ['http://localhost:3000'],
+  origin: isDevelopment
+    ? (origin, callback) => {
+        callback(null, true);
+      }
+    : config.allowLogin,
 });
 
 registerRootEndpoints(app, '/');

@@ -35,6 +35,7 @@ export async function meilingV1UserInfoHandler(req: FastifyRequest, rep: Fastify
       const users = await getLoggedInMeilingV1Session(req);
 
       rep.send(users);
+      return;
     }
   }
 

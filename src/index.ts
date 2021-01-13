@@ -23,6 +23,7 @@ const app = fastify({
   logger: {
     prettyPrint: true,
   },
+  trustProxy: config.behindProxy,
 });
 
 app.register(fastifyCors, {

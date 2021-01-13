@@ -26,4 +26,5 @@ export interface Config {
   token: {
     default: TokenGeneratorConfig;
   };
+  behindProxy: boolean;
 }

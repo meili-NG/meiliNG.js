@@ -29,5 +29,6 @@
       "chars": "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890",
       "length": 128
     }
-  }
+  },
+  "behindProxy": true
 }

@@ -4,7 +4,7 @@ import fs, { promises as fsNext } from 'fs';
 import { config } from '../../../..';
 import { generateToken } from '../../../../common';
 import { getUserInfo, getUserPlainInfo, updateLastAuth } from '../../../../common/user';
-import { MeilingV1Session, MeilingV1SessionExtendedAuthentication } from '../interfaces';
+import { MeilingV1ErrorType, MeilingV1Session, MeilingV1SessionExtendedAuthentication } from '../interfaces';
 import { MeilingV1ExtendedAuthMethods } from '../interfaces/query';
 
 interface TokenSessionFile {
@@ -129,6 +129,11 @@ export function getMeilingV1Session(req: FastifyRequest): MeilingV1Session {
   }
 
   if (data === undefined || data === null) {
+    if (token) {
+      // something's gone terribly wrong.
+      throw new Error(MeilingV1ErrorType.NOT_A_PROPER_SESSION);
+    }
+
     data = {};
     setMeilingV1Session(req, data);
   }

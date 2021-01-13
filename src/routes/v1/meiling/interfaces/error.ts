@@ -16,6 +16,7 @@ export enum MeilingV1ErrorType {
   AUTHENTICATION_NOT_CURRENT_CHALLENGE_METHOD = 'authentication_not_current_challenge_method',
   AUTHENTICATION_TIMEOUT = 'authentication_timeout',
   NOT_IMPLMENETED = 'not_implemented',
+  NOT_A_PROPER_SESSION = 'not_a_proper_session',
 }
 
 export interface MeilingV1ErrorResponse {

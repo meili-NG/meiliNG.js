@@ -23,6 +23,7 @@ export function sendMeilingError(rep: FastifyReply, type: MeilingV1ErrorType, de
     case MeilingV1ErrorType.INVALID_SIGNIN_TYPE:
     case MeilingV1ErrorType.ALREADY_SIGNED_IN:
     case MeilingV1ErrorType.ALREADY_SIGNED_OUT:
+    case MeilingV1ErrorType.NOT_A_PROPER_SESSION:
       statusCode = 400;
       break;
 

@@ -23,9 +23,15 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
   app.get(baseURI + '/signout/:uuid', meilingV1SignoutHandler);
 
   app.get(baseURI + '/session', async (req, rep) => {
-    const session = await getMeilingV1Session(req);
-
     if ((req.query as any)?.token === 'HongMeiling' && isDevelopment) {
+      let session;
+      try {
+        session = await getMeilingV1Session(req);
+      } catch (e) {
+        sendMeilingError(rep, MeilingV1ErrorType.NOT_A_PROPER_SESSION);
+        return;
+      }
+
       rep.send(session);
       return;
     } else {
@@ -41,20 +47,17 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
           });
           return;
         }
-      } else if (
-        session === null ||
-        session === undefined ||
-        (JSON.stringify(session) === '{}' && req.headers.authorization === undefined)
-      ) {
+      } else if (req.session) {
         rep.send({
           success: true,
-          token: createMeilingV1Token(),
         });
         return;
       } else {
         rep.send({
           success: true,
+          token: createMeilingV1Token(),
         });
+        return;
       }
     }
   });

@@ -43,7 +43,14 @@ function getMeilingAvailableAuthMethods(authMethods: Authorization[]) {
 }
 
 export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyReply) {
-  const session = getMeilingV1Session(req);
+  let session;
+  try {
+    session = await getMeilingV1Session(req);
+  } catch (e) {
+    sendMeilingError(rep, MeilingV1ErrorType.NOT_A_PROPER_SESSION);
+    return;
+  }
+
   let body;
 
   if (typeof req.body !== 'string') {

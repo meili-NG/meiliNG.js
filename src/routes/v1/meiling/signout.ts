@@ -17,8 +17,16 @@ interface MeilingV1Signup {
 }
 
 export async function meilingV1SignoutHandler(req: FastifyRequest, rep: FastifyReply) {
+  let session;
+  try {
+    session = await getMeilingV1Session(req);
+  } catch (e) {
+    sendMeilingError(rep, MeilingV1ErrorType.NOT_A_PROPER_SESSION);
+    return;
+  }
+
   const uuid = (req.query as any)?.uuid ? (req.query as any)?.uuid : (req.params as any).uuid;
-  const user = getMeilingV1Session(req).user;
+  const user = session.user;
 
   if (user && user.length > 0) {
     if (uuid === undefined) {

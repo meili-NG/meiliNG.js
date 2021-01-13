@@ -20,7 +20,9 @@ export const isDevelopment = env === 'development';
 loadMeilingV1SessionTokens();
 
 const app = fastify({
-  logger: true,
+  logger: {
+    prettyPrint: true,
+  },
 });
 
 app.register(fastifyCors, {

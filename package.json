@@ -13,6 +13,7 @@
     "fastify-secure-session": "^2.3.0",
     "nodemon": "^2.0.7",
     "openpgp": "^4.10.9",
+    "pino-pretty": "^4.3.0",
     "speakeasy": "^2.0.0",
     "typescript": "^4.0.5"
   },

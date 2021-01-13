@@ -3,6 +3,7 @@ export enum MeilingV1ErrorType {
   ALREADY_SIGNED_IN = 'already_signed_in',
   ALREADY_SIGNED_OUT = 'already_signed_out',
   INVALID_REQUEST = 'invalid_request',
+  INVALID_SESSION = 'invalid_session',
   WRONG_USERNAME = 'wrong_username',
   WRONG_PASSWORD = 'wrong_password',
   INVALID_SIGNIN_TYPE = 'invalid_signin_type',
@@ -16,7 +17,6 @@ export enum MeilingV1ErrorType {
   AUTHENTICATION_NOT_CURRENT_CHALLENGE_METHOD = 'authentication_not_current_challenge_method',
   AUTHENTICATION_TIMEOUT = 'authentication_timeout',
   NOT_IMPLMENETED = 'not_implemented',
-  NOT_A_PROPER_SESSION = 'not_a_proper_session',
 }
 
 export interface MeilingV1ErrorResponse {

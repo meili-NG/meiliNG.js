@@ -42,11 +42,16 @@ export function loadMeilingV1SessionTokens() {
 export function garbageCollectMeilingV1Tokens() {
   // remove duplicates
   tokenSessions.issuedTokens = tokenSessions.issuedTokens.filter(
-    (n) => tokenSessions.issuedTokens.map((b) => n.token === b.token).filter((b) => b).length === 1,
+    (n, i) =>
+      tokenSessions.issuedTokens
+        .map((v, i) => (v.token === n.token ? i : undefined))
+        .filter((n) => n !== undefined)[0] === i,
   );
 
   // remove expired
-  tokenSessions.issuedTokens = tokenSessions.issuedTokens.filter((n) => n.expiresAt.getTime() < new Date().getTime());
+  tokenSessions.issuedTokens = tokenSessions.issuedTokens.filter((n) => n.expiresAt.getTime() > new Date().getTime());
+
+  saveMeilingV1Tokens();
 }
 
 export function saveMeilingV1Tokens() {
@@ -54,12 +59,18 @@ export function saveMeilingV1Tokens() {
 }
 
 export function isMeilingV1Token(token?: string): boolean {
-  return token !== undefined && tokenSessions.issuedTokens.filter((t) => t.token === token).length === 1;
+  const matchedTokens = tokenSessions.issuedTokens.filter((t) => t.token === token);
+  const result = token !== undefined && matchedTokens.length === 1;
+
+  saveMeilingV1Tokens();
+
+  return result;
 }
 
 export function getMeilingV1TokenFromRequest(req: FastifyRequest): string | undefined {
   if (req.headers.authorization) {
-    return req.headers.authorization.split(' ').splice(1).join(' ');
+    const token = req.headers.authorization.split(' ').splice(1).join(' ');
+    return token;
   }
   return;
 }
@@ -75,14 +86,16 @@ export function createMeilingV1Token(req: FastifyRequest): string | undefined {
 
   const token = generateToken();
 
-  tokenSessions.issuedTokens.push({
+  const tokenData: MeilingV1TokenData = {
     token,
     ip: req.ip,
     session: {},
     expiresAt: new Date(new Date().getTime() + config.session.v1.maxAge),
     firstIssued: new Date(),
     lastUsed: new Date(),
-  });
+  };
+
+  tokenSessions.issuedTokens.push(tokenData);
 
   saveMeilingV1Tokens();
 
@@ -96,26 +109,24 @@ export function getMeilingV1Session(req: FastifyRequest): MeilingV1Session | und
   if (req.headers.authorization && req.headers.authorization.includes('Bearer')) {
     token = getMeilingV1TokenFromRequest(req);
 
-    if (token) {
-      if (isMeilingV1Token(token)) {
-        const session = tokenSessions.issuedTokens.find((n) => n.token === token);
-        const expiresAt = session?.expiresAt;
+    if (isMeilingV1Token(token)) {
+      const session = tokenSessions.issuedTokens.find((n) => n.token === token);
+      const expiresAt = session?.expiresAt;
 
-        if (expiresAt) {
-          if (new Date().getTime() > expiresAt.getTime()) {
-            data = undefined;
-          } else {
-            data = session?.session;
-          }
+      if (expiresAt) {
+        if (new Date().getTime() < expiresAt.getTime()) {
+          data = session?.session;
         } else {
           data = undefined;
         }
       } else {
-        data = undefined;
+        data = session?.session;
       }
     } else {
       data = undefined;
     }
+  } else {
+    data = undefined;
   }
 
   saveMeilingV1Tokens();
@@ -195,7 +206,6 @@ export async function checkPreviouslyLoggedinMeilingV1Session(
     const userId = userData.id;
 
     const result = session.previouslyLoggedIn.filter((n) => n.id === userId);
-    console.log(result);
 
     return result.length > 0;
   } else {

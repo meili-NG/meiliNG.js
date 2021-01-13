@@ -19,7 +19,7 @@ export interface Config {
         maxTokenPerIP: number;
         timeframe: number;
       };
-      debugToken: string[];
+      debugTokens: string[];
     };
   };
   errorFormatURL: string;

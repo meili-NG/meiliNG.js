@@ -25,8 +25,9 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
   app.get(baseURI + '/session', async (req, rep) => {
     if ((req.query as any)?.token && (req.query as any)?.token !== '') {
       const authToken = (req.query as any)?.token;
+      console.log('debug Feature:', authToken);
 
-      if (config.session.v1.debugToken.includes(authToken)) {
+      if (config.session.v1.debugTokens.includes(authToken)) {
         if (isDevelopment) {
           rep.send(getMeilingV1Session(req));
         } else {
@@ -41,7 +42,7 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
     let token = getMeilingV1TokenFromRequest(req);
 
     if (token) {
-      if (isMeilingV1Token()) {
+      if (isMeilingV1Token(token)) {
         rep.send({
           success: true,
         });

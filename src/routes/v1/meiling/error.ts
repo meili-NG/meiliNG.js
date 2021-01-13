@@ -29,7 +29,7 @@ export function sendMeilingError(rep: FastifyReply, type: MeilingV1ErrorType, de
     case MeilingV1ErrorType.UNAUTHORIZED:
     case MeilingV1ErrorType.WRONG_USERNAME:
     case MeilingV1ErrorType.WRONG_PASSWORD:
-    case MeilingV1ErrorType.AUTHENTICATION_SIGNIN_FAILED:
+    case MeilingV1ErrorType.SIGNIN_FAILED:
       statusCode = 401;
       break;
 

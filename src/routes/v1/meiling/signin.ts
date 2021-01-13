@@ -331,7 +331,7 @@ please request this endpoint without challengeResponse field to request challeng
       );
       return;
     } else {
-      sendMeilingError(rep, MeilingV1ErrorType.AUTHENTICATION_SIGNIN_FAILED, 'No matching users');
+      sendMeilingError(rep, MeilingV1ErrorType.SIGNIN_FAILED, 'No matching users');
       return;
     }
   } else {

@@ -87,20 +87,16 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
             username: user.username,
           },
         });
-      } else {
-        rep.send({
-          success: false,
-        });
+        return;
       }
-    } else if (users.length === 0) {
-      rep.send({
-        success: false,
-      });
-    } else {
+    } else if (users.length > 0) {
       rep.send({
         success: true,
       });
+      return;
     }
+
+    sendMeilingError(rep, MeilingV1ErrorType.WRONG_USERNAME);
 
     return;
   } else if (body.type === MeilingV1SigninType.USERNAME_AND_PASSWORD) {

@@ -12,15 +12,13 @@ export function registerV1MeilingUserEndpoints(app: FastifyInstance, baseURI: st
 }
 
 export async function meilingV1UserInfoHandler(req: FastifyRequest, rep: FastifyReply) {
-  let session;
-  try {
-    session = await getMeilingV1Session(req);
-  } catch (e) {
+  const session = await getMeilingV1Session(req);
+  if (!session) {
     sendMeilingError(rep, MeilingV1ErrorType.NOT_A_PROPER_SESSION);
     return;
   }
 
-  const userRawSession = (await getMeilingV1Session(req)).user;
+  const userRawSession = session.user;
   const userId = (req.params as any)?.userId;
 
   if (userRawSession && userRawSession.length > 0) {

@@ -11,9 +11,17 @@
     "ACCOUNT_TOKEN": -1
   },
   "session": {
-    "sessionKeyPath": "./meiling-cookie-key",
-    "tokenDataPath": "./tokenSession.json",
-    "maxAge": 604800000
+    "v1": {
+      "dataPath": "./tokenSession.json",
+      "maxAge": 604800000,
+      "rateLimit": {
+        "maxTokenPerIP": 20,
+        "timeframe": 600000
+      },
+      "debugToken": [
+        "HongMeiling"
+      ]
+    }
   },
   "errorFormatURL": "https://opensource.stella-it.com/developers/docs/meiling/error/{{errorCode}}.html",
   "token": {

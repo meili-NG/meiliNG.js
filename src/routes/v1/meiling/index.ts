@@ -1,10 +1,10 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { isDevelopment } from '../../..';
+import { config, isDevelopment } from '../../..';
 import { findMatchingUsersByUsernameOrEmail } from '../../../common/user';
 import {
   createMeilingV1Token,
   getMeilingV1Session,
-  getMeilingV1Token,
+  getMeilingV1TokenFromRequest,
   isMeilingV1Token,
   setMeilingV1Session,
 } from './common';
@@ -23,42 +23,48 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
   app.get(baseURI + '/signout/:uuid', meilingV1SignoutHandler);
 
   app.get(baseURI + '/session', async (req, rep) => {
-    if ((req.query as any)?.token === 'HongMeiling' && isDevelopment) {
-      let session;
-      try {
-        session = await getMeilingV1Session(req);
-      } catch (e) {
-        sendMeilingError(rep, MeilingV1ErrorType.NOT_A_PROPER_SESSION);
-        return;
-      }
+    if ((req.query as any)?.token && (req.query as any)?.token !== '') {
+      const authToken = (req.query as any)?.token;
 
-      rep.send(session);
-      return;
-    } else {
-      if (req.headers.authorization) {
-        if (isMeilingV1Token(getMeilingV1Token(req))) {
-          rep.send({
-            success: true,
-          });
-          return;
+      if (config.session.v1.debugToken.includes(authToken)) {
+        if (isDevelopment) {
+          rep.send(getMeilingV1Session(req));
         } else {
-          rep.send({
-            success: false,
-          });
-          return;
+          sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'unauthorized: not in development mode.');
         }
-      } else if (req.session) {
+      } else {
+        sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'unauthorized: invalid token.');
+      }
+      return;
+    }
+
+    let token = getMeilingV1TokenFromRequest(req);
+
+    if (token) {
+      if (isMeilingV1Token()) {
         rep.send({
           success: true,
         });
         return;
       } else {
         rep.send({
-          success: true,
-          token: createMeilingV1Token(),
+          success: false,
         });
         return;
       }
+    } else {
+      token = createMeilingV1Token(req);
+      if (token) {
+        rep.send({
+          success: true,
+          token,
+        });
+      } else {
+        rep.send({
+          success: false,
+        });
+      }
+      return;
     }
   });
 

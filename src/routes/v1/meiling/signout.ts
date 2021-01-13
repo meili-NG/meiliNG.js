@@ -17,10 +17,8 @@ interface MeilingV1Signup {
 }
 
 export async function meilingV1SignoutHandler(req: FastifyRequest, rep: FastifyReply) {
-  let session;
-  try {
-    session = await getMeilingV1Session(req);
-  } catch (e) {
+  const session = await getMeilingV1Session(req);
+  if (!session) {
     sendMeilingError(rep, MeilingV1ErrorType.NOT_A_PROPER_SESSION);
     return;
   }

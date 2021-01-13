@@ -12,9 +12,15 @@ export interface Config {
     [token in OAuthTokenType]: number;
   };
   session: {
-    sessionKeyPath: string;
-    tokenDataPath: string;
-    maxAge: number;
+    v1: {
+      dataPath: string;
+      maxAge: number;
+      rateLimit: {
+        maxTokenPerIP: number;
+        timeframe: number;
+      };
+      debugToken: string[];
+    };
   };
   errorFormatURL: string;
   token: {

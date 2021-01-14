@@ -82,7 +82,6 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
           data: {
             id: user.id,
             profileUrl: user.profileUrl,
-            emails: user.emails,
             name: user.name,
             username: user.username,
           },

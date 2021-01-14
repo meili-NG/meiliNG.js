@@ -10,19 +10,20 @@ export interface MeilingLoggedInUser {
   id: string;
 }
 
-interface MeilingV1SignInTwoFactorAuth {
+interface MeilingV1SignInTwoFactorAuth extends MeilingV1ChallengeData {
   id: string;
   type: MeilingV1SigninType.TWO_FACTOR_AUTH;
   method?: MeilingV1ExtendedAuthMethods;
-  challenge?: string;
-  challengeTimeout?: string;
 }
 
-interface MeilingV1SignInPasswordLess {
+interface MeilingV1SignInPasswordLess extends MeilingV1ChallengeData {
   type: MeilingV1SigninType.PASSWORDLESS;
   method?: MeilingV1ExtendedAuthMethods;
+}
+
+interface MeilingV1ChallengeData {
   challenge?: string;
-  challengeTimeout?: string;
+  challengeCreatedAt?: Date;
 }
 
 export type MeilingV1SessionExtendedAuthentication = MeilingV1SignInPasswordLess | MeilingV1SignInTwoFactorAuth;

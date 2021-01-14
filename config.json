@@ -5,18 +5,23 @@
     "https://meiling-dev.stella-it.com"
   ],
   "invalidate": {
-    "AUTHORIZATION_CODE": 300,
-    "ACCESS_TOKEN": 7200,
-    "REFRESH_TOKEN": 604800,
-    "ACCOUNT_TOKEN": -1
+    "oauth": {
+      "AUTHORIZATION_CODE": 300,
+      "ACCESS_TOKEN": 7200,
+      "REFRESH_TOKEN": 604800,
+      "ACCOUNT_TOKEN": -1
+    },
+    "meiling": {
+      "CHALLENGE_TOKEN": 300
+    }
   },
   "session": {
     "v1": {
       "dataPath": "./tokenSession.json",
-      "maxAge": 604800000,
+      "maxAge": 604800,
       "rateLimit": {
         "maxTokenPerIP": 20,
-        "timeframe": 600000
+        "timeframe": 600
       },
       "debugTokens": [
         "HongMeiling"

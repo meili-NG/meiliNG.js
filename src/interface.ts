@@ -9,7 +9,12 @@ export interface Config {
   version: string;
   allowLogin: string[];
   invalidate: {
-    [token in OAuthTokenType]: number;
+    oauth: {
+      [token in OAuthTokenType]: number;
+    };
+    meiling: {
+      challenge: number;
+    };
   };
   session: {
     v1: {

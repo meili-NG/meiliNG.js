@@ -1,7 +1,12 @@
 import * as OpenPGP from 'openpgp';
 import * as SpeakEasy from 'speakeasy';
 
-export async function validatePGPSign(challenge: string, challengeResponse: string, publicKeyArmored: string) {
+export async function validatePGPSign(
+  challenge: string,
+  challengeResponse: string,
+  publicKeyArmored: string,
+  validUntil?: Date,
+) {
   let message;
   try {
     message = await OpenPGP.cleartext.readArmored(challengeResponse);

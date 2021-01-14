@@ -33,7 +33,7 @@ export interface MeilingV1SignInUsernameAndPassword {
   };
 }
 
-type MeilingV1SignInExtendedAuthentication = MeilingV1SignInTwoFactor | MeilingV1SignInPasswordLess;
+export type MeilingV1SignInExtendedAuthentication = MeilingV1SignInTwoFactor | MeilingV1SignInPasswordLess;
 
 export interface MeilingV1SignInTwoFactor {
   type: MeilingV1SigninType.TWO_FACTOR_AUTH;

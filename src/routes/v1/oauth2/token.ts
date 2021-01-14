@@ -45,8 +45,8 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
       return;
     }
 
-    if (config?.invalidate?.AUTHORIZATION_CODE >= 0) {
-      if (new Date().getTime() - token.issuedAt.getTime() > config.invalidate.AUTHORIZATION_CODE) {
+    if (config?.invalidate?.oauth?.AUTHORIZATION_CODE >= 0) {
+      if (new Date().getTime() - token.issuedAt.getTime() > config.invalidate.oauth.AUTHORIZATION_CODE) {
         sendOAuth2Error(
           rep,
           OAuth2ErrorResponseType.INVALID_GRANT,
@@ -73,8 +73,8 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
       return;
     }
 
-    if (config?.invalidate?.REFRESH_TOKEN >= 0) {
-      if (new Date().getTime() - token.issuedAt.getTime() > config.invalidate.REFRESH_TOKEN) {
+    if (config?.invalidate?.oauth?.REFRESH_TOKEN >= 0) {
+      if (new Date().getTime() - token.issuedAt.getTime() > config.invalidate.oauth.REFRESH_TOKEN) {
         sendOAuth2Error(
           rep,
           OAuth2ErrorResponseType.INVALID_GRANT,

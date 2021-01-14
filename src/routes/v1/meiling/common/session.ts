@@ -78,7 +78,9 @@ export function getMeilingV1TokenFromRequest(req: FastifyRequest): string | unde
 export function createMeilingV1Token(req: FastifyRequest): string | undefined {
   if (
     tokenSessions.issuedTokens.filter(
-      (t) => t.ip === req.ip && new Date().getTime() - config.session.v1.rateLimit.timeframe < t.firstIssued.getTime(),
+      (t) =>
+        t.ip === req.ip &&
+        new Date().getTime() - config.session.v1.rateLimit.timeframe * 1000 < t.firstIssued.getTime(),
     ).length > config.session.v1.rateLimit.maxTokenPerIP
   ) {
     return undefined;
@@ -90,7 +92,7 @@ export function createMeilingV1Token(req: FastifyRequest): string | undefined {
     token,
     ip: req.ip,
     session: {},
-    expiresAt: new Date(new Date().getTime() + config.session.v1.maxAge),
+    expiresAt: new Date(new Date().getTime() + config.session.v1.maxAge * 1000),
     firstIssued: new Date(),
     lastUsed: new Date(),
   };
@@ -144,7 +146,7 @@ export function setMeilingV1Session(req: FastifyRequest, data?: MeilingV1Session
           const tokenData = tokenSessions.issuedTokens.find((n) => n.token === token);
           if (tokenData) {
             tokenData.session = data;
-            tokenData.expiresAt = new Date(new Date().getTime() + config.session.v1.maxAge);
+            tokenData.expiresAt = new Date(new Date().getTime() + config.session.v1.maxAge * 1000);
           }
         } else {
           tokenSessions.issuedTokens = tokenSessions.issuedTokens.filter((n) => n.token !== token);
@@ -173,6 +175,7 @@ export function setMeilingV1ExtendedAuthSessionMethodAndChallenge(
   req: FastifyRequest,
   method?: MeilingV1ExtendedAuthMethods,
   challenge?: string | undefined,
+  challengeCreatedAt?: Date,
 ) {
   const session = getMeilingV1Session(req);
 
@@ -181,6 +184,11 @@ export function setMeilingV1ExtendedAuthSessionMethodAndChallenge(
       session.extendedAuthentication.method = method === undefined ? session.extendedAuthentication.method : method;
       session.extendedAuthentication.challenge =
         challenge === undefined ? session.extendedAuthentication.challenge : challenge;
+      session.extendedAuthentication.challengeCreatedAt = new Date();
+
+      if (challengeCreatedAt) {
+        session.extendedAuthentication.challengeCreatedAt = challengeCreatedAt;
+      }
     }
 
     setMeilingV1Session(req, session);

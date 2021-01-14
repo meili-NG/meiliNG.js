@@ -1,6 +1,7 @@
 import { Authorization, User } from '@prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
+import { config } from '../../..';
 import {
   findMatchingUsersByUsernameOrEmail,
   getUserInfo,
@@ -15,6 +16,7 @@ import {
   getAuthenticationV1FromDatabaseEquivalent,
   verifyChallengeV1,
   shouldSendChallengeV1,
+  isThisChallengeMethodAdequateV1,
 } from './common';
 import {
   checkPreviouslyLoggedinMeilingV1Session,
@@ -25,16 +27,29 @@ import {
 } from './common/session';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
-import { MeilingV1ExtendedAuthMethods, MeilingV1SignInBody, MeilingV1SigninType } from './interfaces/query';
+import {
+  MeilingV1ExtendedAuthMethods,
+  MeilingV1SignInBody,
+  MeilingV1SignInExtendedAuthentication,
+  MeilingV1SigninType,
+} from './interfaces/query';
 
-function getMeilingAvailableAuthMethods(authMethods: Authorization[]) {
+function getMeilingAvailableAuthMethods(authMethods: Authorization[], body?: MeilingV1SignInExtendedAuthentication) {
   const methods: MeilingV1ExtendedAuthMethods[] = [];
 
   for (const thisMethod of authMethods) {
     const methodMeilingV1 = getAuthenticationV1FromDatabaseEquivalent(thisMethod.method);
     if (methodMeilingV1 !== null) {
-      if (!methods.includes(methodMeilingV1)) {
-        methods.push(methodMeilingV1);
+      let methodAllowed = true;
+
+      if (body) {
+        methodAllowed = isThisChallengeMethodAdequateV1(body, methodMeilingV1);
+      }
+
+      if (methodAllowed) {
+        if (!methods.includes(methodMeilingV1)) {
+          methods.push(methodMeilingV1);
+        }
       }
     }
   }
@@ -266,6 +281,21 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
 please request this endpoint without challengeResponse field to request challenge again.`,
       );
       return;
+    }
+
+    // is challenge expired
+    if (extendedAuthSession.challengeCreatedAt) {
+      if (
+        new Date().getTime() >
+        extendedAuthSession.challengeCreatedAt.getTime() + config.invalidate.meiling.challenge * 1000
+      ) {
+        sendMeilingError(
+          rep,
+          MeilingV1ErrorType.AUTHENTICATION_TIMEOUT,
+          'authentication request timed out, please recreate the challenge.',
+        );
+        return;
+      }
     }
 
     // challenge value from session

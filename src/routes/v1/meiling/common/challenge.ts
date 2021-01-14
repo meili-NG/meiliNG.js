@@ -37,15 +37,23 @@ export async function verifyChallengeV1(
   challengeResponse: any,
   data?: AuthorizationJSONObject,
 ) {
-  switch (signinMethod) {
-    case MeilingV1ExtendedAuthMethods.PGP_SIGNATURE:
-      return validatePGPSign(challenge as string, challengeResponse, (data as AuthorizationPGPSSHKeyObject).data.key);
-    case MeilingV1ExtendedAuthMethods.SECURITY_KEY:
-      break;
-    case MeilingV1ExtendedAuthMethods.SMS:
-    case MeilingV1ExtendedAuthMethods.EMAIL:
-      return (challenge as string).trim() === challengeResponse.trim();
-    case MeilingV1ExtendedAuthMethods.OTP:
-      return validateOTP(challengeResponse, (data as AuthorizationOTPObject).data.secret);
+  try {
+    switch (signinMethod) {
+      case MeilingV1ExtendedAuthMethods.PGP_SIGNATURE:
+        return await validatePGPSign(
+          challenge as string,
+          challengeResponse,
+          (data as AuthorizationPGPSSHKeyObject).data.key,
+        );
+      case MeilingV1ExtendedAuthMethods.SECURITY_KEY:
+        break;
+      case MeilingV1ExtendedAuthMethods.SMS:
+      case MeilingV1ExtendedAuthMethods.EMAIL:
+        return (challenge as string).trim() === challengeResponse.trim();
+      case MeilingV1ExtendedAuthMethods.OTP:
+        return validateOTP(challengeResponse, (data as AuthorizationOTPObject).data.secret);
+    }
+  } catch (e) {
+    return false;
   }
 }

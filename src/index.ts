@@ -34,6 +34,19 @@ app.register(fastifyCors, {
     : config.allowLogin,
 });
 
-registerRootEndpoints(app, '/');
+(async () => {
+  try {
+    const wa = await prisma.user.findFirst({
+      where: {
+        id: '',
+      },
+    });
+    console.log(wa);
+  } catch (e) {
+    console.error('[Database] Failed to connect! Please check MySQL/MariaDB is online.');
+    process.exit(1);
+  }
 
-app.listen(8080);
+  registerRootEndpoints(app, '/');
+  app.listen(config.listeningPort);
+})();

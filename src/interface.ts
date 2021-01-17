@@ -32,4 +32,5 @@ export interface Config {
     default: TokenGeneratorConfig;
   };
   behindProxy: boolean;
+  listeningPort: number;
 }

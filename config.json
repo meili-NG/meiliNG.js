@@ -35,5 +35,6 @@
       "length": 128
     }
   },
-  "behindProxy": true
+  "behindProxy": true,
+  "listeningPort": 8080
 }

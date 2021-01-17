@@ -36,12 +36,8 @@ app.register(fastifyCors, {
 
 (async () => {
   try {
-    const wa = await prisma.user.findFirst({
-      where: {
-        id: '',
-      },
-    });
-    console.log(wa);
+    await prisma.$connect();
+    await prisma.$executeRaw('SHOW TABLES');
   } catch (e) {
     console.error('[Database] Failed to connect! Please check MySQL/MariaDB is online.');
     process.exit(1);

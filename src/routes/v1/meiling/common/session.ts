@@ -306,6 +306,8 @@ export async function getLoggedInMeilingV1Session(req: FastifyRequest) {
 
     return users;
   }
+
+  return [];
 }
 
 export function hasMeilingV1UserLoggedIn(session: MeilingV1Session) {

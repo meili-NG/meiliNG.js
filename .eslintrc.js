@@ -27,5 +27,6 @@ module.exports = {
     // e.g. "@typescript-eslint/explicit-function-return-type": "off",
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': ['warn'],
+    'require-await': 'warn',
   },
 };

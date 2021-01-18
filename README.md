@@ -1,10 +1,46 @@
-# Meiling 
+<h1 align="center">Meiling</h1>
+<p align="center">
+  <strong>An easy-to-use, open-source oAuth2 Authentication Provider</strong>
+</p>
+<p align="center">
+  Meiling allows users to build highly-configurable and open authentication infrastructure based on OAuth2 in no time.
+</p>
 
+<p align="center">
+  <img src="https://github.com/Stella-IT/meiling/workflows/ESLint/badge.svg" alt="ESLint">
+</p>
 
-## GitHub Actions Status
-| Name                      | Status                                                                                                         |
-|---------------------------|----------------------------------------------------------------------------------------------------------------|
-| ESLint                    | ![ESLint](https://github.com/Stella-IT/meiling/workflows/ESLint/badge.svg)                                     |
+<hr>
+
+<p align="right">
+   Developed with &lt;3 by Stella IT OpenSource Project Team<br>
+   Maintained by @Alex4386<br>
+   <a href="https://opensource.stella-it.com/discord/">Join our Community</a>
+</p> 
+
+<hr>
+
+<!-- Add some system specific stuff here -->
+<strong>API Docs:</strong> Getting ready.
+
+<hr>
+
+## Features
+The key featues of Meiling Engine are:
+* highly-configurable client authentication interface.  
+  Just follow the communication API standards defined in API Docs to generate your own login infrastructure with your design.
+* oAuth2 and OpenID Connect Compliant
+* Similar API Structure with Google's oAuth2 API.  
+  You can re-use your REST API based Google oAuth2 code.
+
+Also just like conventional login systems:
+* keeps users' login details and data private, just like an [gatekeeper](https://en.touhouwiki.net/wiki/Hong_Meiling).
+* XSRF preventions using session tokens.
+
+## Use cases
+Meiling Engine is used in:
+* Stella IT Accounts
+* and more!
 
 ## License
-[MIT License](LICENSE)
+Distributed under [MIT License](LICENSE)

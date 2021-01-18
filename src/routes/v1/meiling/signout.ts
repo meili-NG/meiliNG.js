@@ -9,11 +9,8 @@ import {
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
 
-interface MeilingV1Signup {
-  username: string;
-  phone: string;
-  email: string;
-  password: string;
+interface MeilingV1SignOutQuery {
+  userId?: string;
 }
 
 export async function meilingV1SignoutHandler(req: FastifyRequest, rep: FastifyReply) {
@@ -23,15 +20,17 @@ export async function meilingV1SignoutHandler(req: FastifyRequest, rep: FastifyR
     return;
   }
 
-  const uuid = (req.query as any)?.uuid ? (req.query as any)?.uuid : (req.params as any).uuid;
+  const userId = (req.query as MeilingV1SignOutQuery)?.userId
+    ? (req.query as MeilingV1SignOutQuery)?.userId
+    : (req.params as MeilingV1SignOutQuery).userId;
   const user = session.user;
 
   if (user && user.length > 0) {
-    if (uuid === undefined) {
+    if (userId === undefined) {
       await logoutMeilingV1Session(req);
     } else {
-      if (uuid && user.filter((n) => n.id === uuid).length > 0) {
-        await logoutMeilingV1Session(req, uuid);
+      if (userId && user.filter((n) => n.id === userId).length > 0) {
+        await logoutMeilingV1Session(req, userId);
       } else {
         sendMeilingError(rep, MeilingV1ErrorType.ALREADY_SIGNED_OUT, 'you are already signed out.');
         return;

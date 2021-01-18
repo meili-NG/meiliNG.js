@@ -34,6 +34,10 @@ export function sendMeilingError(rep: FastifyReply, type: MeilingV1ErrorType, de
       statusCode = 401;
       break;
 
+    case MeilingV1ErrorType.APPLICATION_NOT_FOUND:
+      statusCode = 404;
+      break;
+
     case MeilingV1ErrorType.UNSUPPORTED_SIGNIN_METHOD:
       statusCode = 405;
       break;
@@ -46,7 +50,7 @@ export function sendMeilingError(rep: FastifyReply, type: MeilingV1ErrorType, de
       statusCode = 410;
       break;
 
-    case MeilingV1ErrorType.NOT_IMPLMENETED:
+    case MeilingV1ErrorType.NOT_IMPLEMENTED:
       statusCode = 501;
       break;
 

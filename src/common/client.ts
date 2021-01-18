@@ -1,7 +1,8 @@
-import { OAuthClientAuthorization } from '@prisma/client';
+import { OAuthClientAuthorization, User } from '@prisma/client';
 import { prisma } from '..';
+import { getUserInfo } from './user';
 
-export async function getAppInfoByClientId(clientId: string) {
+export async function getOAuth2ClientByClientId(clientId: string) {
   const client = await prisma.oAuthClient.findFirst({
     where: {
       id: clientId,
@@ -11,7 +12,7 @@ export async function getAppInfoByClientId(clientId: string) {
   return client;
 }
 
-export async function getOAuthAuthorizationInfo(n: OAuthClientAuthorization) {
+export async function getOAuth2AuthorizationInfo(n: OAuthClientAuthorization) {
   const client = await prisma.oAuthClient.findFirst({
     where: {
       id: n.oAuthClientId,
@@ -22,4 +23,41 @@ export async function getOAuthAuthorizationInfo(n: OAuthClientAuthorization) {
     client,
     ...n,
   };
+}
+
+export async function isClientAccessible(clientId: string, user: User | string): Promise<boolean> {
+  const userObject = await getUserInfo(user);
+  if (!userObject) return false;
+
+  const client = await getOAuth2ClientByClientId(clientId);
+  if (!client) return false;
+
+  if (client.type === 'PUBLIC') {
+    return true;
+  } else {
+    if (!client.oAuthClientAccessControlsId) {
+      return false;
+    } else {
+      const [users, groups] = await Promise.all([
+        prisma.user.findMany({
+          where: {
+            oAuthClientAccessControlsId: client.oAuthClientAccessControlsId,
+          },
+        }),
+        prisma.group.findMany({
+          where: {
+            oAuthClientAccessControlsId: client.oAuthClientAccessControlsId,
+          },
+        }),
+      ]);
+
+      const user = users.find((n) => n.id === userObject.id);
+      if (user) return true;
+
+      const group = groups.find((n) => userObject.groups.find((m) => m.id === n.id));
+      if (group) return true;
+    }
+  }
+
+  return false;
 }

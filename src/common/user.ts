@@ -7,19 +7,21 @@ import {
   Authorization,
   JsonObject,
   AuthorizationMethod,
+  Group,
 } from '@prisma/client';
 import { prisma } from '../';
-import { getAppInfoByClientId, getOAuthAuthorizationInfo } from './client';
+import { getOAuth2ClientByClientId, getOAuth2AuthorizationInfo } from './client';
 import bcrypt from 'bcrypt';
 import { generateToken } from './token';
 import { MeilingV1SigninType } from '../routes/v1/meiling/interfaces/query';
 
-interface UserBaseObject extends User {
+export interface UserBaseObject extends User {
   emails: Email[];
   phones: Phone[];
+  groups: Group[];
 }
 
-interface UserAllObject extends UserBaseObject {
+export interface UserAllObject extends UserBaseObject {
   authorizedApps: ClientAuthorizationObject[];
   createdApps: OAuthClient[];
 }
@@ -111,12 +113,19 @@ export async function getUserInfo(user: User | string): Promise<UserBaseObject |
     },
   });
 
-  const [emails, phones] = await Promise.all([emailsPromise, phonesPromise]);
+  const groupsPromise = prisma.group.findMany({
+    where: {
+      User: userDatabase,
+    },
+  });
+
+  const [emails, phones, groups] = await Promise.all([emailsPromise, phonesPromise, groupsPromise]);
 
   const userObj: UserBaseObject = {
     ...userDatabase,
     emails,
     phones,
+    groups,
   };
 
   return userObj;
@@ -143,8 +152,8 @@ export async function getAllUserInfo(user: User | string): Promise<UserBaseObjec
   const authorizedAppPromises: Promise<any>[] = [];
   const createdAppPromises: Promise<any>[] = [];
 
-  authorizedAppsDatabase.map((n) => authorizedAppPromises.push(getAppInfoByClientId(n.oAuthClientId)));
-  createdAppsDatabase.map((n) => createdAppPromises.push(getOAuthAuthorizationInfo(n)));
+  authorizedAppsDatabase.map((n) => authorizedAppPromises.push(getOAuth2ClientByClientId(n.oAuthClientId)));
+  createdAppsDatabase.map((n) => createdAppPromises.push(getOAuth2AuthorizationInfo(n)));
 
   const [authorizedAppsPromisesPromise, createdAppsPromisesPromise] = await Promise.all([
     Promise.all(authorizedAppPromises),
@@ -254,8 +263,8 @@ export async function findMatchingUsersByUsernameOrEmail(username: string, passw
   return matchingUsers;
 }
 
-export async function updateLastSignIn(user_uuid: User | string) {
-  const user = await getUserPlainInfo(user_uuid);
+export async function updateLastSignIn(userId: User | string) {
+  const user = await getUserPlainInfo(userId);
 
   if (user) {
     await prisma.user.update({
@@ -269,8 +278,8 @@ export async function updateLastSignIn(user_uuid: User | string) {
   }
 }
 
-export async function updateLastAuth(user_uuid: User | string) {
-  const user = await getUserPlainInfo(user_uuid);
+export async function updateLastAuth(userId: User | string) {
+  const user = await getUserPlainInfo(userId);
 
   if (user) {
     await prisma.user.update({

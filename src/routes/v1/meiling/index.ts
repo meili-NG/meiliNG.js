@@ -20,7 +20,7 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
   app.post(baseURI + '/signup', meilingV1SignupHandler);
 
   app.get(baseURI + '/signout', meilingV1SignoutHandler);
-  app.get(baseURI + '/signout/:uuid', meilingV1SignoutHandler);
+  app.get(baseURI + '/signout/:userId', meilingV1SignoutHandler);
 
   app.get(baseURI + '/session', async (req, rep) => {
     if ((req.query as any)?.token && (req.query as any)?.token !== '') {

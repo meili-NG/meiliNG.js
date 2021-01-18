@@ -3,7 +3,6 @@ import { AuthorizationJSONObject, AuthorizationPGPSSHKeyObject, AuthorizationOTP
 import { validatePGPSign, validateOTP } from '../../../../common/validate';
 import {
   MeilingV1ExtendedAuthMethods,
-  MeilingV1SignInBody,
   MeilingV1SignInExtendedAuthentication,
   MeilingV1SigninType,
 } from '../interfaces/query';

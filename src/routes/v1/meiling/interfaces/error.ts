@@ -16,7 +16,8 @@ export enum MeilingV1ErrorType {
   AUTHENTICATION_REQUEST_NOT_GENERATED = 'authentication_request_not_generated',
   AUTHENTICATION_NOT_CURRENT_CHALLENGE_METHOD = 'authentication_not_current_challenge_method',
   AUTHENTICATION_TIMEOUT = 'authentication_timeout',
-  NOT_IMPLMENETED = 'not_implemented',
+  NOT_IMPLEMENTED = 'not_implemented',
+  APPLICATION_NOT_FOUND = 'application_not_found',
 }
 
 export interface MeilingV1ErrorResponse {

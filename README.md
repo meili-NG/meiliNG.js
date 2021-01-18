@@ -14,7 +14,7 @@
 
 <p align="right">
    Developed with &lt;3 by Stella IT OpenSource Project Team<br>
-   Maintained by @Alex4386<br>
+   Maintained by <a href="https://github.com/Alex4386">@Alex4386</a><br>
    <a href="https://opensource.stella-it.com/discord/">Join our Community</a>
 </p> 
 
@@ -34,7 +34,7 @@ The key featues of Meiling Engine are:
   You can re-use your REST API based Google oAuth2 code.
 
 Also just like conventional login systems:
-* keeps users' login details and data private, just like an [gatekeeper](https://en.touhouwiki.net/wiki/Hong_Meiling).
+* keeps users' login details and data private, just like a [gatekeeper](https://en.touhouwiki.net/wiki/Hong_Meiling).
 * XSRF preventions using session tokens.
 
 ## Use cases

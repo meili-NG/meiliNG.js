@@ -88,8 +88,15 @@ model OAuthClient {
   image                 String
   secrets               OAuthClientAuth[]
   permissions           Permission[]
+  accessControls        OAuthClientAccessControls?
   privacy               String
   terms                 String
+}
+
+model OAuthClientAccessControls {
+  id                    String                        @id @default(uuid())
+  authorizedClients     User[]
+  authorizedGroups      Group[]
 }
 
 model OAuthClientAuth {

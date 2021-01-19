@@ -68,6 +68,7 @@ model Authorization {
   allowSingleFactor     Boolean                       @default(false)
   allowTwoFactor        Boolean                       @default(false)
   allowPasswordReset    Boolean                       @default(false)
+  createdAt             DateTime                      @default(now())
 }
 
 model Group {
@@ -91,6 +92,7 @@ model OAuthClient {
   accessControls        OAuthClientAccessControls?
   privacy               String
   terms                 String
+  createdAt             DateTime                      @default(now())
 }
 
 model OAuthClientAccessControls {
@@ -137,6 +139,7 @@ model PolicyConsent {
   user                  User
   policy                Policy
   consent               Boolean                       @default(false)
+  consentAt             DateTime                      @default(now())
 }
 
 enum OAuthTokenType {

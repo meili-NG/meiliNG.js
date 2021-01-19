@@ -131,7 +131,7 @@ export async function getUserInfo(user: User | string): Promise<UserBaseObject |
   return userObj;
 }
 
-export async function getAllUserInfo(user: User | string): Promise<UserBaseObject | undefined> {
+export async function getAllUserInfo(user: User | string): Promise<UserAllObject | undefined> {
   const baseUser = await getUserInfo(user);
   if (!baseUser) return;
 

@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { config, isDevelopment } from '../../..';
 import { findMatchingUsersByUsernameOrEmail } from '../../../common/user';
+import { registerV1MeilingAppEndpoints } from './app';
 import {
   createMeilingV1Token,
   getMeilingV1Session,
@@ -78,18 +79,5 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
   });
 
   registerV1MeilingUserEndpoints(app, baseURI + '/users');
-}
-
-async function meilingV1UserExistHandler(req: FastifyRequest, rep: FastifyReply) {
-  if ((req.query as any)?.username) {
-    const username = (req.query as any)?.username;
-    const users = await findMatchingUsersByUsernameOrEmail(username);
-
-    rep.send({
-      exist: users.length > 0,
-    });
-  } else {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'username is missing.');
-    return;
-  }
+  registerV1MeilingAppEndpoints(app, baseURI + '/apps');
 }

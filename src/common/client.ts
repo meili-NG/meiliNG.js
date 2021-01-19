@@ -1,4 +1,4 @@
-import { OAuthClientAuthorization, User } from '@prisma/client';
+import { OAuthClient, OAuthClientAuthorization, User } from '@prisma/client';
 import { prisma } from '..';
 import { getUserInfo } from './user';
 
@@ -60,4 +60,14 @@ export async function isClientAccessible(clientId: string, user: User | string):
   }
 
   return false;
+}
+
+export function sanitizeClient(client: OAuthClient) {
+  return {
+    id: client.id,
+    image: client.image,
+    name: client.name,
+    privacy: client.privacy,
+    terms: client.terms,
+  };
 }

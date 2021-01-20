@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { UserBaseObject } from '../../../../../common/user';
 import { getLoggedInMeilingV1Session } from '../../common';
-import { meilingV1OAuthApplicationAuthHandler } from './auth';
+import { meilingV1OAuthApplicationAuthCheckHandler } from './auth';
 
 export interface MeilingV1UserActionsParams {
   userId: string;
@@ -11,7 +11,7 @@ export function registerV1MeilingUserActionsEndpoints(app: FastifyInstance, base
   // /v1/meiling/user/:userId/action
   // TODO: Implement authentication
 
-  app.get(baseURI + '/auth', meilingV1OAuthApplicationAuthHandler);
+  app.get(baseURI + '/auth', meilingV1OAuthApplicationAuthCheckHandler);
 }
 
 export async function isMeilingV1UserActionPermitted(req: FastifyRequest): Promise<UserBaseObject | undefined | null> {

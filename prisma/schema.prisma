@@ -90,9 +90,15 @@ model OAuthClient {
   secrets               OAuthClientAuth[]
   permissions           Permission[]
   accessControls        OAuthClientAccessControls?
+  redirectUris          OAuthClientRedirectUris[]
   privacy               String
   terms                 String
   createdAt             DateTime                      @default(now())
+}
+
+model OAuthClientRedirectUris {
+  id                    String                        @id @default(uuid())
+  redirectUri           String
 }
 
 model OAuthClientAccessControls {

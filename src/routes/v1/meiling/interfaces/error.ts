@@ -21,7 +21,9 @@ export enum MeilingV1ErrorType {
   NOT_IMPLEMENTED = 'not_implemented',
   APPLICATION_NOT_FOUND = 'application_not_found',
   APPLICATION_REDIRECT_URI_INVALID = 'application_redirect_uri_invalid',
-  APPLICATION_NOT_AUTHENTICATED = 'application_not_authenticated',
+  APPLICATION_NOT_AUTHORIZED_BY_USER = 'application_not_authorized_by_user',
+  APPLICATION_NOT_AUTHORIZED_SCOPES = 'application_not_authorized_scopes',
+  INTERNAL_SERVER_ERROR = 'internal_server_error',
 }
 
 export interface MeilingV1ErrorResponse {

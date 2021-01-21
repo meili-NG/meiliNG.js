@@ -33,4 +33,7 @@ export interface Config {
   };
   behindProxy: boolean;
   listeningPort: number;
+  oauth2: {
+    skipAuthentication: string[];
+  };
 }

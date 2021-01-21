@@ -1,9 +1,10 @@
 import { OAuthClient } from '@prisma/client';
 import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
 import {
+  checkClientAccessControlledUsers,
+  getClientAccessControls,
   getOAuth2AuthorizationInfo,
   getOAuth2ClientByClientId,
-  isClientAccessible,
   sanitizeClient,
 } from '../../../common/client';
 import { getAllUserInfo } from '../../../common/user';
@@ -32,14 +33,15 @@ export async function meilingV1AppHandler(req: FastifyRequest, rep: FastifyReply
 
   if (clientId) {
     const client = await getOAuth2ClientByClientId(clientId);
-    if (client === null) {
+    const acl = await getClientAccessControls(clientId);
+    if (!client || !acl) {
       sendMeilingError(rep, MeilingV1ErrorType.APPLICATION_NOT_FOUND);
       return;
     }
 
     let shouldShow = false;
     for (const user of users) {
-      shouldShow = shouldShow || (await isClientAccessible(clientId, user.id));
+      shouldShow = shouldShow || (await checkClientAccessControlledUsers(acl, user.id));
     }
 
     if (!shouldShow) {

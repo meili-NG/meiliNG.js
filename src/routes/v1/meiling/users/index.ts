@@ -5,10 +5,13 @@ import { getAllUserInfo } from '../../../../common/user';
 import { getLoggedInMeilingV1Session, getMeilingV1Session } from '../common';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
+import { registerV1MeilingUserActionsEndpoints } from './actions';
 
 export function registerV1MeilingUserEndpoints(app: FastifyInstance, baseURI: string) {
   app.get(baseURI, meilingV1UserInfoHandler);
   app.get(baseURI + '/:userId', meilingV1UserInfoHandler);
+
+  registerV1MeilingUserActionsEndpoints(app, baseURI + '/:userId');
 }
 
 export async function meilingV1UserInfoHandler(req: FastifyRequest, rep: FastifyReply) {

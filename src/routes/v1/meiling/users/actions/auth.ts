@@ -1,13 +1,16 @@
 import { Permission } from '@prisma/client';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { isMeilingV1UserActionPermitted, MeilingV1UserActionsParams } from '.';
-import { prisma } from '../../../../..';
-import { getBooleanFromString, isNotUndefinedOrNullOrBlank } from '../../../../../common';
+import { config, prisma } from '../../../../..';
+import { getBooleanFromString, getUnique, isNotUndefinedOrNullOrBlank } from '../../../../../common';
 import {
   authenticateClientAndGetResponseToken,
+  checkClientAccessControlledUsers,
+  checkClientPermissions,
+  getClientAccessControls,
   getClientRedirectUris,
   getOAuth2ClientByClientId,
-  isClientAccessible,
+  getUserAuthorizedPermissions,
 } from '../../../../../common/client';
 import { getAllUserInfo } from '../../../../../common/user';
 import { OAuth2QueryAccessType, OAuth2QueryResponseType } from '../../../oauth2/interfaces';
@@ -21,8 +24,6 @@ interface MeilingV1UserOAuthAuthBaseQuery {
   // oAuth parameters
   client_id: string;
   scope: string;
-  access_type?: OAuth2QueryAccessType;
-  include_granted_scopes?: string;
   response_type: OAuth2QueryResponseType;
 }
 
@@ -46,15 +47,7 @@ export async function meilingV1OAuthApplicationAuthCheckHandler(req: FastifyRequ
   const query = req.query as MeilingV1UserOAuthAuthQuery;
 
   // validate
-  if (
-    !isNotUndefinedOrNullOrBlank(
-      query.access_type,
-      query.client_id,
-      query.redirect_uri,
-      query.response_type,
-      query.scope,
-    )
-  ) {
+  if (!isNotUndefinedOrNullOrBlank(query.client_id, query.redirect_uri, query.response_type, query.scope)) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'missing query.');
     return;
   }
@@ -74,15 +67,22 @@ export async function meilingV1OAuthApplicationAuthCheckHandler(req: FastifyRequ
     return;
   }
 
+  // load access control
+  const acl = await getClientAccessControls(clientId);
+  if (!acl) {
+    sendMeilingError(rep, MeilingV1ErrorType.INTERNAL_SERVER_ERROR, 'Failed to get Access Control from Server.');
+    return;
+  }
+
   // is this user able to pass client check
-  const clientPrivateCheck = await isClientAccessible(clientId, userBase);
+  const clientPrivateCheck = await checkClientAccessControlledUsers(acl, userBase);
   if (!clientPrivateCheck) {
     sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'specified oAuth2 application is inaccessible');
     return;
   }
 
   // check permissions are valid or not
-  const scopes = query.scope.split(' ');
+  const scopes = getUnique(query.scope.split(' '), (m, n) => m === n);
 
   const permissionsPromise: Promise<Permission | null>[] = [];
   scopes.forEach((scope) =>
@@ -99,32 +99,45 @@ export async function meilingV1OAuthApplicationAuthCheckHandler(req: FastifyRequ
   const requestedPermissions = ((await Promise.all(permissionsPromise)) as unknown) as Permission[];
 
   // find unsupported scope
-  const unsupportedScope = requestedPermissions.filter((n) => n === null);
-  if (unsupportedScope.length > 0) {
+  const unsupportedScopes = requestedPermissions
+    .map((n, i) => (n === null ? scopes[i] : undefined))
+    .filter((j) => j !== undefined);
+  if (unsupportedScopes.length > 0) {
     // invalid permissions found!
     sendMeilingError(
       rep,
       MeilingV1ErrorType.UNSUPPORTED_SCOPE,
-      `the scope: (${unsupportedScope.join(' ')}) is not supported`,
+      `the scope: (${unsupportedScopes.join(' ')}) is not supported`,
     );
     return;
   }
 
+  const areScopesAllowed = await checkClientPermissions(clientId, requestedPermissions);
+  if (areScopesAllowed !== true) {
+    if (areScopesAllowed === false) {
+      sendMeilingError(rep, MeilingV1ErrorType.INTERNAL_SERVER_ERROR, 'Failed to get Access Control from Server.');
+      return;
+    } else {
+      const deniedScopes = areScopesAllowed.map((n) => n.name);
+      sendMeilingError(
+        rep,
+        MeilingV1ErrorType.APPLICATION_NOT_AUTHORIZED_SCOPES,
+        `the scope: (${deniedScopes.join(' ')}) is not authorized`,
+      );
+      return;
+    }
+  }
+
   // permission check agains already authorized application
-  let isUserAllowed = false;
+  let hasUserPassedPermissionCheck = false;
 
   if (userData?.authorizedApps) {
     // check user previously authenticated this app.
-    const userClient = userData.authorizedApps.find((n) => n.oAuthClientId === clientId);
+    const authorizedPermissions = await getUserAuthorizedPermissions(clientId, userData);
 
     // if authenticated.
-    if (userClient !== null) {
+    if (authorizedPermissions) {
       // check permissions
-      const authorizedPermissions = await prisma.permission.findMany({
-        where: {
-          OAuthClientAuthorization: userClient,
-        },
-      });
 
       const unAuthorizedPermissions = requestedPermissions.filter(
         (p) => authorizedPermissions.find((q) => q.name === (p as Permission).name) === null,
@@ -132,14 +145,14 @@ export async function meilingV1OAuthApplicationAuthCheckHandler(req: FastifyRequ
 
       // everything is authorized
       if (unAuthorizedPermissions.length === 0) {
-        isUserAllowed = true;
+        hasUserPassedPermissionCheck = true;
       }
     }
   }
 
-  if (!isUserAllowed) {
-    sendMeilingError(rep, MeilingV1ErrorType.APPLICATION_NOT_AUTHENTICATED);
-    return;
+  if (config.oauth2.skipAuthentication.includes(client.id)) {
+    // bypass user authentication
+    hasUserPassedPermissionCheck = true;
   }
 
   if (query.response_type === 'code') {
@@ -169,7 +182,7 @@ export async function meilingV1OAuthApplicationAuthCheckHandler(req: FastifyRequ
       return;
     }
 
-    if (isUserAllowed) {
+    if (hasUserPassedPermissionCheck) {
       // TODO: Generate Code
 
       const code = await authenticateClientAndGetResponseToken(
@@ -179,12 +192,17 @@ export async function meilingV1OAuthApplicationAuthCheckHandler(req: FastifyRequ
         requestedPermissions,
         true,
       );
+
+      rep.send({
+        code,
+      });
     } else {
-      sendMeilingError(rep, MeilingV1ErrorType.APPLICATION_NOT_AUTHENTICATED);
+      sendMeilingError(rep, MeilingV1ErrorType.APPLICATION_NOT_AUTHORIZED_BY_USER);
       return;
     }
     return;
   } else {
     sendMeilingError(rep, MeilingV1ErrorType.UNSUPPORTED_RESPONSE_TYPE);
+    return;
   }
 }

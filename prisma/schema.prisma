@@ -21,7 +21,6 @@ model User {
   profileUrl            String
 
   groups                Group[]
-  permissions           Permission[]
 
   ownedClients          OAuthClient[]
   authorizedClients     OAuthClientAuthorization[]
@@ -74,23 +73,16 @@ model Authorization {
 model Group {
   id                    String                        @id @default(uuid())
   name                  String
-  permissions           Permission[]
-}
-
-enum OAuthClientType {
-  PUBLIC
-  PRIVATE
 }
 
 model OAuthClient {
   id                    String                        @id @default(uuid())
-  type                  OAuthClientType
   name                  String
   image                 String
-  secrets               OAuthClientAuth[]
-  permissions           Permission[]
-  accessControls        OAuthClientAccessControls?
+  secrets               OAuthClientSecrets[]
+  accessControls        OAuthClientAccessControls
   redirectUris          OAuthClientRedirectUris[]
+  authorizations        OAuthClientAuthorization[]
   privacy               String
   terms                 String
   createdAt             DateTime                      @default(now())
@@ -103,11 +95,17 @@ model OAuthClientRedirectUris {
 
 model OAuthClientAccessControls {
   id                    String                        @id @default(uuid())
-  authorizedClients     User[]
+  userAccessControls    OAuthUserAccessControls?
+  permissions           Permission[]
+}
+
+model OAuthUserAccessControls {
+  id                    String                        @id @default(uuid())
+  authorizedUsers       User[]
   authorizedGroups      Group[]
 }
 
-model OAuthClientAuth {
+model OAuthClientSecrets {
   id                    String                        @id @default(uuid())
   secret                String
   issuer                User
@@ -125,6 +123,9 @@ model OAuthClientAuthorization {
 
 model Permission {
   name                  String                        @id
+  explanation           String?
+  accessControls        OAuthClientAccessControls[]
+  authorizations        OAuthClientAuthorization[]
 }
 
 model Policy {

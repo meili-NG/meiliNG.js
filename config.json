@@ -2,7 +2,8 @@
   "version": "0.0.1",
   "allowLogin": [
     "http://localhost:3000",
-    "https://meiling-dev.stella-it.com"
+    "https://meiling-dev.stella-it.com",
+    "https://appielogin.netlify.app"
   ],
   "invalidate": {
     "oauth": {
@@ -36,5 +37,10 @@
     }
   },
   "behindProxy": true,
-  "listeningPort": 8080
+  "listeningPort": 8080,
+  "oauth2": {
+    "skipAuthentication": [
+      "38e94511-3ec2-40fd-89cb-9be6281e9862"
+    ]
+  }
 }

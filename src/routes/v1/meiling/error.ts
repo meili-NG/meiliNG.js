@@ -28,7 +28,8 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
     case MeilingV1ErrorType.WRONG_PASSWORD:
     case MeilingV1ErrorType.SIGNIN_FAILED:
     case MeilingV1ErrorType.INVALID_SESSION:
-    case MeilingV1ErrorType.APPLICATION_NOT_AUTHENTICATED:
+    case MeilingV1ErrorType.APPLICATION_NOT_AUTHORIZED_BY_USER:
+    case MeilingV1ErrorType.APPLICATION_NOT_AUTHORIZED_SCOPES:
       return 401;
 
     case MeilingV1ErrorType.APPLICATION_NOT_FOUND:
@@ -44,6 +45,9 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
 
     case MeilingV1ErrorType.AUTHENTICATION_TIMEOUT:
       return 410;
+
+    case MeilingV1ErrorType.INTERNAL_SERVER_ERROR:
+      return 500;
 
     case MeilingV1ErrorType.NOT_IMPLEMENTED:
       return 501;

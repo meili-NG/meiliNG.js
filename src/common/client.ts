@@ -1,4 +1,5 @@
-import { OAuthClient, OAuthClientAuthorization, Permission, User } from '@prisma/client';
+import { OAuthClient, OAuthClientAccessControls, OAuthClientAuthorization, Permission, User } from '@prisma/client';
+import { group } from 'console';
 import { prisma } from '..';
 import { OAuth2QueryGrantType, OAuth2QueryResponseType } from '../routes/v1/oauth2/interfaces';
 import { generateToken } from './token';
@@ -27,39 +28,72 @@ export async function getOAuth2AuthorizationInfo(n: OAuthClientAuthorization) {
   };
 }
 
-export async function isClientAccessible(clientId: string, user: User | string): Promise<boolean> {
+export async function checkClientPermissions(
+  clientId: string,
+  permissions: Permission[],
+): Promise<boolean | Permission[]> {
+  const acl = await getClientAccessControls(clientId);
+  if (!acl) return false;
+
+  const allowedPermissions = await prisma.permission.findMany({
+    where: {
+      accessControls: {
+        some: {
+          id: acl.id,
+        },
+      },
+    },
+  });
+
+  const deniedPermissions = permissions.filter((p) => allowedPermissions.find((a) => a.name === p.name) === undefined);
+  if (deniedPermissions.length === 0) {
+    return true;
+  } else {
+    return deniedPermissions;
+  }
+}
+
+export async function getClientAccessControls(clientId: string) {
+  const client = await getOAuth2ClientByClientId(clientId);
+  if (!client) return;
+
+  const acl = await prisma.oAuthClientAccessControls.findFirst({
+    where: {
+      id: client.oAuthClientAccessControlsId,
+    },
+  });
+
+  return acl;
+}
+
+export async function checkClientAccessControlledUsers(
+  acl: OAuthClientAccessControls,
+  user: User | string,
+): Promise<boolean> {
+  // If no user access controls, it is free.
+  if (!acl.oAuthUserAccessControlsId) return true;
+
   const userObject = await getUserInfo(user);
   if (!userObject) return false;
 
-  const client = await getOAuth2ClientByClientId(clientId);
-  if (!client) return false;
+  const [users, groups] = await Promise.all([
+    prisma.user.findMany({
+      where: {
+        oAuthUserAccessControlsId: acl.oAuthUserAccessControlsId,
+      },
+    }),
+    prisma.group.findMany({
+      where: {
+        oAuthUserAccessControlsId: acl.oAuthUserAccessControlsId,
+      },
+    }),
+  ]);
 
-  if (client.type === 'PUBLIC') {
-    return true;
-  } else {
-    if (!client.oAuthClientAccessControlsId) {
-      return false;
-    } else {
-      const [users, groups] = await Promise.all([
-        prisma.user.findMany({
-          where: {
-            oAuthClientAccessControlsId: client.oAuthClientAccessControlsId,
-          },
-        }),
-        prisma.group.findMany({
-          where: {
-            oAuthClientAccessControlsId: client.oAuthClientAccessControlsId,
-          },
-        }),
-      ]);
+  const matchingUser = users.find((n) => n.id === userObject.id);
+  if (matchingUser) return true;
 
-      const user = users.find((n) => n.id === userObject.id);
-      if (user) return true;
-
-      const group = groups.find((n) => userObject.groups.find((m) => m.id === n.id));
-      if (group) return true;
-    }
-  }
+  const matchingGroup = groups.find((n) => userObject.groups.find((m) => m.id === n.id));
+  if (matchingGroup) return true;
 
   return false;
 }
@@ -79,21 +113,47 @@ export async function getClientRedirectUris(clientId: string) {
   return redirectUris;
 }
 
+export async function getClientAuthorizations(userTmp: string | User, clientId?: string) {
+  let returnData;
+
+  const user = await getUserInfo(userTmp);
+  if (!user) return;
+
+  const authorizations = await prisma.oAuthClientAuthorization.findMany({
+    where: {
+      userId: user.id,
+    },
+  });
+
+  if (clientId) {
+    returnData = authorizations.filter((n) => n.oAuthClientId === clientId);
+  } else {
+    returnData = authorizations;
+  }
+
+  return returnData.length > 0 ? returnData : undefined;
+}
+
 export async function getUserAuthorizedPermissions(
   clientId: string,
   userTmp: string | User,
 ): Promise<Permission[] | undefined> {
   const user = await getAllUserInfo(userTmp);
+  const clientAuthorizations = await getClientAuthorizations(userTmp, clientId);
 
-  if (user?.authorizedApps) {
-    const clientAuth = user.authorizedApps.find((n) => n.oAuthClientId === clientId);
+  if (clientAuthorizations) {
+    const clientAuth = clientAuthorizations.find((n) => n.id === clientId);
     if (!clientAuth) {
       return undefined;
     }
 
     const permissions = await prisma.permission.findMany({
       where: {
-        OAuthClientAuthorization: clientAuth,
+        authorizations: {
+          some: {
+            id: clientAuth.id,
+          },
+        },
       },
     });
 
@@ -139,13 +199,15 @@ export async function authenticateClientAndGetResponseToken(
   });
 
   let authorization: OAuthClientAuthorization;
-  if (userPermissions) {
-    const userAuthorization = user.authorizedApps.find((n) => n.oAuthClientId === clientId);
-    if (!userAuthorization) return;
+  const userAuthentications = await getClientAuthorizations(user, clientId);
 
-    authorization = await prisma.oAuthClientAuthorization.update({
+  if (userAuthentications) {
+    const userAuthentication = userAuthentications.find((n) => n.oAuthClientId === clientId);
+    if (!userAuthentication) return;
+
+    await prisma.oAuthClientAuthorization.update({
       where: {
-        id: userAuthorization.id,
+        id: userAuthentication.id,
       },
       data: {
         permissions: {
@@ -153,6 +215,8 @@ export async function authenticateClientAndGetResponseToken(
         },
       },
     });
+
+    authorization = userAuthentication;
   } else {
     authorization = await prisma.oAuthClientAuthorization.create({
       data: {

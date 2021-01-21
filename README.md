@@ -25,6 +25,11 @@
 
 <hr>
 
+<h1 align="center">Experimental Technology!</h1>
+<p align="center">This software is still in "beta" stage and VERSION 1 APIs are not finalized. Expect bugs.</p>
+
+<hr>
+
 ## Features
 The key featues of Meiling Engine are:
 * highly-configurable client authentication interface.  

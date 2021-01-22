@@ -7,7 +7,7 @@ export * as Token from './token';
 export * as User from './user';
 export * as Validate from './validate';
 
-export function isNotUndefinedOrNullOrBlank(...values: any[]): boolean {
+export function isNotUndefinedOrNullOrBlank(...values: unknown[]): boolean {
   let isValid = true;
   for (const value of values) {
     isValid = isValid && !(value === undefined || value === null || value === '');

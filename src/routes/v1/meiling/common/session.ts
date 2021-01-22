@@ -23,7 +23,7 @@ let tokenSessions: MeilingV1TokenDataFile = {
   issuedTokens: [],
 };
 
-export function loadSession() {
+export function loadSessionSaveFiles() {
   if (fs.existsSync(config.session.v1.dataPath)) {
     tokenSessions = JSON.parse(
       fs.readFileSync(config.session.v1.dataPath, { encoding: 'utf-8' }),

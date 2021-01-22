@@ -16,7 +16,7 @@ export const VERSION = packageJson.version;
 
 export const isDevelopment = env === 'development';
 
-MeilingV1Session.loadSession();
+MeilingV1Session.loadSessionSaveFiles();
 
 const app = fastify({
   logger: {

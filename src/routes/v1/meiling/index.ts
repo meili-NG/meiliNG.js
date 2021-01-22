@@ -1,13 +1,7 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import { config, isDevelopment } from '../../..';
 import { registerV1MeilingAppEndpoints } from './app';
-import {
-  createMeilingV1Token,
-  getMeilingV1Session,
-  getMeilingV1TokenFromRequest,
-  isMeilingV1Token,
-  setMeilingV1Session,
-} from './common';
+import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
 import { meilingV1SigninHandler } from './signin';
@@ -29,7 +23,7 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
 
       if (config.session.v1.debugTokens.includes(authToken)) {
         if (isDevelopment) {
-          rep.send(getMeilingV1Session(req));
+          rep.send(MeilingV1Session.getSessionFromRequest(req));
         } else {
           sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'unauthorized: not in development mode.');
         }
@@ -39,10 +33,10 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
       return;
     }
 
-    let token = getMeilingV1TokenFromRequest(req);
+    let token = MeilingV1Session.getTokenFromRequest(req);
 
     if (token) {
-      if (isMeilingV1Token(token)) {
+      if (MeilingV1Session.isToken(token)) {
         rep.send({
           success: true,
         });
@@ -54,7 +48,7 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
         return;
       }
     } else {
-      token = createMeilingV1Token(req);
+      token = MeilingV1Session.createToken(req);
       if (token) {
         rep.send({
           success: true,

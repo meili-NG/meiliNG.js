@@ -1,11 +1,11 @@
-import { User as UserModel, Permission, OAuthClientAuthorization, OAuthClient } from '@prisma/client';
+import { OAuthClient, OAuthClientAuthorization, Permission, User as UserModel } from '@prisma/client';
 import { ClientAuthorization, User } from '.';
 import { prisma } from '..';
 import { OAuth2QueryResponseType } from '../routes/v1/oauth2/interfaces';
 import { generateToken } from './token';
 import { getClientAuthorizations } from './user';
 
-export async function authenticateClientAndGetResponseToken(
+export async function getResponseToken(
   clientId: string,
   type: OAuth2QueryResponseType,
   userTmp: string | UserModel,

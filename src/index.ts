@@ -1,11 +1,10 @@
-import fastify, { FastifyReply, FastifyRequest } from 'fastify';
-import fs, { promises as fsNext } from 'fs';
 import { PrismaClient } from '@prisma/client';
-import { registerRootEndpoints } from './routes';
-import { Config } from './interface';
-import ChildProcess from 'child_process';
+import fastify from 'fastify';
 import fastifyCors from 'fastify-cors';
-import { loadMeilingV1SessionTokens } from './routes/v1/meiling/common';
+import fs from 'fs';
+import { Config } from './interface';
+import { registerRootEndpoints } from './routes';
+import { MeilingV1Session } from './routes/v1/meiling/common';
 
 const packageJson = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf-8' }));
 export const config = JSON.parse(fs.readFileSync('config.json', { encoding: 'utf-8' })) as Config;
@@ -17,7 +16,7 @@ export const VERSION = packageJson.version;
 
 export const isDevelopment = env === 'development';
 
-loadMeilingV1SessionTokens();
+MeilingV1Session.loadSession();
 
 const app = fastify({
   logger: {

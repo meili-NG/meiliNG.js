@@ -2,7 +2,14 @@ import { Permission } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { isMeilingV1UserActionPermitted, MeilingV1UserActionsParams } from '.';
 import { config, prisma } from '../../../../..';
-import { Client, ClientAccessControls, getUnique, isNotUndefinedOrNullOrBlank, User } from '../../../../../common';
+import {
+  Client,
+  ClientAccessControls,
+  getUnique,
+  isNotUndefinedOrNullOrBlank,
+  MeilingCommonOAuth2,
+  User,
+} from '../../../../../common';
 import { OAuth2QueryResponseType } from '../../../oauth2/interfaces';
 import { sendMeilingError } from '../../error';
 import { MeilingV1ErrorType } from '../../interfaces';
@@ -175,7 +182,7 @@ export async function meilingV1OAuthApplicationAuthCheckHandler(req: FastifyRequ
     if (hasUserPassedPermissionCheck) {
       // TODO: Generate Code
 
-      const code = await authenticateClientAndGetResponseToken(
+      const code = await MeilingCommonOAuth2.getResponseToken(
         clientId,
         query.response_type,
         userBase,

@@ -1,7 +1,6 @@
-import { OAuthClient } from '@prisma/client';
-import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { Client, ClientAccessControls, User } from '../../../common';
-import { getLoggedInMeilingV1Session } from './common';
+import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
 
@@ -18,7 +17,7 @@ export async function meilingV1AppHandler(req: FastifyRequest, rep: FastifyReply
   const params = req.params as MeilingV1AppParams;
   const clientId = params.clientId;
 
-  const users = await getLoggedInMeilingV1Session(req);
+  const users = await MeilingV1Session.getLoggedIn(req);
   if (users.length === 0) {
     sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
     return;

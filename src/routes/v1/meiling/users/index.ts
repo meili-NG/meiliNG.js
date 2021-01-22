@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { User } from '../../../../common';
-import { getLoggedInMeilingV1Session, getMeilingV1Session } from '../common';
+import { MeilingV1Session } from '../common';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
 import { registerV1MeilingUserActionsEndpoints } from './actions';
@@ -15,7 +15,7 @@ export function registerV1MeilingUserEndpoints(app: FastifyInstance, baseURI: st
 }
 
 export async function meilingV1UserInfoHandler(req: FastifyRequest, rep: FastifyReply) {
-  const session = await getMeilingV1Session(req);
+  const session = await MeilingV1Session.getSessionFromRequest(req);
   if (!session) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_SESSION);
     return;
@@ -35,7 +35,7 @@ export async function meilingV1UserInfoHandler(req: FastifyRequest, rep: Fastify
         return;
       }
     } else {
-      const users = await getLoggedInMeilingV1Session(req);
+      const users = await MeilingV1Session.getSessionFromRequest(req);
 
       rep.send(users);
       return;

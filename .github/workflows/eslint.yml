@@ -26,6 +26,14 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: Installing Yarn
       run: npm install -g yarn
+    - name: Cache Node Modules
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/cache
+          !~/cache/exclude
+          **/node_modules
+        key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
     - name: Installing dependencies
       run: yarn
     - name: Run Linting

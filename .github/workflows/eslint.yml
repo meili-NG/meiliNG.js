@@ -5,7 +5,8 @@ name: ESLint
 
 on:
   push:
-    branches: [ main ]
+    paths:
+      - "src/**/*.ts"
   pull_request:
     branches: [ main ]
 

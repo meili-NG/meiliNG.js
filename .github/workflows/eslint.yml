@@ -8,7 +8,8 @@ on:
     paths:
       - "src/**/*.ts"
   pull_request:
-    branches: [ main ]
+    paths:
+      - "src/**/*.ts"
 
 jobs:
   build:

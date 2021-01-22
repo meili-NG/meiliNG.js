@@ -1,30 +1,9 @@
-import { Authorization, User } from '@prisma/client';
+import { Authorization, User as UserModel } from '@prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { config } from '../../..';
-import {
-  findMatchingUsersByUsernameOrEmail,
-  getUserInfo,
-  getUserPlainInfo,
-  updateLastAuth,
-  updateLastSignIn,
-} from '../../../common/user';
-import {
-  generateChallengeV1,
-  getExtendedAuthenticationMethodsV1,
-  getDatabaseEquivalentFromAuthenticationV1,
-  getAuthenticationV1FromDatabaseEquivalent,
-  verifyChallengeV1,
-  shouldSendChallengeV1,
-  isThisChallengeMethodAdequateV1,
-} from './common';
-import {
-  checkPreviouslyLoggedinMeilingV1Session,
-  getMeilingV1Session,
-  loginMeilingV1Session,
-  setMeilingV1ExtendedAuthSession,
-  setMeilingV1ExtendedAuthSessionMethodAndChallenge,
-} from './common/session';
+import { User } from '../../../common';
+import { MeilingV1Challenge, MeilingV1Database, MeilingV1Session, MeilingV1User } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
 import {
@@ -38,12 +17,12 @@ function getMeilingAvailableAuthMethods(authMethods: Authorization[], body?: Mei
   const methods: MeilingV1ExtendedAuthMethods[] = [];
 
   for (const thisMethod of authMethods) {
-    const methodMeilingV1 = getAuthenticationV1FromDatabaseEquivalent(thisMethod.method);
+    const methodMeilingV1 = MeilingV1Database.convertAuthenticationMethod(thisMethod.method);
     if (methodMeilingV1 !== null) {
       let methodAllowed = true;
 
       if (body) {
-        methodAllowed = isThisChallengeMethodAdequateV1(body, methodMeilingV1);
+        methodAllowed = MeilingV1Challenge.isChallengeMethodAdequate(body, methodMeilingV1);
       }
 
       if (methodAllowed) {
@@ -58,7 +37,7 @@ function getMeilingAvailableAuthMethods(authMethods: Authorization[], body?: Mei
 }
 
 export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyReply) {
-  const session = await getMeilingV1Session(req);
+  const session = await MeilingV1Session.getSessionFromRequest(req);
   if (!session) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_SESSION);
     return;
@@ -77,7 +56,7 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
     }
   }
 
-  let userToLogin: User;
+  let userToLogin: UserModel;
   if (body.type === MeilingV1SigninType.USERNAME_CHECK) {
     const username = body?.data?.username;
 
@@ -86,10 +65,10 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
       return;
     }
 
-    const users = await findMatchingUsersByUsernameOrEmail(username);
+    const users = await User.findByCommonUsername(username);
 
-    if (users.length === 1 && (await checkPreviouslyLoggedinMeilingV1Session(req, users[0]))) {
-      const user = await getUserInfo(users[0]);
+    if (users.length === 1 && (await MeilingV1Session.getPreviouslyLoggedIn(req, users[0]))) {
+      const user = await User.getInfo(users[0]);
 
       if (user) {
         rep.send({
@@ -122,11 +101,11 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
       return;
     }
 
-    const users = await findMatchingUsersByUsernameOrEmail(username, password);
+    const authenticatedUsers = await User.findByPasswordLogin(username, password);
 
-    if (users.length === 1) {
-      userToLogin = users[0];
-    } else if (users.length > 1) {
+    if (authenticatedUsers.length === 1) {
+      userToLogin = authenticatedUsers[0];
+    } else if (authenticatedUsers.length > 1) {
       sendMeilingError(
         rep,
         MeilingV1ErrorType.MORE_THAN_ONE_USER_MATCHED,
@@ -134,8 +113,9 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
       );
       return;
     } else {
-      const tmpUsers = await findMatchingUsersByUsernameOrEmail(username);
-      if (tmpUsers.length > 0) {
+      const users = await User.findByCommonUsername(username);
+
+      if (users.length > 0) {
         sendMeilingError(rep, MeilingV1ErrorType.WRONG_PASSWORD, 'Wrong password.');
       } else {
         sendMeilingError(rep, MeilingV1ErrorType.WRONG_USERNAME, 'Wrong username.');
@@ -145,12 +125,12 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
 
     const user = userToLogin;
     if (user.useTwoFactor) {
-      const twoFactorMethods = await getExtendedAuthenticationMethodsV1(user, body.type);
+      const twoFactorMethods = await MeilingV1User.getAvailableExtendedAuthenticationMethods(user, body.type);
 
       if (twoFactorMethods.length > 0) {
         // set the session for two factor authentication
 
-        setMeilingV1ExtendedAuthSession(req, {
+        MeilingV1Session.setExtendedAuthentiationSession(req, {
           id: user.id,
           type: MeilingV1SigninType.TWO_FACTOR_AUTH,
         });
@@ -188,7 +168,7 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
         return;
       }
 
-      const user = await getUserPlainInfo(userId);
+      const user = await User.getBasicInfo(userId);
 
       if (user === null) {
         sendMeilingError(
@@ -199,12 +179,14 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
         return;
       }
 
-      authMethods.push(...(await getExtendedAuthenticationMethodsV1(user, body.type, signinMethod)));
+      authMethods.push(
+        ...(await MeilingV1User.getAvailableExtendedAuthenticationMethods(user, body.type, signinMethod)),
+      );
     } else if (body.type === MeilingV1SigninType.PASSWORDLESS) {
       const username = body?.context?.username;
 
       if (username !== undefined) {
-        const users = await findMatchingUsersByUsernameOrEmail(username);
+        const users = await User.findByCommonUsername(username);
 
         if (users.length === 0) {
           sendMeilingError(rep, MeilingV1ErrorType.WRONG_USERNAME, 'Wrong username.');
@@ -212,14 +194,16 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
         }
 
         for (const user of users) {
-          const thisMethods = await getExtendedAuthenticationMethodsV1(user, body.type);
+          const thisMethods = await MeilingV1User.getAvailableExtendedAuthenticationMethods(user, body.type);
           authMethods.push(...thisMethods);
         }
       } else {
-        authMethods.push(...(await getExtendedAuthenticationMethodsV1(undefined, body.type, signinMethod)));
+        authMethods.push(
+          ...(await MeilingV1User.getAvailableExtendedAuthenticationMethods(undefined, body.type, signinMethod)),
+        );
       }
 
-      setMeilingV1ExtendedAuthSession(req, {
+      MeilingV1Session.setExtendedAuthentiationSession(req, {
         type: MeilingV1SigninType.PASSWORDLESS,
       });
     }
@@ -235,7 +219,7 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
     }
 
     // check signinMethod is valid
-    if (getDatabaseEquivalentFromAuthenticationV1(signinMethod) === undefined) {
+    if (MeilingV1Database.convertAuthentication(signinMethod) === undefined) {
       sendMeilingError(rep, MeilingV1ErrorType.INVALID_SIGNIN_METHOD, 'invalid signin method: ' + signinMethod);
       return;
     }
@@ -250,13 +234,13 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
 
     // if challengeResponse is blank, it means you need a challenge that you defined.
     if (challengeResponse === undefined) {
-      const challenge = generateChallengeV1(signinMethod);
+      const challenge = MeilingV1Challenge.generateChallenge(signinMethod);
 
-      setMeilingV1ExtendedAuthSessionMethodAndChallenge(req, signinMethod, challenge);
+      MeilingV1Session.setExtendedAuthenticationSessionMethodAndChallenge(req, signinMethod, challenge);
 
       rep.send({
         type: body.type,
-        challenge: shouldSendChallengeV1(signinMethod) ? challenge : undefined,
+        challenge: MeilingV1Challenge.shouldSendChallenge(signinMethod) ? challenge : undefined,
       });
       return;
     }
@@ -300,7 +284,7 @@ please request this endpoint without challengeResponse field to request challeng
 
     // challenge value from session
     const challenge = extendedAuthSession.challenge;
-    const authorizedUsers: User[] = [];
+    const authorizedUsers: UserModel[] = [];
 
     if (challenge === undefined) {
       sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, `challenge is missing.`);
@@ -313,7 +297,7 @@ please request this endpoint without challengeResponse field to request challeng
     // authMethod
     for (const authMethod of authMethods) {
       // if authMethod is current authMethod:
-      if (getAuthenticationV1FromDatabaseEquivalent(authMethod.method) === signinMethod) {
+      if (MeilingV1Database.convertAuthenticationMethod(authMethod.method) === signinMethod) {
         // check database is not corrupted.
         if (authMethod.data !== null) {
           let data;
@@ -325,7 +309,9 @@ please request this endpoint without challengeResponse field to request challeng
 
           if (authMethod.userId !== null) {
             // add promise to array
-            authMethodCheckPromises.push(verifyChallengeV1(signinMethod, challenge, challengeResponse, data));
+            authMethodCheckPromises.push(
+              MeilingV1Challenge.verifyChallenge(signinMethod, challenge, challengeResponse, data),
+            );
             authMethodCheckUsers.push(authMethod.userId);
           }
         }
@@ -343,7 +329,7 @@ please request this endpoint without challengeResponse field to request challeng
 
       if (userId !== null) {
         if (authorizedUsers.filter((n) => n.id === userId).length === 0) {
-          const user = await getUserPlainInfo(userId);
+          const user = await User.getBasicInfo(userId);
           if (user !== null && user !== undefined) {
             authorizedUsers.push(user);
           }
@@ -369,11 +355,11 @@ please request this endpoint without challengeResponse field to request challeng
     return;
   }
 
-  await loginMeilingV1Session(req, userToLogin);
-  setMeilingV1ExtendedAuthSession(req, undefined);
+  await MeilingV1Session.login(req, userToLogin);
+  MeilingV1Session.setExtendedAuthentiationSession(req, undefined);
 
-  updateLastAuth(userToLogin);
-  updateLastSignIn(userToLogin);
+  User.updateLastAuthenticated(userToLogin);
+  User.updateLastSignIn(userToLogin);
 
   rep.status(200).send({
     success: true,

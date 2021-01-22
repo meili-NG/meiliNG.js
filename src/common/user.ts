@@ -1,27 +1,15 @@
-import {
-  User,
-  OAuthClientAuthorization,
-  OAuthClient,
-  Email,
-  Phone,
-  Authorization,
-  JsonObject,
-  AuthorizationMethod,
-  Group,
-} from '@prisma/client';
-import { prisma } from '../';
-import { getOAuth2ClientByClientId, getOAuth2AuthorizationInfo } from './client';
+import { Email, Group, OAuthClient, OAuthClientAuthorization, Phone, User as UserModel } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { generateToken } from './token';
-import { MeilingV1SigninType } from '../routes/v1/meiling/interfaces/query';
+import { ClientAuthorization, getUnique } from '.';
+import { prisma } from '../';
 
-export interface UserBaseObject extends User {
+export interface UserInfoObject extends UserModel {
   emails: Email[];
   phones: Phone[];
   groups: Group[];
 }
 
-export interface UserAllObject extends UserBaseObject {
+export interface UserDetailedObject extends UserInfoObject {
   authorizedApps: ClientAuthorizationObject[];
   createdApps: OAuthClient[];
 }
@@ -61,44 +49,41 @@ interface AuthorizationEmailSMSObject {
   type: 'EMAIL' | 'SMS';
 }
 
-export function runUserAction(user: User | string) {
-  let uuid;
-  if (typeof user === 'string') {
-    uuid = user;
-  } else {
-    uuid = user.id;
-  }
-
-  prisma.user.update({
+export function getUserId(user: UserModel | string) {
+  return typeof user === 'string' ? user : user.id;
+}
+export async function updateLastAuthenticated(user: UserModel | string) {
+  await prisma.user.update({
     where: {
-      id: uuid,
+      id: getUserId(user),
     },
     data: {
       lastAuthenticated: new Date(),
     },
   });
 }
-
-export async function getUserPlainInfo(user: User | string): Promise<User | undefined> {
-  let uuid;
-  if (typeof user === 'string') {
-    uuid = user;
-  } else {
-    uuid = user.id;
-  }
-
+export async function updateLastSignIn(user: UserModel | string) {
+  await prisma.user.update({
+    where: {
+      id: getUserId(user),
+    },
+    data: {
+      lastSignIn: new Date(),
+    },
+  });
+}
+export async function getBasicInfo(user: UserModel | string): Promise<UserModel | undefined> {
   const userDatabase = await prisma.user.findFirst({
     where: {
-      id: uuid,
+      id: getUserId(user),
     },
   });
   if (!userDatabase) return;
 
   return userDatabase;
 }
-
-export async function getUserInfo(user: User | string): Promise<UserBaseObject | undefined> {
-  const userDatabase = await getUserPlainInfo(user);
+export async function getInfo(user: UserModel | string): Promise<UserInfoObject | undefined> {
+  const userDatabase = await getBasicInfo(user);
   if (!userDatabase) return;
 
   const emailsPromise = prisma.email.findMany({
@@ -121,7 +106,7 @@ export async function getUserInfo(user: User | string): Promise<UserBaseObject |
 
   const [emails, phones, groups] = await Promise.all([emailsPromise, phonesPromise, groupsPromise]);
 
-  const userObj: UserBaseObject = {
+  const userObj: UserInfoObject = {
     ...userDatabase,
     emails,
     phones,
@@ -131,8 +116,8 @@ export async function getUserInfo(user: User | string): Promise<UserBaseObject |
   return userObj;
 }
 
-export async function getAllUserInfo(user: User | string): Promise<UserAllObject | undefined> {
-  const baseUser = await getUserInfo(user);
+export async function getDetailedInfo(user: UserModel | string): Promise<UserDetailedObject | undefined> {
+  const baseUser = await getInfo(user);
   if (!baseUser) return;
 
   const [authorizedAppsDatabase, createdAppsDatabase] = await Promise.all([
@@ -152,8 +137,8 @@ export async function getAllUserInfo(user: User | string): Promise<UserAllObject
   const authorizedAppPromises: Promise<any>[] = [];
   const createdAppPromises: Promise<any>[] = [];
 
-  authorizedAppsDatabase.map((n) => authorizedAppPromises.push(getOAuth2ClientByClientId(n.oAuthClientId)));
-  createdAppsDatabase.map((n) => createdAppPromises.push(getOAuth2AuthorizationInfo(n)));
+  authorizedAppsDatabase.map((n) => authorizedAppPromises.push(ClientAuthorization.getClient(n)));
+  createdAppsDatabase.map((n) => createdAppPromises.push(ClientAuthorization.getClient(n)));
 
   const [authorizedAppsPromisesPromise, createdAppsPromisesPromise] = await Promise.all([
     Promise.all(authorizedAppPromises),
@@ -170,7 +155,7 @@ export async function getAllUserInfo(user: User | string): Promise<UserAllObject
     createdApps.push(cratedApp);
   }
 
-  const userObj: UserAllObject = {
+  const userObj: UserDetailedObject = {
     ...baseUser,
     authorizedApps,
     createdApps,
@@ -179,116 +164,130 @@ export async function getAllUserInfo(user: User | string): Promise<UserAllObject
   return userObj;
 }
 
-export async function findMatchingUsersByUsernameOrEmail(username: string, password?: string): Promise<User[]> {
-  const auths = [];
-  const userIds = [];
+export async function getAuthorizations(user: UserModel | string) {
+  return await prisma.authorization.findMany({
+    where: {
+      userId: getUserId(user),
+    },
+  });
+}
 
-  const usersByUsername = await prisma.user.findMany({
+export async function getClientAuthorizations(user: UserModel | string, clientId?: string) {
+  let returnData;
+
+  const authorizations = await prisma.oAuthClientAuthorization.findMany({
+    where: {
+      userId: getUserId(user),
+    },
+  });
+
+  if (clientId) {
+    returnData = authorizations.filter((n) => n.oAuthClientId === clientId);
+  } else {
+    returnData = authorizations;
+  }
+
+  return returnData.length > 0 ? returnData : undefined;
+}
+
+export async function getClientAuthorizedPermissions(user: UserModel | string, clientId?: string) {
+  const permissions = [];
+
+  let authorizations = await prisma.oAuthClientAuthorization.findMany({
+    where: {
+      userId: getUserId(user),
+    },
+  });
+
+  if (clientId) {
+    authorizations = authorizations.filter((n) => n.oAuthClientId === clientId);
+  }
+
+  for (const authorization of authorizations) {
+    const authPermissions = await ClientAuthorization.getAuthorizedPermissions(authorization);
+    permissions.push(...authPermissions);
+  }
+
+  return getUnique(permissions, (a, b) => a.name === b.name);
+}
+
+export async function findByUsername(username: string): Promise<UserModel[]> {
+  return await prisma.user.findMany({
     where: {
       username,
     },
   });
+}
 
-  for (const user of usersByUsername) {
-    userIds.push(user.id);
-    auths.push(user);
-  }
-
-  const usersByEmail = await prisma.email.findMany({
+export async function findByEmail(email: string, verified: boolean | undefined = true): Promise<UserModel[]> {
+  const emails = await prisma.email.findMany({
     where: {
-      email: username,
-      verified: true,
+      email: email,
       allowUse: true,
+      verified,
     },
   });
 
-  const userPromisesByEmails = [];
+  const userPromises = emails
+    .map((n) =>
+      n.userId === undefined || n.userId === null
+        ? undefined
+        : prisma.user.findFirst({
+            where: {
+              id: n.userId,
+            },
+          }),
+    )
+    .filter((n) => n !== undefined && n !== null);
 
-  for (const email of usersByEmail) {
-    if (email.userId) {
-      if (!userIds.includes(email.userId)) {
-        const userPromise = prisma.user.findFirst({
-          where: {
-            id: email.userId,
-          },
-        });
+  const usersResult = await Promise.all(userPromises);
 
-        userPromisesByEmails.push(userPromise);
-      }
-    }
-  }
+  const users = getUnique(await Promise.all(usersResult), (m, n) => m?.id === n?.id).filter(
+    (n) => n !== undefined && n !== null,
+  ) as UserModel[];
 
-  const result = await Promise.all(userPromisesByEmails);
-  for (const user of result) {
-    if (user !== null) {
-      auths.push(user);
-    }
-  }
+  return users;
+}
+
+export async function findByCommonUsername(username: string): Promise<UserModel[]> {
+  const [resultUsername, resultEmail] = await Promise.all([findByUsername(username), findByEmail(username)]);
+  const users = [];
+
+  users.push(...resultUsername);
+  users.push(...resultEmail);
+
+  return users;
+}
+
+export async function findByPasswordLogin(username: string, password: string): Promise<UserModel[]> {
+  const resultsRaw = await findByCommonUsername(username);
+
+  const queryResults = getUnique(resultsRaw, (m, n) => m.id === n.id);
 
   const matchingUsers = [];
+  for (const query of queryResults) {
+    const authorizations = await getAuthorizations(query);
+    const passwordAuthorizations = authorizations.filter((n) => n.method === 'PASSWORD');
 
-  if (password !== undefined) {
-    for (const user of auths) {
-      const passwordData = await prisma.authorization.findMany({
-        where: {
-          userId: user.id,
-          method: 'PASSWORD',
-        },
-      });
+    let isMatch = false;
+    for (const passwordAuthorization of passwordAuthorizations) {
+      let passwordData = (passwordAuthorization.data as unknown) as AuthorizationPasswordObject;
+      if (typeof passwordData === 'string') {
+        passwordData = JSON.parse(passwordData) as AuthorizationPasswordObject;
+      }
 
-      for (const passwordDatum of passwordData) {
-        if (passwordDatum.data === null) continue;
+      const hash = passwordData.data.hash;
+      const result = await bcrypt.compare(password, hash);
 
-        let passwordDatumJSON;
-
-        if (typeof passwordDatum.data === 'string') {
-          passwordDatumJSON = JSON.parse(passwordDatum.data as string) as AuthorizationJSONObject;
-        } else {
-          passwordDatumJSON = (passwordDatum.data as unknown) as AuthorizationJSONObject;
-        }
-
-        if (passwordDatumJSON.type !== 'PASSWORD') continue;
-        const result = await bcrypt.compare(password, passwordDatumJSON.data.hash);
-
-        if (result) {
-          matchingUsers.push(user);
-          break;
-        }
+      if (result) {
+        isMatch = true;
       }
     }
-  } else {
-    matchingUsers.push(...auths);
+
+    if (isMatch) {
+      matchingUsers.push(query);
+    }
   }
 
   return matchingUsers;
-}
-
-export async function updateLastSignIn(userId: User | string) {
-  const user = await getUserPlainInfo(userId);
-
-  if (user) {
-    await prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        lastSignIn: new Date(),
-      },
-    });
-  }
-}
-
-export async function updateLastAuth(userId: User | string) {
-  const user = await getUserPlainInfo(userId);
-
-  if (user) {
-    await prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        lastAuthenticated: new Date(),
-      },
-    });
-  }
 }

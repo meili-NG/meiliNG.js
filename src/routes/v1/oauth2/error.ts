@@ -1,5 +1,5 @@
 import { FastifyReply } from 'fastify/types/reply';
-import { buildErrorCodeURL } from '../../../common';
+import { MeilingCommonError } from '../../../common';
 import { OAuth2ErrorResponseType } from './interfaces';
 
 export function sendOAuth2Error(
@@ -32,6 +32,6 @@ export function sendOAuth2Error(
   rep.status(statusCode).send({
     error,
     error_description: description,
-    url: buildErrorCodeURL(errorCode),
+    url: MeilingCommonError.buildErrorCodeURL(errorCode),
   });
 }

@@ -1,27 +1,27 @@
-import { generateToken } from '../../../../common';
-import { AuthorizationJSONObject, AuthorizationPGPSSHKeyObject, AuthorizationOTPObject } from '../../../../common/user';
-import { validatePGPSign, validateOTP } from '../../../../common/validate';
+import { Token } from '../../../../common';
+import { AuthorizationJSONObject, AuthorizationOTPObject, AuthorizationPGPSSHKeyObject } from '../../../../common/user';
+import { validateOTP, validatePGPSign } from '../../../../common/validate';
 import {
   MeilingV1ExtendedAuthMethods,
   MeilingV1SignInExtendedAuthentication,
   MeilingV1SigninType,
 } from '../interfaces/query';
 
-export function generateChallengeV1(signinMethod: MeilingV1ExtendedAuthMethods) {
+export function generateChallenge(signinMethod: MeilingV1ExtendedAuthMethods) {
   switch (signinMethod) {
     case MeilingV1ExtendedAuthMethods.PGP_SIGNATURE:
     case MeilingV1ExtendedAuthMethods.SECURITY_KEY:
-      return generateToken();
+      return Token.generateToken();
     case MeilingV1ExtendedAuthMethods.SMS:
     case MeilingV1ExtendedAuthMethods.EMAIL:
-      return generateToken(6, '0123456789');
+      return Token.generateToken(6, '0123456789');
     case MeilingV1ExtendedAuthMethods.OTP:
     default:
       return undefined;
   }
 }
 
-export function shouldSendChallengeV1(signinMethod: MeilingV1ExtendedAuthMethods) {
+export function shouldSendChallenge(signinMethod: MeilingV1ExtendedAuthMethods) {
   switch (signinMethod) {
     case MeilingV1ExtendedAuthMethods.PGP_SIGNATURE:
     case MeilingV1ExtendedAuthMethods.SECURITY_KEY:
@@ -35,7 +35,7 @@ export function shouldSendChallengeV1(signinMethod: MeilingV1ExtendedAuthMethods
   }
 }
 
-export function isThisChallengeMethodAdequateV1(
+export function isChallengeMethodAdequate(
   body: MeilingV1SignInExtendedAuthentication,
   method?: MeilingV1ExtendedAuthMethods,
 ): boolean {
@@ -69,7 +69,7 @@ export function isThisChallengeMethodAdequateV1(
   }
 }
 
-export async function verifyChallengeV1(
+export async function verifyChallenge(
   signinMethod: MeilingV1ExtendedAuthMethods,
   challenge: string | undefined,
   challengeResponse: any,

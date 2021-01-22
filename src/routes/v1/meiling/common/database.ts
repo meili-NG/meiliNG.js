@@ -1,10 +1,7 @@
-import { AuthorizationMethod, User, Authorization } from '@prisma/client';
-import { prisma } from '../../../..';
-import { MeilingV1ExtendedAuthMethods, MeilingV1SigninType } from '../interfaces/query';
+import { AuthorizationMethod } from '@prisma/client';
+import { MeilingV1ExtendedAuthMethods } from '../interfaces/query';
 
-export function getDatabaseEquivalentFromAuthenticationV1(
-  method?: MeilingV1ExtendedAuthMethods,
-): AuthorizationMethod | undefined {
+export function convertAuthentication(method?: MeilingV1ExtendedAuthMethods): AuthorizationMethod | undefined {
   switch (method) {
     case MeilingV1ExtendedAuthMethods.SMS:
       return 'SMS';
@@ -21,9 +18,7 @@ export function getDatabaseEquivalentFromAuthenticationV1(
   }
 }
 
-export function getAuthenticationV1FromDatabaseEquivalent(
-  method: AuthorizationMethod,
-): MeilingV1ExtendedAuthMethods | null {
+export function convertAuthenticationMethod(method: AuthorizationMethod): MeilingV1ExtendedAuthMethods | null {
   switch (method) {
     case 'EMAIL':
       return MeilingV1ExtendedAuthMethods.EMAIL;
@@ -38,43 +33,4 @@ export function getAuthenticationV1FromDatabaseEquivalent(
     default:
       return null;
   }
-}
-
-export async function getExtendedAuthenticationMethodsV1(
-  user?: User | string,
-  signinType?: MeilingV1SigninType,
-  signinMethod?: MeilingV1ExtendedAuthMethods,
-): Promise<Authorization[]> {
-  let uuid;
-  if (user !== undefined) {
-    if (typeof user === 'string') {
-      uuid = user;
-    } else {
-      uuid = user.id;
-    }
-  } else {
-    uuid = undefined;
-  }
-
-  let auths;
-
-  if (signinType !== undefined) {
-    auths = await prisma.authorization.findMany({
-      where: {
-        userId: uuid,
-        allowSingleFactor: signinType === MeilingV1SigninType.PASSWORDLESS ? true : undefined,
-        allowTwoFactor: signinType === MeilingV1SigninType.TWO_FACTOR_AUTH ? true : undefined,
-        method: signinMethod !== undefined ? getDatabaseEquivalentFromAuthenticationV1(signinMethod) : undefined,
-      },
-    });
-  } else {
-    auths = await prisma.authorization.findMany({
-      where: {
-        userId: uuid,
-        method: signinMethod !== undefined ? getDatabaseEquivalentFromAuthenticationV1(signinMethod) : undefined,
-      },
-    });
-  }
-
-  return auths;
 }

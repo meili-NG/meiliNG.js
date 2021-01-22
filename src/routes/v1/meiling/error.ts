@@ -1,5 +1,5 @@
 import { FastifyReply } from 'fastify/types/reply';
-import { buildErrorCodeURL } from '../../../common';
+import { MeilingCommonError } from '../../../common';
 import { MeilingV1ErrorResponse, MeilingV1ErrorType } from './interfaces';
 
 function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
@@ -65,6 +65,6 @@ export function sendMeilingError(rep: FastifyReply, type: MeilingV1ErrorType, de
     type,
     description,
     code,
-    url: buildErrorCodeURL(code),
+    url: MeilingCommonError.buildErrorCodeURL(code),
   } as MeilingV1ErrorResponse);
 }

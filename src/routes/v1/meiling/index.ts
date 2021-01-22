@@ -1,6 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { config, isDevelopment } from '../../..';
-import { findMatchingUsersByUsernameOrEmail } from '../../../common/user';
 import { registerV1MeilingAppEndpoints } from './app';
 import {
   createMeilingV1Token,

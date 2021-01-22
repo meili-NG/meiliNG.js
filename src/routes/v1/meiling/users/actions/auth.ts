@@ -1,19 +1,9 @@
 import { Permission } from '@prisma/client';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { isMeilingV1UserActionPermitted, MeilingV1UserActionsParams } from '.';
 import { config, prisma } from '../../../../..';
-import { getBooleanFromString, getUnique, isNotUndefinedOrNullOrBlank } from '../../../../../common';
-import {
-  authenticateClientAndGetResponseToken,
-  checkClientAccessControlledUsers,
-  checkClientPermissions,
-  getClientAccessControls,
-  getClientRedirectUris,
-  getOAuth2ClientByClientId,
-  getUserAuthorizedPermissions,
-} from '../../../../../common/client';
-import { getAllUserInfo } from '../../../../../common/user';
-import { OAuth2QueryAccessType, OAuth2QueryResponseType } from '../../../oauth2/interfaces';
+import { Client, ClientAccessControls, getUnique, isNotUndefinedOrNullOrBlank, User } from '../../../../../common';
+import { OAuth2QueryResponseType } from '../../../oauth2/interfaces';
 import { sendMeilingError } from '../../error';
 import { MeilingV1ErrorType } from '../../interfaces';
 
@@ -53,11 +43,11 @@ export async function meilingV1OAuthApplicationAuthCheckHandler(req: FastifyRequ
   }
 
   // get userData of selected user
-  const userData = await getAllUserInfo(userBase);
+  const userData = await User.getDetailedInfo(userBase);
 
   // get client via clientId.
   const clientId = query.client_id;
-  const client = await getOAuth2ClientByClientId(clientId);
+  const client = await Client.getByClientId(clientId);
   if (client === null) {
     sendMeilingError(
       rep,
@@ -68,14 +58,14 @@ export async function meilingV1OAuthApplicationAuthCheckHandler(req: FastifyRequ
   }
 
   // load access control
-  const acl = await getClientAccessControls(clientId);
+  const acl = await Client.getAccessControl(clientId);
   if (!acl) {
     sendMeilingError(rep, MeilingV1ErrorType.INTERNAL_SERVER_ERROR, 'Failed to get Access Control from Server.');
     return;
   }
 
   // is this user able to pass client check
-  const clientPrivateCheck = await checkClientAccessControlledUsers(acl, userBase);
+  const clientPrivateCheck = await ClientAccessControls.checkUsers(acl, userBase);
   if (!clientPrivateCheck) {
     sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'specified oAuth2 application is inaccessible');
     return;
@@ -112,7 +102,7 @@ export async function meilingV1OAuthApplicationAuthCheckHandler(req: FastifyRequ
     return;
   }
 
-  const areScopesAllowed = await checkClientPermissions(clientId, requestedPermissions);
+  const areScopesAllowed = await ClientAccessControls.checkPermissions(acl, requestedPermissions);
   if (areScopesAllowed !== true) {
     if (areScopesAllowed === false) {
       sendMeilingError(rep, MeilingV1ErrorType.INTERNAL_SERVER_ERROR, 'Failed to get Access Control from Server.');
@@ -133,7 +123,7 @@ export async function meilingV1OAuthApplicationAuthCheckHandler(req: FastifyRequ
 
   if (userData?.authorizedApps) {
     // check user previously authenticated this app.
-    const authorizedPermissions = await getUserAuthorizedPermissions(clientId, userData);
+    const authorizedPermissions = await User.getClientAuthorizedPermissions(userData, clientId);
 
     // if authenticated.
     if (authorizedPermissions) {
@@ -157,7 +147,7 @@ export async function meilingV1OAuthApplicationAuthCheckHandler(req: FastifyRequ
 
   if (query.response_type === 'code') {
     // check for redirectUris
-    const redirectUris = await getClientRedirectUris(clientId);
+    const redirectUris = await Client.getRedirectUris(clientId);
     const redirectURL = new URL(query.redirect_uri);
 
     const adequateRedirectUris = redirectUris.filter((n) => {

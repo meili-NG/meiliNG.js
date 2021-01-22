@@ -1,13 +1,6 @@
 import { OAuthClient } from '@prisma/client';
 import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
-import {
-  checkClientAccessControlledUsers,
-  getClientAccessControls,
-  getOAuth2AuthorizationInfo,
-  getOAuth2ClientByClientId,
-  sanitizeClient,
-} from '../../../common/client';
-import { getAllUserInfo } from '../../../common/user';
+import { Client, ClientAccessControls, User } from '../../../common';
 import { getLoggedInMeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
@@ -32,8 +25,8 @@ export async function meilingV1AppHandler(req: FastifyRequest, rep: FastifyReply
   }
 
   if (clientId) {
-    const client = await getOAuth2ClientByClientId(clientId);
-    const acl = await getClientAccessControls(clientId);
+    const client = await Client.getByClientId(clientId);
+    const acl = await Client.getAccessControl(clientId);
     if (!client || !acl) {
       sendMeilingError(rep, MeilingV1ErrorType.APPLICATION_NOT_FOUND);
       return;
@@ -41,7 +34,7 @@ export async function meilingV1AppHandler(req: FastifyRequest, rep: FastifyReply
 
     let shouldShow = false;
     for (const user of users) {
-      shouldShow = shouldShow || (await checkClientAccessControlledUsers(acl, user.id));
+      shouldShow = shouldShow || (await ClientAccessControls.checkUsers(acl, user.id));
     }
 
     if (!shouldShow) {
@@ -49,17 +42,17 @@ export async function meilingV1AppHandler(req: FastifyRequest, rep: FastifyReply
       return;
     }
 
-    rep.send(sanitizeClient(client));
+    rep.send(Client.sanitize(client));
     return;
   } else {
     const clients = [];
     for (const user of users) {
-      const userClient = await getAllUserInfo(user);
+      const userClient = await User.getDetailedInfo(user);
 
       if (userClient?.authorizedApps) {
         for (const myApp of userClient.authorizedApps) {
           if (clients.filter((client) => client.id === myApp.client.id).length === 0) {
-            clients.push(sanitizeClient(myApp.client));
+            clients.push(Client.sanitize(myApp.client));
           }
         }
       }

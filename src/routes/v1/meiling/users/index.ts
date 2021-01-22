@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
-import { getAllUserInfo } from '../../../../common/user';
+import { User } from '../../../../common';
 import { getLoggedInMeilingV1Session, getMeilingV1Session } from '../common';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
@@ -29,7 +29,7 @@ export async function meilingV1UserInfoHandler(req: FastifyRequest, rep: Fastify
       const users = userRawSession.filter((n) => n.id === userId);
 
       if (users.length === 1) {
-        const user = await getAllUserInfo(users[0].id);
+        const user = await User.getDetailedInfo(users[0].id);
 
         rep.send(user);
         return;

@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
-import { UserBaseObject } from '../../../../../common/user';
+import { User } from '../../../../../common';
 import { getLoggedInMeilingV1Session } from '../../common';
 import { meilingV1OAuthApplicationAuthCheckHandler } from './auth';
 
@@ -14,7 +14,9 @@ export function registerV1MeilingUserActionsEndpoints(app: FastifyInstance, base
   app.get(baseURI + '/auth', meilingV1OAuthApplicationAuthCheckHandler);
 }
 
-export async function isMeilingV1UserActionPermitted(req: FastifyRequest): Promise<UserBaseObject | undefined | null> {
+export async function isMeilingV1UserActionPermitted(
+  req: FastifyRequest,
+): Promise<User.UserInfoObject | undefined | null> {
   const users = await getLoggedInMeilingV1Session(req);
   const userId = (req.params as { userId: string }).userId;
 

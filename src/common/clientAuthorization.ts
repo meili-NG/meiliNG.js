@@ -2,16 +2,40 @@ import { OAuthClientAuthorization, OAuthTokenType } from '@prisma/client';
 import { Token } from '.';
 import { prisma } from '..';
 
-export async function getClient(authorization: OAuthClientAuthorization) {
+export function getId(authorization: OAuthClientAuthorization | string) {
+  if (typeof authorization === 'string') {
+    return authorization;
+  }
+  return authorization.id;
+}
+
+export async function getById(authorization: OAuthClientAuthorization | string) {
+  if (typeof authorization === 'string') {
+    const tmpAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+      where: {
+        id: getId(authorization),
+      },
+    });
+
+    if (tmpAuthorization) authorization = tmpAuthorization;
+    else return;
+  }
+
+  return authorization;
+}
+
+export async function getClient(authorization: OAuthClientAuthorization | string) {
   const client = await prisma.oAuthClient.findFirst({
     where: {
-      id: authorization.oAuthClientId,
+      id: getId(authorization),
     },
   });
 
+  const tmpAuthorization = await getById(authorization);
+
   return {
     client,
-    ...authorization,
+    ...tmpAuthorization,
   };
 }
 
@@ -36,6 +60,8 @@ export async function createToken(
     },
   });
 
+  updateLastUpdated(authorization);
+
   return token;
 }
 
@@ -51,4 +77,15 @@ export async function getAuthorizedPermissions(authorization: OAuthClientAuthori
   });
 
   return permissions;
+}
+
+export async function updateLastUpdated(authorization: OAuthClientAuthorization | string) {
+  await prisma.oAuthClientAuthorization.update({
+    where: {
+      id: getId(authorization),
+    },
+    data: {
+      lastUpdatedAt: new Date(),
+    },
+  });
 }

@@ -130,6 +130,16 @@ export function getSessionFromRequest(req: FastifyRequest): MeilingV1Session | u
     data = undefined;
   }
 
+  if (data !== undefined) {
+    if (data.user) {
+      const userPromises = [];
+      for (const user of data.user) {
+        // not async function since we don't need to wait it to complete.
+        User.updateLastAuthenticated(user.id);
+      }
+    }
+  }
+
   saveSession();
 
   return data;

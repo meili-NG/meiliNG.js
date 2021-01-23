@@ -1,6 +1,6 @@
 import { InputJsonObject, OAuthTokenType } from '@prisma/client';
 import crypto from 'crypto';
-import { Token, Utils } from '.';
+import { ClientAuthorization, Token, Utils } from '.';
 import { config, prisma } from '..';
 
 export type TokenMetadata = TokenMetadataBlank | TokenMetadataV1;
@@ -43,6 +43,10 @@ export async function getData(token: string, type?: OAuthTokenType) {
       type,
     },
   });
+
+  if (tokenData) {
+    await ClientAuthorization.updateLastUpdated(tokenData.oAuthClientAuthorizationId);
+  }
 
   return tokenData ? tokenData : undefined;
 }

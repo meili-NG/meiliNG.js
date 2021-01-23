@@ -25,7 +25,7 @@
 
 <hr>
 
-<h1 align="center">Experimental Technology!</h1>
+<h2 align="center">Experimental Technology!</h2>
 <p align="center">This software is still in "beta" stage and VERSION 1 APIs are not finalized. Expect bugs.</p>
 
 <hr>

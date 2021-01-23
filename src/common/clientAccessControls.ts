@@ -1,6 +1,6 @@
-import { OAuthClientAccessControls, Permission, User as UserModel, Group } from '@prisma/client';
-import { prisma } from '..';
+import { Group, OAuthClientAccessControls, Permission, User as UserModel } from '@prisma/client';
 import { Client, User } from '.';
+import { prisma } from '..';
 
 export async function getByClientId(clientId: string) {
   return await Client.getAccessControl(clientId);

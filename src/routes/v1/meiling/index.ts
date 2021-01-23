@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { config, isDevelopment } from '../../..';
-import { registerV1MeilingAppEndpoints } from './app';
+import { registerV1MeilingAppsEndpoints } from './app';
 import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
@@ -72,5 +72,5 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
   });
 
   registerV1MeilingUserEndpoints(app, baseURI + '/users');
-  registerV1MeilingAppEndpoints(app, baseURI + '/apps');
+  registerV1MeilingAppsEndpoints(app, baseURI + '/apps');
 }

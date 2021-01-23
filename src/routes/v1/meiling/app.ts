@@ -8,7 +8,7 @@ interface MeilingV1AppParams {
   clientId?: string;
 }
 
-export function registerV1MeilingAppEndpoints(app: FastifyInstance, baseURI: string) {
+export function registerV1MeilingAppsEndpoints(app: FastifyInstance, baseURI: string) {
   app.get(baseURI, meilingV1AppHandler);
   app.get(baseURI + '/:clientId', meilingV1AppHandler);
 }

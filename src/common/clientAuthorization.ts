@@ -25,18 +25,16 @@ export async function getById(authorization: OAuthClientAuthorization | string) 
 }
 
 export async function getClient(authorization: OAuthClientAuthorization | string) {
+  const tmpAuthorization = await getById(authorization);
+  if (!tmpAuthorization) return;
+
   const client = await prisma.oAuthClient.findFirst({
     where: {
-      id: getId(authorization),
+      id: tmpAuthorization.oAuthClientId,
     },
   });
 
-  const tmpAuthorization = await getById(authorization);
-
-  return {
-    client,
-    ...tmpAuthorization,
-  };
+  return client;
 }
 
 export async function createToken(

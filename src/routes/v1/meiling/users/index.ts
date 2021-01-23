@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { User } from '../../../../common';
+import { sanitizeClient } from '../../../../common/oauth2';
 import { MeilingV1Session } from '../common';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
@@ -30,6 +31,19 @@ export async function meilingV1UserInfoHandler(req: FastifyRequest, rep: Fastify
 
       if (users.length === 1) {
         const user = await User.getDetailedInfo(users[0].id);
+
+        // fix any later
+        if (user?.authorizedApps) {
+          for (let i = 0; i < user.authorizedApps.length; i++) {
+            user.authorizedApps[i] = sanitizeClient(user.authorizedApps[i] as any) as any;
+          }
+        }
+
+        if (user?.createdApps) {
+          for (let i = 0; i < user.createdApps.length; i++) {
+            user.createdApps[i] = sanitizeClient(user.createdApps[i] as any) as any;
+          }
+        }
 
         rep.send(user);
         return;

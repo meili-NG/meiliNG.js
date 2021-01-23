@@ -145,8 +145,8 @@ export async function getDetailedInfo(user: UserModel | string): Promise<UserDet
     Promise.all(createdAppPromises),
   ]);
 
-  const authorizedApps = [];
-  const createdApps = [];
+  let authorizedApps = [];
+  let createdApps = [];
 
   for (const authorizedApp of await authorizedAppsPromisesPromise) {
     authorizedApps.push(authorizedApp);
@@ -154,6 +154,9 @@ export async function getDetailedInfo(user: UserModel | string): Promise<UserDet
   for (const cratedApp of await createdAppsPromisesPromise) {
     createdApps.push(cratedApp);
   }
+
+  authorizedApps = Utils.getUnique(authorizedApps, (m, n) => m.id === n.id);
+  createdApps = Utils.getUnique(createdApps, (m, n) => m.id === n.id);
 
   const userObj: UserDetailedObject = {
     ...baseUser,

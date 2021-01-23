@@ -1,9 +1,9 @@
 import {
-  OAuth2QueryResponseType,
   OAuth2QueryAccessType,
   OAuth2QueryBoolean,
-  OAuth2QueryPrompt,
   OAuth2QueryGrantType,
+  OAuth2QueryPrompt,
+  OAuth2QueryResponseType,
 } from './type';
 
 export interface OAuth2QueryBaseParameters {
@@ -50,13 +50,13 @@ export interface OAuth2QueryTokenBaseParameters extends OAuth2QueryAuthClientPar
 }
 
 export interface OAuth2QueryTokenAuthorizationCodeParameters extends OAuth2QueryTokenBaseParameters {
-  grant_type: 'authorization_code';
+  grant_type: OAuth2QueryGrantType.AUTHORIZATION_CODE;
   code: string;
   redirect_uri: string;
 }
 
 export interface OAuth2QueryTokenRefreshTokenParameters extends OAuth2QueryTokenBaseParameters {
-  grant_type: 'refresh_token';
+  grant_type: OAuth2QueryGrantType.REFRESH_TOKEN;
   refresh_token: string;
 }
 

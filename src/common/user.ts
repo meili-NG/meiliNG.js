@@ -1,6 +1,6 @@
 import { Email, Group, OAuthClient, OAuthClientAuthorization, Phone, User as UserModel } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { ClientAuthorization, getUnique } from '.';
+import { ClientAuthorization, Utils } from '.';
 import { prisma } from '../';
 
 export interface UserInfoObject extends UserModel {
@@ -172,6 +172,10 @@ export async function getAuthorizations(user: UserModel | string) {
   });
 }
 
+export async function hasAuthorizedClient(user: UserModel | string, clientId: string) {
+  return (await getClientAuthorizations(user, clientId)) !== undefined;
+}
+
 export async function getClientAuthorizations(user: UserModel | string, clientId?: string) {
   let returnData;
 
@@ -208,7 +212,7 @@ export async function getClientAuthorizedPermissions(user: UserModel | string, c
     permissions.push(...authPermissions);
   }
 
-  return getUnique(permissions, (a, b) => a.name === b.name);
+  return Utils.getUnique(permissions, (a, b) => a.name === b.name);
 }
 
 export async function findByUsername(username: string): Promise<UserModel[]> {
@@ -242,7 +246,7 @@ export async function findByEmail(email: string, verified: boolean | undefined =
 
   const usersResult = await Promise.all(userPromises);
 
-  const users = getUnique(await Promise.all(usersResult), (m, n) => m?.id === n?.id).filter(
+  const users = Utils.getUnique(await Promise.all(usersResult), (m, n) => m?.id === n?.id).filter(
     (n) => n !== undefined && n !== null,
   ) as UserModel[];
 
@@ -262,7 +266,7 @@ export async function findByCommonUsername(username: string): Promise<UserModel[
 export async function findByPasswordLogin(username: string, password: string): Promise<UserModel[]> {
   const resultsRaw = await findByCommonUsername(username);
 
-  const queryResults = getUnique(resultsRaw, (m, n) => m.id === n.id);
+  const queryResults = Utils.getUnique(resultsRaw, (m, n) => m.id === n.id);
 
   const matchingUsers = [];
   for (const query of queryResults) {
@@ -271,10 +275,7 @@ export async function findByPasswordLogin(username: string, password: string): P
 
     let isMatch = false;
     for (const passwordAuthorization of passwordAuthorizations) {
-      let passwordData = (passwordAuthorization.data as unknown) as AuthorizationPasswordObject;
-      if (typeof passwordData === 'string') {
-        passwordData = JSON.parse(passwordData) as AuthorizationPasswordObject;
-      }
+      const passwordData = Utils.convertJsonIfNot<AuthorizationPasswordObject>(passwordAuthorization.data);
 
       const hash = passwordData.data.hash;
       const result = await bcrypt.compare(password, hash);

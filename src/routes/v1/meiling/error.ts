@@ -41,6 +41,7 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
       return 405;
 
     case MeilingV1ErrorType.MORE_THAN_ONE_USER_MATCHED:
+    case MeilingV1ErrorType.APPLICATION_USER_ACTION_REQUIRED:
       return 409;
 
     case MeilingV1ErrorType.AUTHENTICATION_TIMEOUT:

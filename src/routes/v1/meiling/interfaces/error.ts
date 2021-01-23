@@ -23,6 +23,7 @@ export enum MeilingV1ErrorType {
   APPLICATION_REDIRECT_URI_INVALID = 'application_redirect_uri_invalid',
   APPLICATION_NOT_AUTHORIZED_BY_USER = 'application_not_authorized_by_user',
   APPLICATION_NOT_AUTHORIZED_SCOPES = 'application_not_authorized_scopes',
+  APPLICATION_USER_ACTION_REQUIRED = 'application_user_action_required',
   INTERNAL_SERVER_ERROR = 'internal_server_error',
 }
 

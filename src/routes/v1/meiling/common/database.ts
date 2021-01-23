@@ -1,4 +1,5 @@
-import { AuthorizationMethod } from '@prisma/client';
+import { AuthorizationMethod, OAuthTokenType } from '@prisma/client';
+import { OAuth2QueryGrantType } from '../../oauth2/interfaces';
 import { MeilingV1ExtendedAuthMethods } from '../interfaces/query';
 
 export function convertAuthentication(method?: MeilingV1ExtendedAuthMethods): AuthorizationMethod | undefined {
@@ -32,5 +33,18 @@ export function convertAuthenticationMethod(method: AuthorizationMethod): Meilin
       return MeilingV1ExtendedAuthMethods.SMS;
     default:
       return null;
+  }
+}
+
+export function convertTokenType(type?: OAuth2QueryGrantType): OAuthTokenType | undefined {
+  switch (type?.toLowerCase()) {
+    case OAuth2QueryGrantType.ACCESS_TOKEN:
+      return 'ACCESS_TOKEN';
+    case OAuth2QueryGrantType.REFRESH_TOKEN:
+      return 'REFRESH_TOKEN';
+    case OAuth2QueryGrantType.AUTHORIZATION_CODE:
+      return 'AUTHORIZATION_CODE';
+    default:
+      return undefined;
   }
 }

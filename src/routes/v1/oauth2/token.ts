@@ -1,9 +1,9 @@
-import { OAuthToken, OAuthClientAuthorization, OAuthTokenType } from '@prisma/client';
+import { OAuthClientAuthorization, OAuthToken, OAuthTokenType } from '@prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { config, prisma } from '../../..';
-import { OAuth2ErrorResponseType, OAuth2QueryTokenParameters } from './interfaces';
 import { sendOAuth2Error } from './error';
+import { OAuth2ErrorResponseType, OAuth2QueryGrantType, OAuth2QueryTokenParameters } from './interfaces';
 
 export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply) {
   const query = req.query as OAuth2QueryTokenParameters;
@@ -27,7 +27,7 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
   let token: OAuthToken | null = null;
   let oAuthAuthorization: OAuthClientAuthorization | null = null;
 
-  if (query.grant_type === 'authorization_code') {
+  if (query.grant_type === OAuth2QueryGrantType.AUTHORIZATION_CODE) {
     const code = query.code;
     token = await prisma.oAuthToken.findFirst({
       where: {
@@ -55,7 +55,7 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
         return;
       }
     }
-  } else if (query.grant_type === 'refresh_token') {
+  } else if (query.grant_type === OAuth2QueryGrantType.REFRESH_TOKEN) {
     const refreshToken = query.refresh_token;
     token = await prisma.oAuthToken.findFirst({
       where: {

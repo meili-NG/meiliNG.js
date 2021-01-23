@@ -2,7 +2,8 @@ import { Authorization, User as UserModel } from '@prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { config } from '../../..';
-import { User } from '../../../common';
+import { User, Utils } from '../../../common';
+import { AuthorizationJSONObject } from '../../../common/user';
 import { MeilingV1Challenge, MeilingV1Database, MeilingV1Session, MeilingV1User } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
@@ -45,15 +46,11 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
 
   let body;
 
-  if (typeof req.body !== 'string') {
-    body = req.body as MeilingV1SignInBody;
-  } else {
-    try {
-      body = JSON.parse(req.body) as MeilingV1SignInBody;
-    } catch (e) {
-      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'body is not a valid JSON.');
-      return;
-    }
+  try {
+    body = Utils.convertJsonIfNot<MeilingV1SignInBody>(req.body);
+  } catch (e) {
+    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'body is not a valid JSON.');
+    return;
   }
 
   let userToLogin: UserModel;
@@ -300,12 +297,7 @@ please request this endpoint without challengeResponse field to request challeng
       if (MeilingV1Database.convertAuthenticationMethod(authMethod.method) === signinMethod) {
         // check database is not corrupted.
         if (authMethod.data !== null) {
-          let data;
-          if (typeof data === 'string') {
-            data = JSON.parse(authMethod.data as string);
-          } else {
-            data = authMethod.data;
-          }
+          const data = Utils.convertJsonIfNot<AuthorizationJSONObject>(authMethod.data);
 
           if (authMethod.userId !== null) {
             // add promise to array

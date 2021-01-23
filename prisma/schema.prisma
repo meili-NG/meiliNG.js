@@ -41,13 +41,13 @@ model Email {
   addedAt               DateTime                      @default(now())
   verified              Boolean                       @default(false)
   allowUse              Boolean                       @default(true)
-  isPrimary             Boolean                       @default(true)
+  isPrimary             Boolean                       @default(false)
 }
 
 model Phone {
   id                    String                        @id @default(uuid())
   phone                 String
-  isPrimary             Boolean                       @default(true)
+  isPrimary             Boolean                       @default(false)
   addedAt               DateTime                      @default(now())
 }
 

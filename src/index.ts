@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import fastify from 'fastify';
 import fastifyCors from 'fastify-cors';
+import fastifyFormbody from 'fastify-formbody';
 import fs from 'fs';
 import { Config } from './interface';
 import { registerRootEndpoints } from './routes';
@@ -32,6 +33,8 @@ app.register(fastifyCors, {
       }
     : config.allowLogin,
 });
+
+app.register(fastifyFormbody);
 
 (async () => {
   try {

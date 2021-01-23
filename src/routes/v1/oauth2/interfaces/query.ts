@@ -25,7 +25,7 @@ export interface OAuth2QueryAuthParameters extends OAuth2QueryBaseParameters {
   prompt?: OAuth2QueryPrompt;
 }
 
-export type OAuth2QueryTokenParameters =
+export type OAuth2QueryBodyParameters =
   | OAuth2QueryTokenAuthorizationCodeParameters
   | OAuth2QueryTokenRefreshTokenParameters;
 //  | OAuth2QueryTokenSAMLParameters;

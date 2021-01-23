@@ -12,5 +12,5 @@ export function registerV1OAuth2Endpoints(app: FastifyInstance, baseURI: string)
   });
 
   app.get(baseURI + '/auth', oAuth2AuthHandler);
-  app.get(baseURI + '/token', oAuth2TokenHandler);
+  app.post(baseURI + '/token', oAuth2TokenHandler);
 }

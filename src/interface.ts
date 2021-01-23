@@ -27,6 +27,10 @@ export interface Config {
       debugTokens: string[];
     };
   };
+  verification: {
+    host: string;
+    key: string;
+  };
   errorFormatURL: string;
   token: {
     default: TokenGeneratorConfig;

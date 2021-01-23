@@ -1,4 +1,12 @@
-import { Email, Group, OAuthClient, OAuthClientAuthorization, Phone, User as UserModel } from '@prisma/client';
+import {
+  Email,
+  Group,
+  OAuthClient,
+  OAuthClientAuthorization,
+  OAuthTokenType,
+  Phone,
+  User as UserModel,
+} from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { ClientAuthorization, Utils } from '.';
 import { prisma } from '../';
@@ -175,6 +183,31 @@ export async function getAuthorizations(user: UserModel | string) {
   });
 }
 
+export async function getTokens(user: UserModel | string, type: OAuthTokenType | undefined = undefined) {
+  const authorizations = await getClientAuthorizations(user);
+  if (!authorizations) return [];
+
+  const authorizationsPromise = [];
+  for (const authorization of authorizations) {
+    authorizationsPromise.push(
+      prisma.oAuthToken.findMany({
+        where: {
+          oAuthClientAuthorizationId: authorization.id,
+          type,
+        },
+      }),
+    );
+  }
+
+  const authorizationsData = [];
+
+  for (const authorizationDatum of await Promise.all(authorizationsPromise)) {
+    authorizationsData.push(...authorizationDatum);
+  }
+
+  return authorizationsData;
+}
+
 export async function hasAuthorizedClient(user: UserModel | string, clientId: string) {
   return (await getClientAuthorizations(user, clientId)) !== undefined;
 }
@@ -264,6 +297,116 @@ export async function findByCommonUsername(username: string): Promise<UserModel[
   users.push(...resultEmail);
 
   return users;
+}
+
+export async function getEmails(userId: string) {
+  const emails = await prisma.email.findMany({
+    where: {
+      userId,
+    },
+  });
+
+  return emails;
+}
+
+export async function addEmail(userId: string, email: string, isPrimary = false) {
+  const prevPrimaries = (await getEmails(userId)).filter((n) => n.isPrimary);
+
+  await prisma.email.create({
+    data: {
+      email,
+      User: {
+        connect: {
+          id: userId,
+        },
+      },
+      verified: false,
+      allowUse: false,
+      isPrimary,
+    },
+  });
+
+  if (isPrimary) {
+    const prevPrimariesPromise = [];
+    for (const prevPrimary of prevPrimaries) {
+      prevPrimariesPromise.push(
+        prisma.email.update({
+          where: {
+            id: prevPrimary.id,
+          },
+          data: {
+            isPrimary: false,
+          },
+        }),
+      );
+    }
+    await Promise.all(prevPrimariesPromise);
+  }
+
+  return true;
+}
+
+export async function removeEmail(userId: string, email: string) {
+  await prisma.email.deleteMany({
+    where: {
+      userId,
+      email,
+    },
+  });
+}
+
+export async function getPhones(userId: string) {
+  const emails = await prisma.phone.findMany({
+    where: {
+      userId,
+    },
+  });
+
+  return emails;
+}
+
+export async function addPhone(userId: string, phone: string, isPrimary = false) {
+  const prevPrimaries = (await getPhones(userId)).filter((n) => n.isPrimary);
+
+  await prisma.phone.create({
+    data: {
+      phone,
+      User: {
+        connect: {
+          id: userId,
+        },
+      },
+      isPrimary,
+    },
+  });
+
+  if (isPrimary) {
+    const prevPrimariesPromise = [];
+    for (const prevPrimary of prevPrimaries) {
+      prevPrimariesPromise.push(
+        prisma.email.update({
+          where: {
+            id: prevPrimary.id,
+          },
+          data: {
+            isPrimary: false,
+          },
+        }),
+      );
+    }
+    await Promise.all(prevPrimariesPromise);
+  }
+
+  return true;
+}
+
+export async function removePhone(userId: string, phone: string) {
+  await prisma.phone.deleteMany({
+    where: {
+      userId,
+      phone,
+    },
+  });
 }
 
 export async function findByPasswordLogin(username: string, password: string): Promise<UserModel[]> {

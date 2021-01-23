@@ -1,121 +1,141 @@
-import { OAuthClientAuthorization, OAuthToken, OAuthTokenType } from '@prisma/client';
+import { OAuthTokenType } from '@prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
-import { config, prisma } from '../../..';
+import { Client, ClientAuthorization, Token, User, Utils } from '../../../common';
 import { sendOAuth2Error } from './error';
-import { OAuth2ErrorResponseType, OAuth2QueryGrantType, OAuth2QueryTokenParameters } from './interfaces';
+import { OAuth2ErrorResponseType, OAuth2QueryBodyParameters, OAuth2QueryGrantType } from './interfaces';
+
+// TODO: https://developers.google.com/identity/protocols/oauth2/limited-input-device#step-4:-poll-googles-authorization-server
+// TODO: https://developers.google.com/identity/protocols/oauth2/native-app#exchange-authorization-code
 
 export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply) {
-  const query = req.query as OAuth2QueryTokenParameters;
+  const body = req.body as OAuth2QueryBodyParameters;
 
-  if (query.client_id === undefined || query.client_secret === undefined || query.grant_type === undefined) {
+  // validate query
+  if (!Utils.isValidValue(body.client_id, body.client_secret, body.grant_type === undefined)) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST);
     return;
   }
 
-  const client = await prisma.oAuthClient.findUnique({
-    where: {
-      id: query.client_id,
-    },
-  });
+  // cget client
+  const clientId = body.client_id;
+  const client = await Client.getByClientId(clientId);
 
   if (client === null) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT);
     return;
   }
 
-  let token: OAuthToken | null = null;
-  let oAuthAuthorization: OAuthClientAuthorization | null = null;
+  if (!Client.verifySecret(clientId, body.client_secret)) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT);
+    return;
+  }
 
-  if (query.grant_type === OAuth2QueryGrantType.AUTHORIZATION_CODE) {
-    const code = query.code;
-    token = await prisma.oAuthToken.findFirst({
-      where: {
-        type: OAuthTokenType.AUTHORIZATION_CODE,
-        token: code,
-      },
-    });
+  // get token and type.
+  let token;
+  let type: OAuthTokenType;
 
-    if (token === null) {
-      sendOAuth2Error(
-        rep,
-        OAuth2ErrorResponseType.INVALID_GRANT,
-        'provided authorization code is invalid or had been used.',
-      );
-      return;
-    }
-
-    if (config?.invalidate?.oauth?.AUTHORIZATION_CODE >= 0) {
-      if (new Date().getTime() - token.issuedAt.getTime() > config.invalidate.oauth.AUTHORIZATION_CODE) {
-        sendOAuth2Error(
-          rep,
-          OAuth2ErrorResponseType.INVALID_GRANT,
-          'provided authorization code has been invalidated, please reissue one.',
-        );
-        return;
-      }
-    }
-  } else if (query.grant_type === OAuth2QueryGrantType.REFRESH_TOKEN) {
-    const refreshToken = query.refresh_token;
-    token = await prisma.oAuthToken.findFirst({
-      where: {
-        type: OAuthTokenType.REFRESH_TOKEN,
-        token: refreshToken,
-      },
-    });
-
-    if (token === null) {
-      sendOAuth2Error(
-        rep,
-        OAuth2ErrorResponseType.INVALID_GRANT,
-        'provided refresh token is invalid or had been used.',
-      );
-      return;
-    }
-
-    if (config?.invalidate?.oauth?.REFRESH_TOKEN >= 0) {
-      if (new Date().getTime() - token.issuedAt.getTime() > config.invalidate.oauth.REFRESH_TOKEN) {
-        sendOAuth2Error(
-          rep,
-          OAuth2ErrorResponseType.INVALID_GRANT,
-          'provided refresh token has been invalidated, please reissue one.',
-        );
-        return;
-      }
-    }
+  if (body.grant_type === OAuth2QueryGrantType.AUTHORIZATION_CODE) {
+    token = body.code;
+    type = 'AUTHORIZATION_CODE';
+  } else if (body.grant_type === OAuth2QueryGrantType.REFRESH_TOKEN) {
+    token = body.refresh_token;
+    type = 'REFRESH_TOKEN';
   } else {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.UNSUPPORTED_GRANT_TYPE);
     return;
   }
 
-  oAuthAuthorization = (await prisma.oAuthClientAuthorization.findUnique({
-    where: {
-      id: token.oAuthClientAuthorizationId,
-    },
-  })) as OAuthClientAuthorization;
-
-  if (oAuthAuthorization === null) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'unable to find authorization request');
+  // check token is valid
+  if (!Utils.isValidValue(token)) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST);
     return;
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: oAuthAuthorization.userId,
-    },
-  });
+  // get user
+  const authorization = await Token.getAuthorization(token, type);
+  if (!authorization) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'unable to find authorization to authenticate');
+    return;
+  }
 
-  if (user === null) {
+  const user = await ClientAuthorization.getUser(authorization);
+  if (!user) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'unable to find user to authenticate');
     return;
   }
 
-  await prisma.user.update({
-    where: {
-      id: user.id,
-    },
-    data: {
-      lastAuthenticated: new Date(),
-    },
+  const permissions = await Token.getAuthorizedPermissions(token, type);
+  if (!permissions) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST, 'unable to find permissions to authenticate');
+    return;
+  }
+
+  const scope = permissions.map((p) => p.name).join(' ');
+
+  await User.updateLastAuthenticated(user);
+  const metadata = await Token.getMetadata(token, type);
+
+  let needRefreshToken = false;
+
+  // doing manual casting because typescript compiler
+  // doesn't know xxxx about types
+  if ((metadata as Token.TokenMetadataV1)?.version === 1) {
+    const metadataV1 = metadata as Token.TokenMetadataV1;
+
+    needRefreshToken = metadataV1.shouldGenerate?.refreshToken !== undefined;
+  }
+
+  const authorizations = await User.getClientAuthorizations(user, clientId);
+
+  if (authorizations) {
+    const promises = [];
+    const isValid = [];
+    const validRefreshTokens = await User.getTokens(user, 'REFRESH_TOKEN');
+
+    for (const refreshToken of validRefreshTokens) {
+      promises.push(Token.getAuthorizedPermissions(refreshToken.token, refreshToken.type));
+      isValid.push(Token.isValidByType(refreshToken.type, refreshToken.issuedAt));
+    }
+
+    const tokenPermissionsArray = await Promise.all(promises);
+
+    let validContents = 0;
+    for (let i = 0; i < validRefreshTokens.length; i++) {
+      const tokenPermissions = tokenPermissionsArray[i];
+      const isThisTokenValid = isValid[i];
+
+      if (isThisTokenValid) {
+        if (tokenPermissions) {
+          if (
+            permissions.filter((p) => tokenPermissions.filter((q) => p.name === q.name).length > 0).length ===
+            permissions.length
+          ) {
+            validContents++;
+          }
+        }
+      }
+    }
+
+    if (validContents === 0) {
+      needRefreshToken = true;
+    }
+  } else {
+    needRefreshToken = true;
+  }
+
+  const access_token = ClientAuthorization.createToken(authorization, 'ACCESS_TOKEN');
+
+  let refresh_token = undefined;
+  if (needRefreshToken) {
+    refresh_token = ClientAuthorization.createToken(authorization, 'REFRESH_TOKEN');
+  }
+
+  rep.send({
+    access_token,
+    scope,
+    refresh_token,
+    token_type: 'Bearer',
+    expires_in: Token.getValidTimeByType('ACCESS_TOKEN'),
   });
 }

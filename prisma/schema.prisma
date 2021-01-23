@@ -47,6 +47,7 @@ model Email {
 model Phone {
   id                    String                        @id @default(uuid())
   phone                 String
+  isPrimary             Boolean                       @default(true)
   addedAt               DateTime                      @default(now())
 }
 
@@ -161,7 +162,7 @@ model OAuthToken {
   type                  OAuthTokenType
   authorization         OAuthClientAuthorization
   issuedAt              DateTime                      @default(now())
-  metadata              Json                          @default("{}")
+  metadata              Json                          @default("null")
 }
 
 

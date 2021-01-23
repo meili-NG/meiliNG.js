@@ -27,6 +27,16 @@ export async function getRedirectUris(clientId: string) {
   return redirectUris;
 }
 
+export async function verifySecret(clientId: string, clientSecret: string) {
+  const secrets = await prisma.oAuthClientSecrets.findMany({
+    where: {
+      oAuthClientId: clientId,
+    },
+  });
+
+  return secrets.filter((n) => n.secret === clientSecret).length > 0;
+}
+
 export async function isValidRedirectURI(clientId: string, redirectUri: string) {
   const redirectUris = await getRedirectUris(clientId);
   return MeilingCommonOAuth2.getMatchingRedirectURIs(redirectUri, redirectUris).length > 0;

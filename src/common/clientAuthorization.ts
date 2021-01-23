@@ -1,4 +1,4 @@
-import { OAuthClientAuthorization, OAuthTokenType } from '@prisma/client';
+import { InputJsonValue, OAuthClientAuthorization, OAuthTokenType } from '@prisma/client';
 import { Token } from '.';
 import { prisma } from '..';
 
@@ -37,6 +37,19 @@ export async function getClient(authorization: OAuthClientAuthorization | string
   return client;
 }
 
+export async function getUser(authorization: OAuthClientAuthorization | string) {
+  const data = await getById(authorization);
+  if (!data) return;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: data.userId,
+    },
+  });
+
+  return user;
+}
+
 export async function createToken(
   authorization: OAuthClientAuthorization,
   type: OAuthTokenType,
@@ -54,7 +67,7 @@ export async function createToken(
       },
       type,
       token,
-      metadata,
+      metadata: metadata as InputJsonValue,
     },
   });
 

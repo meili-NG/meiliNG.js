@@ -3,11 +3,11 @@ import crypto from 'crypto';
 import { ClientAuthorization, Token, Utils } from '.';
 import { config, prisma } from '..';
 
-export type TokenMetadata = TokenMetadataBlank | TokenMetadataV1;
-type TokenMetadataBlank = InputJsonObject;
-interface TokenMetadataV1 extends InputJsonObject {
+export type TokenMetadata = null | TokenMetadataV1;
+
+export interface TokenMetadataV1 {
   version: 1;
-  shouldGenerate: {
+  shouldGenerate?: {
     refreshToken: boolean;
   };
 }
@@ -34,6 +34,40 @@ export function generateToken(length?: number, chars?: string) {
   }
 
   return token;
+}
+
+export async function getAuthorization(token: string, type?: OAuthTokenType) {
+  const data = await getData(token, type);
+
+  if (data) {
+    const authorization = await prisma.oAuthClientAuthorization.findUnique({
+      where: {
+        id: data.oAuthClientAuthorizationId,
+      },
+    });
+
+    if (authorization) await ClientAuthorization.updateLastUpdated(authorization);
+
+    return authorization;
+  }
+
+  return;
+}
+
+export async function getUser(token: string, type?: OAuthTokenType) {
+  const authorization = await getAuthorization(token, type);
+  if (!authorization) return;
+
+  const user = await ClientAuthorization.getUser(authorization);
+  return user;
+}
+
+export async function getAuthorizedPermissions(token: string, type?: OAuthTokenType) {
+  const authorization = await getAuthorization(token, type);
+  if (!authorization) return;
+
+  const permissions = await ClientAuthorization.getAuthorizedPermissions(authorization);
+  return permissions;
 }
 
 export async function getData(token: string, type?: OAuthTokenType) {
@@ -71,12 +105,12 @@ export async function setMetadata(token: string, metadata: Token.TokenMetadata) 
       token,
     },
     data: {
-      metadata,
+      metadata: (metadata as unknown) as InputJsonObject,
     },
   });
 }
 export function getValidTimeByType(type: OAuthTokenType) {
-  return config.invalidate.oauth[type];
+  return config?.invalidate?.oauth[type] === undefined ? Number.MAX_SAFE_INTEGER : config?.invalidate?.oauth[type];
 }
 
 export function getExpiresInByType(type: OAuthTokenType, issuedAt: Date) {

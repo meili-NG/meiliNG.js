@@ -2,6 +2,7 @@ export function isValidValue(...values: unknown[]): boolean {
   let isValid = true;
   for (const value of values) {
     isValid = isValid && !(value === undefined || value === null || value === '');
+    if (!isValid) return false;
   }
 
   return isValid;

@@ -162,7 +162,7 @@ model OAuthToken {
   type                  OAuthTokenType
   authorization         OAuthClientAuthorization
   issuedAt              DateTime                      @default(now())
-  metadata              Json                          @default("null")
+  metadata              Json?
 }
 
 

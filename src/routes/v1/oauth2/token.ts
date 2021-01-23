@@ -12,7 +12,7 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
   const body = req.body as OAuth2QueryBodyParameters;
 
   // validate query
-  if (!Utils.isValidValue(body.client_id, body.client_secret, body.grant_type === undefined)) {
+  if (!Utils.isValidValue(body, body?.client_id, body?.client_secret, body?.grant_type)) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST);
     return;
   }
@@ -124,11 +124,11 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
     needRefreshToken = true;
   }
 
-  const access_token = ClientAuthorization.createToken(authorization, 'ACCESS_TOKEN');
+  const access_token = await ClientAuthorization.createToken(authorization, 'ACCESS_TOKEN');
 
   let refresh_token = undefined;
   if (needRefreshToken) {
-    refresh_token = ClientAuthorization.createToken(authorization, 'REFRESH_TOKEN');
+    refresh_token = await ClientAuthorization.createToken(authorization, 'REFRESH_TOKEN');
   }
 
   rep.send({

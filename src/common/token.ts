@@ -71,10 +71,9 @@ export async function getAuthorizedPermissions(token: string, type?: OAuthTokenT
 }
 
 export async function getData(token: string, type?: OAuthTokenType) {
-  const tokenData = await prisma.oAuthToken.findFirst({
+  const tokenData = await prisma.oAuthToken.findUnique({
     where: {
       token,
-      type,
     },
   });
 

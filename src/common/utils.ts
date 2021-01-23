@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export function isValidValue(...values: unknown[]): boolean {
   let isValid = true;
   for (const value of values) {
@@ -32,4 +34,21 @@ export function convertJsonIfNot<T>(json: string | T | unknown): T {
     return JSON.parse(json);
   }
   return json as T;
+}
+
+export function checkUsernameCondition(username: string) {
+  return true;
+}
+
+export function checkPasswordCondition(password: string) {
+  return true;
+}
+
+export function getCryptoSafeInteger(bound?: number): number {
+  if (bound === undefined) bound = Number.MAX_SAFE_INTEGER;
+
+  const array = new Uint32Array(1);
+  crypto.randomFillSync(array);
+
+  return array[0] % bound;
 }

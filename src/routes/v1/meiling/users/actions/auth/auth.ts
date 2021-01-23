@@ -1,7 +1,7 @@
 import { Permission } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1UserOAuthAuthQuery } from '.';
-import { isMeilingV1UserActionPermitted } from '..';
+import { meilingV1UserActionGetUser } from '..';
 import { prisma } from '../../../../../..';
 import { Client, ClientAccessControls, ClientAuthorization, Token, User, Utils } from '../../../../../../common';
 import { OAuth2QueryResponseType } from '../../../../oauth2/interfaces';
@@ -10,7 +10,7 @@ import { MeilingV1ErrorType } from '../../../interfaces';
 
 export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: FastifyReply) {
   // user/* common auth section
-  const userBase = await isMeilingV1UserActionPermitted(req);
+  const userBase = await meilingV1UserActionGetUser(req);
   if (userBase === undefined) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'invalid request.');
     return;

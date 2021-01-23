@@ -1,5 +1,4 @@
 import { InputJsonObject, OAuthTokenType } from '@prisma/client';
-import crypto from 'crypto';
 import { ClientAuthorization, Token, Utils } from '.';
 import { config, prisma } from '..';
 
@@ -15,22 +14,13 @@ export interface TokenMetadataV1 {
 const getDefaultAvailableCharacters = () => config.token.default.chars;
 const getDefaultTokenLength = () => config.token.default.length;
 
-export function getCryptographicallySafeRandomInteger(bound?: number): number {
-  if (bound === undefined) bound = Number.MAX_SAFE_INTEGER;
-
-  const array = new Uint32Array(1);
-  crypto.randomFillSync(array);
-
-  return array[0] % bound;
-}
-
 export function generateToken(length?: number, chars?: string) {
   if (length === undefined) length = getDefaultTokenLength();
   if (chars === undefined) chars = getDefaultAvailableCharacters();
 
   let token = '';
   for (let i = 0; i < length; i++) {
-    token += chars.charAt(getCryptographicallySafeRandomInteger(chars.length));
+    token += chars.charAt(Utils.getCryptoSafeInteger(chars.length));
   }
 
   return token;
@@ -84,7 +74,7 @@ export async function getData(token: string, type?: OAuthTokenType) {
   return tokenData ? tokenData : undefined;
 }
 
-export async function isValidToken(token: string, type?: OAuthTokenType) {
+export async function doesExist(token: string, type?: OAuthTokenType) {
   return (await getData(token, type)) !== undefined;
 }
 
@@ -116,7 +106,8 @@ export function getExpiresInByType(type: OAuthTokenType, issuedAt: Date) {
   const invalidTimer = getValidTimeByType(type);
   const expiresAt = new Date(issuedAt.getTime() + 1000 * invalidTimer);
 
-  return (expiresAt.getTime() - new Date().getTime()) / 1000;
+  const leftOver = (expiresAt.getTime() - new Date().getTime()) / 1000;
+  return leftOver;
 }
 
 export async function getExpiresIn(token: string, type?: OAuthTokenType) {

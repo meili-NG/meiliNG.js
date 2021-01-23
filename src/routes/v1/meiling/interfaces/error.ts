@@ -25,6 +25,7 @@ export enum MeilingV1ErrorType {
   APPLICATION_NOT_AUTHORIZED_SCOPES = 'application_not_authorized_scopes',
   APPLICATION_USER_ACTION_REQUIRED = 'application_user_action_required',
   INTERNAL_SERVER_ERROR = 'internal_server_error',
+  EXISTING_PASSWORD = 'existing_password',
 }
 
 export interface MeilingV1ErrorResponse {

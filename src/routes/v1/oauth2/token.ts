@@ -52,6 +52,11 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
     return;
   }
 
+  if (!(await Token.isValid(token, type))) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT);
+    return;
+  }
+
   // get user
   const authorization = await Token.getAuthorization(token, type);
   if (!authorization) {

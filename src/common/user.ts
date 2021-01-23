@@ -1,6 +1,7 @@
 import {
   Email,
   Group,
+  InputJsonObject,
   OAuthClient,
   OAuthClientAuthorization,
   OAuthTokenType,
@@ -181,6 +182,63 @@ export async function getAuthorizations(user: UserModel | string) {
       userId: getUserId(user),
     },
   });
+}
+
+export async function getPasswords(user: UserModel | string) {
+  return await prisma.authorization.findMany({
+    where: {
+      userId: getUserId(user),
+      method: 'PASSWORD',
+    },
+  });
+}
+
+export async function addPassword(user: UserModel | string, password: string) {
+  const salt = await bcrypt.genSalt(Utils.getCryptoSafeInteger(10) + 5);
+  const hash = await bcrypt.hash(password, salt);
+
+  const data: AuthorizationPasswordObject = {
+    type: 'PASSWORD',
+    data: {
+      hash,
+    },
+  };
+
+  const passwordData = await prisma.authorization.create({
+    data: {
+      User: {
+        connect: {
+          id: getUserId(user),
+        },
+      },
+      data: (data as unknown) as InputJsonObject,
+      method: 'PASSWORD',
+      allowSingleFactor: false,
+      allowTwoFactor: false,
+      allowPasswordReset: false,
+    },
+  });
+
+  return passwordData ? true : false;
+}
+
+export async function checkPassword(user: UserModel | string, password: string) {
+  const passwords = await getPasswords(user);
+
+  const passwordCheckPromise = passwords.map(async (passwordDB) => {
+    const passwordData = Utils.convertJsonIfNot<AuthorizationPasswordObject>(passwordDB.data);
+
+    const hash = passwordData.data.hash;
+    const result = await bcrypt.compare(password, hash);
+
+    if (result) {
+      return passwordDB;
+    } else {
+      return undefined;
+    }
+  });
+
+  return (await Promise.all(passwordCheckPromise)).filter((n) => n !== undefined);
 }
 
 export async function getTokens(user: UserModel | string, type: OAuthTokenType | undefined = undefined) {
@@ -416,20 +474,7 @@ export async function findByPasswordLogin(username: string, password: string): P
 
   const matchingUsers = [];
   for (const query of queryResults) {
-    const authorizations = await getAuthorizations(query);
-    const passwordAuthorizations = authorizations.filter((n) => n.method === 'PASSWORD');
-
-    let isMatch = false;
-    for (const passwordAuthorization of passwordAuthorizations) {
-      const passwordData = Utils.convertJsonIfNot<AuthorizationPasswordObject>(passwordAuthorization.data);
-
-      const hash = passwordData.data.hash;
-      const result = await bcrypt.compare(password, hash);
-
-      if (result) {
-        isMatch = true;
-      }
-    }
+    const isMatch = (await checkPassword(query, password)).length > 0;
 
     if (isMatch) {
       matchingUsers.push(query);

@@ -40,7 +40,6 @@
   "listeningPort": 8080,
   "oauth2": {
     "skipAuthentication": [
-      "38e94511-3ec2-40fd-89cb-9be6281e9862"
     ]
   }
 }

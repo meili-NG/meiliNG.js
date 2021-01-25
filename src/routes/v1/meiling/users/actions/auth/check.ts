@@ -20,16 +20,18 @@ export async function meilingV1OAuthClientAuthCheckHandler(req: FastifyRequest, 
   }
 
   // get parameters and query
-  const query = req.query as MeilingV1UserOAuthAuthQuery;
+  let query = req.query as MeilingV1UserOAuthAuthQuery;
+  const body = req.body as MeilingV1UserOAuthAuthQuery;
 
-  // prompt check
-  if (query.prompt) {
-    sendMeilingError(
-      rep,
-      MeilingV1ErrorType.APPLICATION_USER_ACTION_REQUIRED,
-      'prompt was set, user action with prompt is required.',
-    );
-    return;
+  // validate
+  if (!Utils.isValidValue(query, query.client_id, query.redirect_uri, query.response_type, query.scope)) {
+    if (!Utils.isValidValue(body, body.client_id, body.redirect_uri, body.response_type, body.scope)) {
+      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'missing query.');
+      return;
+    } else {
+      query = body;
+      return;
+    }
   }
 
   // validate

@@ -20,12 +20,17 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
   }
 
   // get parameters and query
-  const query = req.query as MeilingV1UserOAuthAuthQuery;
+  let query = req.query as MeilingV1UserOAuthAuthQuery;
+  const body = req.body as MeilingV1UserOAuthAuthQuery;
 
   // validate
-  if (!Utils.isValidValue(query.client_id, query.redirect_uri, query.response_type, query.scope)) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'missing query.');
-    return;
+  if (!Utils.isValidValue(query, query.client_id, query.redirect_uri, query.response_type, query.scope)) {
+    if (!Utils.isValidValue(body, body.client_id, body.redirect_uri, body.response_type, body.scope)) {
+      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'missing query.');
+      return;
+    }
+
+    query = body;
   }
 
   // get userData of selected user

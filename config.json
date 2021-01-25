@@ -1,9 +1,9 @@
 {
   "version": "0.0.1",
   "allowLogin": [
-    "http://localhost:3000",
+    "https://appielogin.netlify.app",
     "https://meiling-dev.stella-it.com",
-    "https://appielogin.netlify.app"
+    "http://localhost:3000"
   ],
   "invalidate": {
     "oauth": {

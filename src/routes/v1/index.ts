@@ -6,7 +6,7 @@ export function registerV1Endpoints(app: FastifyInstance, baseURI: string) {
   app.get(baseURI, (req, rep) => {
     rep.send({
       version: 1,
-      engine: 'Meiling Engine',
+      engine: 'Meiling Project',
     });
   });
 

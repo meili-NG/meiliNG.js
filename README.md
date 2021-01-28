@@ -31,7 +31,7 @@
 <hr>
 
 ## Features
-The key featues of Meiling Engine are:
+The key featues of Meiling Project are:
 * highly-configurable client authentication interface.  
   Just follow the communication API standards defined in API Docs to generate your own login infrastructure with your design.
 * oAuth2 and OpenID Connect Compliant
@@ -43,7 +43,7 @@ Also just like conventional login systems:
 * XSRF preventions using session tokens.
 
 ## Use cases
-Meiling Engine is used in:
+Meiling Project is used in:
 * Stella IT Accounts
 * and more!
 

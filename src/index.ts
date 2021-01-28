@@ -3,8 +3,8 @@ import chalk from 'chalk';
 import fastify from 'fastify';
 import fastifyCors from 'fastify-cors';
 import fastifyFormbody from 'fastify-formbody';
-import Figlet from 'figlet';
 import fs from 'fs';
+import { Banner, Database } from './common';
 import { Config } from './interface';
 import { registerRootEndpoints } from './routes';
 import { MeilingV1Session } from './routes/v1/meiling/common';
@@ -19,20 +19,9 @@ export const VERSION = packageJson.version;
 
 export const isDevelopment = env === 'development';
 
-console.log(Figlet.textSync('Meiling'));
-console.log();
-console.log(`Meiling Engine, version. ${packageJson.version}`);
-console.log(chalk.blueBright('https://github.com/Stella-IT/meiling'));
-console.log();
-console.log('Copyright © Stella IT Inc. and Meiling Engine Contributors');
-if (isDevelopment) {
-  console.log();
-  console.log(
-    chalk.yellowBright('Launching in Development mode, ') +
-      chalk.redBright(chalk.bold('DO NOT USE THIS IN PRODUCTION.')),
-  );
-  console.log();
-}
+// some banner stuff
+Banner.showBanner();
+Banner.devModeCheck();
 
 console.log('[Startup] Loading Session Files...');
 MeilingV1Session.loadSessionSaveFiles();
@@ -58,12 +47,13 @@ console.log('[Startup] Registering for Fastify Handler');
 app.register(fastifyFormbody);
 
 (async () => {
-  try {
-    console.log('[Startup] Checking Database Connection...');
-    await prisma.$connect();
-    await prisma.$executeRaw('SHOW TABLES');
-  } catch (e) {
-    console.error(chalk.red('[Database] Failed to connect! Please check MySQL/MariaDB is online.'));
+  if (!(await Database.testDatabase())) {
+    console.error(
+      chalk.bgRedBright(
+        chalk.whiteBright(chalk.bold('[Database] Failed to connect! Please check MySQL/MariaDB is online.')),
+      ),
+    );
+    console.log();
     process.exit(1);
   }
 

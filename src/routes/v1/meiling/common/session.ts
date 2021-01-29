@@ -13,7 +13,7 @@ interface MeilingV1TokenDataFile {
 type MeilingV1TokenData = {
   token: string;
   ip: string;
-  firstIssued: Date;
+  issuedAt: Date;
   lastUsed: Date;
   expiresAt: Date;
   session: MeilingV1Session;
@@ -32,7 +32,7 @@ export function loadSessionSaveFiles() {
         ) as MeilingV1TokenDataFile;
         for (const tokenData of tokenSessions.issuedTokens) {
           tokenData.expiresAt = new Date(tokenData.expiresAt);
-          tokenData.firstIssued = new Date(tokenData.firstIssued);
+          tokenData.issuedAt = new Date(tokenData.issuedAt);
           tokenData.lastUsed = new Date(tokenData.lastUsed);
         }
       }
@@ -95,29 +95,54 @@ export function getTokenFromRequest(req: FastifyRequest): string | undefined {
   return;
 }
 
-export function createToken(req: FastifyRequest): string | undefined {
-  if (
-    tokenSessions.issuedTokens.filter(
-      (t) =>
-        t.ip === req.ip &&
-        new Date().getTime() - config.session.v1.rateLimit.timeframe * 1000 < t.firstIssued.getTime(),
-    ).length > config.session.v1.rateLimit.maxTokenPerIP
-  ) {
-    return undefined;
-  }
-
+export async function createToken(req: FastifyRequest): Promise<string | undefined> {
   const token = Token.generateToken();
+  const expiration = new Date(new Date().getTime() + config.session.v1.maxAge * 1000);
+  const userTimeFieldMinimum = new Date().getTime() - config.session.v1.rateLimit.timeframe * 1000;
 
-  const tokenData: MeilingV1TokenData = {
-    token,
-    ip: req.ip,
-    session: {},
-    expiresAt: new Date(new Date().getTime() + config.session.v1.maxAge * 1000),
-    firstIssued: new Date(),
-    lastUsed: new Date(),
-  };
+  if (config.session.v1.storage) {
+    if (
+      tokenSessions.issuedTokens.filter((t) => t.ip === req.ip && userTimeFieldMinimum < t.issuedAt.getTime()).length >
+      config.session.v1.rateLimit.maxTokenPerIP
+    ) {
+      return undefined;
+    }
 
-  tokenSessions.issuedTokens.push(tokenData);
+    const tokenData: MeilingV1TokenData = {
+      token,
+      ip: req.ip,
+      session: {},
+      expiresAt: expiration,
+      issuedAt: new Date(),
+      lastUsed: new Date(),
+    };
+
+    tokenSessions.issuedTokens.push(tokenData);
+  } else {
+    const userSessions = await prisma.meilingSessionV1Token.findMany({
+      where: {
+        ip: req.ip,
+        issuedAt: {
+          gt: new Date(userTimeFieldMinimum),
+        },
+      },
+    });
+
+    if (userSessions.length > config.session.v1.rateLimit.maxTokenPerIP) {
+      return undefined;
+    }
+
+    await prisma.meilingSessionV1Token.create({
+      data: {
+        token,
+        ip: req.ip,
+        session: {},
+        expiresAt: expiration,
+        issuedAt: new Date(),
+        lastUsed: new Date(),
+      },
+    });
+  }
 
   saveSession();
 
@@ -125,30 +150,36 @@ export function createToken(req: FastifyRequest): string | undefined {
 }
 
 export async function getSessionFromRequest(req: FastifyRequest): Promise<MeilingV1Session | undefined> {
-  let data: MeilingV1Session | undefined;
+  let data: MeilingV1Session | undefined = undefined;
   let token: string | undefined = undefined;
 
   if (req.headers.authorization && req.headers.authorization.includes('Bearer')) {
     token = await getTokenFromRequest(req);
 
     if (await isToken(token)) {
-      const session = tokenSessions.issuedTokens.find((n) => n.token === token);
-      const expiresAt = session?.expiresAt;
+      if (config.session.v1.storage) {
+        const session = tokenSessions.issuedTokens.find((n) => n.token === token);
+        const expiresAt = session?.expiresAt;
 
-      if (expiresAt) {
-        if (new Date().getTime() < expiresAt.getTime()) {
-          data = session?.session;
+        if (expiresAt) {
+          if (new Date().getTime() < expiresAt.getTime()) {
+            data = session?.session;
+          }
         } else {
-          data = undefined;
+          data = session?.session;
         }
       } else {
-        data = session?.session;
+        const tokenData = await prisma.meilingSessionV1Token.findUnique({
+          where: {
+            token,
+          },
+        });
+
+        if (tokenData) {
+          data = tokenData.session as MeilingV1Session;
+        }
       }
-    } else {
-      data = undefined;
     }
-  } else {
-    data = undefined;
   }
 
   if (data !== undefined) {
@@ -173,10 +204,25 @@ export async function setSession(req: FastifyRequest, data?: MeilingV1Session) {
     if (token) {
       if (await isToken(token)) {
         if (data) {
-          const tokenData = tokenSessions.issuedTokens.find((n) => n.token === token);
-          if (tokenData) {
-            tokenData.session = data;
-            tokenData.expiresAt = new Date(new Date().getTime() + config.session.v1.maxAge * 1000);
+          const newExpiration = new Date(new Date().getTime() + config.session.v1.maxAge * 1000);
+          if (config.session.v1.storage) {
+            const tokenData = tokenSessions.issuedTokens.find((n) => n.token === token);
+            if (tokenData) {
+              tokenData.session = data;
+              tokenData.expiresAt = newExpiration;
+            }
+          } else {
+            await prisma.meilingSessionV1Token.update({
+              where: {
+                token,
+              },
+              data: {
+                ip: req.ip,
+                session: data as any,
+                expiresAt: newExpiration,
+                lastUsed: new Date(),
+              },
+            });
           }
         } else {
           tokenSessions.issuedTokens = tokenSessions.issuedTokens.filter((n) => n.token !== token);

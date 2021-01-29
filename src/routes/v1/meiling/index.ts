@@ -48,7 +48,7 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
         return;
       }
     } else {
-      token = MeilingV1Session.createToken(req);
+      token = await MeilingV1Session.createToken(req);
       if (token) {
         rep.send({
           success: true,

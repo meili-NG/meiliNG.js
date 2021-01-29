@@ -12,6 +12,20 @@ export async function getByClientId(clientId: string) {
   return client;
 }
 
+export async function getClientOwners(clientId: string) {
+  const owners = await prisma.user.findMany({
+    where: {
+      ownedClients: {
+        some: {
+          id: clientId,
+        },
+      },
+    },
+  });
+
+  return owners;
+}
+
 export async function getRedirectUris(clientId: string) {
   const redirectUris = [];
   const data = await prisma.oAuthClientRedirectUris.findMany({

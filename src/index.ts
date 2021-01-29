@@ -31,7 +31,11 @@ const app = fastify({
   logger: {
     prettyPrint: true,
   },
-  trustProxy: config.behindProxy,
+  trustProxy: config.meiling.proxy
+    ? config.meiling.proxy.allowedHosts
+      ? config.meiling.proxy.allowedHosts
+      : true
+    : false,
 });
 
 console.log('[Startup] Registering for CORS header handler');
@@ -40,7 +44,7 @@ app.register(fastifyCors, {
     ? (origin, callback) => {
         callback(null, true);
       }
-    : config.allowLogin,
+    : config.frontend.url,
 });
 
 console.log('[Startup] Registering for Fastify Handler');

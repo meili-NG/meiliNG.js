@@ -1,19 +1,21 @@
 {
   "version": "0.0.1",
-  "allowLogin": [
-    "https://appielogin.netlify.app",
-    "https://meiling-dev.stella-it.com",
-    "http://localhost:3000"
-  ],
-  "invalidate": {
-    "oauth": {
-      "AUTHORIZATION_CODE": 300,
-      "ACCESS_TOKEN": 7200,
-      "REFRESH_TOKEN": 604800,
-      "ACCOUNT_TOKEN": -1
+  "frontend": {
+    "url": [
+      "https://appielogin.netlify.app",
+      "https://meiling-dev.stella-it.com",
+      "http://localhost:3000"
+    ]
+  },
+  "meiling": {
+    "error": {
+      "urlFormat": "https://opensource.stella-it.com/developers/docs/meiling/error/{{errorCode}}.html"
     },
-    "meiling": {
-      "CHALLENGE_TOKEN": 300
+    "oauth2": {
+      "skipAuthentication": []
+    },
+    "proxy": {
+      "allowedHosts": []
     }
   },
   "session": {
@@ -29,17 +31,24 @@
       ]
     }
   },
-  "errorFormatURL": "https://opensource.stella-it.com/developers/docs/meiling/error/{{errorCode}}.html",
   "token": {
-    "default": {
-      "chars": "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890",
-      "length": 128
+    "generators": {
+      "default": {
+        "chars": "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890",
+        "length": 128
+      }
+    },
+    "invalidate": {
+      "oauth": {
+        "AUTHORIZATION_CODE": 300,
+        "ACCESS_TOKEN": 7200,
+        "REFRESH_TOKEN": 604800,
+        "ACCOUNT_TOKEN": -1
+      },
+      "meiling": {
+        "CHALLENGE_TOKEN": 300
+      }
     }
   },
-  "behindProxy": true,
-  "listeningPort": 8080,
-  "oauth2": {
-    "skipAuthentication": [
-    ]
-  }
+  "listeningPort": 8080
 }

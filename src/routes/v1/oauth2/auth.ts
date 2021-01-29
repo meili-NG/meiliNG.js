@@ -1,7 +1,7 @@
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { config } from '../../..';
-import { OAuth2QueryAuthParameters, OAuth2ErrorResponseType } from './interfaces';
+import { OAuth2QueryAuthParameters } from './interfaces';
 
 export function oAuth2AuthHandler(req: FastifyRequest, rep: FastifyReply) {
   const query = req.query as OAuth2QueryAuthParameters;
@@ -19,6 +19,6 @@ export function oAuth2AuthHandler(req: FastifyRequest, rep: FastifyReply) {
 
   str = queryCount > 0 ? '?' + str.replace(/\&$/g, '') : '';
 
-  const bestLogin = config.allowLogin[0];
+  const bestLogin = config.frontend.url[0];
   rep.redirect(302, bestLogin + '/auth' + str);
 }

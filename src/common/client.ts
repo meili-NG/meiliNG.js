@@ -81,7 +81,11 @@ export async function hasUserPermissions(user: UserModel | string, clientId: str
 }
 
 export function shouldSkipAuthentication(clientId: string) {
-  return config.oauth2.skipAuthentication.includes(clientId);
+  if (config.meiling.oauth2.skipAuthentication) {
+    return config.meiling.oauth2.skipAuthentication.includes(clientId);
+  }
+
+  return false;
 }
 
 export async function createAuthorization(clientId: string, user: string | UserModel, permissions: Permission[]) {

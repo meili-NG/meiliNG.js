@@ -11,8 +11,8 @@ export interface TokenMetadataV1 {
   };
 }
 
-const getDefaultAvailableCharacters = () => config.token.default.chars;
-const getDefaultTokenLength = () => config.token.default.length;
+const getDefaultAvailableCharacters = () => config.token.generators.default.chars;
+const getDefaultTokenLength = () => config.token.generators.default.length;
 
 export function generateToken(length?: number, chars?: string) {
   if (length === undefined) length = getDefaultTokenLength();
@@ -99,7 +99,9 @@ export async function setMetadata(token: string, metadata: Token.TokenMetadata) 
   });
 }
 export function getValidTimeByType(type: OAuthTokenType) {
-  return config?.invalidate?.oauth[type] === undefined ? Number.MAX_SAFE_INTEGER : config?.invalidate?.oauth[type];
+  return config?.token?.invalidate?.oauth[type] === undefined
+    ? Number.MAX_SAFE_INTEGER
+    : config?.token?.invalidate?.oauth[type];
 }
 
 export function getExpiresInByType(type: OAuthTokenType, issuedAt: Date) {

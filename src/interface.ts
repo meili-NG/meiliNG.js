@@ -7,13 +7,18 @@ interface TokenGeneratorConfig {
 
 export interface Config {
   version: string;
-  allowLogin: string[];
-  invalidate: {
-    oauth: {
-      [token in OAuthTokenType]: number;
+  frontend: {
+    url: string[];
+  };
+  meiling: {
+    error: {
+      urlFormat: string;
     };
-    meiling: {
-      challenge: number;
+    oauth2: {
+      skipAuthentication?: string[];
+    };
+    proxy?: {
+      allowedHosts: string[];
     };
   };
   session: {
@@ -27,17 +32,18 @@ export interface Config {
       debugTokens: string[];
     };
   };
-  verification: {
-    host: string;
-    key: string;
-  };
-  errorFormatURL: string;
   token: {
-    default: TokenGeneratorConfig;
+    generators: {
+      default: TokenGeneratorConfig;
+    };
+    invalidate: {
+      oauth: {
+        [token in OAuthTokenType]: number;
+      };
+      meiling: {
+        challenge: number;
+      };
+    };
   };
-  behindProxy: boolean;
   listeningPort: number;
-  oauth2: {
-    skipAuthentication: string[];
-  };
 }

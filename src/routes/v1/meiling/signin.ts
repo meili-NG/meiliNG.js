@@ -268,7 +268,7 @@ please request this endpoint without challengeResponse field to request challeng
     if (extendedAuthSession.challengeCreatedAt) {
       if (
         new Date().getTime() >
-        extendedAuthSession.challengeCreatedAt.getTime() + config.invalidate.meiling.challenge * 1000
+        extendedAuthSession.challengeCreatedAt.getTime() + config.token.invalidate.meiling.challenge * 1000
       ) {
         sendMeilingError(
           rep,

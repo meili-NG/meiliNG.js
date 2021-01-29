@@ -5,6 +5,13 @@ interface TokenGeneratorConfig {
   length: number;
 }
 
+type SessionV1StorageConfig = SessionV1StorageFileConfig;
+
+interface SessionV1StorageFileConfig {
+  type: 'file';
+  path: string;
+}
+
 export interface Config {
   version: string;
   frontend: {
@@ -23,7 +30,7 @@ export interface Config {
   };
   session: {
     v1: {
-      dataPath: string;
+      storage?: SessionV1StorageConfig;
       maxAge: number;
       rateLimit: {
         maxTokenPerIP: number;

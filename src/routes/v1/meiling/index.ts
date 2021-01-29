@@ -23,7 +23,7 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
 
       if (config.session.v1.debugTokens.includes(authToken)) {
         if (isDevelopment) {
-          rep.send(MeilingV1Session.getSessionFromRequest(req));
+          rep.send(await MeilingV1Session.getSessionFromRequest(req));
         } else {
           sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'unauthorized: not in development mode.');
         }
@@ -36,7 +36,7 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
     let token = MeilingV1Session.getTokenFromRequest(req);
 
     if (token) {
-      if (MeilingV1Session.isToken(token)) {
+      if (await MeilingV1Session.isToken(token)) {
         rep.send({
           success: true,
         });

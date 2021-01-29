@@ -1,7 +1,7 @@
 import { User as UserModel } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 import fs from 'fs';
-import { config } from '../../../..';
+import { config, prisma } from '../../../..';
 import { Token, User } from '../../../../common';
 import { MeilingV1Session, MeilingV1SessionExtendedAuthentication } from '../interfaces';
 import { MeilingV1ExtendedAuthMethods } from '../interfaces/query';
@@ -24,14 +24,18 @@ let tokenSessions: MeilingV1TokenDataFile = {
 };
 
 export function loadSessionSaveFiles() {
-  if (fs.existsSync(config.session.v1.dataPath)) {
-    tokenSessions = JSON.parse(
-      fs.readFileSync(config.session.v1.dataPath, { encoding: 'utf-8' }),
-    ) as MeilingV1TokenDataFile;
-    for (const tokenData of tokenSessions.issuedTokens) {
-      tokenData.expiresAt = new Date(tokenData.expiresAt);
-      tokenData.firstIssued = new Date(tokenData.firstIssued);
-      tokenData.lastUsed = new Date(tokenData.lastUsed);
+  if (config.session.v1.storage) {
+    if (config.session.v1.storage.type === 'file') {
+      if (fs.existsSync(config.session.v1.storage.path)) {
+        tokenSessions = JSON.parse(
+          fs.readFileSync(config.session.v1.storage.path, { encoding: 'utf-8' }),
+        ) as MeilingV1TokenDataFile;
+        for (const tokenData of tokenSessions.issuedTokens) {
+          tokenData.expiresAt = new Date(tokenData.expiresAt);
+          tokenData.firstIssued = new Date(tokenData.firstIssued);
+          tokenData.lastUsed = new Date(tokenData.lastUsed);
+        }
+      }
     }
 
     garbageCollect();
@@ -54,12 +58,29 @@ export function garbageCollect() {
 }
 
 export function saveSession() {
-  fs.writeFileSync(config.session.v1.dataPath, JSON.stringify(tokenSessions, null, 2));
+  if (config.session.v1.storage) {
+    if (config.session.v1.storage.type === 'file') {
+      fs.writeFileSync(config.session.v1.storage.path, JSON.stringify(tokenSessions, null, 2));
+    }
+  }
 }
 
-export function isToken(token?: string): boolean {
-  const matchedTokens = tokenSessions.issuedTokens.filter((t) => t.token === token);
-  const result = token !== undefined && matchedTokens.length === 1;
+export async function isToken(token?: string): Promise<boolean> {
+  if (!token) return false;
+
+  let result;
+
+  if (config.session.v1.storage) {
+    const matchedTokens = tokenSessions.issuedTokens.filter((t) => t.token === token);
+    result = matchedTokens.length === 1;
+  } else {
+    const matchedToken = await prisma.meilingSessionV1Token.findUnique({
+      where: {
+        token,
+      },
+    });
+    result = matchedToken !== undefined && matchedToken !== null;
+  }
 
   saveSession();
 
@@ -103,14 +124,14 @@ export function createToken(req: FastifyRequest): string | undefined {
   return token;
 }
 
-export function getSessionFromRequest(req: FastifyRequest): MeilingV1Session | undefined {
+export async function getSessionFromRequest(req: FastifyRequest): Promise<MeilingV1Session | undefined> {
   let data: MeilingV1Session | undefined;
   let token: string | undefined = undefined;
 
   if (req.headers.authorization && req.headers.authorization.includes('Bearer')) {
-    token = getTokenFromRequest(req);
+    token = await getTokenFromRequest(req);
 
-    if (isToken(token)) {
+    if (await isToken(token)) {
       const session = tokenSessions.issuedTokens.find((n) => n.token === token);
       const expiresAt = session?.expiresAt;
 
@@ -145,12 +166,12 @@ export function getSessionFromRequest(req: FastifyRequest): MeilingV1Session | u
   return data;
 }
 
-export function setSession(req: FastifyRequest, data?: MeilingV1Session) {
+export async function setSession(req: FastifyRequest, data?: MeilingV1Session) {
   if (req.headers.authorization && req.headers.authorization.includes('Bearer')) {
-    const token = getTokenFromRequest(req);
+    const token = await getTokenFromRequest(req);
 
     if (token) {
-      if (isToken(token)) {
+      if (await isToken(token)) {
         if (data) {
           const tokenData = tokenSessions.issuedTokens.find((n) => n.token === token);
           if (tokenData) {
@@ -167,26 +188,26 @@ export function setSession(req: FastifyRequest, data?: MeilingV1Session) {
   saveSession();
 }
 
-export function setExtendedAuthentiationSession(
+export async function setExtendedAuthentiationSession(
   req: FastifyRequest,
   extAuth: MeilingV1SessionExtendedAuthentication | undefined,
 ) {
-  const prevSession = getSessionFromRequest(req);
+  const prevSession = await getSessionFromRequest(req);
   const session = {
     ...prevSession,
     extendedAuthentication: extAuth,
   } as MeilingV1Session;
 
-  setSession(req, session);
+  await setSession(req, session);
 }
 
-export function setExtendedAuthenticationSessionMethodAndChallenge(
+export async function setExtendedAuthenticationSessionMethodAndChallenge(
   req: FastifyRequest,
   method?: MeilingV1ExtendedAuthMethods,
   challenge?: string | undefined,
   challengeCreatedAt?: Date,
 ) {
-  const session = getSessionFromRequest(req);
+  const session = await getSessionFromRequest(req);
 
   if (session) {
     if (session.extendedAuthentication) {
@@ -200,12 +221,12 @@ export function setExtendedAuthenticationSessionMethodAndChallenge(
       }
     }
 
-    setSession(req, session);
+    await setSession(req, session);
   }
 }
 
 export async function getPreviouslyLoggedIn(req: FastifyRequest, user: UserModel | string): Promise<boolean> {
-  const session = getSessionFromRequest(req);
+  const session = await getSessionFromRequest(req);
 
   if (session) {
     if (session.previouslyLoggedIn === undefined) {
@@ -228,7 +249,7 @@ export async function getPreviouslyLoggedIn(req: FastifyRequest, user: UserModel
 }
 
 export async function login(req: FastifyRequest, user: UserModel | string) {
-  const session = getSessionFromRequest(req);
+  const session = await getSessionFromRequest(req);
 
   if (session) {
     if (session.user === undefined) {
@@ -256,14 +277,14 @@ export async function login(req: FastifyRequest, user: UserModel | string) {
       });
     }
 
-    setSession(req, session);
+    await setSession(req, session);
   }
 
   return;
 }
 
 export async function logout(req: FastifyRequest, user?: UserModel | string) {
-  const session = getSessionFromRequest(req);
+  const session = await getSessionFromRequest(req);
 
   if (session) {
     if (user) {
@@ -288,12 +309,12 @@ export async function logout(req: FastifyRequest, user?: UserModel | string) {
       session.user = undefined;
     }
 
-    setSession(req, session);
+    await setSession(req, session);
   }
 }
 
 export async function getLoggedIn(req: FastifyRequest) {
-  const session = getSessionFromRequest(req);
+  const session = await getSessionFromRequest(req);
 
   if (session) {
     if (session.user === undefined) {

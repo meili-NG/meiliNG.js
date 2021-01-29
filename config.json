@@ -20,7 +20,10 @@
   },
   "session": {
     "v1": {
-      "dataPath": "./tokenSession.json",
+      "storage": {
+        "type": "file",
+        "path": "./tokenSession.json"
+      },
       "maxAge": 604800,
       "rateLimit": {
         "maxTokenPerIP": 20,

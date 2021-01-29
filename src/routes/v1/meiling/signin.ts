@@ -127,7 +127,7 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
       if (twoFactorMethods.length > 0) {
         // set the session for two factor authentication
 
-        MeilingV1Session.setExtendedAuthentiationSession(req, {
+        await MeilingV1Session.setExtendedAuthentiationSession(req, {
           id: user.id,
           type: MeilingV1SigninType.TWO_FACTOR_AUTH,
         });
@@ -200,7 +200,7 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
         );
       }
 
-      MeilingV1Session.setExtendedAuthentiationSession(req, {
+      await MeilingV1Session.setExtendedAuthentiationSession(req, {
         type: MeilingV1SigninType.PASSWORDLESS,
       });
     }
@@ -233,7 +233,7 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
     if (challengeResponse === undefined) {
       const challenge = MeilingV1Challenge.generateChallenge(signinMethod);
 
-      MeilingV1Session.setExtendedAuthenticationSessionMethodAndChallenge(req, signinMethod, challenge);
+      await MeilingV1Session.setExtendedAuthenticationSessionMethodAndChallenge(req, signinMethod, challenge);
 
       rep.send({
         type: body.type,
@@ -348,7 +348,7 @@ please request this endpoint without challengeResponse field to request challeng
   }
 
   await MeilingV1Session.login(req, userToLogin);
-  MeilingV1Session.setExtendedAuthentiationSession(req, undefined);
+  await MeilingV1Session.setExtendedAuthentiationSession(req, undefined);
 
   User.updateLastAuthenticated(userToLogin);
   User.updateLastSignIn(userToLogin);

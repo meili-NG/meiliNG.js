@@ -165,4 +165,11 @@ model OAuthToken {
   metadata              Json?
 }
 
-
+model MeilingSessionV1Token {
+  token                 String                        @id
+  ip                    String                        
+  issuedAt              DateTime                      @default(now())
+  lastUsed              DateTime                      @default(now())
+  expiresAt             DateTime
+  session               Json
+}

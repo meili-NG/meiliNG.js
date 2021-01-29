@@ -173,3 +173,11 @@ model MeilingSessionV1Token {
   expiresAt             DateTime
   session               Json
 }
+
+model MeilingV1Verification {
+  token                 String                        @id
+  verificationData      Json
+  isValid               Boolean                       @default(true)
+  issuedAt              DateTime                      @default(now())
+  expiresAt             DateTime
+}

@@ -117,9 +117,8 @@ dist
 ehthumbs.db
 Thumbs.db
 
-# Meiling Project Session Key
-meiling-cookie-key
-
 # Temporary stuff
 /prisma/migrations
+
+# File based Token Sessions
 tokenSession.json

@@ -1,17 +1,9 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { Client, ClientAccessControls, User } from '../../../common';
-import { MeilingV1Session } from './common';
-import { sendMeilingError } from './error';
-import { MeilingV1ErrorType } from './interfaces';
-
-interface MeilingV1AppParams {
-  clientId?: string;
-}
-
-export function registerV1MeilingAppsEndpoints(app: FastifyInstance, baseURI: string) {
-  app.get(baseURI, meilingV1AppHandler);
-  app.get(baseURI + '/:clientId', meilingV1AppHandler);
-}
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { Client, ClientAccessControls, User } from '../../../../common';
+import { MeilingV1Session } from '../common';
+import { sendMeilingError } from '../error';
+import { MeilingV1ErrorType } from '../interfaces';
+import { MeilingV1AppParams } from './interface';
 
 export async function meilingV1AppHandler(req: FastifyRequest, rep: FastifyReply) {
   const params = req.params as MeilingV1AppParams;

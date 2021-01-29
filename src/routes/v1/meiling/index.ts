@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { config, isDevelopment } from '../../..';
-import { registerV1MeilingAppsEndpoints } from './app';
+import { registerV1MeilingAppsEndpoints } from './apps';
 import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';

@@ -11,7 +11,7 @@ interface MeilingV1Signup {
 }
 
 export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyReply) {
-  req.body;
+  const body = req.body as MeilingV1Signup;
 
   sendMeilingError(rep, MeilingV1ErrorType.NOT_IMPLEMENTED);
 }

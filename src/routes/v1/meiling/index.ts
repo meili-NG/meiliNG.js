@@ -9,14 +9,14 @@ import { meilingV1SignoutHandler } from './signout';
 import { meilingV1SignupHandler } from './signup';
 import { registerV1MeilingUserEndpoints } from './users';
 
-export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string) {
-  app.post(baseURI + '/signin', meilingV1SigninHandler);
-  app.post(baseURI + '/signup', meilingV1SignupHandler);
+export function registerV1MeilingEndpoints(app: FastifyInstance) {
+  app.post('/signin', meilingV1SigninHandler);
+  app.post('/signup', meilingV1SignupHandler);
 
-  app.get(baseURI + '/signout', meilingV1SignoutHandler);
-  app.get(baseURI + '/signout/:userId', meilingV1SignoutHandler);
+  app.get('/signout', meilingV1SignoutHandler);
+  app.get('/signout/:userId', meilingV1SignoutHandler);
 
-  app.get(baseURI + '/session', async (req, rep) => {
+  app.get('/session', async (req, rep) => {
     if ((req.query as any)?.token && (req.query as any)?.token !== '') {
       const authToken = (req.query as any)?.token;
       console.log('debug Feature:', authToken);
@@ -63,7 +63,7 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
     }
   });
 
-  app.get(baseURI, (req, rep) => {
+  app.get('/', (req, rep) => {
     rep.send({
       version: 1,
       engine: 'Meiling Project',
@@ -71,6 +71,6 @@ export function registerV1MeilingEndpoints(app: FastifyInstance, baseURI: string
     });
   });
 
-  registerV1MeilingUserEndpoints(app, baseURI + '/users');
-  registerV1MeilingAppsEndpoints(app, baseURI + '/apps');
+  registerV1MeilingUserEndpoints(app, '/users');
+  registerV1MeilingAppsEndpoints(app, '/apps');
 }

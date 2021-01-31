@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import chalk from 'chalk';
 import fastify from 'fastify';
-import fastifyCors from 'fastify-cors';
 import fastifyFormbody from 'fastify-formbody';
 import fs from 'fs';
 import { Banner, Database } from './common';
@@ -36,15 +35,6 @@ const app = fastify({
       ? config.meiling.proxy.allowedHosts
       : true
     : false,
-});
-
-console.log('[Startup] Registering for CORS header handler');
-app.register(fastifyCors, {
-  origin: isDevelopment
-    ? (origin, callback) => {
-        callback(null, true);
-      }
-    : config.frontend.url,
 });
 
 console.log('[Startup] Registering for Fastify Handler');

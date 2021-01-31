@@ -1,7 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { isDevelopment, VERSION } from '..';
 import { registerV1Endpoints } from './v1';
-import { registerV1OAuth2Endpoints } from './v1/oauth2';
 
 export function registerRootEndpoints(app: FastifyInstance, baseURI: string) {
   app.route({
@@ -11,9 +10,6 @@ export function registerRootEndpoints(app: FastifyInstance, baseURI: string) {
   });
 
   registerV1Endpoints(app, baseURI + 'v1');
-
-  // Google Compatibility
-  registerV1OAuth2Endpoints(app, baseURI + 'o/oauth2/v2');
 }
 
 // ======

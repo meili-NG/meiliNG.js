@@ -56,9 +56,9 @@ export async function createToken(
   metadata?: Token.TokenMetadata,
 ) {
   // TODO: allow custom generator for token
-  const token = Token.generateToken();
+  const tokenKey = Token.generateToken();
 
-  await prisma.oAuthToken.create({
+  const token = await prisma.oAuthToken.create({
     data: {
       authorization: {
         connect: {
@@ -66,10 +66,32 @@ export async function createToken(
         },
       },
       type,
-      token,
+      token: tokenKey,
       metadata: metadata as InputJsonValue,
     },
   });
+
+  updateLastUpdated(authorization);
+
+  return token;
+}
+
+export async function getToken(authorization: OAuthClientAuthorization, type: OAuthTokenType) {
+  let token = await prisma.oAuthToken.findFirst({
+    orderBy: [
+      {
+        issuedAt: 'desc',
+      },
+    ],
+    where: {
+      authorization,
+      type,
+    },
+  });
+
+  if (!token || Token.getExpiresInByType(type, token.issuedAt) < Token.getValidTimeByType(type) * 0.1) {
+    token = await createToken(authorization, type, token?.metadata as Token.TokenMetadata);
+  }
 
   updateLastUpdated(authorization);
 

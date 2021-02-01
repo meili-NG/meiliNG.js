@@ -1,5 +1,5 @@
 import { OAuthClient, Permission, User as UserModel } from '@prisma/client';
-import { MeilingCommonOAuth2, User, Utils } from '.';
+import { ClientAuthorization, MeilingCommonOAuth2, User, Utils } from '.';
 import { config, prisma } from '..';
 
 export async function getByClientId(clientId: string) {
@@ -144,4 +144,46 @@ export async function createAuthorization(clientId: string, user: string | UserM
   });
 
   return authorization;
+}
+
+export async function getUnauthorizedPermissions(
+  user: UserModel | string,
+  clientId: string,
+  permissions: (Permission | string)[],
+) {
+  const authorizations = await User.getClientAuthorizations(user, clientId);
+
+  if (authorizations) {
+    const authPromises = [];
+
+    for (const authorization of authorizations) {
+      authPromises.push(ClientAuthorization.getAuthorizedPermissions(authorization));
+    }
+
+    let minimumUnauthorizedPermissions: string[] | undefined = undefined;
+
+    const data = await Promise.all(authPromises);
+    for (const datum of data) {
+      if (minimumUnauthorizedPermissions === undefined) {
+        minimumUnauthorizedPermissions = datum.map((n) => n.name);
+      }
+
+      const unauthorizedPermissions = permissions.filter((p) => {
+        const name = typeof p === 'string' ? p : p.name;
+        return datum.filter((q) => q.name === name).length === 0;
+      });
+
+      if (minimumUnauthorizedPermissions.length > unauthorizedPermissions.length) {
+        minimumUnauthorizedPermissions = unauthorizedPermissions.map((n) => (typeof n === 'string' ? n : n.name));
+      }
+    }
+
+    if (minimumUnauthorizedPermissions === undefined) {
+      minimumUnauthorizedPermissions = permissions.map((n) => (typeof n === 'string' ? n : n.name));
+    }
+
+    return minimumUnauthorizedPermissions;
+  } else {
+    return false;
+  }
 }

@@ -12,3 +12,5 @@ export enum OAuth2QueryGrantType {
 
 export type OAuth2QueryBoolean = 'true' | 'false';
 export type OAuth2QueryPrompt = 'none' | 'consent' | 'select_account';
+
+export type OAuth2QueryCodeChallengeMethod = 'S256' | 'plain';

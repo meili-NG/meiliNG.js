@@ -1,13 +1,21 @@
-import { InputJsonObject, OAuthTokenType } from '@prisma/client';
-import { ClientAuthorization, Token, Utils } from '.';
+import { InputJsonObject, OAuthTokenType, Permission, User as UserModel } from '@prisma/client';
+import { ClientAuthorization, Token, User, Utils } from '.';
 import { config, prisma } from '..';
+import { OAuth2QueryCodeChallengeMethod } from '../routes/v1/oauth2/interfaces';
 
 export type TokenMetadata = null | TokenMetadataV1;
 
 export interface TokenMetadataV1 {
   version: 1;
-  shouldGenerate?: {
-    refreshToken: boolean;
+  options?: {
+    offline: boolean;
+    code_challenge?: {
+      method: OAuth2QueryCodeChallengeMethod;
+      challenge: string;
+    };
+    openid?: {
+      nonce?: string;
+    };
   };
 }
 
@@ -44,14 +52,6 @@ export async function getAuthorization(token: string, type?: OAuthTokenType) {
   return;
 }
 
-export async function getUser(token: string, type?: OAuthTokenType) {
-  const authorization = await getAuthorization(token, type);
-  if (!authorization) return;
-
-  const user = await ClientAuthorization.getUser(authorization);
-  return user;
-}
-
 export async function getAuthorizedPermissions(token: string, type?: OAuthTokenType) {
   const authorization = await getAuthorization(token, type);
   if (!authorization) return;
@@ -72,6 +72,23 @@ export async function getData(token: string, type?: OAuthTokenType) {
   }
 
   return tokenData ? tokenData : undefined;
+}
+
+export async function getUser(token: string, type?: OAuthTokenType): Promise<UserModel | undefined> {
+  const tokenData = await getData(token, type);
+  if (!tokenData) return undefined;
+
+  const clientAuthorization = await ClientAuthorization.getById(tokenData.oAuthClientAuthorizationId);
+  if (!clientAuthorization) return undefined;
+
+  const user = await User.getBasicInfo(clientAuthorization?.userId);
+  if (!user) return undefined;
+
+  if (user) {
+    await User.updateLastAuthenticated(user);
+  }
+
+  return user && user !== null ? user : undefined;
 }
 
 export async function doesExist(token: string, type?: OAuthTokenType) {
@@ -134,4 +151,34 @@ export async function isValid(token: string, type?: OAuthTokenType): Promise<boo
   type = data.type;
 
   return isValidByType(type, issuedAt);
+}
+
+export async function serialize(
+  token: string,
+  type?: OAuthTokenType,
+): Promise<null | {
+  token: string;
+  scope: string;
+  token_type: 'Bearer';
+  expires_in: number;
+}> {
+  const data = await getData(token, type);
+  if (!data) return null;
+
+  let permissions: Permission[];
+  const permissionsTmp = await Token.getAuthorizedPermissions(token, type);
+  if (!permissionsTmp) {
+    permissions = [];
+  } else {
+    permissions = permissionsTmp;
+  }
+
+  const scope = permissions.map((p) => p.name).join(' ');
+
+  return {
+    token,
+    scope,
+    token_type: 'Bearer',
+    expires_in: await Token.getExpiresIn(token, type),
+  };
 }

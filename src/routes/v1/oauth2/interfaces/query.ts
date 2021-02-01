@@ -52,6 +52,7 @@ export interface OAuth2QueryTokenBaseParameters extends OAuth2QueryAuthClientPar
 export interface OAuth2QueryTokenAuthorizationCodeParameters extends OAuth2QueryTokenBaseParameters {
   grant_type: OAuth2QueryGrantType.AUTHORIZATION_CODE;
   code: string;
+  code_verifier?: string;
   redirect_uri: string;
 }
 

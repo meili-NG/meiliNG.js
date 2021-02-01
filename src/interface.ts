@@ -14,6 +14,10 @@ interface SessionV1StorageFileConfig {
 
 export interface Config {
   version: string;
+  openid: {
+    issuingAuthority: string;
+    secretKey: string;
+  };
   frontend: {
     url: string[];
   };
@@ -47,6 +51,7 @@ export interface Config {
       oauth: {
         [token in OAuthTokenType]: number;
       };
+      openid: number;
       meiling: {
         challenge: number;
       };

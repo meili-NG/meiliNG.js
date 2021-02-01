@@ -9,8 +9,9 @@ import {
   User as UserModel,
 } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { ClientAuthorization, Utils } from '.';
-import { prisma } from '../';
+import JWT from 'jsonwebtoken';
+import { ClientAuthorization, User, Utils } from '.';
+import { config, prisma } from '../';
 
 export interface UserInfoObject extends UserModel {
   emails: Email[];
@@ -357,6 +358,18 @@ export async function findByCommonUsername(username: string): Promise<UserModel[
   return users;
 }
 
+export async function getPrimaryEmail(userId: string) {
+  const email = await prisma.email.findFirst({
+    where: {
+      userId,
+      isPrimary: true,
+    },
+  });
+
+  if (!email) return undefined;
+  return email;
+}
+
 export async function getEmails(userId: string) {
   const emails = await prisma.email.findMany({
     where: {
@@ -411,6 +424,18 @@ export async function removeEmail(userId: string, email: string) {
       email: email.toLowerCase(),
     },
   });
+}
+
+export async function getPrimaryPhone(userId: string) {
+  const phone = await prisma.phone.findFirst({
+    where: {
+      userId,
+      isPrimary: true,
+    },
+  });
+
+  if (!phone) return undefined;
+  return phone;
 }
 
 export async function getPhones(userId: string) {
@@ -482,4 +507,52 @@ export async function findByPasswordLogin(username: string, password: string): P
   }
 
   return matchingUsers;
+}
+
+export async function createIDToken(
+  user: UserModel | string,
+  clientId: string,
+  permissions?: string[],
+  nonce?: string,
+) {
+  const data = await getDetailedInfo(user);
+  if (!data) return undefined;
+
+  const namePerm = permissions && permissions.includes('name');
+  const nameDetail = {
+    family_name: data.familyName,
+    given_name: data.givenName,
+    middle_name: data.middleName,
+    nickname: data.name,
+  };
+
+  const emailPerm = permissions && permissions.includes('email');
+  const email = await User.getPrimaryEmail(getUserId(user));
+
+  const phonePerm = permissions && permissions.includes('phone');
+  const phone = await User.getPrimaryPhone(getUserId(user));
+
+  const addressPerm = permissions && permissions.includes('address');
+  const address = data.address;
+
+  const jwtData = {
+    sub: data.id,
+    iss: config.openid.issuingAuthority,
+    aud: clientId,
+    nonce: nonce,
+    auth_time: data.lastAuthenticated,
+    iat: new Date(),
+    exp: new Date(new Date().getTime() + 1000 * config.token.invalidate.openid),
+    name: data.name,
+    ...(namePerm ? nameDetail : {}),
+    preferred_username: data.username,
+    picture: data.profileUrl,
+    email: emailPerm && email ? email.email : undefined,
+    email_verified: emailPerm && email ? email.verified : undefined,
+    phone: phonePerm && phone ? phone.phone : undefined,
+    phone_verified: true,
+    address: addressPerm && address ? address : undefined,
+  };
+
+  return JWT.sign(jwtData, config.openid.secretKey);
 }

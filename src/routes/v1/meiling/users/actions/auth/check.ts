@@ -4,7 +4,7 @@ import { MeilingV1UserOAuthAuthQuery } from '.';
 import { meilingV1UserActionGetUser } from '..';
 import { prisma } from '../../../../../..';
 import { Client, ClientAccessControls, ClientAuthorization, Token, User, Utils } from '../../../../../../common';
-import { OAuth2QueryResponseType } from '../../../../oauth2/interfaces';
+import { OAuth2QueryCodeChallengeMethod, OAuth2QueryResponseType } from '../../../../oauth2/interfaces';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 
@@ -153,20 +153,68 @@ export async function meilingV1OAuthClientAuthCheckHandler(req: FastifyRequest, 
 
   const authorization = await Client.createAuthorization(clientId, userBase, requestedPermissions);
 
+  let code_challenge = false;
+  if (query.code_challenge || query.code_challenge_method) {
+    if (!Utils.isValidValue(query.code_challenge, query.code_challenge_method)) {
+      sendMeilingError(
+        rep,
+        MeilingV1ErrorType.INVALID_REQUEST,
+        `code_challenge should send query.code_challenge_method too.`,
+      );
+      return;
+    }
+
+    if (query.code_challenge_method === 'S256' || query.code_challenge_method === 'plain') {
+      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, `code_challenge_method should be S256 or plain`);
+      return;
+    }
+
+    if (query.code_challenge_method === 'S256') {
+      if (!Utils.checkBase64(query.code_challenge_method)) {
+        sendMeilingError(
+          rep,
+          MeilingV1ErrorType.INVALID_REQUEST,
+          `code_challenge should be base64 encoded sha256 hash string`,
+        );
+        return;
+      }
+    }
+    code_challenge = true;
+  }
+
   if (query.response_type === OAuth2QueryResponseType.CODE) {
-    const code = await ClientAuthorization.createToken(authorization, 'AUTHORIZATION_CODE');
+    const code = await ClientAuthorization.createToken(authorization, 'AUTHORIZATION_CODE', {
+      version: 1,
+      options: {
+        offline: query.access_type === 'offline',
+        code_challenge: code_challenge
+          ? {
+              method: (query.code_challenge_method as unknown) as OAuth2QueryCodeChallengeMethod,
+              challenge: query.code_challenge as string,
+            }
+          : undefined,
+        openid: {
+          nonce: query.nonce,
+        },
+      },
+    });
 
     rep.send({
-      code,
+      code: code.token,
+      state: query.state,
     });
     return;
   } else if (query.response_type === OAuth2QueryResponseType.TOKEN) {
     const access_token = await ClientAuthorization.createToken(authorization, 'ACCESS_TOKEN');
 
     rep.send({
-      access_token,
+      access_token: access_token.token,
       token_type: 'Bearer',
       expires_in: Token.getValidTimeByType('ACCESS_TOKEN'),
+      state: query.state,
+      id_token: scopes.includes('openid')
+        ? await User.createIDToken(userData, clientId, scopes, query.nonce)
+        : undefined,
     });
     return;
   } else {

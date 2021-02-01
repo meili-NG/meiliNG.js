@@ -312,7 +312,7 @@ export async function getClientAuthorizedPermissions(user: UserModel | string, c
 export async function findByUsername(username: string): Promise<UserModel[]> {
   return await prisma.user.findMany({
     where: {
-      username,
+      username: username.toLowerCase(),
     },
   });
 }
@@ -320,7 +320,7 @@ export async function findByUsername(username: string): Promise<UserModel[]> {
 export async function findByEmail(email: string, verified: boolean | undefined = true): Promise<UserModel[]> {
   const emails = await prisma.email.findMany({
     where: {
-      email: email,
+      email: email.toLowerCase(),
       allowUse: true,
       verified,
     },
@@ -372,7 +372,7 @@ export async function addEmail(userId: string, email: string, isPrimary = false)
 
   await prisma.email.create({
     data: {
-      email,
+      email: email.toLowerCase(),
       User: {
         connect: {
           id: userId,
@@ -408,7 +408,7 @@ export async function removeEmail(userId: string, email: string) {
   await prisma.email.deleteMany({
     where: {
       userId,
-      email,
+      email: email.toLowerCase(),
     },
   });
 }

@@ -1,9 +1,9 @@
 import { OAuthTokenType } from '@prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
-import { Client, ClientAuthorization, Token, User, Utils } from '../../../common';
-import { sendOAuth2Error } from './error';
-import { OAuth2ErrorResponseType, OAuth2QueryBodyParameters, OAuth2QueryGrantType } from './interfaces';
+import { Client, ClientAuthorization, Token, User, Utils } from '../../../../common';
+import { sendOAuth2Error } from '../error';
+import { OAuth2ErrorResponseType, OAuth2QueryBodyParameters, OAuth2QueryGrantType } from '../interfaces';
 
 // TODO: https://developers.google.com/identity/protocols/oauth2/limited-input-device#step-4:-poll-googles-authorization-server
 // TODO: https://developers.google.com/identity/protocols/oauth2/native-app#exchange-authorization-code

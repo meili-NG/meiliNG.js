@@ -2,8 +2,8 @@ import { FastifyInstance } from 'fastify';
 import { oAuth2AuthHandler } from './auth';
 import { oAuth2TokenHandler } from './token';
 
-export function registerV1OAuth2Endpoints(app: FastifyInstance, baseURI: string) {
-  app.get(baseURI, (req, rep) => {
+export function registerV1OAuth2Endpoints(app: FastifyInstance) {
+  app.get('/', (req, rep) => {
     rep.send({
       version: 1,
       engine: 'Meiling Project',
@@ -11,6 +11,6 @@ export function registerV1OAuth2Endpoints(app: FastifyInstance, baseURI: string)
     });
   });
 
-  app.get(baseURI + '/auth', oAuth2AuthHandler);
-  app.post(baseURI + '/token', oAuth2TokenHandler);
+  app.get('/auth', oAuth2AuthHandler);
+  app.post('/token', oAuth2TokenHandler);
 }

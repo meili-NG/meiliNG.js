@@ -42,6 +42,11 @@ export async function getRedirectUris(clientId: string) {
 }
 
 export async function verifySecret(clientId: string, clientSecret?: string) {
+  const client = await getByClientId(clientId);
+  if (!client) {
+    return false;
+  }
+
   const secrets = await prisma.oAuthClientSecrets.findMany({
     where: {
       oAuthClientId: clientId,

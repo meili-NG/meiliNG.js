@@ -11,7 +11,7 @@ export interface OAuth2QueryBaseParameters {
 }
 
 export interface OAuth2QueryAuthClientParameters extends OAuth2QueryAuthParameters {
-  client_secret: string;
+  client_secret?: string;
 }
 
 export interface OAuth2QueryAuthParameters extends OAuth2QueryBaseParameters {

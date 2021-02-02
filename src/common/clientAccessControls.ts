@@ -38,12 +38,20 @@ export async function checkUsers(acl: OAuthClientAccessControls, user: UserModel
   const [users, groups] = await Promise.all([
     prisma.user.findMany({
       where: {
-        oAuthUserAccessControlsId: acl.oAuthUserAccessControlsId,
+        oAuthAccessControls: {
+          some: {
+            id: acl.id,
+          },
+        },
       },
     }),
     prisma.group.findMany({
       where: {
-        oAuthUserAccessControlsId: acl.oAuthUserAccessControlsId,
+        oAuthAccessControls: {
+          some: {
+            id: acl.id,
+          },
+        },
       },
     }),
   ]);

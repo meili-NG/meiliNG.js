@@ -16,9 +16,9 @@ model User {
   username              String                        @unique
   
   name                  String
-  familyName            String                        @default("")
-  givenName             String                        @default("")
-  middleName            String                        @default("")
+  familyName            String?
+  givenName             String?
+  middleName            String?
 
   emails                Email[]
   phones                Phone[]
@@ -81,6 +81,8 @@ model Authorization {
 model Group {
   id                    String                        @id @default(uuid())
   name                  String
+
+  oAuthAccessControls   OAuthUserAccessControls[]
 }
 
 model OAuthClient {

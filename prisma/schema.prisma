@@ -30,6 +30,8 @@ model User {
   ownedClients          OAuthClient[]
   authorizedClients     OAuthClientAuthorization[]
 
+  oAuthAccessControls   OAuthUserAccessControls[]
+
   auths                 Authorization[]
 
   isActive              Boolean                       @default(true)

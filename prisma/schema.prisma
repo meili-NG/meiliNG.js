@@ -20,8 +20,6 @@ model User {
   givenName             String                        @default("")
   middleName            String                        @default("")
 
-  address               String
-
   emails                Email[]
   phones                Phone[]
 

@@ -532,9 +532,6 @@ export async function createIDToken(
   const phonePerm = permissions && permissions.includes('phone');
   const phone = await User.getPrimaryPhone(getUserId(user));
 
-  const addressPerm = permissions && permissions.includes('address');
-  const address = data.address;
-
   const jwtData = {
     sub: data.id,
     iss: config.openid.issuingAuthority,
@@ -551,7 +548,6 @@ export async function createIDToken(
     email_verified: emailPerm && email ? email.verified : undefined,
     phone: phonePerm && phone ? phone.phone : undefined,
     phone_verified: true,
-    address: addressPerm && address ? address : undefined,
   };
 
   return JWT.sign(jwtData, config.openid.secretKey);

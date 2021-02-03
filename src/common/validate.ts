@@ -43,6 +43,6 @@ export function validateOTP(challengeResponse: string, secret: string) {
 
 export function sendOTPSMS(phones: string[], challenge: string) {
   for (const phone of phones) {
-    console.log(`pseudo-request: created challenge (${challenge}) for ${phone}`);
+    // TODO: Implement SMS
   }
 }

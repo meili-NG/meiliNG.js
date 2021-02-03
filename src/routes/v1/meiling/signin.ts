@@ -317,7 +317,6 @@ please request this endpoint without challengeResponse field to request challeng
 
     for (const index of authMethodCheckIndex) {
       const userId = authMethodCheckUsers[index];
-      console.log(userId);
 
       if (userId !== null) {
         if (authorizedUsers.filter((n) => n.id === userId).length === 0) {

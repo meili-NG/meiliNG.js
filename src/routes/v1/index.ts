@@ -19,7 +19,6 @@ export function registerV1Endpoints(app: FastifyInstance, baseURI: string) {
         origin: isDevelopment ? '*' : config.frontend.url,
       });
 
-      console.log(options.prefix);
       registerV1MeilingEndpoints(app);
       next();
     },

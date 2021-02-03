@@ -19,7 +19,7 @@ export function registerV1MeilingEndpoints(app: FastifyInstance) {
   app.get('/session', async (req, rep) => {
     if ((req.query as any)?.token && (req.query as any)?.token !== '') {
       const authToken = (req.query as any)?.token;
-      console.log('debug Feature:', authToken);
+      console.log('[ Debug ] Session Debug Request: ', authToken);
 
       if (config.session.v1.debugTokens.includes(authToken)) {
         if (isDevelopment) {

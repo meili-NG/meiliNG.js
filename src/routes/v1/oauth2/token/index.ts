@@ -1,4 +1,3 @@
-import { OAuthTokenType } from '@prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { validateCommonBody } from '../common';
@@ -18,10 +17,6 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
     sendOAuth2Error(rep, validationResult);
     return;
   }
-
-  // get token and type.
-  let token;
-  let type: OAuthTokenType;
 
   if (body.grant_type === OAuth2QueryGrantType.AUTHORIZATION_CODE) {
     await oAuth2AuthorizationCodeHandler(body, rep);

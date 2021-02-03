@@ -23,6 +23,14 @@ export async function oAuthUserInfoHandler(req: FastifyRequest, rep: FastifyRepl
   }
 
   const scopes = perms.map((n) => n.name);
+  if (!scopes.includes('openid')) {
+    sendOAuth2Error(
+      rep,
+      OAuth2ErrorResponseType.INVALID_GRANT,
+      'provided access_token does NOT have openid permission',
+    );
+    return;
+  }
 
   const userData = await User.createIDToken(user, clientId.id, scopes);
   if (!userData) {

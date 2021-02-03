@@ -515,6 +515,12 @@ export async function createIDToken(
   permissions?: string[],
   nonce?: string,
 ) {
+  if (permissions) {
+    if (!permissions.includes('openid')) {
+      return undefined;
+    }
+  }
+
   const data = await getDetailedInfo(user);
   if (!data) return undefined;
 

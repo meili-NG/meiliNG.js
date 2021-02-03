@@ -88,11 +88,8 @@ export async function isToken(token?: string): Promise<boolean> {
 }
 
 export function getTokenFromRequest(req: FastifyRequest): string | undefined {
-  if (req.headers.authorization) {
-    const token = req.headers.authorization.split(' ').splice(1).join(' ');
-    return token;
-  }
-  return;
+  const token = Token.getTokenFromRequest(req);
+  return token ? token.token : undefined;
 }
 
 export async function createToken(req: FastifyRequest): Promise<string | undefined> {

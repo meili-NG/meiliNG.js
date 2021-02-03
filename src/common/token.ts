@@ -1,5 +1,6 @@
-import { InputJsonObject, OAuthTokenType, Permission, User as UserModel } from '@prisma/client';
-import { ClientAuthorization, Token, User, Utils } from '.';
+import { InputJsonObject, OAuthClient, OAuthTokenType, Permission, User as UserModel } from '@prisma/client';
+import { FastifyRequest } from 'fastify';
+import { Client, ClientAuthorization, Token, User, Utils } from '.';
 import { config, prisma } from '..';
 import { OAuth2QueryCodeChallengeMethod } from '../routes/v1/oauth2/interfaces';
 
@@ -68,6 +69,9 @@ export async function getData(token: string, type?: OAuthTokenType) {
   });
 
   if (tokenData) {
+    if (tokenData.type !== type) {
+      return undefined;
+    }
     await ClientAuthorization.updateLastUpdated(tokenData.oAuthClientAuthorizationId);
   }
 
@@ -89,6 +93,19 @@ export async function getUser(token: string, type?: OAuthTokenType): Promise<Use
   }
 
   return user && user !== null ? user : undefined;
+}
+
+export async function getClient(token: string, type?: OAuthTokenType): Promise<OAuthClient | undefined> {
+  const tokenData = await getData(token, type);
+  if (!tokenData) return undefined;
+
+  const clientAuthorization = await ClientAuthorization.getById(tokenData.oAuthClientAuthorizationId);
+  if (!clientAuthorization) return undefined;
+
+  const client = await Client.getByClientId(clientAuthorization.oAuthClientId);
+  if (!client) return undefined;
+
+  return client && client !== null ? client : undefined;
 }
 
 export async function doesExist(token: string, type?: OAuthTokenType) {
@@ -181,4 +198,23 @@ export async function serialize(
     token_type: 'Bearer',
     expires_in: await Token.getExpiresIn(token, type),
   };
+}
+
+export function getTokenFromRequest(
+  req: FastifyRequest,
+):
+  | {
+      method: string;
+      token: string;
+    }
+  | undefined {
+  if (req.headers.authorization) {
+    const method = req.headers.authorization.split(' ')[0];
+    const token = req.headers.authorization.split(' ').splice(1).join(' ');
+    return {
+      method,
+      token,
+    };
+  }
+  return;
 }

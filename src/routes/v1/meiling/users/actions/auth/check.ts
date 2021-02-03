@@ -120,6 +120,20 @@ export async function meilingV1OAuthClientAuthCheckHandler(req: FastifyRequest, 
     }
   }
 
+  // check for redirectUris
+  const redirectUriCheck = await Client.isValidRedirectURI(clientId, query.redirect_uri);
+
+  // if no redirectUri rule that meets user provided redirectUri
+  if (!redirectUriCheck) {
+    // callback match failed
+    sendMeilingError(
+      rep,
+      MeilingV1ErrorType.APPLICATION_REDIRECT_URI_INVALID,
+      `${query.redirect_uri} is not in pre-defined redirect uri.`,
+    );
+    return;
+  }
+
   // permission check agains already authorized application
   const permissionCheck =
     (await User.hasAuthorizedClient(userData, clientId)) &&
@@ -133,20 +147,6 @@ export async function meilingV1OAuthClientAuthCheckHandler(req: FastifyRequest, 
       rep,
       MeilingV1ErrorType.APPLICATION_USER_ACTION_REQUIRED,
       'permission upgrade was requested, user action with prompt is required.',
-    );
-    return;
-  }
-
-  // check for redirectUris
-  const redirectUriCheck = await Client.isValidRedirectURI(clientId, query.redirect_uri);
-
-  // if no redirectUri rule that meets user provided redirectUri
-  if (!redirectUriCheck) {
-    // callback match failed
-    sendMeilingError(
-      rep,
-      MeilingV1ErrorType.APPLICATION_REDIRECT_URI_INVALID,
-      `${query.redirect_uri} is not in pre-defined redirect uri.`,
     );
     return;
   }

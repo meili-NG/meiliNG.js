@@ -23,7 +23,7 @@ const eastereggDev = {
   },
   poweredBy: {
     gatekeeperEngine: 'Scarlet Mansion Access Control, ver. 0.1.6',
-    qiEngine: 'Qi Engine, ver. 0.2.4; Compatible with Qi Standard ver.1.2.4',
+    qiEngine: 'Qi Engine, ver. 0.2.4; Compatible with Qi Standard ver.1.2.4; https://www.wirelesspowerconsortium.com',
   },
   developmentMode: true,
 };

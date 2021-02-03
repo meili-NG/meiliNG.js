@@ -547,7 +547,7 @@ export async function createIDToken(
     email: emailPerm && email ? email.email : undefined,
     email_verified: emailPerm && email ? email.verified : undefined,
     phone: phonePerm && phone ? phone.phone : undefined,
-    phone_verified: true,
+    phone_verified: phonePerm && phone ? true : undefined,
   };
 
   return JWT.sign(jwtData, config.openid.secretKey);

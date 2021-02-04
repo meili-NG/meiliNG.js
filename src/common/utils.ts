@@ -54,6 +54,6 @@ export function getCryptoSafeInteger(bound?: number): number {
 }
 
 export function checkBase64(string: string) {
-  const regex = /[^-A-Za-z0-9+/=]|=[^=]|={3,}$/;
+  const regex = /^(?:[a-zA-Z0-9+\/]{4})*(?:|(?:[a-zA-Z0-9+\/]{3}=)|(?:[a-zA-Z0-9+\/]{2}==)|(?:[a-zA-Z0-9+\/]{1}===))$/;
   return regex.test(string);
 }

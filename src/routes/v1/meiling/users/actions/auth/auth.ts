@@ -146,7 +146,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
       return;
     }
 
-    if (query.code_challenge_method === 'S256' || query.code_challenge_method === 'plain') {
+    if (query.code_challenge_method !== 'S256' && query.code_challenge_method !== 'plain') {
       sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, `code_challenge_method should be S256 or plain`);
       return;
     }

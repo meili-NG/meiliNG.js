@@ -159,7 +159,7 @@ export async function meilingV1OAuthClientAuthCheckHandler(req: FastifyRequest, 
       sendMeilingError(
         rep,
         MeilingV1ErrorType.INVALID_REQUEST,
-        `code_challenge should send query.code_challenge_method too.`,
+        `code_challenge should send code_challenge_method too.`,
       );
       return;
     }
@@ -170,7 +170,7 @@ export async function meilingV1OAuthClientAuthCheckHandler(req: FastifyRequest, 
     }
 
     if (query.code_challenge_method === 'S256') {
-      if (!Utils.checkBase64(query.code_challenge_method)) {
+      if (!Utils.checkBase64(query.code_challenge as string)) {
         sendMeilingError(
           rep,
           MeilingV1ErrorType.INVALID_REQUEST,

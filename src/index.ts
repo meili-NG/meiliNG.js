@@ -55,5 +55,5 @@ app.register(fastifyFormbody);
   registerRootEndpoints(app, '/');
 
   console.log('[Startup] Starting up fastify...');
-  app.listen(config.listeningPort);
+  app.listen(config.listen);
 })();

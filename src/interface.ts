@@ -57,5 +57,5 @@ export interface Config {
       };
     };
   };
-  listeningPort: number;
+  listen: number | string;
 }

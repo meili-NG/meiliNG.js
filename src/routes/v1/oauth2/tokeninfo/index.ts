@@ -12,13 +12,13 @@ interface OAuth2QueryTokenInfoBody {
 }
 
 export async function oAuth2TokenInfoHandler(req: FastifyRequest, rep: FastifyReply) {
-  const body = req.body as OAuth2QueryTokenInfoBody;
+  const body = (req.body ? req.body : req.query) as OAuth2QueryTokenInfoBody;
 
-  if (body.id_token) {
+  if (body?.id_token) {
     await oAuth2IDTokenInfoHandler(body.id_token, rep);
-  } else if (body.access_token) {
+  } else if (body?.access_token) {
     await oAuth2AccessTokenInfoHandler(body.access_token, rep);
-  } else if (body.refresh_token) {
+  } else if (body?.refresh_token) {
     await oAuth2AccessTokenInfoHandler(body.refresh_token, rep);
   } else {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST, 'missing proper query');

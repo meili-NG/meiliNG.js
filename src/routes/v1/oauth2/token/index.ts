@@ -11,7 +11,7 @@ import { oAuth2RefreshTokenHandler } from './refresh_token';
 
 export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply) {
   const body = req.body as OAuth2QueryBodyParameters;
-  const validationResult = await validateCommonBody(body);
+  const validationResult = await validateCommonBody(body, false);
 
   if (validationResult !== true) {
     sendOAuth2Error(rep, validationResult);

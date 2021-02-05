@@ -1,9 +1,16 @@
 import { Client, Utils } from '../../../common';
 import { OAuth2ErrorResponseType, OAuth2QueryBodyParameters } from './interfaces';
 
-export async function validateCommonBody(body: OAuth2QueryBodyParameters): Promise<OAuth2ErrorResponseType | true> {
+export async function validateCommonBody(
+  body: OAuth2QueryBodyParameters,
+  include_secret = true,
+): Promise<OAuth2ErrorResponseType | true> {
   // validate query
-  if (!Utils.isValidValue(body, body?.client_id, body?.client_secret, body?.grant_type)) {
+  if (!Utils.isValidValue(body, body?.client_id, body?.grant_type)) {
+    return OAuth2ErrorResponseType.INVALID_REQUEST;
+  }
+
+  if (include_secret && !Utils.isValidValue(body?.client_secret)) {
     return OAuth2ErrorResponseType.INVALID_REQUEST;
   }
 

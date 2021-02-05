@@ -69,7 +69,7 @@ export async function getData(token: string, type?: OAuthTokenType) {
   });
 
   if (tokenData) {
-    if (tokenData.type !== type) {
+    if (type && tokenData.type !== type) {
       return undefined;
     }
     await ClientAuthorization.updateLastUpdated(tokenData.oAuthClientAuthorizationId);

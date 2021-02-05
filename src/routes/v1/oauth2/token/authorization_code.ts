@@ -19,8 +19,15 @@ export async function oAuth2AuthorizationCodeHandler(
     return;
   }
 
+  const data = await Token.getData(token);
+  if (data?.type !== type) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'invalid token type');
+    return;
+  }
+
   if (!(await Token.isValid(token, type))) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'expired token');
+    const expiresIn = await Token.getExpiresIn(token, type);
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'expired token, expired seconds: ' + expiresIn);
     return;
   }
 

@@ -21,15 +21,18 @@ export interface Config {
   frontend: {
     url: string[];
   };
+  fastify: {
+    listen: number | string;
+    proxy?: {
+      allowedHosts: string[];
+    };
+  };
   meiling: {
     error: {
       urlFormat: string;
     };
     oauth2: {
       skipAuthentication?: string[];
-    };
-    proxy?: {
-      allowedHosts: string[];
     };
   };
   session: {
@@ -57,5 +60,4 @@ export interface Config {
       };
     };
   };
-  listen: number | string;
 }

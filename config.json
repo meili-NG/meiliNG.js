@@ -11,15 +11,18 @@
     "issuingAuthority": "https://meiling.stella-api.dev",
     "secretKey": "ds6ab7nd96t7ba6sd78tv6ase78tv6ase78t"
   },
+  "fastify": {
+    "listen": 8080,
+    "proxy": {
+      "allowedHosts": []
+    }
+  },
   "meiling": {
     "error": {
       "urlFormat": "https://opensource.stella-it.com/developers/docs/meiling/error/{{errorCode}}.html"
     },
     "oauth2": {
       "skipAuthentication": []
-    },
-    "proxy": {
-      "allowedHosts": []
     }
   },
   "session": {

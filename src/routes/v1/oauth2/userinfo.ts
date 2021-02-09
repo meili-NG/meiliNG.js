@@ -1,6 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import JWT from 'jsonwebtoken';
-import { config } from '../../../';
 import { Token, User } from '../../../common';
 import { sendOAuth2Error } from './error';
 import { OAuth2ErrorResponseType } from './interfaces';
@@ -39,7 +38,7 @@ export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyRep
   }
 
   try {
-    const result = JWT.verify(userData, config.openid.secretKey) as any;
+    const result = JWT.decode(userData) as any;
     rep.send(result);
   } catch (e) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'invalid id_token has generated');

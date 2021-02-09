@@ -30,9 +30,9 @@ const app = fastify({
   logger: {
     prettyPrint: true,
   },
-  trustProxy: config.meiling.proxy
-    ? config.meiling.proxy.allowedHosts
-      ? config.meiling.proxy.allowedHosts
+  trustProxy: config.fastify.proxy
+    ? config.fastify.proxy.allowedHosts
+      ? config.fastify.proxy.allowedHosts
       : true
     : false,
 });
@@ -55,5 +55,5 @@ app.register(fastifyFormbody);
   registerRootEndpoints(app, '/');
 
   console.log('[Startup] Starting up fastify...');
-  app.listen(config.listen);
+  app.listen(config.fastify.listen);
 })();

@@ -8,14 +8,12 @@ import { Config } from './interface';
 import { registerRootEndpoints } from './routes';
 import { MeilingV1Session } from './routes/v1/meiling/common';
 
-const packageJson = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf-8' }));
+export const packageJson = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf-8' }));
 export const config = JSON.parse(fs.readFileSync('config.json', { encoding: 'utf-8' })) as Config;
 
 const env = process.env.NODE_ENV || 'development';
 
 export const prisma = new PrismaClient();
-export const VERSION = packageJson.version;
-
 export const isDevelopment = env === 'development';
 
 // some banner stuff

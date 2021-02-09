@@ -1,12 +1,12 @@
 import chalk from 'chalk';
 import Figlet from 'figlet';
-import { isDevelopment, VERSION } from '../';
+import { isDevelopment, packageJson } from '../';
 
 export function showBanner() {
   console.log(Figlet.textSync('Meiling'));
   console.log();
-  console.log(`${chalk.bold('Meiling Project')} - ${chalk.italic(`ver. ${VERSION}`)}`);
-  console.log(chalk.cyan(chalk.underline('https://github.com/Stella-IT/meiling')));
+  console.log(`${chalk.bold('Meiling Project')} - ${chalk.italic(`ver. ${packageJson.version}`)}`);
+  console.log(chalk.cyan(chalk.underline(packageJson.repository)));
   console.log();
   console.log(
     `Copyright © ${chalk.bold(

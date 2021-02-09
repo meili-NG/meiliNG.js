@@ -12,9 +12,10 @@
     "secretKey": "ds6ab7nd96t7ba6sd78tv6ase78tv6ase78t"
   },
   "fastify": {
-    "listen": 8080,
-    "proxy": {
-      "allowedHosts": []
+    "listen": "/tmp/stella-it/sockets/meiling.sock",
+    "proxy": {},
+    "unixSocket": {
+      "chmod": "0777"
     }
   },
   "meiling": {

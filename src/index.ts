@@ -59,5 +59,20 @@ app.register(fastifyFormbody);
   }
 
   console.log('[Startup] Starting up fastify...');
-  app.listen(config.fastify.listen);
+  await app.listen(config.fastify.listen);
+
+  if (typeof config.fastify.listen === 'string') {
+    if (config.fastify.unixSocket?.chown?.uid !== undefined && config.fastify.unixSocket?.chown?.gid !== undefined) {
+      console.log('[Startup] Setting up Owner Permissions of Socket...');
+      fs.chownSync(
+        config.fastify.listen,
+        config.fastify.unixSocket?.chown?.uid as number,
+        config.fastify.unixSocket?.chown?.gid as number,
+      );
+    }
+    if (config.fastify.unixSocket?.chmod) {
+      console.log('[Startup] Setting up Access Permissions of Socket...');
+      fs.chmodSync(config.fastify.listen, config.fastify.unixSocket.chmod);
+    }
+  }
 })();

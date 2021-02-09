@@ -52,6 +52,12 @@ app.register(fastifyFormbody);
   console.log('[Startup] Registering Root Endpoints...');
   registerRootEndpoints(app, '/');
 
+  if (typeof config.fastify.listen === 'string') {
+    if (fs.existsSync(config.fastify.listen)) {
+      fs.unlinkSync(config.fastify.listen);
+    }
+  }
+
   console.log('[Startup] Starting up fastify...');
   app.listen(config.fastify.listen);
 })();

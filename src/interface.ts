@@ -28,6 +28,7 @@ export interface Config {
     };
   };
   meiling: {
+    hostname: string;
     error: {
       urlFormat: string;
     };

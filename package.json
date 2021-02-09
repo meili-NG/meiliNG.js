@@ -40,6 +40,10 @@
     "prettier": "^2.1.2",
     "ts-node": "^9.0.0"
   },
+  "poweredBy": {
+      "gatekeeperEngine": "Scarlet Mansion Access Control, ver. 0.1.6",
+      "qiEngine": "Qi Engine, ver. 0.2.4; Compatible with Qi Standard ver.1.2.4; https://www.wirelesspowerconsortium.com"
+  },
   "scripts": {
     "debug": "ts-node ./src/",
     "build": "tsc",

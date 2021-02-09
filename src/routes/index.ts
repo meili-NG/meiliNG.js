@@ -15,36 +15,20 @@ export function registerRootEndpoints(app: FastifyInstance, baseURI: string) {
 // ======
 
 function handleRoot(req: FastifyRequest, rep: FastifyReply) {
-  const eastereggDev = {
-    about: {
-      name: 'meiling',
-      description: 'An easy-to-use, open-source oAuth2 Authentication Provider',
-      version: packageJson.version,
-      repository: packageJson.repository,
-    },
-    poweredBy: {
-      gatekeeperEngine: 'Scarlet Mansion Access Control, ver. 0.1.6',
-      qiEngine: 'Qi Engine, ver. 0.2.4; Compatible with Qi Standard ver.1.2.4; https://www.wirelesspowerconsortium.com',
-    },
-    developmentMode: true,
-  };
-
   const easteregg = {
     about: {
-      name: 'meiling',
-      description: 'An easy-to-use, open-source oAuth2 Authentication Provider',
-      repository: 'https://github.com/Stella-IT/meiling',
+      name: packageJson.name,
+      description: packageJson.description,
+      repository: packageJson.repository,
+      version: isDevelopment ? packageJson.version : undefined,
     },
-    poweredBy: {
-      gatekeeperEngine: 'Scarlet Mansion Access Control, ver. 0.1.6',
-      qiEngine: 'Qi Engine, ver. 0.2.4; Compatible with Qi Standard ver.1.2.4',
-    },
+    poweredBy: packageJson.poweredBy,
     developmentMode: false,
   };
 
   const helloWorld = {
     hello: 'world',
-    ...(isDevelopment ? eastereggDev : easteregg),
+    ...easteregg,
   };
 
   rep.send(helloWorld);

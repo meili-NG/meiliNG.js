@@ -23,7 +23,7 @@ function handleRoot(req: FastifyRequest, rep: FastifyReply) {
       version: isDevelopment ? packageJson.version : undefined,
     },
     poweredBy: packageJson.poweredBy,
-    developmentMode: false,
+    isDevelopment,
   };
 
   const helloWorld = {

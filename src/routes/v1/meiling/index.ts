@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
 import fastifyCors from 'fastify-cors';
 import { config, isDevelopment } from '../../..';
+import { meilingV1AppsPlugin } from './apps';
 import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType, MeilingV1Session as SessionObject } from './interfaces';
@@ -52,7 +53,7 @@ export function v1MeilingSessionRequiredPlugin(app: FastifyInstance, opts: Fasti
   app.get('/signout/:userId', meilingV1SignoutHandler);
 
   app.register(meilingV1UserPlugin, { prefix: '/users' });
-  app.register(meilingV1UserPlugin, { prefix: '/apps' });
+  app.register(meilingV1AppsPlugin, { prefix: '/apps' });
 
   done();
 }

@@ -5,7 +5,7 @@ import fastifyFormbody from 'fastify-formbody';
 import fs from 'fs';
 import { Banner, Database } from './common';
 import { Config } from './interface';
-import { registerRootEndpoints } from './routes';
+import meilingPlugin from './routes';
 import { MeilingV1Session } from './routes/v1/meiling/common';
 
 export const packageJson = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf-8' }));
@@ -50,7 +50,7 @@ app.register(fastifyFormbody);
   }
 
   console.log('[Startup] Registering Root Endpoints...');
-  registerRootEndpoints(app, '/');
+  app.register(meilingPlugin);
 
   if (typeof config.fastify.listen === 'string') {
     if (fs.existsSync(config.fastify.listen)) {

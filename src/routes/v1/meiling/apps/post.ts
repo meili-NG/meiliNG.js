@@ -19,7 +19,7 @@ interface MeilingV1AppPostBody {
   terms: string;
 }
 
-export async function meilingV1AppPostHandler(req: FastifyRequest, rep: FastifyReply) {
+async function meilingV1AppPostHandler(req: FastifyRequest, rep: FastifyReply) {
   const body = req.body as MeilingV1AppPostBody;
 
   const users = await MeilingV1Session.getLoggedIn(req);
@@ -169,3 +169,5 @@ export async function meilingV1AppPostHandler(req: FastifyRequest, rep: FastifyR
 
   rep.send(Client.sanitize(client));
 }
+
+export default meilingV1AppPostHandler;

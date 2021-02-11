@@ -1,18 +1,20 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
+import { FastifyRequestWithSession } from '..';
 import { User } from '../../../../common';
 import { sanitizeClient } from '../../../../common/oauth2';
-import { MeilingV1Session } from '../common';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
-import { registerV1MeilingUserActionsEndpoints } from './actions';
+import { meilingV1UserActionsHandler } from './actions';
 
-export function registerV1MeilingUserEndpoints(app: FastifyInstance, baseURI: string) {
-  app.get(baseURI, meilingV1UserInfoHandler);
-  app.get(baseURI + '/:userId', meilingV1UserInfoHandler);
+export function meilingV1UserPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
+  app.get('/', meilingV1UserInfoHandler);
+  app.get('/:userId', meilingV1UserInfoHandler);
 
-  registerV1MeilingUserActionsEndpoints(app, baseURI + '/:userId');
+  app.register(meilingV1UserActionsHandler, { prefix: '/:userId' });
+
+  done();
 }
 
 async function getSanitizedUser(user: string) {
@@ -36,11 +38,7 @@ async function getSanitizedUser(user: string) {
 }
 
 export async function meilingV1UserInfoHandler(req: FastifyRequest, rep: FastifyReply) {
-  const session = await MeilingV1Session.getSessionFromRequest(req);
-  if (!session) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_SESSION);
-    return;
-  }
+  const session = (req as FastifyRequestWithSession).session;
 
   const userRawSession = session.user;
   const userId = (req.params as any)?.userId;

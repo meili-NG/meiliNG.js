@@ -1,10 +1,15 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import fastifyCors from 'fastify-cors';
 import { oAuth2AuthHandler } from './auth';
 import { oAuth2TokenHandler } from './token';
 import { oAuth2TokenInfoHandler } from './tokeninfo';
 import { oAuth2UserInfoHandler } from './userinfo';
 
-export function registerV1OAuth2Endpoints(app: FastifyInstance) {
+export function meilingV1OAuth2(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
+  app.register(fastifyCors, {
+    origin: '*',
+  });
+
   app.get('/', (req, rep) => {
     rep.send({
       version: 1,
@@ -25,4 +30,6 @@ export function registerV1OAuth2Endpoints(app: FastifyInstance) {
     url: '/userinfo',
     handler: oAuth2UserInfoHandler,
   });
+
+  done();
 }

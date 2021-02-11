@@ -1,15 +1,17 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from 'fastify';
 import { isDevelopment, packageJson } from '..';
-import { registerV1Endpoints } from './v1';
+import v1Plugin from './v1';
 
-export function registerRootEndpoints(app: FastifyInstance, baseURI: string) {
+function meilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
   app.route({
     method: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'],
-    url: baseURI,
+    url: '/',
     handler: handleRoot,
   });
 
-  registerV1Endpoints(app, baseURI + 'v1');
+  app.register(v1Plugin, { prefix: '/v1' });
+
+  done();
 }
 
 // ======
@@ -33,3 +35,5 @@ function handleRoot(req: FastifyRequest, rep: FastifyReply) {
 
   rep.send(helloWorld);
 }
+
+export default meilingPlugin;

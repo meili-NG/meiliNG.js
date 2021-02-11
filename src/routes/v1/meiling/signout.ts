@@ -1,5 +1,6 @@
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
+import { FastifyRequestWithSession } from '.';
 import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
@@ -9,11 +10,7 @@ interface MeilingV1SignOutQuery {
 }
 
 export async function meilingV1SignoutHandler(req: FastifyRequest, rep: FastifyReply) {
-  const session = await MeilingV1Session.getSessionFromRequest(req);
-  if (!session) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_SESSION);
-    return;
-  }
+  const session = (req as FastifyRequestWithSession).session;
 
   const userId = (req.query as MeilingV1SignOutQuery)?.userId
     ? (req.query as MeilingV1SignOutQuery)?.userId

@@ -1,6 +1,7 @@
 import { Authorization, User as UserModel } from '@prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
+import { FastifyRequestWithSession } from '.';
 import { config } from '../../..';
 import { User, Utils } from '../../../common';
 import { AuthorizationJSONObject } from '../../../common/user';
@@ -38,12 +39,7 @@ function getMeilingAvailableAuthMethods(authMethods: Authorization[], body?: Mei
 }
 
 export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyReply) {
-  const session = await MeilingV1Session.getSessionFromRequest(req);
-  if (!session) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_SESSION);
-    return;
-  }
-
+  const session = (req as FastifyRequestWithSession).session;
   let body;
 
   try {

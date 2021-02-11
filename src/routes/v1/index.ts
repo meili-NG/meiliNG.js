@@ -1,11 +1,9 @@
-import { FastifyInstance } from 'fastify';
-import fastifyCors from 'fastify-cors';
-import { config, isDevelopment } from '../..';
-import { registerV1MeilingEndpoints } from './meiling';
-import { registerV1OAuth2Endpoints } from './oauth2';
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import { v1MeilingPlugin } from './meiling';
+import { meilingV1OAuth2 } from './oauth2';
 
-export function registerV1Endpoints(app: FastifyInstance, baseURI: string) {
-  app.get(baseURI, (req, rep) => {
+function v1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
+  app.get('/', (req, rep) => {
     rep.send({
       version: 1,
       engine: 'Meiling Project',
@@ -15,26 +13,23 @@ export function registerV1Endpoints(app: FastifyInstance, baseURI: string) {
   app.register(
     (app, options, next) => {
       // register cors for meiling
-      app.register(fastifyCors, {
-        origin: isDevelopment ? '*' : config.frontend.url,
-      });
 
-      registerV1MeilingEndpoints(app);
+      app.register(v1MeilingPlugin);
       next();
     },
-    { prefix: baseURI + '/meiling' },
+    { prefix: '/meiling' },
   );
 
   app.register(
     (app, options, next) => {
       // register cors for oauth endpoints
-      app.register(fastifyCors, {
-        origin: '*',
-      });
-
-      registerV1OAuth2Endpoints(app);
+      app.register(meilingV1OAuth2);
       next();
     },
-    { prefix: baseURI + '/oauth2' },
+    { prefix: '/oauth2' },
   );
+
+  done();
 }
+
+export default v1Plugin;

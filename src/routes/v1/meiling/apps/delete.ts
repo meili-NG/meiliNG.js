@@ -6,7 +6,7 @@ import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
 import { MeilingV1AppParams } from './interface';
 
-export async function meilingV1AppDeleteHandler(req: FastifyRequest, rep: FastifyReply) {
+async function meilingV1AppDeleteHandler(req: FastifyRequest, rep: FastifyReply) {
   const params = req.params as MeilingV1AppParams;
   const clientId = params.clientId;
 
@@ -45,3 +45,5 @@ export async function meilingV1AppDeleteHandler(req: FastifyRequest, rep: Fastif
   });
   return;
 }
+
+export default meilingV1AppDeleteHandler;

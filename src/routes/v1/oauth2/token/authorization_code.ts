@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { FastifyReply } from 'fastify';
-import { Client, ClientAuthorization, Token, User, Utils } from '../../../../common';
+import { ClientAuthorization, Token, User, Utils } from '../../../../common';
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType, OAuth2QueryTokenAuthorizationCodeParameters } from '../interfaces';
 
@@ -99,12 +99,14 @@ export async function oAuth2AuthorizationCodeHandler(
     }
   }
 
+  /*
   if (!needRefreshToken) {
     const unauthorizedPermissions = await Client.getUnauthorizedPermissions(user, clientId, permissions);
     if (unauthorizedPermissions) {
       needRefreshToken = unauthorizedPermissions.length > 0;
     }
   }
+  */
 
   const access_token = await ClientAuthorization.createToken(authorization, 'ACCESS_TOKEN');
 

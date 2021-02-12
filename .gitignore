@@ -122,3 +122,4 @@ Thumbs.db
 
 # File based Token Sessions
 tokenSession.json
+src/.legacy

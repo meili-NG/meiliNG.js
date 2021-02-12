@@ -2,14 +2,14 @@
   "version": "0.0.1",
   "frontend": {
     "url": [
-      "https://appielogin.netlify.app",
       "https://meiling-dev.stella-it.com",
+      "https://appielogin.netlify.app",
       "http://localhost:3000"
     ]
   },
   "openid": {
     "issuingAuthority": "https://meiling.stella-api.dev",
-    "secretKey": "ds6ab7nd96t7ba6sd78tv6ase78tv6ase78t"
+    "secretKey": "ds6ab7nd96t7ba6sd78tv66ase78t"
   },
   "fastify": {
     "listen": "/tmp/stella-it/sockets/meiling.sock",

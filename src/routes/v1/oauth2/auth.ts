@@ -20,5 +20,6 @@ export function oAuth2AuthHandler(req: FastifyRequest, rep: FastifyReply) {
   str = queryCount > 0 ? '?' + str.replace(/\&$/g, '') : '';
 
   const bestLogin = config.frontend.url[0];
+
   rep.redirect(302, bestLogin + '/auth' + str);
 }

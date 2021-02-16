@@ -2,10 +2,21 @@
   "version": "0.0.1",
   "frontend": {
     "url": [
-      "https://appielogin.netlify.app",
+      "https://login.appie.stella-it.com",
       "https://meiling-dev.stella-it.com",
       "http://localhost:3000"
     ]
+  },
+  "openid": {
+    "issuingAuthority": "https://meiling.stella-api.dev",
+    "secretKey": "YOUR VERY OWN SECRET"
+  },
+  "fastify": {
+    "listen": "/tmp/stella-it/sockets/meiling.sock",
+    "proxy": {},
+    "unixSocket": {
+      "chmod": "0777"
+    }
   },
   "meiling": {
     "error": {
@@ -13,25 +24,16 @@
     },
     "oauth2": {
       "skipAuthentication": []
-    },
-    "proxy": {
-      "allowedHosts": []
     }
   },
   "session": {
     "v1": {
-      "storage": {
-        "type": "file",
-        "path": "./tokenSession.json"
-      },
       "maxAge": 604800,
       "rateLimit": {
         "maxTokenPerIP": 20,
         "timeframe": 600
       },
-      "debugTokens": [
-        "HongMeiling"
-      ]
+      "debugTokens": []
     }
   },
   "token": {
@@ -48,10 +50,11 @@
         "REFRESH_TOKEN": 604800,
         "ACCOUNT_TOKEN": -1
       },
+      "openid": 300,
       "meiling": {
         "CHALLENGE_TOKEN": 300
       }
     }
   },
-  "listeningPort": 8080
+  "listen": 8080
 }

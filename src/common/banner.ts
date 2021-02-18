@@ -8,11 +8,13 @@ export function showBanner() {
   console.log(`${chalk.bold('Meiling Project')} - ${chalk.italic(`ver. ${packageJson.version}`)}`);
   console.log(chalk.cyan(chalk.underline(packageJson.repository)));
   console.log();
+  console.log(`Copyright © Meiling Project Contributors`);
   console.log(
-    `Copyright © ${chalk.bold(
-      `${chalk.cyan('Stella')} ${chalk.blue('IT')} ${chalk.magenta('Inc.')}`,
-    )} and Meiling Project Contributors`,
+    `Built with ${chalk.redBright('<3')} by ${chalk.cyan('Stella')} ${chalk.blue('IT')} ${chalk.magenta(
+      'Inc.',
+    )} OpenSource Team`,
   );
+  console.log();
   console.log('Distributed under ' + chalk.bold('MIT License'));
   console.log();
 }

@@ -1,6 +1,6 @@
 import { FastifyReply } from 'fastify';
 import JWT from 'jsonwebtoken';
-import { config } from '../../../..';
+import config from '../../../../config';
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType } from '../interfaces';
 

@@ -11,7 +11,8 @@ import {
 import bcrypt from 'bcrypt';
 import JWT from 'jsonwebtoken';
 import { ClientAuthorization, User, Utils } from '.';
-import { config, prisma } from '../';
+import { prisma } from '../';
+import config from '../config';
 
 export interface UserInfoObject extends UserModel {
   emails: Email[];

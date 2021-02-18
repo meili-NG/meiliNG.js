@@ -1,8 +1,9 @@
 import { User as UserModel } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 import fs from 'fs';
-import { config, prisma } from '../../../..';
+import { prisma } from '../../../..';
 import { Token, User } from '../../../../common';
+import config from '../../../../config';
 import { MeilingV1Session, MeilingV1SessionExtendedAuthentication } from '../interfaces';
 import { MeilingV1ExtendedAuthMethods } from '../interfaces/query';
 

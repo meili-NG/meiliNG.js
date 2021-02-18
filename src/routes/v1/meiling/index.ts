@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
 import fastifyCors from 'fastify-cors';
-import { config, isDevelopment } from '../../..';
+import { isDevelopment } from '../../..';
+import config from '../../../config';
 import { meilingV1AppsPlugin } from './apps';
 import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';

@@ -1,7 +1,8 @@
 import { InputJsonObject, OAuthClient, OAuthTokenType, Permission, User as UserModel } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 import { Client, ClientAuthorization, Token, User, Utils } from '.';
-import { config, prisma } from '..';
+import { prisma } from '..';
+import config from '../config';
 import { OAuth2QueryCodeChallengeMethod } from '../routes/v1/oauth2/interfaces';
 
 export type TokenMetadata = null | TokenMetadataV1;

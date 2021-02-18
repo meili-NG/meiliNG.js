@@ -35,15 +35,14 @@ export function v1MeilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions
 }
 
 export function v1MeilingSessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
-  app.addHook('onRequest', async (req, rep, next) => {
+  app.addHook('onRequest', async (req, rep) => {
     const session = await MeilingV1Session.getSessionFromRequest(req);
     if (!session) {
       sendMeilingError(rep, MeilingV1ErrorType.INVALID_SESSION);
-      return;
+      throw new Error();
     }
 
     (req as FastifyRequestWithSession).session = session;
-    next();
   });
 
   app.post('/signin', meilingV1SigninHandler);

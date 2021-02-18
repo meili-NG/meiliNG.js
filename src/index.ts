@@ -4,12 +4,11 @@ import fastify from 'fastify';
 import fastifyFormbody from 'fastify-formbody';
 import fs from 'fs';
 import { Banner, Database } from './common';
-import { Config } from './interface';
+import config from './config';
 import meilingPlugin from './routes';
 import { MeilingV1Session } from './routes/v1/meiling/common';
 
 export const packageJson = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf-8' }));
-export const config = JSON.parse(fs.readFileSync('config.json', { encoding: 'utf-8' })) as Config;
 
 const env = process.env.NODE_ENV || 'development';
 

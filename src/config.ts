@@ -1,12 +1,12 @@
-// TODO: Migrate... config data
+import { ConfigInterface } from './interface';
 
-const config = {
+export default {
   frontend: {
     url: ['https://login.appie.stella-it.com', 'https://meiling-dev.stella-it.com', 'http://localhost:3000'],
   },
   openid: {
     issuingAuthority: 'https://meiling.stella-api.dev',
-    secretKey: process.env['OPENID_JWT_SECRET'],
+    secretKey: process.env['OPENID_JWT_SECRET'] as string,
   },
   fastify: {
     listen: '/tmp/stella-it/sockets/meiling.sock',
@@ -16,6 +16,7 @@ const config = {
     },
   },
   meiling: {
+    hostname: 'https://meiling.stella-api.dev',
     error: {
       urlFormat: 'https://opensource.stella-it.com/developers/docs/meiling/error/{{errorCode}}.html',
     },
@@ -54,4 +55,4 @@ const config = {
     },
   },
   listen: 8080,
-};
+} as ConfigInterface;

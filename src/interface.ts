@@ -12,14 +12,13 @@ interface SessionV1StorageFileConfig {
   path: string;
 }
 
-export interface Config {
-  version: string;
+export interface ConfigInterface {
+  frontend: {
+    url: string[];
+  };
   openid: {
     issuingAuthority: string;
     secretKey: string;
-  };
-  frontend: {
-    url: string[];
   };
   fastify: {
     listen: number | string;
@@ -28,10 +27,10 @@ export interface Config {
         uid?: number;
         gid?: number;
       };
-      chmod?: number;
+      chmod?: string;
     };
     proxy?: {
-      allowedHosts: string[];
+      allowedHosts?: string[];
     };
   };
   meiling: {
@@ -64,7 +63,7 @@ export interface Config {
       };
       openid: number;
       meiling: {
-        challenge: number;
+        CHALLENGE_TOKEN: number;
       };
     };
   };

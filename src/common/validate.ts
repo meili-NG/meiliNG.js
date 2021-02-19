@@ -1,5 +1,8 @@
+import axios from 'axios';
+import { PhoneNumber } from 'libphonenumber-js';
 import * as OpenPGP from 'openpgp';
 import * as SpeakEasy from 'speakeasy';
+import config from '../config';
 
 export async function validatePGPSign(
   challenge: string,
@@ -41,8 +44,33 @@ export function validateOTP(challengeResponse: string, secret: string) {
   });
 }
 
-export function sendOTPSMS(phones: string[], challenge: string) {
-  for (const phone of phones) {
-    // TODO: Implement SMS
+export async function sendOTPSMS(phone: PhoneNumber, challenge: string) {
+  if (!config.notificationApi) {
+    throw new Error();
   }
+
+  const host = config.notificationApi.host;
+  const key = config.notificationApi.key;
+
+  await axios.post(
+    `${host}/v1/sms`,
+    {
+      type: 'template',
+      templateId: 'authorization_code',
+      lang: 'ko',
+      messages: [
+        {
+          to: phone.formatInternational(),
+          variables: {
+            코드: challenge,
+          },
+        },
+      ],
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${key}`,
+      },
+    },
+  );
 }

@@ -7,6 +7,7 @@
   "author": "Alex4386 <psh010209@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.21.1",
     "bcrypt": "^5.0.0",
     "chalk": "^4.1.0",
     "fastify": "^3.9.2",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@prisma/cli": "2.13.1",
     "@prisma/client": "2.13.1",
+    "@types/axios": "^0.14.0",
     "@types/bcrypt": "^3.0.0",
     "@types/figlet": "^1.2.1",
     "@types/jsonwebtoken": "^8.5.0",

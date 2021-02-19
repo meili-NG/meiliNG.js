@@ -67,4 +67,8 @@ export interface ConfigInterface {
       };
     };
   };
+  notificationApi?: {
+    host: string;
+    key: string;
+  };
 }

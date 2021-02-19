@@ -1,6 +1,7 @@
-import chalk from 'chalk';
-import Figlet from 'figlet';
 import { isDevelopment, packageJson } from '../';
+
+import Figlet from 'figlet';
+import chalk from 'chalk';
 
 export function showBanner() {
   console.log(Figlet.textSync('Meiling'));

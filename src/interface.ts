@@ -22,6 +22,7 @@ export interface ConfigInterface {
   };
   fastify: {
     listen: number | string;
+    address?: string;
     unixSocket?: {
       chown?: {
         uid?: number;

@@ -1,3 +1,4 @@
+import { ClientAuthorization, User, Utils } from '.';
 import {
   Email,
   Group,
@@ -8,11 +9,11 @@ import {
   Phone,
   User as UserModel,
 } from '@prisma/client';
-import bcrypt from 'bcrypt';
+
 import JWT from 'jsonwebtoken';
-import { ClientAuthorization, User, Utils } from '.';
-import { prisma } from '../';
+import bcrypt from 'bcrypt';
 import config from '../config';
+import { prisma } from '../';
 
 export interface UserInfoObject extends UserModel {
   emails: Email[];

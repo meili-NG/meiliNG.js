@@ -1,11 +1,12 @@
-import bcrypt from 'bcrypt';
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { User, Utils } from '../../../../../../common';
+
+import { MeilingV1ErrorType } from '../../../interfaces';
 import { PasswordChangeBody } from '.';
+import bcrypt from 'bcrypt';
 import { meilingV1UserActionGetUser } from '..';
 import { prisma } from '../../../../../..';
-import { User, Utils } from '../../../../../../common';
 import { sendMeilingError } from '../../../error';
-import { MeilingV1ErrorType } from '../../../interfaces';
 
 export async function meilingV1OAuthClientPasswordsPutHandler(req: FastifyRequest, rep: FastifyReply) {
   const user = await meilingV1UserActionGetUser(req);

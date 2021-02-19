@@ -1,12 +1,13 @@
+import { Banner, Database } from './common';
+
+import { MeilingV1Session } from './routes/v1/meiling/common';
 import { PrismaClient } from '@prisma/client';
 import chalk from 'chalk';
+import config from './config';
 import fastify from 'fastify';
 import fastifyFormbody from 'fastify-formbody';
 import fs from 'fs';
-import { Banner, Database } from './common';
-import config from './config';
 import meilingPlugin from './routes';
-import { MeilingV1Session } from './routes/v1/meiling/common';
 
 export const packageJson = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf-8' }));
 
@@ -58,7 +59,7 @@ app.register(fastifyFormbody);
   }
 
   console.log('[Startup] Starting up fastify...');
-  await app.listen(config.fastify.listen);
+  await app.listen(config.fastify.listen, config.fastify.address);
 
   if (typeof config.fastify.listen === 'string') {
     if (config.fastify.unixSocket?.chown?.uid !== undefined && config.fastify.unixSocket?.chown?.gid !== undefined) {

@@ -29,6 +29,8 @@ export function getUnique<T>(array: T[], equals: (m: T, n: T) => boolean) {
   return uniqueArray;
 }
 
+const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/g;
+
 export function convertJsonIfNot<T>(json: string | T | unknown): T {
   if (typeof json === 'string') {
     return JSON.parse(json);
@@ -36,12 +38,28 @@ export function convertJsonIfNot<T>(json: string | T | unknown): T {
   return json as T;
 }
 
-export function checkUsernameCondition(username: string) {
-  return true;
+export interface MeilingV1SignupName {
+  name: string;
+  familyName: string;
+  givenName: string;
+  middleName?: string;
 }
 
-export function checkPasswordCondition(password: string) {
-  return true;
+export function isValidUsername(username: string): boolean {
+  return /^[A-Za-z0-9_-\.]+$/g.test(username);
+}
+
+export function isValidPassword(password: string): boolean {
+  return password.length >= 8;
+}
+
+export function isValidEmail(email: string): boolean {
+  emailRegex.lastIndex = 0;
+  return emailRegex.test(email);
+}
+
+export function isValidName(name: MeilingV1SignupName): boolean {
+  return isValidValue(name, name.name, name.familyName, name.givenName);
 }
 
 export function getCryptoSafeInteger(bound?: number): number {

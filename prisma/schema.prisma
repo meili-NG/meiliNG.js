@@ -23,7 +23,7 @@ model User {
   emails                Email[]
   phones                Phone[]
 
-  profileUrl            String
+  profileUrl            String                        @default("")
 
   groups                Group[]
 

@@ -9,7 +9,7 @@ import { MeilingV1ErrorType, MeilingV1Session as SessionObject } from './interfa
 import { meilingV1SessionHandler } from './session';
 import { meilingV1SigninHandler } from './signin';
 import { meilingV1SignoutHandler } from './signout';
-import { meilingV1SignupHandler } from './signup';
+import { v1MeilingSignupPlugin } from './signup/';
 import { meilingV1UserPlugin } from './users';
 
 export interface FastifyRequestWithSession extends FastifyRequest {
@@ -47,7 +47,7 @@ export function v1MeilingSessionRequiredPlugin(app: FastifyInstance, opts: Fasti
   });
 
   app.post('/signin', meilingV1SigninHandler);
-  app.post('/signup', meilingV1SignupHandler);
+  app.register(v1MeilingSignupPlugin, { prefix: '/signup' });
 
   app.get('/signout', meilingV1SignoutHandler);
   app.get('/signout/:userId', meilingV1SignoutHandler);

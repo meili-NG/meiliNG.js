@@ -1,7 +1,8 @@
-import axios from 'axios';
-import { PhoneNumber } from 'libphonenumber-js';
 import * as OpenPGP from 'openpgp';
 import * as SpeakEasy from 'speakeasy';
+
+import { PhoneNumber } from 'libphonenumber-js';
+import axios from 'axios';
 import config from '../config';
 
 export async function validatePGPSign(

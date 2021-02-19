@@ -3,7 +3,7 @@ import { User, Utils } from '../../../../../../common';
 
 import { MeilingV1ErrorType } from '../../../interfaces';
 import { PasswordChangeBody } from '.';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { meilingV1UserActionGetUser } from '..';
 import { prisma } from '../../../../../..';
 import { sendMeilingError } from '../../../error';

@@ -11,7 +11,7 @@ import {
 } from '@prisma/client';
 
 import JWT from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import config from '../config';
 import { prisma } from '../';
 

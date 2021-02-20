@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { FastifyRequestWithSession } from '..';
 import { prisma } from '../../../..';
+import config from '../../../../config';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
 
@@ -36,7 +37,7 @@ export async function meilingV1VerificationHandler(req: FastifyRequest, rep: Fas
 
   let verified = false;
   let createdAt = undefined;
-  const expiresAt = undefined;
+  let expiresAt = undefined;
 
   if (body.type === 'phone') {
     if (!session.verificationStatus.phone) {
@@ -74,10 +75,26 @@ export async function meilingV1VerificationHandler(req: FastifyRequest, rep: Fas
 
       verified = true;
       createdAt = data.issuedAt;
+      expiresAt = data.expiresAt;
     }
   } else {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
     return;
+  }
+
+  if (createdAt && !expiresAt) {
+    expiresAt = new Date(createdAt.getTime() + config.token.invalidate.meiling.CHALLENGE_TOKEN * 1000);
+  } else if (!expiresAt) {
+    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
+    return;
+  }
+
+  if (verified && new Date().getTime() < expiresAt.getTime()) {
+    if (body.type === 'phone' && session.verificationStatus.phone) {
+      session.verificationStatus.phone.isVerified = true;
+    } else if (body.type === 'email' && session.verificationStatus.email) {
+      session.verificationStatus.email.isVerified = true;
+    }
   }
 
   sendMeilingError(rep, MeilingV1ErrorType.NOT_IMPLEMENTED);

@@ -26,7 +26,7 @@ export enum MeilingV1ErrorType {
   APPLICATION_NOT_AUTHORIZED_SCOPES = 'application_not_authorized_scopes',
   APPLICATION_USER_ACTION_REQUIRED = 'application_user_action_required',
   INTERNAL_SERVER_ERROR = 'internal_server_error',
-  AUTHORIZATION_REQUEST_WRONG_CHALLENGE = 'authorization_request_wrong_challenge',
+  AUTHORIZATION_REQUEST_INVALID = 'authorization_request_invalid',
   AUTHORIZATION_REQUEST_NOT_GENERATED = 'authorization_request_not_generated',
   AUTHORIZATION_REQUEST_NOT_COMPLETED = 'authorization_request_not_completed',
   AUTHORIZATION_REQUEST_RATE_LIMITED = 'authorization_request_rate_limited',

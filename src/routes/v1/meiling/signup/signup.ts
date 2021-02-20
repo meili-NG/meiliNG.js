@@ -47,19 +47,7 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
   const phone = libmobilephoneJs(body.phone);
   const username = body.username;
 
-  if (!(signupChallenge.email && signupChallenge.phone)) {
-    sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_NOT_COMPLETED);
-    return;
-  }
-
-  if (!phone) {
-    sendMeilingError(
-      rep,
-      MeilingV1ErrorType.INVALID_REQUEST,
-      'Phone number should be valid ITU compliant international number',
-    );
-    return;
-  }
+  // check user input is valid.
 
   if (!Utils.isValidUsername(username)) {
     sendMeilingError(
@@ -75,8 +63,35 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
     return;
   }
 
+  if (!phone) {
+    sendMeilingError(
+      rep,
+      MeilingV1ErrorType.INVALID_REQUEST,
+      'Phone number should be valid ITU compliant international number',
+    );
+    return;
+  }
+
   if (!Utils.isValidEmail(email)) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'Entered email is NOT a valid email.');
+    return;
+  }
+
+  // check with validation.
+
+  if (!(signupChallenge.email && signupChallenge.phone)) {
+    sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_NOT_COMPLETED);
+    return;
+  }
+
+  if (
+    !(
+      signupChallenge.email.to === email &&
+      phone &&
+      phone.formatInternational() === libmobilephoneJs(signupChallenge.phone.to)?.formatInternational()
+    )
+  ) {
+    sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID);
     return;
   }
 

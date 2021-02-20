@@ -47,7 +47,9 @@ export async function sendOTPSMS(phone: PhoneNumber, challenge: string) {
   await Notification.sendNotification(Notification.NotificationMethod.SMS, {
     type: 'template',
     templateId: Notification.TemplateId.AUTHORIZATION_CODE,
-    lang: Notification.TemplateLanguage.KOREAN,
+
+    // TODO: get Language
+    lang: 'ko',
     messages: [
       {
         to: phone.formatInternational(),

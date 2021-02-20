@@ -32,7 +32,7 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
     case MeilingV1ErrorType.INVALID_SESSION:
     case MeilingV1ErrorType.APPLICATION_NOT_AUTHORIZED_BY_USER:
     case MeilingV1ErrorType.APPLICATION_NOT_AUTHORIZED_SCOPES:
-    case MeilingV1ErrorType.AUTHORIZATION_REQUEST_WRONG_CHALLENGE:
+    case MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID:
       return 401;
 
     case MeilingV1ErrorType.APPLICATION_NOT_FOUND:

@@ -106,7 +106,7 @@ export async function meilingV1AuthorizationVerifyHandler(req: FastifyRequest, r
       return;
     }
   } else {
-    sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_WRONG_CHALLENGE);
+    sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID);
     return;
   }
 

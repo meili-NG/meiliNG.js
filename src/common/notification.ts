@@ -1,10 +1,7 @@
 import axios from 'axios';
 import config from '../config';
 
-export enum TemplateLanguage {
-  KOREAN = 'ko',
-  ENGLISH = 'en',
-}
+export type TemplateLanguage = 'ko' | 'en';
 
 export enum TemplateId {
   AUTHORIZATION_CODE = 'authorization_code',

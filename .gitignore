@@ -124,5 +124,5 @@ Thumbs.db
 tokenSession.json
 src/.legacy
 
-# config.json
-config.json
+# config.js
+config.js

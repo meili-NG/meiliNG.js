@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from 'fastify';
 import { isDevelopment, packageJson } from '..';
+
 import v1Plugin from './v1';
 
 function meilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {

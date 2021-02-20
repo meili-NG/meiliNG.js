@@ -1,19 +1,20 @@
 import { Authorization, User as UserModel } from '@prisma/client';
-import { FastifyReply } from 'fastify/types/reply';
-import { FastifyRequest } from 'fastify/types/request';
-import { FastifyRequestWithSession } from '.';
-import { User, Utils } from '../../../common';
-import { AuthorizationJSONObject } from '../../../common/user';
-import config from '../../../config';
 import { MeilingV1Challenge, MeilingV1Database, MeilingV1Session, MeilingV1User } from './common';
-import { sendMeilingError } from './error';
-import { MeilingV1ErrorType } from './interfaces';
 import {
   MeilingV1ExtendedAuthMethods,
   MeilingV1SignInBody,
   MeilingV1SignInExtendedAuthentication,
   MeilingV1SigninType,
 } from './interfaces/query';
+import { User, Utils } from '../../../common';
+
+import { AuthorizationJSONObject } from '../../../common/user';
+import { FastifyReply } from 'fastify/types/reply';
+import { FastifyRequest } from 'fastify/types/request';
+import { FastifyRequestWithSession } from '.';
+import { MeilingV1ErrorType } from './interfaces';
+import config from '../../../config';
+import { sendMeilingError } from './error';
 
 function getMeilingAvailableAuthMethods(authMethods: Authorization[], body?: MeilingV1SignInExtendedAuthentication) {
   const methods: MeilingV1ExtendedAuthMethods[] = [];

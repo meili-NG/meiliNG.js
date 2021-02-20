@@ -8,7 +8,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.21.1",
-    "bcrypt": "^5.0.0",
+    "bcryptjs": "^2.4.3",
     "chalk": "^4.1.0",
     "fastify": "^3.9.2",
     "fastify-cors": "^5.1.0",
@@ -22,13 +22,13 @@
     "openpgp": "^4.10.9",
     "pino-pretty": "^4.3.0",
     "speakeasy": "^2.0.0",
-    "typescript": "^4.0.5"
+    "typescript": "^4.0.5",
+    "@prisma/client": "2.13.1"
   },
   "devDependencies": {
     "@prisma/cli": "2.13.1",
-    "@prisma/client": "2.13.1",
     "@types/axios": "^0.14.0",
-    "@types/bcrypt": "^3.0.0",
+    "@types/bcryptjs": "^2.4.2",
     "@types/figlet": "^1.2.1",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/node": "^14.14.7",
@@ -51,6 +51,7 @@
   "scripts": {
     "debug": "ts-node ./src/",
     "build": "tsc",
+    "build:docker": "docker build .",
     "start:dev": "nodemon",
     "start:prod": "tsc && NODE_ENV=production node ./dist/",
     "start": "NODE_ENV=production node ./dist/",
@@ -60,8 +61,7 @@
     "migrate:dev": "prisma migrate dev --preview-feature",
     "migrate:reset": "prisma migrate reset --preview-feature",
     "migrate:redeploy": "prisma migrate reset --preview-feature; rm -rf ./prisma/migrations/; prisma migrate dev --preview-feature",
-    "generate": "prisma generate",
-    "postinstall": "prisma generate"
+    "generate": "prisma generate"
   },
   "husky": {
     "hooks": {

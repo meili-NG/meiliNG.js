@@ -12,6 +12,7 @@ export enum MeilingV1ErrorType {
   UNSUPPORTED_SIGNIN_METHOD = 'unsupported_signin_method',
   UNSUPPORTED_SCOPE = 'unsupported_scope',
   UNSUPPORTED_RESPONSE_TYPE = 'unsupported_response_type',
+  UNSUPPORTED_AUTHORIZATION_TYPE = 'unsupported_authorization_type',
   TWO_FACTOR_AUTHENTICATION_REQUIRED = 'two_factor_authentication_required',
   TWO_FACTOR_AUTHENTICATION_REQUEST_NOT_GENERATED = 'two_factor_authentication_request_not_generated',
   MORE_THAN_ONE_USER_MATCHED = 'more_than_one_user_matched',
@@ -25,9 +26,11 @@ export enum MeilingV1ErrorType {
   APPLICATION_NOT_AUTHORIZED_SCOPES = 'application_not_authorized_scopes',
   APPLICATION_USER_ACTION_REQUIRED = 'application_user_action_required',
   INTERNAL_SERVER_ERROR = 'internal_server_error',
-  VERIFICATION_REQUEST_NOT_GENERATED = 'verification_request_not_generated',
-  VERIFICATION_REQUEST_NOT_COMPLETED = 'verification_request_not_completed',
-  VERIFICATION_REQUEST_RATE_LIMITED = 'verification_request_rate_limited',
+  AUTHORIZATION_REQUEST_WRONG_CHALLENGE = 'authorization_request_wrong_challenge',
+  AUTHORIZATION_REQUEST_NOT_GENERATED = 'authorization_request_not_generated',
+  AUTHORIZATION_REQUEST_NOT_COMPLETED = 'authorization_request_not_completed',
+  AUTHORIZATION_REQUEST_RATE_LIMITED = 'authorization_request_rate_limited',
+  AUTHORIZATION_REQUEST_TIMEOUT = 'authorization_request_timeout',
   EXISTING_PASSWORD = 'existing_password',
 }
 

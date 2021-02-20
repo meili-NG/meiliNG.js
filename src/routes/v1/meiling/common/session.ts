@@ -6,8 +6,8 @@ import { Token, User } from '../../../../common';
 import config from '../../../../config';
 import {
   MeilingV1Session,
+  MeilingV1SessionAuthorizationStatus,
   MeilingV1SessionExtendedAuthentication,
-  MeilingV1SessionVerificationStatus,
 } from '../interfaces';
 import { MeilingV1ExtendedAuthMethods } from '../interfaces/query';
 
@@ -236,22 +236,22 @@ export async function setSession(req: FastifyRequest, data?: MeilingV1Session): 
   saveSession();
 }
 
-export async function getVerificationStatus(
+export async function getAuthorizationStatus(
   req: FastifyRequest,
-): Promise<MeilingV1SessionVerificationStatus | undefined> {
+): Promise<MeilingV1SessionAuthorizationStatus | undefined> {
   const session = await getSessionFromRequest(req);
-  return session?.verificationStatus;
+  return session?.authorizationStatus;
 }
 
-export async function appendVerificationStatus(
+export async function appendAuthorizationStatus(
   req: FastifyRequest,
-  signupChallenge: MeilingV1SessionVerificationStatus,
+  signupChallenge: MeilingV1SessionAuthorizationStatus,
 ): Promise<void> {
   const prevSession = await getSessionFromRequest(req);
   const session: MeilingV1Session = {
     ...prevSession,
-    verificationStatus: {
-      ...prevSession?.verificationStatus,
+    authorizationStatus: {
+      ...prevSession?.authorizationStatus,
       ...signupChallenge,
     },
   };
@@ -259,14 +259,14 @@ export async function appendVerificationStatus(
   await setSession(req, session);
 }
 
-export async function setVerificationStatus(
+export async function setAuthorizationStatus(
   req: FastifyRequest,
-  signupChallenge: MeilingV1SessionVerificationStatus,
+  signupChallenge: MeilingV1SessionAuthorizationStatus,
 ): Promise<void> {
   const session = await getSessionFromRequest(req);
   await setSession(req, {
     ...session,
-    verificationStatus: signupChallenge,
+    authorizationStatus: signupChallenge,
   });
 }
 

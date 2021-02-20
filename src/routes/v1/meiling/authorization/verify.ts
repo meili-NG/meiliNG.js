@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { FastifyRequestWithSession } from '..';
 import { prisma } from '../../../..';
 import config from '../../../../config';
+import { setAuthorizationStatus } from '../common/session';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
 
@@ -26,12 +27,12 @@ interface MeilingV1EmailVerificationTokenQuery {
   token: string;
 }
 
-export async function meilingV1VerificationHandler(req: FastifyRequest, rep: FastifyReply) {
+export async function meilingV1AuthorizationVerifyHandler(req: FastifyRequest, rep: FastifyReply) {
   const session = (req as FastifyRequestWithSession).session;
   const body = req.body as MeilingV1VerificationQuery;
 
-  if (!session.verificationStatus) {
-    sendMeilingError(rep, MeilingV1ErrorType.VERIFICATION_REQUEST_NOT_GENERATED);
+  if (!session.authorizationStatus) {
+    sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_NOT_GENERATED);
     return;
   }
 
@@ -40,27 +41,27 @@ export async function meilingV1VerificationHandler(req: FastifyRequest, rep: Fas
   let expiresAt = undefined;
 
   if (body.type === 'phone') {
-    if (!session.verificationStatus.phone) {
-      sendMeilingError(rep, MeilingV1ErrorType.VERIFICATION_REQUEST_NOT_GENERATED);
+    if (!session.authorizationStatus.phone) {
+      sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_NOT_GENERATED);
       return;
     }
 
     if (body.code) {
-      verified = session.verificationStatus.phone.challenge.challenge === body.code;
-      createdAt = session.verificationStatus.phone.challenge.challengeCreatedAt;
+      verified = session.authorizationStatus.phone.challenge.challenge === body.code;
+      createdAt = session.authorizationStatus.phone.challenge.challengeCreatedAt;
     }
   } else if (body.type === 'email') {
     const code = (body as MeilingV1EmailVerificationCodeQuery).code;
     const token = (body as MeilingV1EmailVerificationTokenQuery).token;
 
     if (code) {
-      if (!session.verificationStatus.email) {
-        sendMeilingError(rep, MeilingV1ErrorType.VERIFICATION_REQUEST_NOT_GENERATED);
+      if (!session.authorizationStatus.email) {
+        sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_NOT_GENERATED);
         return;
       }
 
-      verified = session.verificationStatus.email.challenge.challenge == code;
-      createdAt = session.verificationStatus.email.challenge.challengeCreatedAt;
+      verified = session.authorizationStatus.email.challenge.challenge == code;
+      createdAt = session.authorizationStatus.email.challenge.challengeCreatedAt;
     } else if (token) {
       const data = await prisma.meilingV1Verification.findUnique({
         where: {
@@ -83,19 +84,34 @@ export async function meilingV1VerificationHandler(req: FastifyRequest, rep: Fas
   }
 
   if (createdAt && !expiresAt) {
+    createdAt = createdAt === undefined ? createdAt : new Date(createdAt);
     expiresAt = new Date(createdAt.getTime() + config.token.invalidate.meiling.CHALLENGE_TOKEN * 1000);
   } else if (!expiresAt) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
     return;
   }
 
-  if (verified && new Date().getTime() < expiresAt.getTime()) {
-    if (body.type === 'phone' && session.verificationStatus.phone) {
-      session.verificationStatus.phone.isVerified = true;
-    } else if (body.type === 'email' && session.verificationStatus.email) {
-      session.verificationStatus.email.isVerified = true;
+  if (verified) {
+    if (new Date().getTime() < expiresAt.getTime()) {
+      if (body.type === 'phone' && session.authorizationStatus.phone) {
+        session.authorizationStatus.phone.isVerified = true;
+      } else if (body.type === 'email' && session.authorizationStatus.email) {
+        session.authorizationStatus.email.isVerified = true;
+      } else {
+        sendMeilingError(rep, MeilingV1ErrorType.UNSUPPORTED_AUTHORIZATION_TYPE);
+        return;
+      }
+    } else {
+      sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_TIMEOUT);
+      return;
     }
+  } else {
+    sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_WRONG_CHALLENGE);
+    return;
   }
 
-  sendMeilingError(rep, MeilingV1ErrorType.NOT_IMPLEMENTED);
+  await setAuthorizationStatus(req, session.authorizationStatus);
+  rep.send({
+    success: true,
+  });
 }

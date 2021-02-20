@@ -70,4 +70,9 @@ module.exports = {
       },
     },
   },
+  notificationApi: {
+    version: Number(process.env.NOTIFICATION_API_VERSION) || 1,
+    host: Number(process.env.NOTIFICATION_API_HOST) || 'https://notification.stella-api.dev',
+    key: Number(process.env.NOTIFICATION_API_KEY) || 'YOUR NOTIFICATION API KEY',
+  },
 };

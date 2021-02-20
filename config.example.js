@@ -81,4 +81,9 @@ module.exports = {
       },
     },
   },
+  notificationApi: {
+    version: 1,
+    host: 'https://notification.stella-api.dev',
+    key: 'YOUR NOTIFICATION API KEY',
+  },
 };

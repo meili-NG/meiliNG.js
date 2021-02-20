@@ -1,17 +1,17 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
-import { MeilingV1ErrorType, MeilingV1Session as SessionObject } from './interfaces';
-
-import { MeilingV1Session } from './common';
-import config from '../../../config';
 import fastifyCors from 'fastify-cors';
 import { isDevelopment } from '../../..';
+import config from '../../../config';
 import { meilingV1AppsPlugin } from './apps';
+import { meilingV1AuthorizationPlugin } from './authorization';
+import { MeilingV1Session } from './common';
+import { sendMeilingError } from './error';
+import { MeilingV1ErrorType, MeilingV1Session as SessionObject } from './interfaces';
 import { meilingV1SessionHandler } from './session';
 import { meilingV1SigninHandler } from './signin';
 import { meilingV1SignoutHandler } from './signout';
 import { v1MeilingSignupPlugin } from './signup/';
 import { meilingV1UserPlugin } from './users';
-import { sendMeilingError } from './error';
 
 export interface FastifyRequestWithSession extends FastifyRequest {
   session: SessionObject;
@@ -55,6 +55,7 @@ export function v1MeilingSessionRequiredPlugin(app: FastifyInstance, opts: Fasti
 
   app.register(meilingV1UserPlugin, { prefix: '/users' });
   app.register(meilingV1AppsPlugin, { prefix: '/apps' });
+  app.register(meilingV1AuthorizationPlugin, { prefix: '/authorization' });
 
   done();
 }

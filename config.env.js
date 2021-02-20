@@ -1,3 +1,12 @@
+// load dotenv if necessary.
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const dotenv = require('dotenv');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const path = require('path');
+
+dotenv.config({ path: path.join(__dirname, '.env') });
+
 module.exports = {
   frontend: {
     url: process.env.FRONTEND_URLS ? process.env.FRONTEND_URLS.split(',') : ['http://localhost:3000'],

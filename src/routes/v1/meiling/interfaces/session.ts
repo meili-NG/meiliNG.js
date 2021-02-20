@@ -1,11 +1,10 @@
-import { PhoneNumber } from 'libphonenumber-js';
 import { MeilingV1ExtendedAuthMethods, MeilingV1SigninType } from './query';
 
 export interface MeilingV1Session {
   user?: MeilingLoggedInUser[];
   extendedAuthentication?: MeilingV1SessionExtendedAuthentication;
   previouslyLoggedIn?: MeilingLoggedInUser[];
-  signupChallenge?: MeilingV1SessionSignupChallenge;
+  verificationStatus?: MeilingV1SessionVerificationStatus;
 }
 
 export interface MeilingLoggedInUser {
@@ -31,11 +30,12 @@ interface MeilingV1ChallengeData {
 interface MeilingV1SignupChallengeInfo<T> {
   to: T;
   challenge: MeilingV1ChallengeData;
+  isVerified: boolean;
 }
 
-interface MeilingV1SessionSignupChallenge {
+export interface MeilingV1SessionVerificationStatus {
   email?: MeilingV1SignupChallengeInfo<string>;
-  phone?: MeilingV1SignupChallengeInfo<PhoneNumber>;
+  phone?: MeilingV1SignupChallengeInfo<string>;
 }
 
 export type MeilingV1SessionExtendedAuthentication = MeilingV1SignInPasswordLess | MeilingV1SignInTwoFactorAuth;

@@ -10,6 +10,16 @@ export function isValidValue(...values: unknown[]): boolean {
   return isValid;
 }
 
+export function isNotBlank(...values: (string | undefined)[]): boolean {
+  let isValid = true;
+  for (const value of values) {
+    isValid = isValid && !(value === undefined || value === null || value === '' || value.trim() === undefined);
+    if (!isValid) return false;
+  }
+
+  return isValid;
+}
+
 export function string2Boolean(string?: string): boolean | undefined {
   if (!string) return;
   if (string.toLowerCase() !== 'true' && string.toLowerCase() !== 'false') return;
@@ -46,7 +56,7 @@ export interface MeilingV1SignupName {
 }
 
 export function isValidUsername(username: string): boolean {
-  return /^[A-Za-z0-9_-\.]+$/g.test(username);
+  return /^[A-Za-z0-9-_\.]+$/g.test(username);
 }
 
 export function isValidPassword(password: string): boolean {
@@ -58,8 +68,10 @@ export function isValidEmail(email: string): boolean {
   return emailRegex.test(email);
 }
 
-export function isValidName(name: MeilingV1SignupName): boolean {
-  return isValidValue(name, name.name, name.familyName, name.givenName);
+export function isValidName(name?: MeilingV1SignupName): boolean {
+  if (!name) return false;
+
+  return isNotBlank(name.name, name.familyName, name.givenName);
 }
 
 export function getCryptoSafeInteger(bound?: number): number {

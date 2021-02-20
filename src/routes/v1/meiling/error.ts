@@ -21,6 +21,8 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
     case MeilingV1ErrorType.ALREADY_SIGNED_IN:
     case MeilingV1ErrorType.ALREADY_SIGNED_OUT:
     case MeilingV1ErrorType.APPLICATION_REDIRECT_URI_INVALID:
+    case MeilingV1ErrorType.VERIFICATION_REQUEST_NOT_GENERATED:
+    case MeilingV1ErrorType.VERIFICATION_REQUEST_NOT_COMPLETED:
       return 400;
 
     case MeilingV1ErrorType.UNAUTHORIZED:
@@ -47,6 +49,9 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
 
     case MeilingV1ErrorType.AUTHENTICATION_TIMEOUT:
       return 410;
+
+    case MeilingV1ErrorType.VERIFICATION_REQUEST_RATE_LIMITED:
+      return 429;
 
     case MeilingV1ErrorType.INTERNAL_SERVER_ERROR:
       return 500;

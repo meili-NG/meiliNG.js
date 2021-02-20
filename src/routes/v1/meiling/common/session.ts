@@ -4,7 +4,11 @@ import fs from 'fs';
 import { prisma } from '../../../..';
 import { Token, User } from '../../../../common';
 import config from '../../../../config';
-import { MeilingV1Session, MeilingV1SessionExtendedAuthentication } from '../interfaces';
+import {
+  MeilingV1Session,
+  MeilingV1SessionExtendedAuthentication,
+  MeilingV1SessionVerificationStatus,
+} from '../interfaces';
 import { MeilingV1ExtendedAuthMethods } from '../interfaces/query';
 
 interface MeilingV1TokenDataFile {
@@ -195,7 +199,7 @@ export async function getSessionFromRequest(req: FastifyRequest): Promise<Meilin
   return data;
 }
 
-export async function setSession(req: FastifyRequest, data?: MeilingV1Session) {
+export async function setSession(req: FastifyRequest, data?: MeilingV1Session): Promise<void> {
   if (req.headers.authorization && req.headers.authorization.includes('Bearer')) {
     const token = await getTokenFromRequest(req);
 
@@ -232,10 +236,44 @@ export async function setSession(req: FastifyRequest, data?: MeilingV1Session) {
   saveSession();
 }
 
+export async function getVerificationStatus(
+  req: FastifyRequest,
+): Promise<MeilingV1SessionVerificationStatus | undefined> {
+  const session = await getSessionFromRequest(req);
+  return session?.verificationStatus;
+}
+
+export async function appendVerificationStatus(
+  req: FastifyRequest,
+  signupChallenge: MeilingV1SessionVerificationStatus,
+): Promise<void> {
+  const prevSession = await getSessionFromRequest(req);
+  const session: MeilingV1Session = {
+    ...prevSession,
+    verificationStatus: {
+      ...prevSession?.verificationStatus,
+      ...signupChallenge,
+    },
+  };
+
+  await setSession(req, session);
+}
+
+export async function setVerificationStatus(
+  req: FastifyRequest,
+  signupChallenge: MeilingV1SessionVerificationStatus,
+): Promise<void> {
+  const session = await getSessionFromRequest(req);
+  await setSession(req, {
+    ...session,
+    verificationStatus: signupChallenge,
+  });
+}
+
 export async function setExtendedAuthentiationSession(
   req: FastifyRequest,
   extAuth: MeilingV1SessionExtendedAuthentication | undefined,
-) {
+): Promise<void> {
   const prevSession = await getSessionFromRequest(req);
   const session = {
     ...prevSession,

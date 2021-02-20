@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import libmobilephoneJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '..';
 import { Utils } from '../../../../common';
+import { getVerificationStatus } from '../common/session';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
 
@@ -28,12 +29,28 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
     return;
   }
 
+  const signupChallenge = await getVerificationStatus(req);
+
+  if (signupChallenge === undefined) {
+    sendMeilingError(
+      rep,
+      MeilingV1ErrorType.VERIFICATION_REQUEST_NOT_GENERATED,
+      'Signup Validation requests were not generated.',
+    );
+    return;
+  }
+
   const name = body.name;
 
   const email = body.email;
   const password = body.password;
   const phone = libmobilephoneJs(body.phone);
   const username = body.username;
+
+  if (!(signupChallenge.email && signupChallenge.phone)) {
+    sendMeilingError(rep, MeilingV1ErrorType.VERIFICATION_REQUEST_NOT_COMPLETED);
+    return;
+  }
 
   if (!phone) {
     sendMeilingError(

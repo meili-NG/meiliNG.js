@@ -18,9 +18,13 @@ module.exports = {
   fastify: {
     listen: isNaN(process.env.FASTIFY_LISTEN) ? process.env.FASTIFY_LISTEN : Number(process.env.FASTIFY_LISTEN) || 3000,
     address: process.env.FASTIFY_ADDRESS,
-    proxy: {
-      allowedHosts: process.env.FASTIFY_PROXY_ALLOWED_HOSTS ? process.env.FASTIFY_PROXY_ALLOWED_HOSTS.split(',') : [],
-    },
+    proxy: process.env.FASTIFY_USE_PROXY
+      ? {
+          allowedHosts: process.env.FASTIFY_PROXY_ALLOWED_HOSTS
+            ? process.env.FASTIFY_PROXY_ALLOWED_HOSTS.split(',')
+            : undefined,
+        }
+      : undefined,
     unixSocket: {
       chmod: process.env.FASTIFY_UNIXSOCKET_CHMOD || '0777',
     },

@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import libphonenumberJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '..';
 import * as Notification from '../../../../common/notification';
+import { generateToken } from '../../../../common/token';
 import * as Utils from '../../../../common/utils';
 import config from '../../../../config';
 import { appendAuthorizationStatus } from '../common/session';
@@ -25,7 +26,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
   const body = req.body as MeilingV1AuthorizationIssueQuery;
 
   const createdAt = new Date();
-  const challenge = 'CHALLENGE';
+  const challenge = generateToken(6, '0123456789');
 
   try {
     if (body.type === 'email') {

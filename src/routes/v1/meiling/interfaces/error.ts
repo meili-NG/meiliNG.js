@@ -32,6 +32,7 @@ export enum MeilingV1ErrorType {
   AUTHORIZATION_REQUEST_RATE_LIMITED = 'authorization_request_rate_limited',
   AUTHORIZATION_REQUEST_TIMEOUT = 'authorization_request_timeout',
   EMAIL_NOT_ALLOWED = 'email_not_allowed',
+  EXISTING_USERNAME = 'existing_username',
   EXISTING_PASSWORD = 'existing_password',
 }
 

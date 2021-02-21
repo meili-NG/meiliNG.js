@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import libmobilephoneJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '..';
 import { prisma } from '../../../..';
-import { Utils } from '../../../../common';
+import { User, Utils } from '../../../../common';
 import { getAuthorizationStatus } from '../common/session';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
@@ -93,6 +93,12 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
     )
   ) {
     sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID);
+    return;
+  }
+
+  const user = await User.findByUsername(username);
+  if (user.length > 0) {
+    sendMeilingError(rep, MeilingV1ErrorType.EXISTING_USERNAME);
     return;
   }
 

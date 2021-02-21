@@ -7,6 +7,7 @@ export enum OAuth2QueryGrantType {
   ACCESS_TOKEN = 'access_token',
   REFRESH_TOKEN = 'refresh_token',
   AUTHORIZATION_CODE = 'authorization_code',
+  DEVICE_CODE = 'urn:ietf:params:oauth:grant-type:device_code',
   // SAML_BEARER = 'urn:ietf:params:oauth:grant-type:saml2-bearer',
 }
 

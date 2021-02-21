@@ -3,6 +3,7 @@ import libphonenumberJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '..';
 import * as Notification from '../../../../common/notification';
 import * as Utils from '../../../../common/utils';
+import config from '../../../../config';
 import { appendAuthorizationStatus } from '../common/session';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
@@ -32,6 +33,29 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
       if (!Utils.isValidEmail(email)) {
         sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'email is not valid');
         return;
+      }
+
+      if (session.authorizationStatus?.email?.challenge.challengeCreatedAt) {
+        const to = session.authorizationStatus.email.to;
+
+        if (to === email) {
+          const prevCreatedAt = new Date(session.authorizationStatus?.email?.challenge.challengeCreatedAt);
+          const estimatedExpiresAt = new Date(
+            prevCreatedAt.getTime() + 1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN,
+          );
+
+          if (
+            estimatedExpiresAt.getTime() - prevCreatedAt.getTime() >
+            1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN * (3 / 4)
+          ) {
+            sendMeilingError(
+              rep,
+              MeilingV1ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
+              'old token is still valid for email verification',
+            );
+            return;
+          }
+        }
       }
 
       await Notification.sendNotification(Notification.NotificationMethod.EMAIL, {
@@ -70,6 +94,29 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         return;
       }
 
+      if (session.authorizationStatus?.phone?.challenge.challengeCreatedAt) {
+        const to = libphonenumberJs(session.authorizationStatus.phone.to);
+
+        if (to && to.formatInternational() === phone.formatInternational()) {
+          const prevCreatedAt = new Date(session.authorizationStatus?.phone?.challenge.challengeCreatedAt);
+          const estimatedExpiresAt = new Date(
+            prevCreatedAt.getTime() + 1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN,
+          );
+
+          if (
+            estimatedExpiresAt.getTime() - prevCreatedAt.getTime() >
+            1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN * (3 / 4)
+          ) {
+            sendMeilingError(
+              rep,
+              MeilingV1ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
+              'old token is still valid for phone authorization.',
+            );
+            return;
+          }
+        }
+      }
+
       await Notification.sendNotification(Notification.NotificationMethod.SMS, {
         type: 'template',
         templateId: Notification.TemplateId.AUTHORIZATION_CODE,
@@ -100,9 +147,12 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
       });
     } else {
       sendMeilingError(rep, MeilingV1ErrorType.UNSUPPORTED_AUTHORIZATION_TYPE);
+      return;
     }
   } catch (e) {
     sendMeilingError(rep, MeilingV1ErrorType.INTERNAL_SERVER_ERROR, 'Failed to communicate with Server');
+    console.error(e);
+    return;
   }
 
   rep.send({

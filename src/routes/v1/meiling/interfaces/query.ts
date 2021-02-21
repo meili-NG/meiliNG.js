@@ -51,4 +51,5 @@ interface MeilingV1SignInPasswordLess {
 interface MeilingV1SignInAuthenticateData {
   method?: MeilingV1ExtendedAuthMethods;
   challengeResponse?: string;
+  challengeContext?: any;
 }

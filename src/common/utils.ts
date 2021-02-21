@@ -10,6 +10,16 @@ export function isValidValue(...values: unknown[]): boolean {
   return isValid;
 }
 
+export function isNotBlank(...values: (string | undefined)[]): boolean {
+  let isValid = true;
+  for (const value of values) {
+    isValid = isValid && !(value === undefined || value === null || value === '' || value.trim() === undefined);
+    if (!isValid) return false;
+  }
+
+  return isValid;
+}
+
 export function string2Boolean(string?: string): boolean | undefined {
   if (!string) return;
   if (string.toLowerCase() !== 'true' && string.toLowerCase() !== 'false') return;
@@ -29,6 +39,8 @@ export function getUnique<T>(array: T[], equals: (m: T, n: T) => boolean) {
   return uniqueArray;
 }
 
+const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/g;
+
 export function convertJsonIfNot<T>(json: string | T | unknown): T {
   if (typeof json === 'string') {
     return JSON.parse(json);
@@ -36,12 +48,30 @@ export function convertJsonIfNot<T>(json: string | T | unknown): T {
   return json as T;
 }
 
-export function checkUsernameCondition(username: string) {
-  return true;
+export interface MeilingV1SignupName {
+  name: string;
+  familyName: string;
+  givenName: string;
+  middleName?: string;
 }
 
-export function checkPasswordCondition(password: string) {
-  return true;
+export function isValidUsername(username: string): boolean {
+  return /^[A-Za-z0-9-_\.]+$/g.test(username);
+}
+
+export function isValidPassword(password: string): boolean {
+  return password.length >= 8;
+}
+
+export function isValidEmail(email: string): boolean {
+  emailRegex.lastIndex = 0;
+  return emailRegex.test(email);
+}
+
+export function isValidName(name?: MeilingV1SignupName): boolean {
+  if (!name) return false;
+
+  return isNotBlank(name.name, name.familyName, name.givenName);
 }
 
 export function getCryptoSafeInteger(bound?: number): number {

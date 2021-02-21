@@ -1,3 +1,12 @@
+// load dotenv if necessary.
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const dotenv = require('dotenv');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const path = require('path');
+
+dotenv.config({ path: path.join(__dirname, '.env') });
+
 module.exports = {
   frontend: {
     url: process.env.FRONTEND_URLS ? process.env.FRONTEND_URLS.split(',') : ['http://localhost:3000'],
@@ -9,9 +18,13 @@ module.exports = {
   fastify: {
     listen: isNaN(process.env.FASTIFY_LISTEN) ? process.env.FASTIFY_LISTEN : Number(process.env.FASTIFY_LISTEN) || 3000,
     address: process.env.FASTIFY_ADDRESS,
-    proxy: {
-      allowedHosts: process.env.FASTIFY_PROXY_ALLOWED_HOSTS ? process.env.FASTIFY_PROXY_ALLOWED_HOSTS.split(',') : [],
-    },
+    proxy: process.env.FASTIFY_USE_PROXY
+      ? {
+          allowedHosts: process.env.FASTIFY_PROXY_ALLOWED_HOSTS
+            ? process.env.FASTIFY_PROXY_ALLOWED_HOSTS.split(',')
+            : undefined,
+        }
+      : undefined,
     unixSocket: {
       chmod: process.env.FASTIFY_UNIXSOCKET_CHMOD || '0777',
     },
@@ -60,5 +73,10 @@ module.exports = {
         CHALLENGE_TOKEN: Number(process.env.TOKEN_INVALIDATE_MEILING_CHALLENGE_TOKEN) || 300,
       },
     },
+  },
+  notificationApi: {
+    version: Number(process.env.NOTIFICATION_API_VERSION) || 1,
+    host: process.env.NOTIFICATION_API_HOST || 'https://notification.stella-api.dev',
+    key: process.env.NOTIFICATION_API_KEY || 'YOUR NOTIFICATION API KEY',
   },
 };

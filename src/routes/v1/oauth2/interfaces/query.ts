@@ -27,7 +27,8 @@ export interface OAuth2QueryAuthParameters extends OAuth2QueryBaseParameters {
 
 export type OAuth2QueryBodyParameters =
   | OAuth2QueryTokenAuthorizationCodeParameters
-  | OAuth2QueryTokenRefreshTokenParameters;
+  | OAuth2QueryTokenRefreshTokenParameters
+  | OAuth2QueryTokenDeviceCodeParameters;
 //  | OAuth2QueryTokenSAMLParameters;
 
 export enum OAuth2ErrorResponseType {
@@ -59,6 +60,11 @@ export interface OAuth2QueryTokenAuthorizationCodeParameters extends OAuth2Query
 export interface OAuth2QueryTokenRefreshTokenParameters extends OAuth2QueryTokenBaseParameters {
   grant_type: OAuth2QueryGrantType.REFRESH_TOKEN;
   refresh_token: string;
+}
+
+export interface OAuth2QueryTokenDeviceCodeParameters extends OAuth2QueryTokenBaseParameters {
+  grant_type: OAuth2QueryGrantType.DEVICE_CODE;
+  device_code: string;
 }
 
 /*

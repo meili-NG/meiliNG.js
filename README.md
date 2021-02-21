@@ -21,7 +21,7 @@
 <hr>
 
 <!-- Add some system specific stuff here -->
-<strong>API Docs:</strong> <a alt="Postman" href="https://documenter.getpostman.com/view/14147251/TW6tL9sz">Postman</a>
+<strong>API Docs:</strong> <a alt="Postman" href="https://documenter.getpostman.com/view/14310965/TWDXnc3q">Postman</a>
 
 <hr>
 

@@ -4,6 +4,7 @@ export interface MeilingV1Session {
   user?: MeilingLoggedInUser[];
   extendedAuthentication?: MeilingV1SessionExtendedAuthentication;
   previouslyLoggedIn?: MeilingLoggedInUser[];
+  authorizationStatus?: MeilingV1SessionAuthorizationStatus;
 }
 
 export interface MeilingLoggedInUser {
@@ -24,6 +25,17 @@ interface MeilingV1SignInPasswordLess extends MeilingV1ChallengeData {
 interface MeilingV1ChallengeData {
   challenge?: string;
   challengeCreatedAt?: Date;
+}
+
+interface MeilingV1SignupChallengeInfo<T> {
+  to: T;
+  challenge: MeilingV1ChallengeData;
+  isVerified: boolean;
+}
+
+export interface MeilingV1SessionAuthorizationStatus {
+  email?: MeilingV1SignupChallengeInfo<string>;
+  phone?: MeilingV1SignupChallengeInfo<string>;
 }
 
 export type MeilingV1SessionExtendedAuthentication = MeilingV1SignInPasswordLess | MeilingV1SignInTwoFactorAuth;

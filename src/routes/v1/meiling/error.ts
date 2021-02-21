@@ -21,6 +21,8 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
     case MeilingV1ErrorType.ALREADY_SIGNED_IN:
     case MeilingV1ErrorType.ALREADY_SIGNED_OUT:
     case MeilingV1ErrorType.APPLICATION_REDIRECT_URI_INVALID:
+    case MeilingV1ErrorType.AUTHORIZATION_REQUEST_NOT_GENERATED:
+    case MeilingV1ErrorType.AUTHORIZATION_REQUEST_NOT_COMPLETED:
       return 400;
 
     case MeilingV1ErrorType.UNAUTHORIZED:
@@ -30,6 +32,7 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
     case MeilingV1ErrorType.INVALID_SESSION:
     case MeilingV1ErrorType.APPLICATION_NOT_AUTHORIZED_BY_USER:
     case MeilingV1ErrorType.APPLICATION_NOT_AUTHORIZED_SCOPES:
+    case MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID:
       return 401;
 
     case MeilingV1ErrorType.APPLICATION_NOT_FOUND:
@@ -38,15 +41,22 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
     case MeilingV1ErrorType.UNSUPPORTED_SIGNIN_METHOD:
     case MeilingV1ErrorType.UNSUPPORTED_SCOPE:
     case MeilingV1ErrorType.UNSUPPORTED_RESPONSE_TYPE:
+    case MeilingV1ErrorType.UNSUPPORTED_AUTHORIZATION_TYPE:
       return 405;
 
     case MeilingV1ErrorType.MORE_THAN_ONE_USER_MATCHED:
     case MeilingV1ErrorType.APPLICATION_USER_ACTION_REQUIRED:
+    case MeilingV1ErrorType.EXISTING_USERNAME:
     case MeilingV1ErrorType.EXISTING_PASSWORD:
+    case MeilingV1ErrorType.EMAIL_NOT_ALLOWED:
       return 409;
 
     case MeilingV1ErrorType.AUTHENTICATION_TIMEOUT:
+    case MeilingV1ErrorType.AUTHORIZATION_REQUEST_TIMEOUT:
       return 410;
+
+    case MeilingV1ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED:
+      return 429;
 
     case MeilingV1ErrorType.INTERNAL_SERVER_ERROR:
       return 500;

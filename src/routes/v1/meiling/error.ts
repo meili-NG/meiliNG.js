@@ -46,6 +46,7 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
 
     case MeilingV1ErrorType.MORE_THAN_ONE_USER_MATCHED:
     case MeilingV1ErrorType.APPLICATION_USER_ACTION_REQUIRED:
+    case MeilingV1ErrorType.EXISTING_USERNAME:
     case MeilingV1ErrorType.EXISTING_PASSWORD:
     case MeilingV1ErrorType.EMAIL_NOT_ALLOWED:
       return 409;

@@ -41,6 +41,10 @@ module.exports = {
         ? process.env.MEILING_OAUTH2_SKIP_AUTHENTICATION.split(',')
         : [],
     },
+    deviceCode: {
+      verification_url: process.env.MEILING_DEVICE_CODE_VERIFICATION_URL || 'http://localhost:3000/device',
+      interval: Number(process.env.MEILING_DEVICE_CODE_INTERVAL) || 5,
+    },
   },
   session: {
     v1: {

@@ -35,6 +35,16 @@ module.exports = {
     oauth2: {
       /** List the client_id of applications to skip the authentication steps */
       skipAuthentication: [],
+      /** Configurations for Device Code Authentication */
+      deviceCode: {
+        /**
+         * verification url to redirect when device code request was received.
+         * make it short! (about 40 chars long)
+         **/
+        verification_url: 'http://localhost:3000/device',
+        /** polling interval to send on device code requests */
+        interval: 5,
+      },
     },
   },
   session: {
@@ -63,6 +73,8 @@ module.exports = {
         /** length of the token */
         length: 128,
       },
+      /** TODO: Implement generators */
+      tokens: {},
     },
     /** Token Invalidation Config */
     invalidate: {

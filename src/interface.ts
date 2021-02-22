@@ -37,6 +37,10 @@ export interface ConfigInterface {
     };
     oauth2: {
       skipAuthentication?: string[];
+      deviceCode: {
+        verification_url: string;
+        interval: number;
+      };
     };
   };
   session: {

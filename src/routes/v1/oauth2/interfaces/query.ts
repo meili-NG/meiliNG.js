@@ -47,6 +47,8 @@ export enum OAuth2ErrorResponseType {
   SLOW_DOWN = 'slow_down',
   AUTHORIZATION_PENDING = 'authorization_pending',
   ACCESS_DENIED = 'access_denied',
+
+  INTERNAL_SERVER_ERROR = 'internal_server_error',
 }
 
 export interface OAuth2ErrorResponse {

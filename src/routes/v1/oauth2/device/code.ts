@@ -1,7 +1,7 @@
 import { InputJsonValue, Permission } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../../../..';
-import { Client, Token, Utils } from '../../../../common';
+import { Client, ClientAccessControls, Token, Utils } from '../../../../common';
 import { generateToken } from '../../../../common/token';
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType } from '../interfaces';
@@ -53,6 +53,13 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
     ),
   );
 
+  // load access control
+  const acl = await Client.getAccessControl(client.id);
+  if (!acl) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INTERNAL_SERVER_ERROR, 'Failed to get Access Control from Server.');
+    return;
+  }
+
   // permissions that were requested
   const requestedPermissions = (await Promise.all(permissionsPromise)) as Permission[];
 
@@ -68,6 +75,22 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
       `the scope: (${unsupportedScopes.join(' ')}) is not supported`,
     );
     return;
+  }
+
+  const areScopesAllowed = await ClientAccessControls.checkPermissions(acl, requestedPermissions);
+  if (areScopesAllowed !== true) {
+    if (areScopesAllowed === false) {
+      sendOAuth2Error(rep, OAuth2ErrorResponseType.INTERNAL_SERVER_ERROR, 'Failed to get Access Control from Server.');
+      return;
+    } else {
+      const deniedScopes = areScopesAllowed.map((n) => n.name);
+      sendOAuth2Error(
+        rep,
+        OAuth2ErrorResponseType.INVALID_GRANT,
+        `the scope (${deniedScopes.join(' ')}) is not authorized`,
+      );
+      return;
+    }
   }
 
   await prisma.oAuthToken.create({

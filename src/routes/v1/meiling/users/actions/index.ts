@@ -5,6 +5,8 @@ import { sendMeilingError } from '../../error';
 import { MeilingV1ErrorType } from '../../interfaces';
 import { meilingV1OAuthClientAuthCheckHandler } from './auth';
 import { meilingV1OAuthClientAuthHandler } from './auth/auth';
+import { meilingV1OAuthClientDeviceAuthHandler } from './auth/device/auth';
+import { meilingV1OAuthClientDeviceAuthCheckHandler } from './auth/device/check';
 import { meilingV1OAuthClientPasswordsDeleteHandler } from './passwords/delete';
 import { meilingV1OAuthClientPasswordsGetHandler } from './passwords/get';
 import { meilingV1OAuthClientPasswordsPostHandler } from './passwords/post';
@@ -30,6 +32,10 @@ export function meilingV1UserActionsHandler(app: FastifyInstance, opts: FastifyP
 
   app.get('/auth', meilingV1OAuthClientAuthCheckHandler);
   app.post('/auth', meilingV1OAuthClientAuthHandler);
+
+  app.get('/auth/device', meilingV1OAuthClientDeviceAuthCheckHandler);
+  app.post('/auth/device', meilingV1OAuthClientDeviceAuthHandler);
+
   app.get('/passwords', meilingV1OAuthClientPasswordsGetHandler);
   app.post('/passwords', meilingV1OAuthClientPasswordsPostHandler);
   app.put('/passwords', meilingV1OAuthClientPasswordsPutHandler);

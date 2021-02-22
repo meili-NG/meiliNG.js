@@ -124,7 +124,7 @@ model OAuthClientSecrets {
 
 model OAuthClientAuthorization {
   id                    String                        @id @default(uuid())
-  user                  User
+  user                  User?
   client                OAuthClient
   permissions           Permission[]
   authorizedAt          DateTime                      @default(now())
@@ -164,6 +164,7 @@ enum OAuthTokenType {
   REFRESH_TOKEN
   ACCOUNT_TOKEN
   AUTHORIZATION_CODE
+  DEVICE_CODE
 }
 
 model OAuthToken {

@@ -13,11 +13,13 @@ type MeilingV1AuthorizationIssueQuery = MeilingV1AuthorizationIssueEmailQuery | 
 
 interface MeilingV1AuthorizationIssueEmailQuery {
   type: 'email';
+  lang?: Notification.TemplateLanguage;
   to: string;
 }
 
 interface MeilingV1AuthorizationIssuePhoneQuery {
   type: 'phone';
+  lang?: Notification.TemplateLanguage;
   to: string;
 }
 
@@ -27,6 +29,8 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
 
   const createdAt = new Date();
   const challenge = generateToken(6, '0123456789');
+
+  const lang = body.lang ? body.lang : 'ko';
 
   try {
     if (body.type === 'email') {
@@ -62,9 +66,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
       await Notification.sendNotification(Notification.NotificationMethod.EMAIL, {
         type: 'template',
         templateId: Notification.TemplateId.AUTHORIZATION_CODE,
-
-        // TODO: get language
-        lang: 'ko',
+        lang,
 
         messages: [
           {
@@ -121,9 +123,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
       await Notification.sendNotification(Notification.NotificationMethod.SMS, {
         type: 'template',
         templateId: Notification.TemplateId.AUTHORIZATION_CODE,
-
-        // TODO: get language
-        lang: 'ko',
+        lang,
 
         messages: [
           {

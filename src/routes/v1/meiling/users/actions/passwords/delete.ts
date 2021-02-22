@@ -7,16 +7,8 @@ import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 
 export async function meilingV1OAuthClientPasswordsDeleteHandler(req: FastifyRequest, rep: FastifyReply) {
-  const user = await meilingV1UserActionGetUser(req);
+  const user = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
   const body = req.body as PasswordBody;
-
-  if (user === undefined) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'invalid request.');
-    return;
-  } else if (user === null) {
-    sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'you are not logged in as specified user.');
-    return;
-  }
 
   if (!body?.password) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'invalid request.');

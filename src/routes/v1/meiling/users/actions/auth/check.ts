@@ -9,15 +9,7 @@ import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 
 export async function meilingV1OAuthClientAuthCheckHandler(req: FastifyRequest, rep: FastifyReply) {
-  // user/* common auth section
-  const userBase = await meilingV1UserActionGetUser(req);
-  if (userBase === undefined) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'invalid request.');
-    return;
-  } else if (userBase === null) {
-    sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'you are not logged in as specified user.');
-    return;
-  }
+  const userBase = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
 
   // get parameters and query
   let query = req.query as MeilingV1UserOAuthAuthQuery;

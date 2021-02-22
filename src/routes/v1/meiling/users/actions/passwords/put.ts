@@ -1,22 +1,14 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { User, Utils } from '../../../../../../common';
-
-import { MeilingV1ErrorType } from '../../../interfaces';
-import { PasswordChangeBody } from '.';
 import bcrypt from 'bcryptjs';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { PasswordChangeBody } from '.';
 import { meilingV1UserActionGetUser } from '..';
 import { prisma } from '../../../../../..';
+import { User, Utils } from '../../../../../../common';
 import { sendMeilingError } from '../../../error';
+import { MeilingV1ErrorType } from '../../../interfaces';
 
 export async function meilingV1OAuthClientPasswordsPutHandler(req: FastifyRequest, rep: FastifyReply) {
-  const user = await meilingV1UserActionGetUser(req);
-  if (user === undefined) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'invalid request.');
-    return;
-  } else if (user === null) {
-    sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'you are not logged in as specified user.');
-    return;
-  }
+  const user = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
 
   const body = req.body as PasswordChangeBody;
   if (!Utils.isValidValue(body, body?.password, body?.newPassword)) {

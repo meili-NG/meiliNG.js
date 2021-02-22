@@ -38,6 +38,8 @@ jobs:
         key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
     - name: Installing dependencies
       run: yarn
+    - name: Generate Prisma Typescript d.ts
+      run: yarn generate
     - name: Run Linting
       run: yarn eslint ./src/ --ext .js,.jsx,.ts,.tsx
       

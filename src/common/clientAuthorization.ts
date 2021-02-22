@@ -40,6 +40,7 @@ export async function getClient(authorization: OAuthClientAuthorization | string
 export async function getUser(authorization: OAuthClientAuthorization | string) {
   const data = await getById(authorization);
   if (!data) return;
+  if (!data.userId) return;
 
   const user = await prisma.user.findUnique({
     where: {

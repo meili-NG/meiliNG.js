@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { FastifyReply } from 'fastify';
-import { ClientAuthorization, Token, User, Utils } from '../../../../common';
+import { Client, ClientAuthorization, Token, User, Utils } from '../../../../common';
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType, OAuth2QueryTokenAuthorizationCodeParameters } from '../interfaces';
 
@@ -9,9 +9,20 @@ export async function oAuth2AuthorizationCodeHandler(
   rep: FastifyReply,
 ) {
   const clientId = body.client_id;
+  const clientSecret = body.client_secret;
 
   const token = body.code;
   const type = 'AUTHORIZATION_CODE';
+
+  if (!(await Client.getByClientId(clientId))) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid clientId');
+    return;
+  }
+
+  if (!(await Client.verifySecret(clientId, clientSecret))) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client secret');
+    return;
+  }
 
   // check token is valid
   if (!Utils.isValidValue(token)) {

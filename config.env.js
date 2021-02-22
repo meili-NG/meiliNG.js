@@ -60,6 +60,8 @@ module.exports = {
           'QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890',
         length: Number(process.env.TOKEN_GENERATORS_DEFAULT_LENGTH) || 128,
       },
+      // TODO:
+      tokens: {},
     },
     invalidate: {
       oauth: {
@@ -67,6 +69,7 @@ module.exports = {
         ACCESS_TOKEN: Number(process.env.TOKEN_INVALIDATE_OAUTH_ACCESS_TOKEN) || 7200,
         REFRESH_TOKEN: Number(process.env.TOKEN_INVALIDATE_OAUTH_REFRESH_TOKEN) || 604800,
         ACCOUNT_TOKEN: Number(process.env.TOKEN_INVALIDATE_OAUTH_ACCOUNT_TOKEN) || -1,
+        DEVICE_CODE: Number(process.env.TOKEN_INVALIDATE_OAUTH_DEVICE_CODE) || 300,
       },
       openid: Number(process.env.TOKEN_INVALIDATE_OPENID) || 300,
       meiling: {

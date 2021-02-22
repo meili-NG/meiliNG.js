@@ -1,9 +1,5 @@
 import { OAuthTokenType } from '@prisma/client';
-
-interface TokenGeneratorConfig {
-  chars: string;
-  length: number;
-}
+import { TokenGenerator } from './common/token';
 
 type SessionV1StorageConfig = SessionV1StorageFileConfig;
 
@@ -56,7 +52,10 @@ export interface ConfigInterface {
   };
   token: {
     generators: {
-      default: TokenGeneratorConfig;
+      default: TokenGenerator;
+      tokens: {
+        [token in OAuthTokenType]: TokenGenerator;
+      };
     };
     invalidate: {
       oauth: {

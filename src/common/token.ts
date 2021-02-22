@@ -1,10 +1,9 @@
-import { Client, ClientAuthorization, Token, User, Utils } from '.';
 import { InputJsonObject, OAuthClient, OAuthTokenType, Permission, User as UserModel } from '@prisma/client';
-
 import { FastifyRequest } from 'fastify';
-import { OAuth2QueryCodeChallengeMethod } from '../routes/v1/oauth2/interfaces';
-import config from '../config';
+import { Client, ClientAuthorization, Token, User, Utils } from '.';
 import { prisma } from '..';
+import config from '../config';
+import { OAuth2QueryCodeChallengeMethod } from '../routes/v1/oauth2/interfaces';
 
 export type TokenMetadata = null | TokenMetadataV1;
 
@@ -20,14 +19,23 @@ export interface TokenMetadataV1 {
       nonce?: string;
     };
   };
+  data?: {
+    deviceCode?: {
+      userCode: string;
+      isAuthorized: boolean;
+      isRejected: boolean;
+    };
+  };
 }
 
-const getDefaultAvailableCharacters = () => config.token.generators.default.chars;
-const getDefaultTokenLength = () => config.token.generators.default.length;
+export interface TokenGenerator {
+  chars?: string;
+  length?: number;
+}
 
 export function generateToken(length?: number, chars?: string) {
-  if (length === undefined) length = getDefaultTokenLength();
-  if (chars === undefined) chars = getDefaultAvailableCharacters();
+  if (length === undefined) length = config.token.generators.default.length as number;
+  if (chars === undefined) chars = config.token.generators.default.chars as string;
 
   let token = '';
   for (let i = 0; i < length; i++) {
@@ -37,8 +45,24 @@ export function generateToken(length?: number, chars?: string) {
   return token;
 }
 
+export function generateTokenViaType(type?: OAuthTokenType) {
+  if (!type) return generateToken();
+  const generator = config.token.generators?.tokens[type]
+    ? config.token.generators?.tokens[type]
+    : config.token.generators.default;
+
+  return generateToken(generator.length, generator.chars);
+}
+
+export function generateTokenViaGenerator(generator?: TokenGenerator) {
+  if (!generator) return generateToken();
+  return generateToken(generator.length, generator.chars);
+}
+
 export async function getAuthorization(token: string, type?: OAuthTokenType) {
   const data = await getData(token, type);
+
+  if (!data?.oAuthClientAuthorizationId) return undefined;
 
   if (data) {
     const authorization = await prisma.oAuthClientAuthorization.findUnique({
@@ -74,7 +98,10 @@ export async function getData(token: string, type?: OAuthTokenType) {
     if (type && tokenData.type !== type) {
       return undefined;
     }
-    await ClientAuthorization.updateLastUpdated(tokenData.oAuthClientAuthorizationId);
+
+    if (tokenData.oAuthClientAuthorizationId) {
+      await ClientAuthorization.updateLastUpdated(tokenData.oAuthClientAuthorizationId);
+    }
   }
 
   return tokenData ? tokenData : undefined;
@@ -84,9 +111,12 @@ export async function getUser(token: string, type?: OAuthTokenType): Promise<Use
   const tokenData = await getData(token, type);
   if (!tokenData) return undefined;
 
+  if (!tokenData.oAuthClientAuthorizationId) return undefined;
+
   const clientAuthorization = await ClientAuthorization.getById(tokenData.oAuthClientAuthorizationId);
   if (!clientAuthorization) return undefined;
 
+  if (!clientAuthorization?.userId) return undefined;
   const user = await User.getBasicInfo(clientAuthorization?.userId);
   if (!user) return undefined;
 
@@ -100,6 +130,8 @@ export async function getUser(token: string, type?: OAuthTokenType): Promise<Use
 export async function getClient(token: string, type?: OAuthTokenType): Promise<OAuthClient | undefined> {
   const tokenData = await getData(token, type);
   if (!tokenData) return undefined;
+
+  if (!tokenData.oAuthClientAuthorizationId) return undefined;
 
   const clientAuthorization = await ClientAuthorization.getById(tokenData.oAuthClientAuthorizationId);
   if (!clientAuthorization) return undefined;

@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fastifyCors from 'fastify-cors';
 import { oAuth2AuthHandler } from './auth';
+import { meilingV1OAuthDevice } from './device';
 import { oAuth2RevokeHandler } from './revoke';
 import { oAuth2TokenHandler } from './token';
 import { oAuth2TokenInfoHandler } from './tokeninfo';
@@ -36,6 +37,8 @@ export function meilingV1OAuth2(app: FastifyInstance, opts: FastifyPluginOptions
     url: '/revoke',
     handler: oAuth2RevokeHandler,
   });
+
+  app.register(meilingV1OAuthDevice, { prefix: '/device' });
 
   done();
 }

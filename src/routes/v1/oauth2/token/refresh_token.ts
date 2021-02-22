@@ -1,11 +1,24 @@
 import { FastifyReply } from 'fastify';
-import { ClientAuthorization, Token, Utils } from '../../../../common';
+import { Client, ClientAuthorization, Token, Utils } from '../../../../common';
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType, OAuth2QueryTokenRefreshTokenParameters } from '../interfaces';
 
 export async function oAuth2RefreshTokenHandler(body: OAuth2QueryTokenRefreshTokenParameters, rep: FastifyReply) {
+  const clientId = body.client_id;
+  const clientSecret = body.client_secret;
+
   const token = body.refresh_token;
   const type = 'REFRESH_TOKEN';
+
+  if (!(await Client.getByClientId(clientId))) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid clientId');
+    return;
+  }
+
+  if (!(await Client.verifySecret(clientId, clientSecret))) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client secret');
+    return;
+  }
 
   // check token is valid
   if (!Utils.isValidValue(token)) {

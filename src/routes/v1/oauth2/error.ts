@@ -20,7 +20,13 @@ export function sendOAuth2Error(
       break;
     case OAuth2ErrorResponseType.INVALID_GRANT:
     case OAuth2ErrorResponseType.UNAUTHORIZED_CLIENT:
+    case OAuth2ErrorResponseType.RATE_LIMIT_EXCEEDED:
+    case OAuth2ErrorResponseType.SLOW_DOWN:
+    case OAuth2ErrorResponseType.ACCESS_DENIED:
       statusCode = 403;
+      break;
+    case OAuth2ErrorResponseType.AUTHORIZATION_PENDING:
+      statusCode = 428;
       break;
     case OAuth2ErrorResponseType.UNSUPPORTED_GRANT_TYPE:
       statusCode = 504;

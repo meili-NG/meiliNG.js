@@ -31,6 +31,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
   const challenge = generateToken(6, '0123456789');
 
   const lang = body.lang ? body.lang : 'ko';
+  const REISSUE_ALLOWED = 60;
 
   try {
     if (body.type === 'email') {
@@ -49,14 +50,11 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
             prevCreatedAt.getTime() + 1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN,
           );
 
-          if (
-            estimatedExpiresAt.getTime() - prevCreatedAt.getTime() >
-            1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN * (3 / 4)
-          ) {
+          if (new Date().getTime() - prevCreatedAt.getTime() < 1000 * REISSUE_ALLOWED) {
             sendMeilingError(
               rep,
               MeilingV1ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
-              'old token is still valid for email verification',
+              'old token is still valid for email verification. rate_limited',
             );
             return;
           }
@@ -106,14 +104,11 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
             prevCreatedAt.getTime() + 1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN,
           );
 
-          if (
-            estimatedExpiresAt.getTime() - prevCreatedAt.getTime() >
-            1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN * (3 / 4)
-          ) {
+          if (new Date().getTime() - prevCreatedAt.getTime() < 1000 * REISSUE_ALLOWED) {
             sendMeilingError(
               rep,
               MeilingV1ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
-              'old token is still valid for phone authorization.',
+              'old token is still valid for phone authorization. rate_limited',
             );
             return;
           }

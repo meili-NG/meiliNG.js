@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import libmobilephoneJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '..';
@@ -102,6 +103,12 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
     return;
   }
 
+  const userByEmail = await User.findByUsername(email);
+  if (userByEmail.length > 0) {
+    sendMeilingError(rep, MeilingV1ErrorType.EXISTING_USERNAME, 'there is already a user using same email');
+    return;
+  }
+
   const emails = await prisma.email.findMany({
     where: {
       email,
@@ -126,7 +133,7 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
         create: {
           email,
           verified: true,
-          allowUse: false,
+          allowUse: true,
           isPrimary: true,
         },
       },
@@ -135,6 +142,22 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
           phone: phone.formatInternational(),
           isPrimary: true,
         },
+      },
+      auths: {
+        create: [
+          {
+            method: 'PASSWORD',
+            data: {
+              type: 'PASSWORD',
+              data: {
+                hash: bcrypt.hashSync(password, bcrypt.genSaltSync()),
+              },
+            },
+            allowPasswordReset: false,
+            allowSingleFactor: false,
+            allowTwoFactor: false,
+          },
+        ],
       },
     },
   });

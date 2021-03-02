@@ -90,6 +90,8 @@ module.exports = {
       /** Configures Invalidation timeframe of meiling's token */
       meiling: {
         CHALLENGE_TOKEN: 300,
+        CHALLENGE_TOKEN_SMS_RATE_LIMIT: 60,
+        CHALLENGE_TOKEN_EMAIL_RATE_LIMIT: 60,
       },
     },
   },

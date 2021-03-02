@@ -1,3 +1,5 @@
+import { TemplateLanguage } from '../../../../common/notification';
+
 export enum MeilingV1SigninType {
   USERNAME_CHECK = 'username_check',
   USERNAME_AND_PASSWORD = 'username_and_password',
@@ -35,6 +37,16 @@ export interface MeilingV1SignInUsernameAndPassword {
 
 export type MeilingV1SignInExtendedAuthentication = MeilingV1SignInTwoFactor | MeilingV1SignInPasswordLess;
 
+export interface MeilingV1PasswordReset {
+  method?: MeilingV1ExtendedAuthMethods;
+  data?: MeilingV1SignInAuthenticateData;
+  context?: {
+    username?: string;
+    phone?: string;
+    lang?: TemplateLanguage;
+  };
+}
+
 export interface MeilingV1SignInTwoFactor {
   type: MeilingV1SigninType.TWO_FACTOR_AUTH;
   data?: MeilingV1SignInAuthenticateData;
@@ -45,6 +57,7 @@ interface MeilingV1SignInPasswordLess {
   data?: MeilingV1SignInAuthenticateData;
   context?: {
     username?: string;
+    phone?: string;
   };
 }
 

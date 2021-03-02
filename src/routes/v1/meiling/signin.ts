@@ -1,43 +1,16 @@
-import { Authorization, User as UserModel } from '@prisma/client';
-import { MeilingV1Challenge, MeilingV1Database, MeilingV1Session, MeilingV1User } from './common';
-import {
-  MeilingV1ExtendedAuthMethods,
-  MeilingV1SignInBody,
-  MeilingV1SignInExtendedAuthentication,
-  MeilingV1SigninType,
-} from './interfaces/query';
-import { User, Utils } from '../../../common';
-
-import { AuthorizationJSONObject } from '../../../common/user';
+import { User as UserModel } from '@prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { FastifyRequestWithSession } from '.';
-import { MeilingV1ErrorType } from './interfaces';
+import { User, Utils } from '../../../common';
+import * as Notification from '../../../common/notification';
+import { AuthorizationJSONObject } from '../../../common/user';
 import config from '../../../config';
+import { MeilingV1Challenge, MeilingV1Database, MeilingV1Session, MeilingV1User } from './common';
+import { getMeilingAvailableAuthMethods } from './common/challenge';
 import { sendMeilingError } from './error';
-
-function getMeilingAvailableAuthMethods(authMethods: Authorization[], body?: MeilingV1SignInExtendedAuthentication) {
-  const methods: MeilingV1ExtendedAuthMethods[] = [];
-
-  for (const thisMethod of authMethods) {
-    const methodMeilingV1 = MeilingV1Database.convertAuthenticationMethod(thisMethod.method);
-    if (methodMeilingV1 !== null) {
-      let methodAllowed = true;
-
-      if (body) {
-        methodAllowed = MeilingV1Challenge.isChallengeMethodAdequate(body, methodMeilingV1);
-      }
-
-      if (methodAllowed) {
-        if (!methods.includes(methodMeilingV1)) {
-          methods.push(methodMeilingV1);
-        }
-      }
-    }
-  }
-
-  return methods;
-}
+import { MeilingV1ErrorType } from './interfaces';
+import { MeilingV1ExtendedAuthMethods, MeilingV1SignInBody, MeilingV1SigninType } from './interfaces/query';
 
 export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyReply) {
   const session = (req as FastifyRequestWithSession).session;
@@ -228,11 +201,55 @@ export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyRe
 
     // if challengeResponse is blank, it means you need a challenge that you defined.
     if (challengeResponse === undefined) {
+      if (MeilingV1Challenge.isChallengeRateLimited(signinMethod, session.extendedAuthentication?.challengeCreatedAt)) {
+        sendMeilingError(
+          rep,
+          MeilingV1ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
+          'you have been rate limited. please try again later.',
+        );
+        return;
+      }
+
       const challenge = MeilingV1Challenge.generateChallenge(signinMethod);
+      const to = undefined;
 
       await MeilingV1Session.setExtendedAuthenticationSessionMethodAndChallenge(req, signinMethod, challenge);
 
+      if (challenge) {
+        if (signinMethod === MeilingV1ExtendedAuthMethods.EMAIL || signinMethod === MeilingV1ExtendedAuthMethods.SMS) {
+          if (to)
+            await Notification.sendNotification(
+              MeilingV1ExtendedAuthMethods.EMAIL === signinMethod
+                ? Notification.NotificationMethod.EMAIL
+                : MeilingV1ExtendedAuthMethods.SMS === signinMethod
+                ? Notification.NotificationMethod.SMS
+                : // FALLBACK - BAD PRACTICE
+                  Notification.NotificationMethod.SMS,
+              {
+                type: 'template',
+                templateId: Notification.TemplateId.AUTHORIZATION_CODE,
+
+                // TODO: configurable default language
+                // user defined language
+                lang: 'ko',
+                messages: [
+                  {
+                    to,
+                    variables: {
+                      // I want this to be fixed.
+                      // but KakaoTalk's eGovFrame-style template
+                      // system prevents me from doing it.
+                      코드: challenge,
+                    },
+                  },
+                ],
+              },
+            );
+        }
+      }
+
       rep.send({
+        to,
         type: body.type,
         challenge: MeilingV1Challenge.shouldSendChallenge(signinMethod) ? challenge : undefined,
       });

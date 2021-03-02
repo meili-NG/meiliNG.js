@@ -157,6 +157,15 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
             allowSingleFactor: false,
             allowTwoFactor: false,
           },
+          {
+            method: 'SMS',
+            data: {
+              type: 'SMS',
+            },
+            allowPasswordReset: true,
+            allowSingleFactor: false,
+            allowTwoFactor: true,
+          },
         ],
       },
     },

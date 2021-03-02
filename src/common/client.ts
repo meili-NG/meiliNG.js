@@ -1,8 +1,7 @@
-import { ClientAuthorization, MeilingCommonOAuth2, User, Utils } from '.';
 import { OAuthClient, Permission, User as UserModel } from '@prisma/client';
-
-import config from '../config';
+import { ClientAuthorization, MeilingCommonOAuth2, User, Utils } from '.';
 import { prisma } from '..';
+import config from '../config';
 
 export async function getByClientId(clientId: string) {
   const client = await prisma.oAuthClient.findFirst({
@@ -26,21 +25,6 @@ export async function getClientOwners(clientId: string) {
   });
 
   return owners;
-}
-
-export async function getRedirectUris(clientId: string) {
-  const redirectUris = [];
-  const data = await prisma.oAuthClientRedirectUris.findMany({
-    where: {
-      oAuthClientId: clientId,
-    },
-  });
-
-  for (const datum of data) {
-    redirectUris.push(datum.redirectUri);
-  }
-
-  return redirectUris;
 }
 
 export async function verifySecret(clientId: string, clientSecret?: string) {
@@ -114,6 +98,74 @@ export function shouldSkipAuthentication(clientId: string) {
   }
 
   return false;
+}
+
+export async function getRedirectUris(clientId: string) {
+  const redirectUris = [];
+  const data = await prisma.oAuthClientRedirectUris.findMany({
+    where: {
+      oAuthClientId: clientId,
+    },
+  });
+
+  for (const datum of data) {
+    redirectUris.push(datum.redirectUri);
+  }
+
+  return redirectUris;
+}
+
+export async function addRedirectUri(clientId: string, redirectUri: string): Promise<boolean> {
+  const client = await getByClientId(clientId);
+  if (!client) {
+    throw new Error('Client not found');
+  }
+
+  const redirectUris = await getRedirectUris(clientId);
+  if (redirectUris.filter((n) => n === redirectUri).length > 0) {
+    return false;
+  }
+
+  await prisma.oAuthClientRedirectUris.create({
+    data: {
+      OAuthClient: {
+        connect: {
+          id: clientId,
+        },
+      },
+      redirectUri: redirectUri,
+    },
+  });
+
+  return true;
+}
+
+export async function removeRedirectUri(clientId: string, redirectUri: string): Promise<boolean> {
+  const rawRedirectUris = await prisma.oAuthClientRedirectUris.findMany({
+    where: {
+      OAuthClient: {
+        id: clientId,
+      },
+    },
+  });
+
+  const url = new URL(redirectUri);
+  if (!url) {
+    return false;
+  }
+
+  const matchingUris = rawRedirectUris.filter((n) => n.redirectUri === redirectUri);
+  await Promise.all(
+    matchingUris.map((n) =>
+      prisma.oAuthClientRedirectUris.delete({
+        where: {
+          id: n.id,
+        },
+      }),
+    ),
+  );
+
+  return true;
 }
 
 export async function createAuthorization(clientId: string, user: string | UserModel, permissions: Permission[]) {

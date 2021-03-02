@@ -78,6 +78,10 @@ module.exports = {
       openid: Number(process.env.TOKEN_INVALIDATE_OPENID) || 300,
       meiling: {
         CHALLENGE_TOKEN: Number(process.env.TOKEN_INVALIDATE_MEILING_CHALLENGE_TOKEN) || 300,
+        CHALLENGE_TOKEN_SMS_RATE_LIMIT:
+          Number(process.env.TOKEN_INVALIDATE_MEILING_CHALLENGE_TOKEN_SMS_RATE_LIMIT) || 60,
+        CHALLENGE_TOKEN_EMAIL_RATE_LIMIT:
+          Number(process.env.TOKEN_INVALIDATE_MEILING_CHALLENGE_TOKEN_EMAIL_RATE_LIMIT) || 60,
       },
     },
   },

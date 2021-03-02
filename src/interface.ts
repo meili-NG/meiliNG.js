@@ -68,6 +68,8 @@ export interface ConfigInterface {
       openid: number;
       meiling: {
         CHALLENGE_TOKEN: number;
+        CHALLENGE_TOKEN_SMS_RATE_LIMIT: number;
+        CHALLENGE_TOKEN_EMAIL_RATE_LIMIT: number;
       };
     };
   };

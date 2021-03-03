@@ -5,9 +5,10 @@ import * as Notification from '../../../../common/notification';
 import { generateToken } from '../../../../common/token';
 import * as Utils from '../../../../common/utils';
 import config from '../../../../config';
+import { MeilingV1Challenge } from '../common';
 import { appendAuthorizationStatus } from '../common/session';
 import { sendMeilingError } from '../error';
-import { MeilingV1ErrorType } from '../interfaces';
+import { MeilingV1ErrorType, MeilingV1ExtendedAuthMethods } from '../interfaces';
 
 type MeilingV1AuthorizationIssueQuery = MeilingV1AuthorizationIssueEmailQuery | MeilingV1AuthorizationIssuePhoneQuery;
 
@@ -31,7 +32,6 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
   const challenge = generateToken(6, '0123456789');
 
   const lang = body.lang ? body.lang : 'ko';
-  const REISSUE_ALLOWED = 60;
 
   try {
     if (body.type === 'email') {
@@ -50,7 +50,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
             prevCreatedAt.getTime() + 1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN,
           );
 
-          if (new Date().getTime() - prevCreatedAt.getTime() < 1000 * REISSUE_ALLOWED) {
+          if (MeilingV1Challenge.isChallengeRateLimited(MeilingV1ExtendedAuthMethods.EMAIL, prevCreatedAt)) {
             sendMeilingError(
               rep,
               MeilingV1ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
@@ -104,7 +104,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
             prevCreatedAt.getTime() + 1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN,
           );
 
-          if (new Date().getTime() - prevCreatedAt.getTime() < 1000 * REISSUE_ALLOWED) {
+          if (MeilingV1Challenge.isChallengeRateLimited(MeilingV1ExtendedAuthMethods.SMS, prevCreatedAt)) {
             sendMeilingError(
               rep,
               MeilingV1ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,

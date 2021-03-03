@@ -1,11 +1,58 @@
+import { Authorization } from '@prisma/client';
+import { MeilingV1Challenge, MeilingV1Database } from '.';
 import { Token } from '../../../../common';
 import { AuthorizationJSONObject, AuthorizationOTPObject, AuthorizationPGPSSHKeyObject } from '../../../../common/user';
 import { validateOTP, validatePGPSign } from '../../../../common/validate';
+import config from '../../../../config';
 import {
   MeilingV1ExtendedAuthMethods,
   MeilingV1SignInExtendedAuthentication,
   MeilingV1SigninType,
 } from '../interfaces/query';
+
+export function getMeilingAvailableAuthMethods(
+  authMethods: Authorization[],
+  body?: MeilingV1SignInExtendedAuthentication,
+) {
+  const methods: MeilingV1ExtendedAuthMethods[] = [];
+
+  for (const thisMethod of authMethods) {
+    const methodMeilingV1 = MeilingV1Database.convertAuthenticationMethod(thisMethod.method);
+    if (methodMeilingV1 !== null) {
+      let methodAllowed = true;
+
+      if (body) {
+        methodAllowed = MeilingV1Challenge.isChallengeMethodAdequate(body, methodMeilingV1);
+      }
+
+      if (methodAllowed) {
+        if (!methods.includes(methodMeilingV1)) {
+          methods.push(methodMeilingV1);
+        }
+      }
+    }
+  }
+
+  return methods;
+}
+
+export function isChallengeRateLimited(signinMethod: MeilingV1ExtendedAuthMethods, issuedAt?: Date) {
+  if (issuedAt) {
+    if (signinMethod === MeilingV1ExtendedAuthMethods.SMS) {
+      return (
+        new Date().getTime() - issuedAt.getTime() <
+        config.token.invalidate.meiling.CHALLENGE_TOKEN_SMS_RATE_LIMIT * 1000
+      );
+    } else if (signinMethod === MeilingV1ExtendedAuthMethods.EMAIL) {
+      return (
+        new Date().getTime() - issuedAt.getTime() <
+        config.token.invalidate.meiling.CHALLENGE_TOKEN_EMAIL_RATE_LIMIT * 1000
+      );
+    }
+  }
+
+  return false;
+}
 
 export function generateChallenge(signinMethod: MeilingV1ExtendedAuthMethods) {
   switch (signinMethod) {

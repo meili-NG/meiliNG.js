@@ -5,7 +5,7 @@ import { convertAuthentication } from './database';
 
 export async function getAvailableExtendedAuthenticationMethods(
   user?: User | string,
-  signinType?: MeilingV1SigninType,
+  signinType?: MeilingV1SigninType | 'password_reset',
   signinMethod?: MeilingV1ExtendedAuthMethods,
 ): Promise<Authorization[]> {
   let uuid;
@@ -27,6 +27,7 @@ export async function getAvailableExtendedAuthenticationMethods(
         userId: uuid,
         allowSingleFactor: signinType === MeilingV1SigninType.PASSWORDLESS ? true : undefined,
         allowTwoFactor: signinType === MeilingV1SigninType.TWO_FACTOR_AUTH ? true : undefined,
+        allowPasswordReset: signinType === 'password_reset' ? true : undefined,
         method: signinMethod !== undefined ? convertAuthentication(signinMethod) : undefined,
       },
     });

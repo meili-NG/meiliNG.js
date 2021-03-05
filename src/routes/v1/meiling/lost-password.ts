@@ -1,5 +1,6 @@
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
+import libphonenumberJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '.';
 import { Token, User, Utils } from '../../../common';
 import { NotificationMethod, sendNotification, TemplateId, TemplateLanguage } from '../../../common/notification';
@@ -89,7 +90,40 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
 
       // work on later. challenge and session.
     } else if (body.method === MeilingV1ExtendedAuthMethods.SMS) {
-      // work l8r.
+      const toRaw = (await User.getPrimaryPhone(user[0].id))?.phone;
+      let to = undefined;
+
+      if (toRaw) {
+        to = libphonenumberJs(toRaw);
+      }
+
+      // TODO: make it configurable
+      const challenge = Token.generateToken(6, '0123456789');
+
+      if (!to) {
+        sendMeilingError(
+          rep,
+          MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID,
+          'phone number does not exist on this user',
+        );
+        return;
+      }
+
+      await sendNotification(NotificationMethod.EMAIL, {
+        type: 'template',
+        templateId: TemplateId.AUTHORIZATION_CODE,
+        lang,
+        messages: [
+          {
+            to: to.formatInternational(),
+            variables: {
+              // TODO: fix eGovFrame like template system.
+              // LDM's work required beforehand. est. 10d+
+              코드: challenge,
+            },
+          },
+        ],
+      });
     }
   }
 

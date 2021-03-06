@@ -5,14 +5,14 @@ export interface MeilingV1Session {
   extendedAuthentication?: MeilingV1SessionExtendedAuthentication;
   previouslyLoggedIn?: MeilingLoggedInUser[];
   authorizationStatus?: MeilingV1SessionAuthorizationStatus;
-  passwordReset?: MeilingV1PasswordReset;
+  passwordReset?: MeilingV1PasswordResetSession;
 }
 
 export interface MeilingLoggedInUser {
   id: string;
 }
 
-interface MeilingV1PasswordReset extends MeilingV1ChallengeData {
+export interface MeilingV1PasswordResetSession extends MeilingV1ChallengeData {
   method?: MeilingV1ExtendedAuthMethods;
 }
 

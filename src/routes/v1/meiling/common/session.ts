@@ -5,6 +5,7 @@ import { prisma } from '../../../..';
 import { Token, User } from '../../../../common';
 import config from '../../../../config';
 import {
+  MeilingV1PasswordResetSession,
   MeilingV1Session,
   MeilingV1SessionAuthorizationStatus,
   MeilingV1SessionExtendedAuthentication,
@@ -278,6 +279,19 @@ export async function setExtendedAuthenticationSession(
   const session = {
     ...prevSession,
     extendedAuthentication: extAuth,
+  } as MeilingV1Session;
+
+  await setSession(req, session);
+}
+
+export async function setPasswordResetSession(
+  req: FastifyRequest,
+  passwordReset: MeilingV1PasswordResetSession | undefined,
+): Promise<void> {
+  const prevSession = await getSessionFromRequest(req);
+  const session = {
+    ...prevSession,
+    passwordReset,
   } as MeilingV1Session;
 
   await setSession(req, session);

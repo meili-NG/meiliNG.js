@@ -9,7 +9,9 @@ import {
   TemplateId,
   TemplateLanguage,
 } from '../../../common/notification';
+import { MeilingV1Challenge } from './common';
 import { generateChallenge, isChallengeRateLimited } from './common/challenge';
+import { setPasswordResetSession } from './common/session';
 import { getAvailableExtendedAuthenticationMethods } from './common/user';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
@@ -49,6 +51,7 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
 
   if (!body.data?.challengeResponse) {
     let user = [];
+    const methods = await getAvailableExtendedAuthenticationMethods(username, 'password_reset');
 
     if (Utils.isValidEmail(username)) {
       user = await User.findByUsername(username);
@@ -72,6 +75,11 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
     // TODO: make it configurable
     const challenge = generateChallenge(body.method);
     if (!challenge) {
+      sendMeilingError(rep, MeilingV1ErrorType.UNSUPPORTED_SIGNIN_METHOD);
+      return;
+    }
+
+    if (!methods.map((n) => n.method.toLowerCase() as string).includes(body.method.toLowerCase())) {
       sendMeilingError(rep, MeilingV1ErrorType.UNSUPPORTED_SIGNIN_METHOD);
       return;
     }
@@ -103,6 +111,8 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
         );
         return;
       }
+    } else {
+      // TODO: Create Lost Password flow for other method.
     }
 
     if (to !== undefined) {
@@ -134,6 +144,18 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
         ],
       });
     }
+
+    await setPasswordResetSession(req, {
+      method: body.method,
+      challenge: challenge,
+      challengeCreatedAt: new Date(),
+    });
+
+    rep.send({
+      to,
+      challenge: MeilingV1Challenge.shouldSendChallenge(body.method) ? challenge : undefined,
+    });
+    return;
   }
 
   rep.status(200).send({

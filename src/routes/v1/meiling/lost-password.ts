@@ -2,9 +2,14 @@ import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import libphonenumberJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '.';
-import { Token, User, Utils } from '../../../common';
-import { NotificationMethod, sendNotification, TemplateId, TemplateLanguage } from '../../../common/notification';
-import { isChallengeRateLimited } from './common/challenge';
+import { User, Utils } from '../../../common';
+import {
+  convertToNotificationMethod,
+  sendNotification,
+  TemplateId,
+  TemplateLanguage,
+} from '../../../common/notification';
+import { generateChallenge, isChallengeRateLimited } from './common/challenge';
 import { getAvailableExtendedAuthenticationMethods } from './common/user';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
@@ -21,6 +26,18 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
     return;
   }
 
+  if (!body.data?.challengeContext.username) {
+    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'body does not contain context: username');
+    return;
+  }
+
+  const username = body?.data?.challengeContext.username;
+
+  if (!username) {
+    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'username is missing');
+    return;
+  }
+
   if (!body.method) {
     const methods = await getAvailableExtendedAuthenticationMethods(undefined, 'password_reset');
 
@@ -31,23 +48,12 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
   }
 
   if (!body.data?.challengeResponse) {
-    if (isChallengeRateLimited(body.method, session.passwordReset?.challengeCreatedAt)) {
-      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'body is not a valid JSON.');
-      return;
-    }
-
-    if (!body.data?.challengeContext.username) {
-      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'body does not contain context: username');
-      return;
-    }
-
     let user = [];
-    const usernameInput = body.data.challengeContext.username;
 
-    if (Utils.isValidEmail(usernameInput)) {
-      user = await User.findByUsername(usernameInput);
+    if (Utils.isValidEmail(username)) {
+      user = await User.findByUsername(username);
     } else {
-      user = await User.findByEmail(usernameInput);
+      user = await User.findByEmail(username);
     }
 
     if (user.length > 1) {
@@ -61,44 +67,33 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
     // TODO: make it configurable
     const lang: TemplateLanguage = 'ko';
 
+    // TODO: get lang from body
+
+    // TODO: make it configurable
+    const challenge = generateChallenge(body.method);
+    if (!challenge) {
+      sendMeilingError(rep, MeilingV1ErrorType.UNSUPPORTED_SIGNIN_METHOD);
+      return;
+    }
+
+    let to: string | undefined = undefined;
+
     if (body.method === MeilingV1ExtendedAuthMethods.EMAIL) {
       const to = (await User.getPrimaryEmail(user[0].id))?.email;
-
-      // TODO: make it configurable
-      const challenge = Token.generateToken(6, '0123456789');
 
       if (!to || !Utils.isValidEmail(to)) {
         sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID, 'email does not exist on this user');
         return;
       }
-
-      await sendNotification(NotificationMethod.EMAIL, {
-        type: 'template',
-        templateId: TemplateId.AUTHORIZATION_CODE,
-        lang,
-        messages: [
-          {
-            to,
-            variables: {
-              // TODO: fix eGovFrame like template system.
-              // LDM's work required beforehand. est. 10d+
-              코드: challenge,
-            },
-          },
-        ],
-      });
-
-      // work on later. challenge and session.
     } else if (body.method === MeilingV1ExtendedAuthMethods.SMS) {
       const toRaw = (await User.getPrimaryPhone(user[0].id))?.phone;
-      let to = undefined;
 
       if (toRaw) {
-        to = libphonenumberJs(toRaw);
+        const phoneParsed = libphonenumberJs(toRaw);
+        if (phoneParsed) {
+          to = phoneParsed.formatInternational();
+        }
       }
-
-      // TODO: make it configurable
-      const challenge = Token.generateToken(6, '0123456789');
 
       if (!to) {
         sendMeilingError(
@@ -108,14 +103,28 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
         );
         return;
       }
+    }
 
-      await sendNotification(NotificationMethod.EMAIL, {
+    if (to !== undefined) {
+      if (isChallengeRateLimited(body.method, session.passwordReset?.challengeCreatedAt)) {
+        sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED, 'You are rate limited');
+
+        return;
+      }
+
+      const notificationMethod = convertToNotificationMethod(body.method);
+      if (!notificationMethod) {
+        sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID, 'invalid authorization method');
+        return;
+      }
+
+      await sendNotification(notificationMethod, {
         type: 'template',
         templateId: TemplateId.AUTHORIZATION_CODE,
         lang,
         messages: [
           {
-            to: to.formatInternational(),
+            to,
             variables: {
               // TODO: fix eGovFrame like template system.
               // LDM's work required beforehand. est. 10d+

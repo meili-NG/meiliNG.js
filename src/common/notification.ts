@@ -1,5 +1,6 @@
 import axios from 'axios';
 import config from '../config';
+import { MeilingV1ExtendedAuthMethods } from '../routes/v1/meiling/interfaces';
 
 export type TemplateLanguage = 'ko' | 'en';
 
@@ -11,6 +12,19 @@ export enum NotificationMethod {
   SMS = 'sms',
   ALIMTALK = 'alimtalk',
   EMAIL = 'email',
+}
+
+export function convertToNotificationMethod(method: MeilingV1ExtendedAuthMethods) {
+  switch (method) {
+    case MeilingV1ExtendedAuthMethods.EMAIL:
+      return NotificationMethod.EMAIL;
+    case MeilingV1ExtendedAuthMethods.SMS:
+      return NotificationMethod.SMS;
+    default:
+      return undefined;
+  }
+
+  return undefined;
 }
 
 type NotificationPayload = SMSPayload | AlimtalkPayload | CallPayload;

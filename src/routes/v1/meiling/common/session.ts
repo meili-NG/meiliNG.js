@@ -270,7 +270,7 @@ export async function setAuthorizationStatus(
   });
 }
 
-export async function setExtendedAuthentiationSession(
+export async function setExtendedAuthenticationSession(
   req: FastifyRequest,
   extAuth: MeilingV1SessionExtendedAuthentication | undefined,
 ): Promise<void> {

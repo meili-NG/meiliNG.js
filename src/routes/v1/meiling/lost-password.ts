@@ -113,6 +113,7 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
       }
     } else {
       // TODO: Create Lost Password flow for other method.
+      // but I think common flow can cover this?
     }
 
     if (to !== undefined) {
@@ -158,7 +159,5 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
     return;
   }
 
-  rep.status(200).send({
-    success: true,
-  });
+  sendMeilingError(rep, MeilingV1ErrorType.NOT_IMPLEMENTED, 'not implemented yet™');
 }

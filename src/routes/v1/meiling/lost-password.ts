@@ -9,12 +9,13 @@ import {
   TemplateId,
   TemplateLanguage,
 } from '../../../common/notification';
+import config from '../../../config';
 import { MeilingV1Challenge } from './common';
-import { generateChallenge, isChallengeRateLimited } from './common/challenge';
+import { generateChallenge, isChallengeRateLimited, verifyChallenge } from './common/challenge';
 import { setPasswordResetSession } from './common/session';
 import { getAvailableExtendedAuthenticationMethods } from './common/user';
 import { sendMeilingError } from './error';
-import { MeilingV1ErrorType } from './interfaces';
+import { MeilingV1ErrorType, MeilingV1PasswordResetSession } from './interfaces';
 import { MeilingV1ExtendedAuthMethods, MeilingV1PasswordReset } from './interfaces/query';
 
 export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: FastifyReply) {
@@ -41,7 +42,7 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
   }
 
   if (!body.method) {
-    const methods = await getAvailableExtendedAuthenticationMethods(undefined, 'password_reset');
+    const methods = await getAvailableExtendedAuthenticationMethods(username, 'password_reset');
 
     rep.send({
       method: methods,
@@ -156,6 +157,46 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
       to,
       challenge: MeilingV1Challenge.shouldSendChallenge(body.method) ? challenge : undefined,
     });
+    return;
+  }
+
+  if (
+    !Utils.isValidValue(
+      session.passwordReset,
+      session.passwordReset?.challenge,
+      session.passwordReset?.challengeCreatedAt,
+    )
+  ) {
+    sendMeilingError(
+      rep,
+      MeilingV1ErrorType.AUTHORIZATION_REQUEST_NOT_GENERATED,
+      'generation request was not generated in first place.',
+    );
+    return;
+  }
+
+  const passwordReset = session.passwordReset as MeilingV1PasswordResetSession;
+  if (passwordReset.method !== body.method) {
+    sendMeilingError(
+      rep,
+      MeilingV1ErrorType.AUTHORIZATION_REQUEST_NOT_GENERATED,
+      'generation request was not generated with particular method',
+    );
+    return;
+  }
+
+  if (
+    !passwordReset.challengeCreatedAt ||
+    new Date().getTime() - passwordReset.challengeCreatedAt.getTime() >
+      1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN
+  ) {
+    sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_TIMEOUT, 'generated request was timed out');
+    return;
+  }
+
+  const isValid = verifyChallenge(passwordReset.method, passwordReset.challenge, body.data.challengeResponse);
+  if (!isValid) {
+    sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID, 'invalid challenge');
     return;
   }
 

@@ -1,6 +1,6 @@
 <h1 align="center">Meiling</h1>
 <p align="center">
-  <strong>An easy-to-use, open-source oAuth2 Authentication Provider</strong>
+  <strong>An easy-to-use, open-source Gatekeeper for oAuth2 Authentication</strong>
 </p>
 <p align="center">
   Meiling allows users to build highly-configurable and open authentication infrastructure based on OAuth2 in no time.
@@ -13,9 +13,8 @@
 <hr>
 
 <p align="right">
-   Developed with &lt;3 by Stella IT OpenSource Project Team<br>
-   Maintained by <a href="https://github.com/Alex4386">@Alex4386</a><br>
-   <a href="https://opensource.stella-it.com/discord/">Join our Community</a>
+  Fueled by Stella IT OpenSource Project Team with ❤️<br>
+  <a href="https://opensource.stella-it.com/discord/">Join our Community</a>
 </p> 
 
 <hr>
@@ -25,27 +24,28 @@
 
 <hr>
 
-<h2 align="center">Experimental Technology!</h2>
-<p align="center">This software is still in "beta" stage and VERSION 1 APIs are not finalized. Expect bugs.</p>
+<h2 align="center">Unstable!</h2>
+<p align="center">This software is still in "Release-Candidate" stage but its VERSION 1 API could be unstable. Expect bugs.</p>
 
 <hr>
 
 ## Features
-The key featues of Meiling Project are:
+The key featues of Meiling Gatekeeper are:
 * highly-configurable client authentication interface.  
-  Just follow the communication API standards defined in API Docs to generate your own login infrastructure with your design.
-* oAuth2 and OpenID Connect Compliant
-* Similar API Structure with Google's oAuth2 API.  
-  You can re-use your REST API based Google oAuth2 code.
+  Just follow the communication API standards defined in API Docs to generate your own login infrastructure with your design.  
+    
+  Take your BI even on Logins, Let your front-end developer/designers fly.  
+* oAuth2 and OpenID Connect Compliant.
+* Similar API Structure with good ol' friend, Google's oAuth2 API.  
 
 Also just like conventional login systems:
-* keeps users' login details and data private, just like a [gatekeeper](https://en.touhouwiki.net/wiki/Hong_Meiling).
+* keeps users' login details and data private, That's always be mission of this [gatekeeper](https://en.touhouwiki.net/wiki/Hong_Meiling).
 * XSRF preventions using session tokens.
 
 ## Use cases
-Meiling Project is used in:
-* Stella IT Accounts
-* and more!
+Meiling Gatekeeper is used in:
+* [Stella IT Accounts](https://login.appie.stella-it.com)  
+  With the launch of [Stella API](https://docs.stella-api.dev/), Stella IT opens its infrastructure for users and developers by providing programmable API. Stella IT uses Meiling Gatekeeper for providing authorization for all Stella APIs.
 
 ## License
-Distributed under [MIT License](LICENSE)
+Distributed under [MIT License](LICENSE).  

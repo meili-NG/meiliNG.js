@@ -1,4 +1,3 @@
-import { InputJsonValue } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { meilingV1UserActionGetUser } from '../..';
 import { prisma } from '../../../../../../..';
@@ -57,7 +56,7 @@ export async function meilingV1OAuthClientDeviceAuthHandler(req: FastifyRequest,
 
   const userCode = matchingUserCodes[0];
 
-  const client = await ClientAuthorization.getClient(userCode.oAuthClientAuthorizationId);
+  const client = await ClientAuthorization.getClient(userCode.authorizationId);
   if (!client) {
     sendMeilingError(rep, MeilingV1ErrorType.APPLICATION_NOT_FOUND, 'unable to find proper client');
     return;
@@ -77,7 +76,7 @@ export async function meilingV1OAuthClientDeviceAuthHandler(req: FastifyRequest,
     return;
   }
 
-  const authorization = await ClientAuthorization.getById(userCode.oAuthClientAuthorizationId);
+  const authorization = await ClientAuthorization.getById(userCode.authorizationId);
   if (!authorization) {
     sendMeilingError(
       rep,
@@ -113,7 +112,7 @@ export async function meilingV1OAuthClientDeviceAuthHandler(req: FastifyRequest,
       token: userCode.token,
     },
     data: {
-      metadata: (metadata as unknown) as InputJsonValue,
+      metadata: metadata as any,
     },
   });
 

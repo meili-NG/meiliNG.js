@@ -1,19 +1,17 @@
-import { ClientAuthorization, User, Utils } from '.';
 import {
   Email,
   Group,
-  InputJsonObject,
   OAuthClient,
   OAuthClientAuthorization,
   OAuthTokenType,
   Phone,
   User as UserModel,
 } from '@prisma/client';
-
-import JWT from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import config from '../config';
+import JWT from 'jsonwebtoken';
+import { ClientAuthorization, User, Utils } from '.';
 import { prisma } from '../';
+import config from '../config';
 
 export interface UserInfoObject extends UserModel {
   emails: Email[];
@@ -100,19 +98,23 @@ export async function getInfo(user: UserModel | string): Promise<UserInfoObject 
 
   const emailsPromise = prisma.email.findMany({
     where: {
-      User: userDatabase,
+      user: userDatabase,
     },
   });
 
   const phonesPromise = prisma.phone.findMany({
     where: {
-      User: userDatabase,
+      user: userDatabase,
     },
   });
 
   const groupsPromise = prisma.group.findMany({
     where: {
-      User: userDatabase,
+      users: {
+        some: {
+          id: userDatabase.id,
+        },
+      },
     },
   });
 
@@ -209,12 +211,12 @@ export async function addPassword(user: UserModel | string, password: string) {
 
   const passwordData = await prisma.authorization.create({
     data: {
-      User: {
+      user: {
         connect: {
           id: getUserId(user),
         },
       },
-      data: (data as unknown) as InputJsonObject,
+      data: data as any,
       method: 'PASSWORD',
       allowSingleFactor: false,
       allowTwoFactor: false,
@@ -253,7 +255,7 @@ export async function getTokens(user: UserModel | string, type: OAuthTokenType |
     authorizationsPromise.push(
       prisma.oAuthToken.findMany({
         where: {
-          oAuthClientAuthorizationId: authorization.id,
+          authorizationId: authorization.id,
           type,
         },
       }),
@@ -283,7 +285,7 @@ export async function getClientAuthorizations(user: UserModel | string, clientId
   });
 
   if (clientId) {
-    returnData = authorizations.filter((n) => n.oAuthClientId === clientId);
+    returnData = authorizations.filter((n) => n.clientId === clientId);
   } else {
     returnData = authorizations;
   }
@@ -301,7 +303,7 @@ export async function getClientAuthorizedPermissions(user: UserModel | string, c
   });
 
   if (clientId) {
-    authorizations = authorizations.filter((n) => n.oAuthClientId === clientId);
+    authorizations = authorizations.filter((n) => n.clientId === clientId);
   }
 
   for (const authorization of authorizations) {
@@ -388,7 +390,7 @@ export async function addEmail(userId: string, email: string, isPrimary = false)
   await prisma.email.create({
     data: {
       email: email.toLowerCase(),
-      User: {
+      user: {
         connect: {
           id: userId,
         },
@@ -456,7 +458,7 @@ export async function addPhone(userId: string, phone: string, isPrimary = false)
   await prisma.phone.create({
     data: {
       phone,
-      User: {
+      user: {
         connect: {
           id: userId,
         },

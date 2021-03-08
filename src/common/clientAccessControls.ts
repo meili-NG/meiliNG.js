@@ -30,7 +30,7 @@ export async function checkPermissions(
 
 export async function checkUsers(acl: OAuthClientAccessControls, user: UserModel | string) {
   // If no user access controls, it is free.
-  if (!acl.oAuthUserAccessControlsId) return true;
+  if (!acl.userAclId) return true;
 
   const userObject = await User.getInfo(user);
   if (!userObject) return false;

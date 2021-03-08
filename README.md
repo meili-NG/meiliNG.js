@@ -20,7 +20,8 @@
 <hr>
 
 <!-- Add some system specific stuff here -->
-<strong>API Docs:</strong> <a alt="Postman" href="https://documenter.getpostman.com/view/14310965/TWDXnc3q">Postman</a>
+<strong>API Docs:</strong> <a alt="Postman" href="https://documenter.getpostman.com/view/14310965/TWDXnc3q">Postman</a><br>
+<strong>Install Guide:</strong> <a alt="Install Guide" href="INSTALL.md">Install Guide</a>
 
 <hr>
 

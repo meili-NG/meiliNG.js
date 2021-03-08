@@ -35,7 +35,7 @@ export async function verifySecret(clientId: string, clientSecret?: string) {
 
   const secrets = await prisma.oAuthClientSecrets.findMany({
     where: {
-      oAuthClientId: clientId,
+      clientId: clientId,
     },
   });
 
@@ -60,7 +60,7 @@ export async function getAccessControl(clientId: string) {
 
   const acl = await prisma.oAuthClientAccessControls.findFirst({
     where: {
-      id: client.oAuthClientAccessControlsId,
+      id: client.aclId,
     },
   });
 
@@ -104,7 +104,7 @@ export async function getRedirectUris(clientId: string) {
   const redirectUris = [];
   const data = await prisma.oAuthClientRedirectUris.findMany({
     where: {
-      oAuthClientId: clientId,
+      clientId,
     },
   });
 
@@ -128,7 +128,7 @@ export async function addRedirectUri(clientId: string, redirectUri: string): Pro
 
   await prisma.oAuthClientRedirectUris.create({
     data: {
-      OAuthClient: {
+      client: {
         connect: {
           id: clientId,
         },
@@ -143,9 +143,7 @@ export async function addRedirectUri(clientId: string, redirectUri: string): Pro
 export async function removeRedirectUri(clientId: string, redirectUri: string): Promise<boolean> {
   const rawRedirectUris = await prisma.oAuthClientRedirectUris.findMany({
     where: {
-      OAuthClient: {
-        id: clientId,
-      },
+      clientId,
     },
   });
 

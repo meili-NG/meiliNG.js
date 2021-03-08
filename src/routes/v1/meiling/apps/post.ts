@@ -154,10 +154,12 @@ async function meilingV1AppPostHandler(req: FastifyRequest, rep: FastifyReply) {
               },
         },
       },
-      User: {
-        connect: {
-          id: owner.id,
-        },
+      owners: {
+        connect: [
+          {
+            id: owner.id,
+          },
+        ],
       },
     },
   });

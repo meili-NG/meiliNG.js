@@ -47,7 +47,7 @@ model User {
 model Email {
   id        String   @id @default(uuid())
   email     String
-  owner     User?    @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
   addedAt   DateTime @default(now())
   verified  Boolean  @default(false)
   allowUse  Boolean  @default(true)
@@ -60,8 +60,8 @@ model Phone {
   phone     String
   isPrimary Boolean  @default(false)
   addedAt   DateTime @default(now())
-  owner     User?    @relation(fields: [ownerId], references: [id])
-  ownerId   String?
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
 }
 
 enum AuthorizationMethod {
@@ -106,8 +106,7 @@ model OAuthClient {
   privacy                     String
   terms                       String
   createdAt                   DateTime                   @default(now())
-  User                        User?                      @relation(fields: [userId], references: [id])
-  userId                      String?
+  owners                      User[]
   aclId                       String
 }
 

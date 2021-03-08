@@ -1,4 +1,4 @@
-import { InputJsonValue, Permission } from '@prisma/client';
+import { Permission } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../../../..';
 import { Client, ClientAccessControls, Token, Utils } from '../../../../common';
@@ -97,7 +97,7 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
     data: {
       token: device_code,
       type,
-      metadata: (metadata as unknown) as InputJsonValue,
+      metadata: metadata as any,
       authorization: {
         create: {
           client: {

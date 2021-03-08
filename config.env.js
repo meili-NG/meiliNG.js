@@ -9,10 +9,10 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 
 module.exports = {
   frontend: {
-    url: process.env.FRONTEND_URLS ? process.env.FRONTEND_URLS.split(',') : ['http://localhost:3000'],
+    url: process.env.FRONTEND_URLS ? process.env.FRONTEND_URLS.split(',') : ['http://frontend.meili.ng'],
   },
   openid: {
-    issuingAuthority: process.env.OPENID_ISSUING_AUTHORITY || 'https://meiling.stella-api.dev',
+    issuingAuthority: process.env.OPENID_ISSUING_AUTHORITY || 'http://demo.meili.ng',
     secretKey: process.env.OPENID_SECRET_KEY || 'YOUR OPENID SECRET',
   },
   fastify: {
@@ -30,7 +30,7 @@ module.exports = {
     },
   },
   meiling: {
-    hostname: process.env.MEILING_HOSTNAME || 'https://meiling.stella-api.dev',
+    hostname: process.env.MEILING_HOSTNAME || 'https://demo.meili.ng',
     error: {
       urlFormat:
         process.env.MEILING_ERROR_URL_FORMAT ||
@@ -42,7 +42,7 @@ module.exports = {
         : [],
     },
     deviceCode: {
-      verification_url: process.env.MEILING_DEVICE_CODE_VERIFICATION_URL || 'http://localhost:3000/device',
+      verification_url: process.env.MEILING_DEVICE_CODE_VERIFICATION_URL || 'http://frontend.meili.ng/device',
       interval: Number(process.env.MEILING_DEVICE_CODE_INTERVAL) || 5,
     },
   },
@@ -87,7 +87,7 @@ module.exports = {
   },
   notificationApi: {
     version: Number(process.env.NOTIFICATION_API_VERSION) || 1,
-    host: process.env.NOTIFICATION_API_HOST || 'https://notification.stella-api.dev',
+    host: process.env.NOTIFICATION_API_HOST || 'https://notification.meili.ng',
     key: process.env.NOTIFICATION_API_KEY || 'YOUR NOTIFICATION API KEY',
   },
 };

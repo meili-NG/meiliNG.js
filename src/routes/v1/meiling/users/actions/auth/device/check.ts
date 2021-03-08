@@ -55,13 +55,13 @@ export async function meilingV1OAuthClientDeviceAuthCheckHandler(req: FastifyReq
 
   const userCode = matchingUserCodes[0];
 
-  const client = await ClientAuthorization.getClient(userCode.oAuthClientAuthorizationId);
+  const client = await ClientAuthorization.getClient(userCode.authorizationId);
   if (!client) {
     sendMeilingError(rep, MeilingV1ErrorType.APPLICATION_NOT_FOUND, 'unable to find proper client');
     return;
   }
 
-  const authorization = await ClientAuthorization.getById(userCode.oAuthClientAuthorizationId);
+  const authorization = await ClientAuthorization.getById(userCode.authorizationId);
   if (!authorization) {
     sendMeilingError(
       rep,

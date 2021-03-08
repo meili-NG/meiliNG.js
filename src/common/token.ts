@@ -1,4 +1,4 @@
-import { InputJsonObject, OAuthClient, OAuthTokenType, Permission, User as UserModel } from '@prisma/client';
+import { OAuthClient, OAuthTokenType, Permission, User as UserModel } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 import { Client, ClientAuthorization, Token, User, Utils } from '.';
 import { prisma } from '..';
@@ -62,12 +62,12 @@ export function generateTokenViaGenerator(generator?: TokenGenerator) {
 export async function getAuthorization(token: string, type?: OAuthTokenType) {
   const data = await getData(token, type);
 
-  if (!data?.oAuthClientAuthorizationId) return undefined;
+  if (!data?.authorizationId) return undefined;
 
   if (data) {
     const authorization = await prisma.oAuthClientAuthorization.findUnique({
       where: {
-        id: data.oAuthClientAuthorizationId,
+        id: data.authorizationId,
       },
     });
 
@@ -99,8 +99,8 @@ export async function getData(token: string, type?: OAuthTokenType) {
       return undefined;
     }
 
-    if (tokenData.oAuthClientAuthorizationId) {
-      await ClientAuthorization.updateLastUpdated(tokenData.oAuthClientAuthorizationId);
+    if (tokenData.authorizationId) {
+      await ClientAuthorization.updateLastUpdated(tokenData.authorizationId);
     }
   }
 
@@ -111,9 +111,9 @@ export async function getUser(token: string, type?: OAuthTokenType): Promise<Use
   const tokenData = await getData(token, type);
   if (!tokenData) return undefined;
 
-  if (!tokenData.oAuthClientAuthorizationId) return undefined;
+  if (!tokenData.authorizationId) return undefined;
 
-  const clientAuthorization = await ClientAuthorization.getById(tokenData.oAuthClientAuthorizationId);
+  const clientAuthorization = await ClientAuthorization.getById(tokenData.authorizationId);
   if (!clientAuthorization) return undefined;
 
   if (!clientAuthorization?.userId) return undefined;
@@ -131,12 +131,12 @@ export async function getClient(token: string, type?: OAuthTokenType): Promise<O
   const tokenData = await getData(token, type);
   if (!tokenData) return undefined;
 
-  if (!tokenData.oAuthClientAuthorizationId) return undefined;
+  if (!tokenData.authorizationId) return undefined;
 
-  const clientAuthorization = await ClientAuthorization.getById(tokenData.oAuthClientAuthorizationId);
+  const clientAuthorization = await ClientAuthorization.getById(tokenData.authorizationId);
   if (!clientAuthorization) return undefined;
 
-  const client = await Client.getByClientId(clientAuthorization.oAuthClientId);
+  const client = await Client.getByClientId(clientAuthorization.clientId);
   if (!client) return undefined;
 
   return client && client !== null ? client : undefined;
@@ -162,7 +162,7 @@ export async function setMetadata(token: string, metadata: Token.TokenMetadata) 
       token,
     },
     data: {
-      metadata: (metadata as unknown) as InputJsonObject,
+      metadata: metadata as any,
     },
   });
 }

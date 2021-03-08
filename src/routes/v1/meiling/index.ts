@@ -7,6 +7,7 @@ import { meilingV1AuthorizationPlugin } from './authorization';
 import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType, MeilingV1Session as SessionObject } from './interfaces';
+import { meilingV1LostPasswordHandler } from './lost-password';
 import { meilingV1SessionHandler } from './session';
 import { meilingV1SigninHandler } from './signin';
 import { meilingV1SignoutHandler } from './signout';
@@ -49,6 +50,8 @@ export function v1MeilingSessionRequiredPlugin(app: FastifyInstance, opts: Fasti
 
   app.post('/signin', meilingV1SigninHandler);
   app.register(v1MeilingSignupPlugin, { prefix: '/signup' });
+
+  app.post('/lost-password', meilingV1LostPasswordHandler);
 
   app.get('/signout', meilingV1SignoutHandler);
   app.get('/signout/:userId', meilingV1SignoutHandler);

@@ -79,7 +79,7 @@ export async function sendNotification(method: NotificationMethod, query: Notifi
   if (notificationApi.version === 1) {
     await axios.post(`${host}/v1/${method}`, query, {
       headers: {
-        Authorization: `Bearer ${key}`,
+        authorization: `Bearer ${key}`,
       },
     });
   } else {

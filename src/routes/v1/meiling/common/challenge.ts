@@ -40,12 +40,12 @@ export function isChallengeRateLimited(signinMethod: MeilingV1ExtendedAuthMethod
   if (issuedAt) {
     if (signinMethod === MeilingV1ExtendedAuthMethods.SMS) {
       return (
-        new Date().getTime() - issuedAt.getTime() <
+        new Date().getTime() - new Date(issuedAt).getTime() <
         config.token.invalidate.meiling.CHALLENGE_TOKEN_SMS_RATE_LIMIT * 1000
       );
     } else if (signinMethod === MeilingV1ExtendedAuthMethods.EMAIL) {
       return (
-        new Date().getTime() - issuedAt.getTime() <
+        new Date().getTime() - new Date(issuedAt).getTime() <
         config.token.invalidate.meiling.CHALLENGE_TOKEN_EMAIL_RATE_LIMIT * 1000
       );
     }

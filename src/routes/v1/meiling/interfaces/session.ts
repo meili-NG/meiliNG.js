@@ -14,6 +14,8 @@ export interface MeilingLoggedInUser {
 
 export interface MeilingV1PasswordResetSession extends MeilingV1ChallengeData {
   method?: MeilingV1ExtendedAuthMethods;
+  passwordResetUser?: string;
+  isVerified?: boolean;
 }
 
 interface MeilingV1SignInTwoFactorAuth extends MeilingV1ChallengeData {

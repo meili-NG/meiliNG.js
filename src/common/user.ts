@@ -365,7 +365,9 @@ export async function findByCommonUsername(username: string): Promise<UserModel[
 export async function getPrimaryEmail(userId: string) {
   const email = await prisma.email.findFirst({
     where: {
-      userId,
+      user: {
+        id: userId,
+      },
       isPrimary: true,
     },
   });
@@ -377,7 +379,9 @@ export async function getPrimaryEmail(userId: string) {
 export async function getEmails(userId: string) {
   const emails = await prisma.email.findMany({
     where: {
-      userId,
+      user: {
+        id: userId,
+      },
     },
   });
 
@@ -433,7 +437,9 @@ export async function removeEmail(userId: string, email: string) {
 export async function getPrimaryPhone(userId: string) {
   const phone = await prisma.phone.findFirst({
     where: {
-      userId,
+      user: {
+        id: userId,
+      },
       isPrimary: true,
     },
   });

@@ -2,6 +2,7 @@ import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import libphonenumberJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '.';
+import { prisma } from '../../..';
 import { User, Utils } from '../../../common';
 import {
   convertToNotificationMethod,
@@ -29,20 +30,62 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
     return;
   }
 
-  if (!body.data?.challengeContext.username) {
+  if (body.password) {
+    if (!session.passwordReset?.isVerified || !session.passwordReset.passwordResetUser) {
+      sendMeilingError(
+        rep,
+        MeilingV1ErrorType.AUTHORIZATION_REQUEST_NOT_COMPLETED,
+        'password reset request not completed yet',
+      );
+      return;
+    }
+
+    const uuid = session.passwordReset.passwordResetUser;
+    await prisma.authorization.deleteMany({
+      where: {
+        method: 'PASSWORD',
+        user: {
+          id: uuid,
+        },
+      },
+    });
+
+    await User.addPassword(uuid, body.password);
+
+    rep.send({ success: true });
+    return;
+  }
+
+  if (!body.context?.username) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'body does not contain context: username');
     return;
   }
 
-  const username = body?.data?.challengeContext.username;
+  const username = body?.context?.username;
 
   if (!username) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'username is missing');
     return;
   }
 
+  const users = await User.findByUsername(username);
+
+  if (Utils.isValidEmail(username)) {
+    users.push(...(await User.findByEmail(username)));
+  }
+
+  if (users.length > 1) {
+    sendMeilingError(rep, MeilingV1ErrorType.MORE_THAN_ONE_USER_MATCHED, 'more than one user has matched');
+    return;
+  } else if (users.length < 1) {
+    sendMeilingError(rep, MeilingV1ErrorType.WRONG_USERNAME, 'no user was found!');
+    return;
+  }
+
+  const user = users[0];
+
   if (!body.method) {
-    const methods = await getAvailableExtendedAuthenticationMethods(username, 'password_reset');
+    const methods = (await getAvailableExtendedAuthenticationMethods(user, 'password_reset')).map((n) => n.method);
 
     rep.send({
       method: methods,
@@ -51,22 +94,7 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
   }
 
   if (!body.data?.challengeResponse) {
-    let user = [];
-    const methods = await getAvailableExtendedAuthenticationMethods(username, 'password_reset');
-
-    if (Utils.isValidEmail(username)) {
-      user = await User.findByUsername(username);
-    } else {
-      user = await User.findByEmail(username);
-    }
-
-    if (user.length > 1) {
-      sendMeilingError(rep, MeilingV1ErrorType.MORE_THAN_ONE_USER_MATCHED, 'more than one user has matched');
-      return;
-    } else if (user.length < 1) {
-      sendMeilingError(rep, MeilingV1ErrorType.WRONG_USERNAME, 'no user was found!');
-      return;
-    }
+    const methods = await getAvailableExtendedAuthenticationMethods(user, 'password_reset');
 
     // TODO: make it configurable
     const lang: TemplateLanguage = 'ko';
@@ -74,28 +102,32 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
     // TODO: get lang from body
 
     // TODO: make it configurable
-    const challenge = generateChallenge(body.method);
+    const currentMethod: MeilingV1ExtendedAuthMethods = body.method.toLowerCase() as MeilingV1ExtendedAuthMethods;
+
+    const challenge = generateChallenge(currentMethod);
     if (!challenge) {
       sendMeilingError(rep, MeilingV1ErrorType.UNSUPPORTED_SIGNIN_METHOD);
       return;
     }
 
-    if (!methods.map((n) => n.method.toLowerCase() as string).includes(body.method.toLowerCase())) {
+    if (
+      methods.map((n) => n.method.toLowerCase() as string).filter((n) => n === currentMethod.toLowerCase()).length === 0
+    ) {
       sendMeilingError(rep, MeilingV1ErrorType.UNSUPPORTED_SIGNIN_METHOD);
       return;
     }
 
     let to: string | undefined = undefined;
 
-    if (body.method === MeilingV1ExtendedAuthMethods.EMAIL) {
-      const to = (await User.getPrimaryEmail(user[0].id))?.email;
+    if (currentMethod === MeilingV1ExtendedAuthMethods.EMAIL) {
+      const to = (await User.getPrimaryEmail(user.id))?.email;
 
       if (!to || !Utils.isValidEmail(to)) {
         sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID, 'email does not exist on this user');
         return;
       }
-    } else if (body.method === MeilingV1ExtendedAuthMethods.SMS) {
-      const toRaw = (await User.getPrimaryPhone(user[0].id))?.phone;
+    } else if (currentMethod === MeilingV1ExtendedAuthMethods.SMS) {
+      const toRaw = (await User.getPrimaryPhone(user.id))?.phone;
 
       if (toRaw) {
         const phoneParsed = libphonenumberJs(toRaw);
@@ -124,7 +156,7 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
         return;
       }
 
-      const notificationMethod = convertToNotificationMethod(body.method);
+      const notificationMethod = convertToNotificationMethod(currentMethod);
       if (!notificationMethod) {
         sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID, 'invalid authorization method');
         return;
@@ -151,10 +183,11 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
       method: body.method,
       challenge: challenge,
       challengeCreatedAt: new Date(),
+      passwordResetUser: user.id,
     });
 
     rep.send({
-      to,
+      success: true,
       challenge: MeilingV1Challenge.shouldSendChallenge(body.method) ? challenge : undefined,
     });
     return;
@@ -176,7 +209,11 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
   }
 
   const passwordReset = session.passwordReset as MeilingV1PasswordResetSession;
-  if (passwordReset.method !== body.method) {
+  if (
+    !passwordReset.method ||
+    passwordReset.method.toLowerCase() !== body.method.toLowerCase() ||
+    !passwordReset.passwordResetUser
+  ) {
     sendMeilingError(
       rep,
       MeilingV1ErrorType.AUTHORIZATION_REQUEST_NOT_GENERATED,
@@ -187,7 +224,7 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
 
   if (
     !passwordReset.challengeCreatedAt ||
-    new Date().getTime() - passwordReset.challengeCreatedAt.getTime() >
+    new Date().getTime() - new Date(passwordReset.challengeCreatedAt).getTime() >
       1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN
   ) {
     sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_TIMEOUT, 'generated request was timed out');
@@ -200,5 +237,12 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
     return;
   }
 
-  sendMeilingError(rep, MeilingV1ErrorType.NOT_IMPLEMENTED, 'not implemented yet™');
+  await setPasswordResetSession(req, {
+    passwordResetUser: passwordReset.passwordResetUser,
+    isVerified: true,
+  });
+
+  rep.send({
+    success: true,
+  });
 }

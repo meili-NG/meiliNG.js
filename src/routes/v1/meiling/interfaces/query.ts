@@ -42,9 +42,9 @@ export interface MeilingV1PasswordReset {
   data?: MeilingV1SignInAuthenticateData;
   context?: {
     username?: string;
-    phone?: string;
     lang?: TemplateLanguage;
   };
+  password?: string;
 }
 
 export interface MeilingV1SignInTwoFactor {

@@ -42,6 +42,10 @@ export interface ConfigInterface {
         interval: number;
       };
     };
+    deviceCode: {
+      verification_url: string;
+      interval: number;
+    };
   };
   session: {
     v1: {

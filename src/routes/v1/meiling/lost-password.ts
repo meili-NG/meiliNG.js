@@ -88,7 +88,7 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
     const methods = (await getAvailableExtendedAuthenticationMethods(user, 'password_reset')).map((n) => n.method);
 
     rep.send({
-      method: methods,
+      methods,
     });
     return;
   }

@@ -3,6 +3,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../../../..';
 import { Client, ClientAccessControls, Token, Utils } from '../../../../common';
 import { generateToken } from '../../../../common/token';
+import config from '../../../../config';
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType } from '../interfaces';
 
@@ -121,9 +122,9 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
     device_code,
     expires_in: Token.getExpiresInByType(type, new Date()),
     // TODO: Make this configurable
-    interval: 5,
+    interval: config.meiling.deviceCode.interval,
     user_code: user_code,
     // TODO: Make available to configure verification_url
-    verification_url: 'https://test.com/device',
+    verification_url: config.meiling.deviceCode.verification_url,
   });
 }

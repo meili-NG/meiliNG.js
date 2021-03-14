@@ -52,6 +52,8 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
 
     await User.addPassword(uuid, body.password);
 
+    await setPasswordResetSession(req, undefined);
+
     rep.send({ success: true });
     return;
   }
@@ -231,7 +233,7 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
     return;
   }
 
-  const isValid = verifyChallenge(passwordReset.method, passwordReset.challenge, body.data.challengeResponse);
+  const isValid = await verifyChallenge(passwordReset.method, passwordReset.challenge, body.data.challengeResponse);
   if (!isValid) {
     sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID, 'invalid challenge');
     return;

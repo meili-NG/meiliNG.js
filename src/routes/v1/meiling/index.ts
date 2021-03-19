@@ -8,7 +8,7 @@ import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType, MeilingV1Session as SessionObject } from './interfaces';
 import { meilingV1LostPasswordHandler } from './lost-password';
-import { meilingV1SessionHandler } from './session';
+import { v1MeilingSessionPlugin } from './session';
 import { meilingV1SigninHandler } from './signin';
 import { meilingV1SignoutHandler } from './signout';
 import { v1MeilingSignupPlugin } from './signup/';
@@ -31,8 +31,7 @@ export function v1MeilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions
     });
   });
 
-  app.get('/session', meilingV1SessionHandler);
-
+  app.register(v1MeilingSessionPlugin, { prefix: '/session' });
   app.register(v1MeilingSessionRequiredPlugin);
   done();
 }

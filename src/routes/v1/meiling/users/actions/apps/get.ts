@@ -1,19 +1,15 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { Client, ClientAccessControls } from '../../../../common';
-import { MeilingV1Session } from '../common';
-import { sendMeilingError } from '../error';
-import { MeilingV1ErrorType } from '../interfaces';
+import { meilingV1UserActionGetUser } from '..';
+import { Client, ClientAccessControls, User } from '../../../../../../common';
+import { sendMeilingError } from '../../../error';
+import { MeilingV1ErrorType } from '../../../interfaces';
 import { MeilingV1AppParams } from './interface';
 
-async function meilingV1AppInfoHandler(req: FastifyRequest, rep: FastifyReply) {
+async function meilingV1UserAppInfoHandler(req: FastifyRequest, rep: FastifyReply) {
   const params = req.params as MeilingV1AppParams;
   const clientId = params.clientId;
 
-  const users = await MeilingV1Session.getLoggedIn(req);
-  if (users.length === 0) {
-    sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
-    return;
-  }
+  const user = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
 
   if (clientId) {
     const client = await Client.getByClientId(clientId);
@@ -23,10 +19,7 @@ async function meilingV1AppInfoHandler(req: FastifyRequest, rep: FastifyReply) {
       return;
     }
 
-    let shouldShow = false;
-    for (const user of users) {
-      shouldShow = shouldShow || (await ClientAccessControls.checkUsers(acl, user.id));
-    }
+    const shouldShow = await ClientAccessControls.checkUsers(acl, user.id);
 
     if (!shouldShow) {
       sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
@@ -34,11 +27,9 @@ async function meilingV1AppInfoHandler(req: FastifyRequest, rep: FastifyReply) {
     }
 
     rep.send(Client.sanitize(client));
-    return;
   } else {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
-    return;
   }
 }
 
-export default meilingV1AppInfoHandler;
+export default meilingV1UserAppInfoHandler;

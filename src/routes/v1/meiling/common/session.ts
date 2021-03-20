@@ -3,6 +3,7 @@ import { FastifyRequest } from 'fastify';
 import fs from 'fs';
 import { prisma } from '../../../..';
 import { Token, User } from '../../../../common';
+import { UserInfoObject } from '../../../../common/user';
 import config from '../../../../config';
 import {
   MeilingV1PasswordResetSession,
@@ -29,7 +30,7 @@ let tokenSessions: MeilingV1TokenDataFile = {
   issuedTokens: [],
 };
 
-export function loadSessionSaveFiles() {
+export function loadSessionSaveFiles(): void {
   if (config.session.v1.storage) {
     if (config.session.v1.storage.type === 'file') {
       if (fs.existsSync(config.session.v1.storage.path)) {
@@ -48,7 +49,7 @@ export function loadSessionSaveFiles() {
   }
 }
 
-export function garbageCollect() {
+export function garbageCollect(): void {
   // remove duplicates
   tokenSessions.issuedTokens = tokenSessions.issuedTokens.filter(
     (n, i) =>
@@ -63,7 +64,7 @@ export function garbageCollect() {
   saveSession();
 }
 
-export function saveSession() {
+export function saveSession(): void {
   if (config.session.v1.storage) {
     if (config.session.v1.storage.type === 'file') {
       fs.writeFileSync(config.session.v1.storage.path, JSON.stringify(tokenSessions, null, 2));
@@ -187,7 +188,6 @@ export async function getSessionFromRequest(req: FastifyRequest): Promise<Meilin
 
   if (data !== undefined) {
     if (data.user) {
-      const userPromises = [];
       for (const user of data.user) {
         // not async function since we don't need to wait it to complete.
         User.updateLastAuthenticated(user.id);
@@ -302,7 +302,7 @@ export async function setExtendedAuthenticationSessionMethodAndChallenge(
   method?: MeilingV1ExtendedAuthMethods,
   challenge?: string | undefined,
   challengeCreatedAt?: Date,
-) {
+): Promise<void> {
   const session = await getSessionFromRequest(req);
 
   if (session) {
@@ -344,7 +344,7 @@ export async function getPreviouslyLoggedIn(req: FastifyRequest, user: UserModel
   }
 }
 
-export async function login(req: FastifyRequest, user: UserModel | string) {
+export async function login(req: FastifyRequest, user: UserModel | string): Promise<void> {
   const session = await getSessionFromRequest(req);
 
   if (session) {
@@ -379,7 +379,7 @@ export async function login(req: FastifyRequest, user: UserModel | string) {
   return;
 }
 
-export async function logout(req: FastifyRequest, user?: UserModel | string) {
+export async function logout(req: FastifyRequest, user?: UserModel | string): Promise<void> {
   const session = await getSessionFromRequest(req);
 
   if (session) {
@@ -409,7 +409,7 @@ export async function logout(req: FastifyRequest, user?: UserModel | string) {
   }
 }
 
-export async function getLoggedIn(req: FastifyRequest) {
+export async function getLoggedIn(req: FastifyRequest): Promise<UserInfoObject[]> {
   const session = await getSessionFromRequest(req);
 
   if (session) {
@@ -433,14 +433,16 @@ export async function getLoggedIn(req: FastifyRequest) {
   return [];
 }
 
-export function isUserLoggedIn(session: MeilingV1Session) {
+export function isUserLoggedIn(session: MeilingV1Session): boolean {
   return session.user !== undefined && session.user.length > 0;
 }
 
-export function isInExtendedAuthenticationSession(session: MeilingV1Session) {
+export function isInExtendedAuthenticationSession(session: MeilingV1Session): boolean {
   return session.extendedAuthentication !== undefined;
 }
 
-export function getExtendedAuthenticationSession(session: MeilingV1Session) {
+export function getExtendedAuthenticationSession(
+  session: MeilingV1Session,
+): MeilingV1SessionExtendedAuthentication | undefined {
   return session.extendedAuthentication;
 }

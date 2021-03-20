@@ -3,12 +3,12 @@ import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { FastifyRequestWithSession } from '..';
 import { User } from '../../../../common';
-import { sanitizeClient } from '../../../../common/oauth2';
 import { sendMeilingError } from '../error';
+import * as Client from '../../../../common/client';
 import { MeilingV1ErrorType } from '../interfaces';
 import { meilingV1UserActionsHandler } from './actions';
 
-export function meilingV1UserPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
+export function meilingV1UserPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', meilingV1UserInfoHandler);
   app.get('/:userId', meilingV1UserInfoHandler);
 
@@ -17,20 +17,20 @@ export function meilingV1UserPlugin(app: FastifyInstance, opts: FastifyPluginOpt
   done();
 }
 
-async function getSanitizedUser(user: string) {
+async function getSanitizedUser(user: string): Promise<User.UserDetailedObject | undefined> {
   const userId = User.getUserId(user);
   const userData = await User.getDetailedInfo(userId);
 
   // fix any later
   if (userData?.authorizedApps) {
     for (let i = 0; i < userData.authorizedApps.length; i++) {
-      userData.authorizedApps[i] = sanitizeClient(userData.authorizedApps[i] as any) as any;
+      userData.authorizedApps[i] = Client.sanitize(userData.authorizedApps[i]);
     }
   }
 
   if (userData?.createdApps) {
     for (let i = 0; i < userData.createdApps.length; i++) {
-      userData.createdApps[i] = sanitizeClient(userData.createdApps[i] as any) as any;
+      userData.createdApps[i] = Client.sanitize(userData.createdApps[i]);
     }
   }
 

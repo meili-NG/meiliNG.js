@@ -19,7 +19,7 @@ import { sendMeilingError } from './error';
 import { MeilingV1ErrorType, MeilingV1PasswordResetSession } from './interfaces';
 import { MeilingV1ExtendedAuthMethods, MeilingV1PasswordReset } from './interfaces/query';
 
-export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: FastifyReply) {
+export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
   let body;
 

@@ -7,7 +7,7 @@ import { OAuth2ErrorResponseType, OAuth2QueryTokenAuthorizationCodeParameters } 
 export async function oAuth2AuthorizationCodeHandler(
   body: OAuth2QueryTokenAuthorizationCodeParameters,
   rep: FastifyReply,
-) {
+): Promise<void> {
   const clientId = body.client_id;
   const clientSecret = body.client_secret;
 

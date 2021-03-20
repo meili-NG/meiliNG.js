@@ -70,7 +70,12 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
   ((n: never) => {})(type);
 }
 
-export function sendMeilingError(rep: FastifyReply, type: MeilingV1ErrorType, description?: string, code?: string) {
+export function sendMeilingError(
+  rep: FastifyReply,
+  type: MeilingV1ErrorType,
+  description?: string,
+  code?: string,
+): void {
   const statusCode = getMeilingErrorStatusCode(type);
 
   rep.status(statusCode).send({

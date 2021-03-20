@@ -11,7 +11,7 @@ interface OAuth2QueryTokenInfoBody {
   refresh_token?: string;
 }
 
-export async function oAuth2TokenInfoHandler(req: FastifyRequest, rep: FastifyReply) {
+export async function oAuth2TokenInfoHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const body = (req.body ? req.body : req.query) as OAuth2QueryTokenInfoBody;
 
   if (body?.id_token) {

@@ -7,7 +7,7 @@ interface OAuth2QueryRevokeParameters {
   token: string;
 }
 
-export async function oAuth2RevokeHandler(req: FastifyRequest, rep: FastifyReply) {
+export async function oAuth2RevokeHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const query = req.query as OAuth2QueryRevokeParameters;
 
   if (!query?.token) {

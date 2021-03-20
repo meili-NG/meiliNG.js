@@ -12,7 +12,7 @@ interface DeviceCodeRequestBody {
   scope: string;
 }
 
-export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep: FastifyReply) {
+export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const body = req.body as DeviceCodeRequestBody;
   const type = 'DEVICE_CODE';
 

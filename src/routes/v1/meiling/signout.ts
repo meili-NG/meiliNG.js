@@ -9,7 +9,7 @@ interface MeilingV1SignOutQuery {
   userId?: string;
 }
 
-export async function meilingV1SignoutHandler(req: FastifyRequest, rep: FastifyReply) {
+export async function meilingV1SignoutHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
 
   const userId = (req.query as MeilingV1SignOutQuery)?.userId

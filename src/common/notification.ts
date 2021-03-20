@@ -14,7 +14,7 @@ export enum NotificationMethod {
   EMAIL = 'email',
 }
 
-export function convertToNotificationMethod(method: MeilingV1ExtendedAuthMethods) {
+export function convertToNotificationMethod(method: MeilingV1ExtendedAuthMethods): NotificationMethod | undefined {
   switch (method) {
     case MeilingV1ExtendedAuthMethods.EMAIL:
       return NotificationMethod.EMAIL;
@@ -65,7 +65,7 @@ interface AuthorizationCodeCallPayload {
   code: string;
 }
 
-export async function sendNotification(method: NotificationMethod, query: NotificationPayload) {
+export async function sendNotification(method: NotificationMethod, query: NotificationPayload): Promise<void> {
   const notificationApi = config.notificationApi;
   if (!notificationApi) {
     throw new Error('Notification API was not configured properly.');

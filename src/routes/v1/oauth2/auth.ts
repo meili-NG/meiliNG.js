@@ -3,7 +3,7 @@ import { FastifyRequest } from 'fastify/types/request';
 import { OAuth2QueryAuthParameters } from './interfaces';
 import config from '../../../config';
 
-export function oAuth2AuthHandler(req: FastifyRequest, rep: FastifyReply) {
+export function oAuth2AuthHandler(req: FastifyRequest, rep: FastifyReply): void {
   const query = req.query as OAuth2QueryAuthParameters;
 
   let queryCount = 0;

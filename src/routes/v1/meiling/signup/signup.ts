@@ -16,7 +16,7 @@ interface MeilingV1Signup {
   name: Utils.MeilingV1SignupName;
 }
 
-export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyReply) {
+export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
   const body = req.body as MeilingV1Signup;
 

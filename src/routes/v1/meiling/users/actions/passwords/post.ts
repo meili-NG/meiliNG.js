@@ -5,7 +5,7 @@ import { User, Utils } from '../../../../../../common';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 
-export async function meilingV1OAuthClientPasswordsPostHandler(req: FastifyRequest, rep: FastifyReply) {
+export async function meilingV1OAuthClientPasswordsPostHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
 
   const body = req.body as PasswordBody;

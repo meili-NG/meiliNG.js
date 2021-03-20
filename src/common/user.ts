@@ -12,6 +12,7 @@ import JWT from 'jsonwebtoken';
 import { ClientAuthorization, User, Utils } from '.';
 import { prisma } from '../';
 import config from '../config';
+import { SanitizedClientModel } from './client';
 
 export interface UserInfoObject extends UserModel {
   emails: Email[];
@@ -20,12 +21,8 @@ export interface UserInfoObject extends UserModel {
 }
 
 export interface UserDetailedObject extends UserInfoObject {
-  authorizedApps: ClientAuthorizationObject[];
-  createdApps: OAuthClient[];
-}
-
-interface ClientAuthorizationObject extends OAuthClientAuthorization {
-  client: OAuthClient;
+  authorizedApps: SanitizedClientModel[];
+  createdApps: SanitizedClientModel[];
 }
 
 export type AuthorizationJSONObject =
@@ -141,9 +138,13 @@ export async function getDetailedInfo(user: UserModel | string): Promise<UserDet
       },
     }),
 
-    prisma.oAuthClientAuthorization.findMany({
+    prisma.oAuthClient.findMany({
       where: {
-        userId: baseUser.id,
+        owners: {
+          some: {
+            id: baseUser.id,
+          },
+        },
       },
     }),
   ]);
@@ -152,7 +153,9 @@ export async function getDetailedInfo(user: UserModel | string): Promise<UserDet
   const createdAppPromises: Promise<any>[] = [];
 
   authorizedAppsDatabase.map((n) => authorizedAppPromises.push(ClientAuthorization.getClient(n)));
-  createdAppsDatabase.map((n) => createdAppPromises.push(ClientAuthorization.getClient(n)));
+
+  // TODO: remove this totally unnecessary async.
+  createdAppsDatabase.map((n) => createdAppPromises.push((async () => n)()));
 
   const [authorizedAppsPromisesPromise, createdAppsPromisesPromise] = await Promise.all([
     Promise.all(authorizedAppPromises),

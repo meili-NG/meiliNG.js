@@ -8,7 +8,7 @@ import { OAuth2QueryCodeChallengeMethod, OAuth2QueryResponseType } from '../../.
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 
-export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: FastifyReply) {
+export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const userBase = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
 
   // get parameters and query

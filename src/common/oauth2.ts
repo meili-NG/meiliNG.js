@@ -1,6 +1,9 @@
-import { OAuthClient, OAuthClientRedirectUris } from '@prisma/client';
+import { OAuthClientRedirectUris } from '@prisma/client';
 
-export function getMatchingRedirectURIs(redirectUri: string, redirectUris: (OAuthClientRedirectUris | string)[]) {
+export function getMatchingRedirectURIs(
+  redirectUri: string,
+  redirectUris: (OAuthClientRedirectUris | string)[],
+): (OAuthClientRedirectUris | string)[] {
   let adequateRedirectUris;
 
   if (redirectUri.startsWith('urn:ietf:wg:oauth:2.0')) {
@@ -34,14 +37,4 @@ export function getMatchingRedirectURIs(redirectUri: string, redirectUris: (OAut
   }
 
   return adequateRedirectUris;
-}
-
-export function sanitizeClient(client: OAuthClient) {
-  return {
-    id: client.id,
-    image: client.image,
-    name: client.name,
-    privacy: client.privacy,
-    terms: client.terms,
-  };
 }

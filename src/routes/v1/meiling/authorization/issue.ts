@@ -24,7 +24,7 @@ interface MeilingV1AuthorizationIssuePhoneQuery {
   to: string;
 }
 
-export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, rep: FastifyReply) {
+export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
   const body = req.body as MeilingV1AuthorizationIssueQuery;
 

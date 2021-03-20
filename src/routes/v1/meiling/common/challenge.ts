@@ -13,7 +13,7 @@ import {
 export function getMeilingAvailableAuthMethods(
   authMethods: Authorization[],
   body?: MeilingV1SignInExtendedAuthentication,
-) {
+): MeilingV1ExtendedAuthMethods[] {
   const methods: MeilingV1ExtendedAuthMethods[] = [];
 
   for (const thisMethod of authMethods) {
@@ -36,7 +36,7 @@ export function getMeilingAvailableAuthMethods(
   return methods;
 }
 
-export function isChallengeRateLimited(signinMethod: MeilingV1ExtendedAuthMethods, issuedAt?: Date) {
+export function isChallengeRateLimited(signinMethod: MeilingV1ExtendedAuthMethods, issuedAt?: Date): boolean {
   if (issuedAt) {
     if (signinMethod === MeilingV1ExtendedAuthMethods.SMS) {
       return (
@@ -54,7 +54,7 @@ export function isChallengeRateLimited(signinMethod: MeilingV1ExtendedAuthMethod
   return false;
 }
 
-export function generateChallenge(signinMethod: MeilingV1ExtendedAuthMethods) {
+export function generateChallenge(signinMethod: MeilingV1ExtendedAuthMethods): string | undefined {
   switch (signinMethod) {
     case MeilingV1ExtendedAuthMethods.PGP_SIGNATURE:
     case MeilingV1ExtendedAuthMethods.SECURITY_KEY:
@@ -68,7 +68,7 @@ export function generateChallenge(signinMethod: MeilingV1ExtendedAuthMethods) {
   }
 }
 
-export function shouldSendChallenge(signinMethod: MeilingV1ExtendedAuthMethods) {
+export function shouldSendChallenge(signinMethod: MeilingV1ExtendedAuthMethods): boolean {
   switch (signinMethod) {
     case MeilingV1ExtendedAuthMethods.PGP_SIGNATURE:
     case MeilingV1ExtendedAuthMethods.SECURITY_KEY:
@@ -78,7 +78,7 @@ export function shouldSendChallenge(signinMethod: MeilingV1ExtendedAuthMethods) 
       return false;
     case MeilingV1ExtendedAuthMethods.OTP:
     default:
-      return undefined;
+      return false;
   }
 }
 
@@ -121,7 +121,7 @@ export async function verifyChallenge(
   challenge: string | undefined,
   challengeResponse: any,
   data?: AuthorizationJSONObject,
-) {
+): Promise<boolean> {
   try {
     switch (signinMethod) {
       case MeilingV1ExtendedAuthMethods.PGP_SIGNATURE:
@@ -131,7 +131,7 @@ export async function verifyChallenge(
           (data as AuthorizationPGPSSHKeyObject).data.key,
         );
       case MeilingV1ExtendedAuthMethods.SECURITY_KEY:
-        break;
+        return false;
       case MeilingV1ExtendedAuthMethods.SMS:
       case MeilingV1ExtendedAuthMethods.EMAIL:
         return (challenge as string).trim() === challengeResponse.trim();

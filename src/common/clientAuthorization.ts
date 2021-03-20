@@ -1,15 +1,17 @@
-import { OAuthClientAuthorization, OAuthTokenType } from '@prisma/client';
+import { OAuthClient, OAuthClientAuthorization, OAuthToken, OAuthTokenType, Permission, User } from '@prisma/client';
 import { Token } from '.';
 import { prisma } from '..';
 
-export function getId(authorization: OAuthClientAuthorization | string) {
+export function getId(authorization: OAuthClientAuthorization | string): string {
   if (typeof authorization === 'string') {
     return authorization;
   }
   return authorization.id;
 }
 
-export async function getById(authorization: OAuthClientAuthorization | string) {
+export async function getById(
+  authorization: OAuthClientAuthorization | string,
+): Promise<OAuthClientAuthorization | undefined> {
   if (typeof authorization === 'string') {
     const tmpAuthorization = await prisma.oAuthClientAuthorization.findFirst({
       where: {
@@ -24,7 +26,9 @@ export async function getById(authorization: OAuthClientAuthorization | string) 
   return authorization;
 }
 
-export async function getClient(authorization: OAuthClientAuthorization | string) {
+export async function getClient(
+  authorization: OAuthClientAuthorization | string,
+): Promise<OAuthClient | undefined | null> {
   const tmpAuthorization = await getById(authorization);
   if (!tmpAuthorization) return;
 
@@ -37,7 +41,7 @@ export async function getClient(authorization: OAuthClientAuthorization | string
   return client;
 }
 
-export async function getUser(authorization: OAuthClientAuthorization | string) {
+export async function getUser(authorization: OAuthClientAuthorization | string): Promise<User | undefined | null> {
   const data = await getById(authorization);
   if (!data) return;
   if (!data.userId) return;
@@ -55,7 +59,7 @@ export async function createToken(
   authorization: OAuthClientAuthorization,
   type: OAuthTokenType,
   metadata?: Token.TokenMetadata,
-) {
+): Promise<OAuthToken> {
   // TODO: allow custom generator for token
   const tokenKey = Token.generateToken();
 
@@ -68,6 +72,8 @@ export async function createToken(
       },
       type,
       token: tokenKey,
+
+      // TODO: FIX LATER. I KNOW THIS IS BAD!
       metadata: metadata as any,
     },
   });
@@ -77,7 +83,7 @@ export async function createToken(
   return token;
 }
 
-export async function getToken(authorization: OAuthClientAuthorization, type: OAuthTokenType) {
+export async function getToken(authorization: OAuthClientAuthorization, type: OAuthTokenType): Promise<OAuthToken> {
   let token = await prisma.oAuthToken.findFirst({
     orderBy: [
       {
@@ -99,7 +105,7 @@ export async function getToken(authorization: OAuthClientAuthorization, type: OA
   return token;
 }
 
-export async function getAuthorizedPermissions(authorization: OAuthClientAuthorization) {
+export async function getAuthorizedPermissions(authorization: OAuthClientAuthorization): Promise<Permission[]> {
   const permissions = await prisma.permission.findMany({
     where: {
       authorizations: {
@@ -113,7 +119,7 @@ export async function getAuthorizedPermissions(authorization: OAuthClientAuthori
   return permissions;
 }
 
-export async function updateLastUpdated(authorization: OAuthClientAuthorization | string) {
+export async function updateLastUpdated(authorization: OAuthClientAuthorization | string): Promise<void> {
   await prisma.oAuthClientAuthorization.update({
     where: {
       id: getId(authorization),

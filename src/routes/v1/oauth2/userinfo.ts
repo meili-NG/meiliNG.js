@@ -4,7 +4,7 @@ import { Token, User } from '../../../common';
 import { sendOAuth2Error } from './error';
 import { OAuth2ErrorResponseType } from './interfaces';
 
-export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyReply) {
+export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const type = 'ACCESS_TOKEN';
 
   const token = Token.getTokenFromRequest(req);

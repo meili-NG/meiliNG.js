@@ -10,7 +10,7 @@ interface DeviceCode {
   user_code: string;
 }
 
-export async function meilingV1OAuthClientDeviceAuthHandler(req: FastifyRequest, rep: FastifyReply) {
+export async function meilingV1OAuthClientDeviceAuthHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const userBase = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
   const type = 'DEVICE_CODE';
 

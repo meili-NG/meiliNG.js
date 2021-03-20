@@ -7,7 +7,7 @@ import { oAuth2TokenHandler } from './token';
 import { oAuth2TokenInfoHandler } from './tokeninfo';
 import { oAuth2UserInfoHandler } from './userinfo';
 
-export function meilingV1OAuth2(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
+export function meilingV1OAuth2(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.register(fastifyCors, {
     origin: '*',
   });

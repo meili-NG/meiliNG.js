@@ -1,9 +1,17 @@
-import { OAuthClient, Permission, User as UserModel } from '@prisma/client';
+import {
+  OAuthClient as ClientModel,
+  OAuthClient,
+  OAuthClientAccessControls,
+  OAuthClientAuthorization,
+  Permission,
+  User as UserModel,
+} from '@prisma/client';
 import { ClientAuthorization, MeilingCommonOAuth2, User, Utils } from '.';
 import { prisma } from '..';
 import config from '../config';
+import { ClientACLRules, getAccessControlRules } from './clientAccessControls';
 
-export async function getByClientId(clientId: string) {
+export async function getByClientId(clientId: string): Promise<ClientModel | null> {
   const client = await prisma.oAuthClient.findFirst({
     where: {
       id: clientId,
@@ -13,7 +21,7 @@ export async function getByClientId(clientId: string) {
   return client;
 }
 
-export async function getClientOwners(clientId: string) {
+export async function getClientOwners(clientId: string): Promise<UserModel[]> {
   const owners = await prisma.user.findMany({
     where: {
       ownedClients: {
@@ -27,7 +35,7 @@ export async function getClientOwners(clientId: string) {
   return owners;
 }
 
-export async function verifySecret(clientId: string, clientSecret?: string) {
+export async function verifySecret(clientId: string, clientSecret?: string): Promise<boolean> {
   const client = await getByClientId(clientId);
   if (!client) {
     return false;
@@ -47,14 +55,16 @@ export async function verifySecret(clientId: string, clientSecret?: string) {
   } else {
     return secrets.filter((n) => n.secret === clientSecret).length > 0;
   }
+
+  return false;
 }
 
-export async function isValidRedirectURI(clientId: string, redirectUri: string) {
+export async function isValidRedirectURI(clientId: string, redirectUri: string): Promise<boolean> {
   const redirectUris = await getRedirectUris(clientId);
   return MeilingCommonOAuth2.getMatchingRedirectURIs(redirectUri, redirectUris).length > 0;
 }
 
-export async function getAccessControl(clientId: string) {
+export async function getAccessControl(clientId: string): Promise<OAuthClientAccessControls | null | undefined> {
   const client = await getByClientId(clientId);
   if (!client) return;
 
@@ -67,7 +77,15 @@ export async function getAccessControl(clientId: string) {
   return acl;
 }
 
-export function sanitize(client: OAuthClient) {
+export interface SanitizedClientModel {
+  id: string;
+  image: string;
+  name: string;
+  privacy: string;
+  terms: string;
+}
+
+export function sanitize(client: OAuthClient | SanitizedClientModel): SanitizedClientModel {
   return {
     id: client.id,
     image: client.image,
@@ -77,7 +95,45 @@ export function sanitize(client: OAuthClient) {
   };
 }
 
-export async function hasUserPermissions(user: UserModel | string, clientId: string, permissions: Permission[]) {
+interface SanitizedClientOwnerModel extends SanitizedClientModel {
+  createdAt: Date;
+  accessControls: ClientACLRules;
+  permissions: Permission[];
+  redirectUris: string[];
+}
+
+export async function getInfoForOwners(
+  client_: OAuthClient | SanitizedClientModel,
+): Promise<SanitizedClientOwnerModel | undefined> {
+  const client = await getByClientId(client_.id);
+  if (!client) return;
+
+  const acl = await getAccessControl(client.id);
+
+  return {
+    ...sanitize(client),
+    createdAt: client.createdAt,
+    accessControls: await getAccessControlRules(acl),
+    permissions: acl
+      ? await prisma.permission.findMany({
+          where: {
+            accessControls: {
+              some: {
+                id: acl.id,
+              },
+            },
+          },
+        })
+      : [],
+    redirectUris: await getRedirectUris(client.id),
+  };
+}
+
+export async function hasUserPermissions(
+  user: UserModel | string,
+  clientId: string,
+  permissions: Permission[],
+): Promise<boolean> {
   const authorizedPermissions = await User.getClientAuthorizedPermissions(user, clientId);
 
   if (authorizedPermissions) {
@@ -92,7 +148,7 @@ export async function hasUserPermissions(user: UserModel | string, clientId: str
   }
 }
 
-export function shouldSkipAuthentication(clientId: string) {
+export function shouldSkipAuthentication(clientId: string): boolean {
   if (config.meiling.oauth2.skipAuthentication) {
     return config.meiling.oauth2.skipAuthentication.includes(clientId);
   }
@@ -100,7 +156,7 @@ export function shouldSkipAuthentication(clientId: string) {
   return false;
 }
 
-export async function getRedirectUris(clientId: string) {
+export async function getRedirectUris(clientId: string): Promise<string[]> {
   const redirectUris = [];
   const data = await prisma.oAuthClientRedirectUris.findMany({
     where: {
@@ -166,7 +222,11 @@ export async function removeRedirectUri(clientId: string, redirectUri: string): 
   return true;
 }
 
-export async function createAuthorization(clientId: string, user: string | UserModel, permissions: Permission[]) {
+export async function createAuthorization(
+  clientId: string,
+  user: string | UserModel,
+  permissions: Permission[],
+): Promise<OAuthClientAuthorization> {
   const userId = User.getUserId(user);
   const permissionsConnect: {
     name: string;
@@ -202,7 +262,7 @@ export async function getUnauthorizedPermissions(
   user: UserModel | string,
   clientId: string,
   permissions: (Permission | string)[],
-) {
+): Promise<false | string[]> {
   const authorizations = await User.getClientAuthorizations(user, clientId);
 
   if (authorizations) {

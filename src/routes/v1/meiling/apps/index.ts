@@ -1,14 +1,10 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import meilingV1AppDeleteHandler from './delete';
-import meilingV1AppHandler from './get';
-import meilingV1AppPostHandler from './post';
+import meilingV1AppInfoHandler from './get';
+import meilingV1AppListHandler from './list';
 
 export function meilingV1AppsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
-  app.get('/', meilingV1AppHandler);
-  app.post('/', meilingV1AppPostHandler);
-
-  app.get('/:clientId', meilingV1AppHandler);
-  app.delete('/:clientId', meilingV1AppDeleteHandler);
+  app.get('/', meilingV1AppListHandler);
+  app.get('/:clientId', meilingV1AppInfoHandler);
 
   done();
 }

@@ -1,9 +1,9 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { prisma } from '../../../..';
-import { Client } from '../../../../common';
-import { MeilingV1Session } from '../common';
-import { sendMeilingError } from '../error';
-import { MeilingV1ErrorType } from '../interfaces';
+import { prisma } from '../../../../../..';
+import { Client } from '../../../../../../common';
+import { MeilingV1Session } from '../../../common';
+import { sendMeilingError } from '../../../error';
+import { MeilingV1ErrorType } from '../../../interfaces';
 import { MeilingV1AppParams } from './interface';
 
 async function meilingV1AppDeleteHandler(req: FastifyRequest, rep: FastifyReply) {

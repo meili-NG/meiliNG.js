@@ -3,7 +3,10 @@ import { Client, ClientAuthorization, Token, Utils } from '../../../../common';
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType, OAuth2QueryTokenRefreshTokenParameters } from '../interfaces';
 
-export async function oAuth2RefreshTokenHandler(body: OAuth2QueryTokenRefreshTokenParameters, rep: FastifyReply) {
+export async function oAuth2RefreshTokenHandler(
+  body: OAuth2QueryTokenRefreshTokenParameters,
+  rep: FastifyReply,
+): Promise<void> {
   const clientId = body.client_id;
   const clientSecret = body.client_secret;
 

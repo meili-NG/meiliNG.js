@@ -3,7 +3,7 @@ import { isDevelopment, packageJson } from '..';
 
 import v1Plugin from './v1';
 
-function meilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
+function meilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.route({
     method: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'],
     url: '/',
@@ -17,7 +17,7 @@ function meilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: (
 
 // ======
 
-function handleRoot(req: FastifyRequest, rep: FastifyReply) {
+function handleRoot(req: FastifyRequest, rep: FastifyReply): void {
   const easteregg = {
     about: {
       name: packageJson.name,

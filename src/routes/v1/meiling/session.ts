@@ -5,7 +5,7 @@ import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
 
-export function v1MeilingSessionPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
+export function v1MeilingSessionPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', async (req, rep) => {
     if ((req.query as any)?.token && (req.query as any)?.token !== '') {
       const authToken = (req.query as any)?.token;

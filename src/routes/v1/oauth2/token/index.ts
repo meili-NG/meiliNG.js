@@ -10,7 +10,7 @@ import { oAuth2RefreshTokenHandler } from './refresh_token';
 // TODO: https://developers.google.com/identity/protocols/oauth2/limited-input-device#step-4:-poll-googles-authorization-server
 // TODO: https://developers.google.com/identity/protocols/oauth2/native-app#exchange-authorization-code
 
-export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply) {
+export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const body = req.body as OAuth2QueryBodyParameters;
   const validationResult = await validateCommonBody(body, false);
 

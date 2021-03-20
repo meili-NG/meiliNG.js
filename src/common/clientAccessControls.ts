@@ -2,7 +2,7 @@ import { Group, OAuthClientAccessControls, Permission, User as UserModel } from 
 import { Client, User } from '.';
 import { prisma } from '..';
 
-export async function getByClientId(clientId: string) {
+export async function getByClientId(clientId: string): Promise<OAuthClientAccessControls | null | undefined> {
   return await Client.getAccessControl(clientId);
 }
 
@@ -28,7 +28,7 @@ export async function checkPermissions(
   }
 }
 
-export async function checkUsers(acl: OAuthClientAccessControls, user: UserModel | string) {
+export async function checkUsers(acl: OAuthClientAccessControls, user: UserModel | string): Promise<boolean> {
   // If no user access controls, it is free.
   if (!acl.userAclId) return true;
 
@@ -63,4 +63,44 @@ export async function checkUsers(acl: OAuthClientAccessControls, user: UserModel
   if (matchingGroup) return true;
 
   return false;
+}
+
+export interface ClientACLRules {
+  users: UserModel[];
+  groups: Group[];
+}
+
+export async function getAccessControlRules(acl?: OAuthClientAccessControls | null): Promise<ClientACLRules> {
+  // If no user access controls, it is free.
+  if (!acl || !acl.userAclId)
+    return {
+      users: [],
+      groups: [],
+    };
+
+  const [users, groups] = await Promise.all([
+    prisma.user.findMany({
+      where: {
+        oAuthAccessControls: {
+          some: {
+            id: acl.id,
+          },
+        },
+      },
+    }),
+    prisma.group.findMany({
+      where: {
+        oAuthAccessControls: {
+          some: {
+            id: acl.id,
+          },
+        },
+      },
+    }),
+  ]);
+
+  return {
+    users,
+    groups,
+  };
 }

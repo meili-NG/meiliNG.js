@@ -3,7 +3,10 @@ import { Client, ClientAuthorization, Token, User, Utils } from '../../../../com
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType, OAuth2QueryTokenDeviceCodeParameters } from '../interfaces';
 
-export async function oAuth2DeviceCodeHandler(body: OAuth2QueryTokenDeviceCodeParameters, rep: FastifyReply) {
+export async function oAuth2DeviceCodeHandler(
+  body: OAuth2QueryTokenDeviceCodeParameters,
+  rep: FastifyReply,
+): Promise<void> {
   const clientId = body.client_id;
 
   const token = body.device_code;

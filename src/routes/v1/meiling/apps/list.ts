@@ -5,9 +5,8 @@ import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
 import { MeilingV1AppParams } from './interface';
 
-async function meilingV1AppListHandler(req: FastifyRequest, rep: FastifyReply) {
+async function meilingV1AppListHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const params = req.params as MeilingV1AppParams;
-  const clientId = params.clientId;
 
   const users = await MeilingV1Session.getLoggedIn(req);
   if (users.length === 0) {
@@ -21,8 +20,8 @@ async function meilingV1AppListHandler(req: FastifyRequest, rep: FastifyReply) {
 
     if (userClient?.authorizedApps) {
       for (const myApp of userClient.authorizedApps) {
-        if (clients.filter((client) => client.id === myApp.client.id).length === 0) {
-          clients.push(Client.sanitize(myApp.client));
+        if (clients.filter((client) => client.id === myApp.id).length === 0) {
+          clients.push(Client.sanitize(myApp));
         }
       }
     }

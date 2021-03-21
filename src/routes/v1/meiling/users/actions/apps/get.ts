@@ -5,7 +5,7 @@ import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 import { MeilingV1AppParams } from './interface';
 
-async function meilingV1UserAppInfoHandler(req: FastifyRequest, rep: FastifyReply) {
+async function meilingV1UserAppInfoHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const params = req.params as MeilingV1AppParams;
   const clientId = params.clientId;
 

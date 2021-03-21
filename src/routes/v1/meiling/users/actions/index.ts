@@ -3,6 +3,7 @@ import { User } from '../../../../../common';
 import { MeilingV1Session } from '../../common';
 import { sendMeilingError } from '../../error';
 import { MeilingV1ErrorType } from '../../interfaces';
+import { meilingV1UserAppsPlugin } from './apps';
 import { meilingV1OAuthClientAuthCheckHandler } from './auth';
 import { meilingV1OAuthClientAuthHandler } from './auth/auth';
 import { meilingV1OAuthClientDeviceAuthHandler } from './auth/device/auth';
@@ -40,6 +41,8 @@ export function meilingV1UserActionsHandler(app: FastifyInstance, opts: FastifyP
   app.post('/passwords', meilingV1OAuthClientPasswordsPostHandler);
   app.put('/passwords', meilingV1OAuthClientPasswordsPutHandler);
   app.delete('/passwords', meilingV1OAuthClientPasswordsDeleteHandler);
+
+  app.register(meilingV1UserAppsPlugin, { prefix: '/apps' });
 
   done();
 }

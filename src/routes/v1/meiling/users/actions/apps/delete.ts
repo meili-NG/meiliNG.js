@@ -7,7 +7,7 @@ import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 import { MeilingV1AppParams } from './interface';
 
-async function meilingV1AppDeleteHandler(req_: FastifyRequest, rep: FastifyReply): Promise<void> {
+async function meilingV1UserAppDeleteHandler(req_: FastifyRequest, rep: FastifyReply): Promise<void> {
   const req = req_ as MeilingV1ClientRequest;
 
   if (!req.status.owned) {
@@ -63,4 +63,4 @@ async function meilingV1AppDeleteHandler(req_: FastifyRequest, rep: FastifyReply
   return;
 }
 
-export default meilingV1AppDeleteHandler;
+export default meilingV1UserAppDeleteHandler;

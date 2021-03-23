@@ -4,6 +4,8 @@ import { meilingV1UserActionGetUser } from '..';
 import { Client, User } from '../../../../../../common';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
+import { meilingV1UserAppsAuthorizedActionsCombinedPlugin } from './actions';
+import meilingV1UserAppDeleteHandler from './delete';
 import meilingV1UserAppInfoHandler from './get';
 import meilingV1UserAppListHandler from './list';
 
@@ -57,5 +59,8 @@ export function meilingV1UserAppsAuthorizedActionsPlugin(
   });
 
   app.get('/', meilingV1UserAppInfoHandler);
+  app.delete('/', meilingV1UserAppDeleteHandler);
+  app.register(meilingV1UserAppsAuthorizedActionsCombinedPlugin);
+
   done();
 }

@@ -1,4 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { MeilingV1ClientRequest } from '.';
 import { prisma } from '../../../../../..';
 import { Client } from '../../../../../../common';
 import { MeilingV1Session } from '../../../common';
@@ -6,37 +7,53 @@ import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 import { MeilingV1AppParams } from './interface';
 
-async function meilingV1AppDeleteHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
-  const params = req.params as MeilingV1AppParams;
-  const clientId = params.clientId;
+async function meilingV1AppDeleteHandler(req_: FastifyRequest, rep: FastifyReply): Promise<void> {
+  const req = req_ as MeilingV1ClientRequest;
 
-  const users = await MeilingV1Session.getLoggedIn(req);
-  if (users.length === 0) {
-    sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
+  if (!req.status.owned) {
+    sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, "you don't have permission to do this.");
     return;
   }
 
-  if (!clientId) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'missing client_id');
-    return;
-  }
+  const client = req.client;
 
-  const client = await Client.getByClientId(clientId);
-  const acl = await Client.getAccessControl(clientId);
-  if (!client || !acl) {
-    sendMeilingError(rep, MeilingV1ErrorType.APPLICATION_NOT_FOUND);
-    return;
-  }
+  await prisma.oAuthToken.deleteMany({
+    where: {
+      authorization: {
+        client: {
+          id: client.id,
+        },
+      },
+    },
+  });
 
-  const owners = await Client.getClientOwners(clientId);
-  if (owners.filter((n) => users.filter((o) => o.id === n.id)).length === 0) {
-    sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
-    return;
-  }
+  await prisma.oAuthClientAuthorization.deleteMany({
+    where: {
+      client: {
+        id: client.id,
+      },
+    },
+  });
+
+  await prisma.oAuthClientRedirectUris.deleteMany({
+    where: {
+      client: {
+        id: client.id,
+      },
+    },
+  });
+
+  await prisma.oAuthClientSecrets.deleteMany({
+    where: {
+      client: {
+        id: client.id,
+      },
+    },
+  });
 
   await prisma.oAuthClient.delete({
     where: {
-      id: clientId,
+      id: client.id,
     },
   });
 

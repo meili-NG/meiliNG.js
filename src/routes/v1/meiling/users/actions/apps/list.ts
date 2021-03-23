@@ -6,12 +6,12 @@ async function meilingV1UserAppListHandler(req: FastifyRequest, rep: FastifyRepl
   const user = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
   const userData = await User.getDetailedInfo(user);
 
-  const createdApps = Promise.all(
+  const createdApps = await Promise.all(
     userData?.createdApps ? userData.createdApps.map((n) => Client.getInfoForOwners(n)) : [],
   );
 
-  const authorizedApps = Promise.all(
-    userData?.authorizedApps ? userData.authorizedApps.map((n) => Client.getInfoForOwners(n)) : [],
+  const authorizedApps = await Promise.all(
+    userData?.authorizedApps ? userData.authorizedApps.map((n) => Client.sanitize(n)) : [],
   );
 
   rep.send({

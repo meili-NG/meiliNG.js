@@ -141,8 +141,11 @@ export async function hasUserPermissions(
   if (authorizedPermissions) {
     const unauthorizedPermissions = permissions.filter(
       (permission) =>
-        authorizedPermissions.find((authPermission: Permission) => permission.name === authPermission.name) === null,
+        authorizedPermissions.filter((authPermission: Permission) => permission.name === authPermission.name).length ===
+        0,
     );
+
+    console.log(unauthorizedPermissions);
 
     return unauthorizedPermissions.length === 0;
   } else {

@@ -4,7 +4,7 @@ import libmobilephoneJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '..';
 import { prisma } from '../../../..';
 import { User, Utils } from '../../../../common';
-import { getAuthorizationStatus } from '../common/session';
+import { getAuthorizationStatus, setAuthorizationStatus } from '../common/session';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
 
@@ -170,6 +170,8 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
       },
     },
   });
+
+  await setAuthorizationStatus(req, undefined);
 
   rep.send({
     success: true,

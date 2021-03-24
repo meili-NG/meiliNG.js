@@ -262,7 +262,7 @@ export async function appendAuthorizationStatus(
 
 export async function setAuthorizationStatus(
   req: FastifyRequest,
-  signupChallenge: MeilingV1SessionAuthorizationStatus,
+  signupChallenge?: MeilingV1SessionAuthorizationStatus,
 ): Promise<void> {
   const session = await getSessionFromRequest(req);
   await setSession(req, {

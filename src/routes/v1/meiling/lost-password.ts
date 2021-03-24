@@ -13,7 +13,7 @@ import {
 import config from '../../../config';
 import { MeilingV1Challenge } from './common';
 import { generateChallenge, isChallengeRateLimited, verifyChallenge } from './common/challenge';
-import { setPasswordResetSession } from './common/session';
+import { setAuthorizationStatus, setPasswordResetSession } from './common/session';
 import { getAvailableExtendedAuthenticationMethods } from './common/user';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType, MeilingV1PasswordResetSession } from './interfaces';
@@ -51,7 +51,7 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
     });
 
     await User.addPassword(uuid, body.password);
-
+    await setAuthorizationStatus(req, undefined);
     await setPasswordResetSession(req, undefined);
 
     rep.send({ success: true });

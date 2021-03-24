@@ -145,8 +145,6 @@ export async function hasUserPermissions(
         0,
     );
 
-    console.log(unauthorizedPermissions);
-
     return unauthorizedPermissions.length === 0;
   } else {
     return false;

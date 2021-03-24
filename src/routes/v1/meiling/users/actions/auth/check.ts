@@ -129,7 +129,7 @@ export async function meilingV1OAuthClientAuthCheckHandler(req: FastifyRequest, 
   // permission check agains already authorized application
   const permissionCheck =
     (await User.hasAuthorizedClient(userData, clientId)) &&
-    Client.hasUserPermissions(userData, clientId, requestedPermissions);
+    (await Client.hasUserPermissions(userData, clientId, requestedPermissions));
   const shouldBypassPermissionCheck = Client.shouldSkipAuthentication(client.id);
 
   if (!(permissionCheck || shouldBypassPermissionCheck)) {

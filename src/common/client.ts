@@ -98,7 +98,7 @@ export function sanitize(client: OAuthClient | SanitizedClientModel): SanitizedC
 interface SanitizedClientOwnerModel extends SanitizedClientModel {
   createdAt: Date;
   accessControls: ClientACLRules;
-  permissions: Permission[];
+  allowedPermissions: string[];
   redirectUris: string[];
 }
 
@@ -114,16 +114,18 @@ export async function getInfoForOwners(
     ...sanitize(client),
     createdAt: client.createdAt,
     accessControls: await getAccessControlRules(acl),
-    permissions: acl
-      ? await prisma.permission.findMany({
-          where: {
-            accessControls: {
-              some: {
-                id: acl.id,
+    allowedPermissions: acl
+      ? (
+          await prisma.permission.findMany({
+            where: {
+              accessControls: {
+                some: {
+                  id: acl.id,
+                },
               },
             },
-          },
-        })
+          })
+        ).map((n) => n.name)
       : [],
     redirectUris: await getRedirectUris(client.id),
   };

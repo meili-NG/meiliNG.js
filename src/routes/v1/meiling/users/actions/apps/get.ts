@@ -53,6 +53,7 @@ async function meilingV1UserAppInfoHandler(req_: FastifyRequest, rep: FastifyRep
       ...Client.sanitize(req.client),
       authorizedAt: firstAuthorization?.authorizedAt,
       lastAuthAt: lastAuthorization?.authorizedAt,
+      permissions: (await User.getClientAuthorizedPermissions(user, req.client.id)).map((n) => n.name),
     };
   }
 

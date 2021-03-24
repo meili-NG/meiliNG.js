@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1ClientRequest } from '.';
 import { meilingV1UserActionGetUser } from '..';
+import { prisma } from '../../../../../..';
 import { Client, ClientAccessControls, User } from '../../../../../../common';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
@@ -8,8 +9,9 @@ import { MeilingV1AppParams } from './interface';
 
 async function meilingV1UserAppInfoHandler(req_: FastifyRequest, rep: FastifyReply): Promise<void> {
   const req = req_ as MeilingV1ClientRequest;
+  const user = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
 
-  let response = {
+  let response: any = {
     status: req.status,
   };
 
@@ -18,9 +20,39 @@ async function meilingV1UserAppInfoHandler(req_: FastifyRequest, rep: FastifyRep
   }
 
   if (req.status.authorized) {
+    const firstAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+      where: {
+        client: {
+          id: req.client.id,
+        },
+        user: {
+          id: user.id,
+        },
+      },
+      orderBy: {
+        authorizedAt: 'asc',
+      },
+    });
+
+    const lastAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+      where: {
+        client: {
+          id: req.client.id,
+        },
+        user: {
+          id: user.id,
+        },
+      },
+      orderBy: {
+        authorizedAt: 'desc',
+      },
+    });
+
     response = {
       ...response,
       ...Client.sanitize(req.client),
+      authorizedAt: firstAuthorization?.authorizedAt,
+      lastAuthAt: lastAuthorization?.authorizedAt,
     };
   }
 

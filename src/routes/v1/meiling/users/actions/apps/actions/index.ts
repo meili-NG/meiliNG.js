@@ -1,5 +1,8 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '..';
+import { meilingV1UserActionGetUser } from '../..';
+import { prisma } from '../../../../../../..';
+import { User } from '../../../../../../../common';
 import { sendMeilingError } from '../../../../error';
 import { MeilingV1ErrorType } from '../../../../interfaces';
 
@@ -29,6 +32,77 @@ export function meilingV1UserAppsAuthorizedActionsAuthorizedUserPlugin(
     }
 
     done();
+  });
+
+  app.get('/auth', async (_req, rep) => {
+    const user = (await meilingV1UserActionGetUser(_req)) as User.UserInfoObject;
+    const req = _req as MeilingV1ClientRequest;
+
+    const firstAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+      where: {
+        client: {
+          id: req.client.id,
+        },
+        user: {
+          id: user.id,
+        },
+      },
+      orderBy: {
+        authorizedAt: 'asc',
+      },
+    });
+
+    const lastAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+      where: {
+        client: {
+          id: req.client.id,
+        },
+        user: {
+          id: user.id,
+        },
+      },
+      orderBy: {
+        authorizedAt: 'desc',
+      },
+    });
+
+    rep.send({
+      authorizedAt: firstAuthorization?.authorizedAt,
+      lastAuthAt: lastAuthorization?.authorizedAt,
+    });
+  });
+
+  app.delete('/auth', async (_req, rep) => {
+    const user = (await meilingV1UserActionGetUser(_req)) as User.UserInfoObject;
+    const req = _req as MeilingV1ClientRequest;
+
+    await prisma.oAuthToken.deleteMany({
+      where: {
+        authorization: {
+          client: {
+            id: req.client.id,
+          },
+          user: {
+            id: user.id,
+          },
+        },
+      },
+    });
+
+    await prisma.oAuthClientAuthorization.deleteMany({
+      where: {
+        client: {
+          id: req.client.id,
+        },
+        user: {
+          id: user.id,
+        },
+      },
+    });
+
+    rep.send({
+      success: true,
+    });
   });
 
   done();

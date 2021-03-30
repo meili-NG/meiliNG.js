@@ -45,7 +45,7 @@ Also just like conventional login systems:
 
 ## Use cases
 Meiling Gatekeeper is used in:
-* [Stella IT Accounts](https://login.appie.stella-it.com)  
+* [Stella IT Accounts](https://accounts.stella-it.com)  
   With the launch of [Stella API](https://docs.stella-api.dev/), Stella IT opens its infrastructure for users and developers by providing programmable API. Stella IT uses Meiling Gatekeeper for providing authorization for all Stella APIs.
 
 ## License

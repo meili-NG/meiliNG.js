@@ -22,7 +22,13 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
 
   if (!Utils.isValidValue(body.username, body.email, body.phone, body.password)) {
     // you are out.
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'Invalid body');
+    sendMeilingError(
+      rep,
+      MeilingV1ErrorType.INVALID_REQUEST,
+      `Invalid body (${['username', 'email', 'phone', 'password'].filter((n: string) => {
+        return Utils.isValidValue(body[n as keyof MeilingV1Signup]);
+      })})`,
+    );
     return;
   }
 

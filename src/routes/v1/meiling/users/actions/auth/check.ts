@@ -178,7 +178,7 @@ export async function meilingV1OAuthClientAuthCheckHandler(req: FastifyRequest, 
     const code = await ClientAuthorization.createToken(authorization, 'AUTHORIZATION_CODE', {
       version: 1,
       options: {
-        offline: query.access_type === 'offline',
+        offline: query.access_type !== 'online',
         code_challenge: code_challenge
           ? {
               method: (query.code_challenge_method as unknown) as OAuth2QueryCodeChallengeMethod,

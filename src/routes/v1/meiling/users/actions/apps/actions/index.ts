@@ -5,6 +5,7 @@ import { prisma } from '../../../../../../..';
 import { User } from '../../../../../../../common';
 import { sendMeilingError } from '../../../../error';
 import { MeilingV1ErrorType } from '../../../../interfaces';
+import { meilingV1UserAppsRedirectUriCRUDPlugin } from './redirect_uri';
 
 export function meilingV1UserAppsAuthorizedActionsCombinedPlugin(
   app: FastifyInstance,
@@ -120,6 +121,8 @@ export function meilingV1UserAppsAuthorizedActionsOwnerPlugin(
       sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
       throw new Error('Unauthorized!');
     }
+
+    app.register(meilingV1UserAppsRedirectUriCRUDPlugin, { prefix: '/redirect_uri' });
 
     done();
   });

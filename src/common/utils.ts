@@ -10,6 +10,19 @@ export function isValidValue(...values: unknown[]): boolean {
   return isValid;
 }
 
+export function isValidUri(...values: (string | undefined)[]): boolean {
+  let isValid = true;
+  const regex = /^(([^:\/?#]+):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/g;
+
+  for (const value of values) {
+    regex.lastIndex = 0;
+    isValid = isValid && value !== undefined && regex.test(value) === true;
+    if (!isValid) return false;
+  }
+
+  return isValid;
+}
+
 export function isNotBlank(...values: (string | undefined)[]): boolean {
   let isValid = true;
   for (const value of values) {

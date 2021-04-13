@@ -20,6 +20,8 @@ export enum MeilingV1ErrorType {
   AUTHENTICATION_NOT_CURRENT_CHALLENGE_METHOD = 'authentication_not_current_challenge_method',
   AUTHENTICATION_TIMEOUT = 'authentication_timeout',
   NOT_IMPLEMENTED = 'not_implemented',
+  NOT_FOUND = 'not_found',
+  CONFLICT = 'conflict',
   APPLICATION_NOT_FOUND = 'application_not_found',
   APPLICATION_REDIRECT_URI_INVALID = 'application_redirect_uri_invalid',
   APPLICATION_NOT_AUTHORIZED_BY_USER = 'application_not_authorized_by_user',

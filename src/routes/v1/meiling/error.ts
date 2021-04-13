@@ -36,6 +36,7 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
       return 401;
 
     case MeilingV1ErrorType.APPLICATION_NOT_FOUND:
+    case MeilingV1ErrorType.NOT_FOUND:
       return 404;
 
     case MeilingV1ErrorType.UNSUPPORTED_SIGNIN_METHOD:
@@ -49,6 +50,7 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
     case MeilingV1ErrorType.EXISTING_USERNAME:
     case MeilingV1ErrorType.EXISTING_PASSWORD:
     case MeilingV1ErrorType.EMAIL_NOT_ALLOWED:
+    case MeilingV1ErrorType.CONFLICT:
       return 409;
 
     case MeilingV1ErrorType.AUTHENTICATION_TIMEOUT:

@@ -188,8 +188,54 @@ export function meilingV1UserAppsRedirectUriCRUDPlugin(
     rep.send();
   });
 
-  app.put('/:uuid', async (req, rep) => {
-    sendMeilingError(rep, MeilingV1ErrorType.NOT_IMPLEMENTED);
+  app.put('/:uuid', async (req_, rep) => {
+    const req = req_ as MeilingV1ClientRequest;
+    let redirect_uri = (req.body as MeilingRedirectUriPostRequest).redirect_uri;
+
+    if (!Utils.isNotBlank(redirect_uri) || !Utils.isValidUri(redirect_uri)) {
+      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
+      return;
+    }
+
+    try {
+      const tmp_redirect_uri = new URL(redirect_uri);
+      tmp_redirect_uri.search = '';
+      tmp_redirect_uri.hash = '';
+
+      redirect_uri = tmp_redirect_uri.toString();
+    } catch (e) {
+      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'Invalid URI');
+      return;
+    }
+
+    const redirectUri = redirect_uri;
+
+    const matchingCount = await prisma.oAuthClientRedirectUris.count({
+      where: {
+        redirectUri,
+        client: {
+          id: req.client.id,
+        },
+      },
+    });
+
+    if (matchingCount > 0) {
+      sendMeilingError(rep, MeilingV1ErrorType.CONFLICT, 'Redirect URI already exists');
+      return;
+    }
+
+    await prisma.oAuthClientRedirectUris.update({
+      where: {
+        id: (req.params as any).uuid,
+      },
+      data: {
+        redirectUri,
+      },
+    });
+
+    rep.send({
+      success: true,
+    });
   });
 
   done();

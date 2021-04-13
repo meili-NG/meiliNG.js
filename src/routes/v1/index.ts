@@ -10,24 +10,9 @@ function v1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => 
     });
   });
 
-  app.register(
-    (app, options, next) => {
-      // register cors for meiling
+  app.register(v1MeilingPlugin, { prefix: '/meiling' });
 
-      app.register(v1MeilingPlugin);
-      next();
-    },
-    { prefix: '/meiling' },
-  );
-
-  app.register(
-    (app, options, next) => {
-      // register cors for oauth endpoints
-      app.register(meilingV1OAuth2);
-      next();
-    },
-    { prefix: '/oauth2' },
-  );
+  app.register(meilingV1OAuth2, { prefix: '/oauth2' });
 
   done();
 }

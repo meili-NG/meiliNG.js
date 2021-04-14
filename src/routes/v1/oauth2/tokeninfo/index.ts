@@ -4,6 +4,7 @@ import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType } from '../interfaces';
 import { oAuth2AccessTokenInfoHandler } from './access_token';
 import { oAuth2IDTokenInfoHandler } from './id_token';
+import { oAuth2RefreshTokenInfoHandler } from './refresh_token';
 
 interface OAuth2QueryTokenInfoBody {
   id_token?: string;
@@ -19,7 +20,7 @@ export async function oAuth2TokenInfoHandler(req: FastifyRequest, rep: FastifyRe
   } else if (body?.access_token) {
     await oAuth2AccessTokenInfoHandler(body.access_token, rep);
   } else if (body?.refresh_token) {
-    await oAuth2AccessTokenInfoHandler(body.refresh_token, rep);
+    await oAuth2RefreshTokenInfoHandler(body.refresh_token, rep);
   } else {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST, 'missing proper query');
   }

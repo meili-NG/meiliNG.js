@@ -30,6 +30,11 @@
 
 <hr>
 
+## Alert for Developers
+Currently, due to recent update to prisma 2.21.0 caused some issue with prisma studio. which is currently in trouble-shooting session at [prisma/studio#658](https://github.com/prisma/studio/issues/658).  
+  
+Please remain in 0.2.1 if you need prisma studio for your management. Thank you.
+
 ## Features
 The key featues of Meiling Gatekeeper are:
 * highly-configurable client authentication interface.  

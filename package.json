@@ -58,7 +58,7 @@
     "start:prod": "tsc && NODE_ENV=production node ./dist/",
     "start": "NODE_ENV=production node ./dist/",
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
-    "studio": "prisma studio",
+    "studio": "NODE_ENV=production prisma studio",
     "migrate:deploy": "prisma migrate deploy --preview-feature",
     "migrate:dev": "prisma migrate dev --preview-feature",
     "migrate:reset": "prisma migrate reset --preview-feature",

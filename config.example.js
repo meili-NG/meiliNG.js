@@ -46,6 +46,12 @@ module.exports = {
         interval: 5,
       },
     },
+    /** should meiling generate duplicates? */
+    preventDuplicates: {
+      /**  */
+      email: false,
+      phone: false,
+    },
   },
   session: {
     /** Configures Version 1 of the Meiling Session */

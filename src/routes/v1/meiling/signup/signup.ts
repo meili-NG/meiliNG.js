@@ -4,6 +4,7 @@ import libmobilephoneJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '..';
 import { prisma } from '../../../..';
 import { User, Utils } from '../../../../common';
+import config from '../../../../config';
 import { getAuthorizationStatus, setAuthorizationStatus } from '../common/session';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
@@ -115,17 +116,31 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
     return;
   }
 
-  const emails = await prisma.email.findMany({
-    where: {
-      email,
-      isPrimary: true,
-      allowUse: false,
-    },
-  });
+  if (config.meiling.preventDuplicates.email) {
+    const emails = await prisma.email.findMany({
+      where: {
+        email,
+        isPrimary: true,
+      },
+    });
 
-  if (emails.length > 0) {
-    sendMeilingError(rep, MeilingV1ErrorType.EMAIL_NOT_ALLOWED);
-    return;
+    if (emails.length > 0) {
+      sendMeilingError(rep, MeilingV1ErrorType.EMAIL_NOT_ALLOWED);
+      return;
+    }
+  }
+
+  if (config.meiling.preventDuplicates.phone) {
+    const phones = await prisma.phone.findMany({
+      where: {
+        phone: phone.formatInternational(),
+      },
+    });
+
+    if (phones.length > 0) {
+      sendMeilingError(rep, MeilingV1ErrorType.PHONE_NOT_ALLOWED);
+      return;
+    }
   }
 
   await prisma.user.create({

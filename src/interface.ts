@@ -46,6 +46,10 @@ export interface ConfigInterface {
       verification_url: string;
       interval: number;
     };
+    preventDuplicates: {
+      email: boolean;
+      phone: boolean;
+    };
   };
   session: {
     v1: {

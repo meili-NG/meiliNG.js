@@ -50,6 +50,7 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
     case MeilingV1ErrorType.EXISTING_USERNAME:
     case MeilingV1ErrorType.EXISTING_PASSWORD:
     case MeilingV1ErrorType.EMAIL_NOT_ALLOWED:
+    case MeilingV1ErrorType.PHONE_NOT_ALLOWED:
     case MeilingV1ErrorType.CONFLICT:
       return 409;
 

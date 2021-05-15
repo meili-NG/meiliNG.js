@@ -1,6 +1,6 @@
 import { Group, OAuthClientAccessControls, Permission, User as UserModel } from '@prisma/client';
 import { Client, User } from '.';
-import { prisma } from '..';
+import { getPrismaClient } from '../resources/prisma';
 
 export async function getByClientId(clientId: string): Promise<OAuthClientAccessControls | null | undefined> {
   return await Client.getAccessControl(clientId);
@@ -10,7 +10,7 @@ export async function checkPermissions(
   acl: OAuthClientAccessControls,
   permissions: Permission[],
 ): Promise<boolean | Permission[]> {
-  const allowedPermissions = await prisma.permission.findMany({
+  const allowedPermissions = await getPrismaClient().permission.findMany({
     where: {
       accessControls: {
         some: {
@@ -36,7 +36,7 @@ export async function checkUsers(acl: OAuthClientAccessControls, user: UserModel
   if (!userObject) return false;
 
   const [users, groups] = await Promise.all([
-    prisma.user.findMany({
+    getPrismaClient().user.findMany({
       where: {
         oAuthAccessControls: {
           some: {
@@ -45,7 +45,7 @@ export async function checkUsers(acl: OAuthClientAccessControls, user: UserModel
         },
       },
     }),
-    prisma.group.findMany({
+    getPrismaClient().group.findMany({
       where: {
         oAuthAccessControls: {
           some: {
@@ -79,7 +79,7 @@ export async function getAccessControlRules(acl?: OAuthClientAccessControls | nu
     };
 
   const [users, groups] = await Promise.all([
-    prisma.user.findMany({
+    getPrismaClient().user.findMany({
       where: {
         oAuthAccessControls: {
           some: {
@@ -88,7 +88,7 @@ export async function getAccessControlRules(acl?: OAuthClientAccessControls | nu
         },
       },
     }),
-    prisma.group.findMany({
+    getPrismaClient().group.findMany({
       where: {
         oAuthAccessControls: {
           some: {

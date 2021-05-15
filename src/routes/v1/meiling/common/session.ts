@@ -1,17 +1,17 @@
 import { User as UserModel } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 import fs from 'fs';
-import { prisma } from '../../../..';
 import { Token, User } from '../../../../common';
 import { UserInfoObject } from '../../../../common/user';
-import config from '../../../../config';
+import config from '../../../../resources/config';
 import {
   MeilingV1PasswordResetSession,
   MeilingV1Session,
   MeilingV1SessionAuthorizationStatus,
   MeilingV1SessionExtendedAuthentication,
+  MeilingV1ExtendedAuthMethods,
 } from '../interfaces';
-import { MeilingV1ExtendedAuthMethods } from '../interfaces/query';
+import { getPrismaClient } from '../../../../resources/prisma';
 
 interface MeilingV1TokenDataFile {
   issuedTokens: MeilingV1TokenData[];
@@ -81,7 +81,7 @@ export async function isToken(token?: string): Promise<boolean> {
     const matchedTokens = tokenSessions.issuedTokens.filter((t) => t.token === token);
     result = matchedTokens.length === 1;
   } else {
-    const matchedToken = await prisma.meilingSessionV1Token.findUnique({
+    const matchedToken = await getPrismaClient().meilingSessionV1Token.findUnique({
       where: {
         token,
       },
@@ -123,7 +123,7 @@ export async function createToken(req: FastifyRequest): Promise<string | undefin
 
     tokenSessions.issuedTokens.push(tokenData);
   } else {
-    const userSessions = await prisma.meilingSessionV1Token.findMany({
+    const userSessions = await getPrismaClient().meilingSessionV1Token.findMany({
       where: {
         ip: req.ip,
         issuedAt: {
@@ -136,7 +136,7 @@ export async function createToken(req: FastifyRequest): Promise<string | undefin
       return undefined;
     }
 
-    await prisma.meilingSessionV1Token.create({
+    await getPrismaClient().meilingSessionV1Token.create({
       data: {
         token,
         ip: req.ip,
@@ -173,7 +173,7 @@ export async function getSessionFromRequest(req: FastifyRequest): Promise<Meilin
           data = session?.session;
         }
       } else {
-        const tokenData = await prisma.meilingSessionV1Token.findUnique({
+        const tokenData = await getPrismaClient().meilingSessionV1Token.findUnique({
           where: {
             token,
           },
@@ -215,7 +215,7 @@ export async function setSession(req: FastifyRequest, data?: MeilingV1Session): 
               tokenData.expiresAt = newExpiration;
             }
           } else {
-            await prisma.meilingSessionV1Token.update({
+            await getPrismaClient().meilingSessionV1Token.update({
               where: {
                 token,
               },

@@ -1,10 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { PasswordBody } from '.';
 import { meilingV1UserActionGetUser } from '..';
-import { prisma } from '../../../../../..';
 import { User } from '../../../../../../common';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
+import { getPrismaClient } from '../../../../../../resources/prisma';
 
 export async function meilingV1OAuthClientPasswordsDeleteHandler(
   req: FastifyRequest,
@@ -21,7 +21,7 @@ export async function meilingV1OAuthClientPasswordsDeleteHandler(
   const passwordsRaw = (await User.checkPassword(user, body.password)).filter((n) => n !== undefined);
   for (const passwordRaw of passwordsRaw) {
     if (passwordRaw) {
-      await prisma.authorization.delete({
+      await getPrismaClient().authorization.delete({
         where: {
           id: passwordRaw?.id,
         },

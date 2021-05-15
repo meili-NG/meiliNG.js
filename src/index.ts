@@ -1,20 +1,12 @@
 import { Banner, Database } from './common';
 
 import { MeilingV1Session } from './routes/v1/meiling/common';
-import { PrismaClient } from '@prisma/client';
 import chalk from 'chalk';
-import config from './config';
+import config from './resources/config';
 import fastify from 'fastify';
 import fastifyFormbody from 'fastify-formbody';
 import fs from 'fs';
 import meilingPlugin from './routes';
-
-export const packageJson = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf-8' }));
-
-const env = process.env.NODE_ENV || 'development';
-
-export const prisma = new PrismaClient();
-export const isDevelopment = env === 'development';
 
 // some banner stuff
 Banner.showBanner();

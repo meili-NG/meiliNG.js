@@ -8,7 +8,16 @@ interface SessionV1StorageFileConfig {
   path: string;
 }
 
+export enum NodeEnvironment {
+  Production = 'production',
+  Development = 'development',
+  Testing = 'testing',
+}
+
 export interface ConfigInterface {
+  node: {
+    environment: NodeEnvironment;
+  };
   frontend: {
     url: string[];
   };

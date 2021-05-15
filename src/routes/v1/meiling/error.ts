@@ -2,7 +2,8 @@ import { FastifyReply } from 'fastify/types/reply';
 import { MeilingCommonError } from '../../../common';
 import { MeilingV1ErrorResponse, MeilingV1ErrorType } from './interfaces';
 import chalk from 'chalk';
-import { isDevelopment } from '../../..';
+import config from '../../../resources/config';
+import { NodeEnvironment } from '../../../interface';
 
 function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
   switch (type) {
@@ -81,7 +82,8 @@ export function sendMeilingError(
   description?: string,
   code?: string,
 ): void {
-  if (isDevelopment) console.error(chalk.red('[ERROR]'), 'Error Report', type);
+  if (config.node.environment === NodeEnvironment.Development)
+    console.error(chalk.red('[ERROR]'), 'Error Report', type);
 
   const statusCode = getMeilingErrorStatusCode(type);
 

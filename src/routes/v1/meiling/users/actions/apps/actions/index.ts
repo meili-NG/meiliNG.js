@@ -1,11 +1,11 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '..';
 import { meilingV1UserActionGetUser } from '../..';
-import { prisma } from '../../../../../../..';
 import { User } from '../../../../../../../common';
 import { sendMeilingError } from '../../../../error';
 import { MeilingV1ErrorType } from '../../../../interfaces';
 import { meilingV1UserAppsRedirectUriCRUDPlugin } from './redirect_uri';
+import { getPrismaClient } from '../../../../../../../resources/prisma';
 
 export function meilingV1UserAppsAuthorizedActionsCombinedPlugin(
   app: FastifyInstance,
@@ -39,7 +39,7 @@ export function meilingV1UserAppsAuthorizedActionsAuthorizedUserPlugin(
     const user = (await meilingV1UserActionGetUser(_req)) as User.UserInfoObject;
     const req = _req as MeilingV1ClientRequest;
 
-    const firstAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+    const firstAuthorization = await getPrismaClient().oAuthClientAuthorization.findFirst({
       where: {
         client: {
           id: req.client.id,
@@ -53,7 +53,7 @@ export function meilingV1UserAppsAuthorizedActionsAuthorizedUserPlugin(
       },
     });
 
-    const lastAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+    const lastAuthorization = await getPrismaClient().oAuthClientAuthorization.findFirst({
       where: {
         client: {
           id: req.client.id,
@@ -77,7 +77,7 @@ export function meilingV1UserAppsAuthorizedActionsAuthorizedUserPlugin(
     const user = (await meilingV1UserActionGetUser(_req)) as User.UserInfoObject;
     const req = _req as MeilingV1ClientRequest;
 
-    await prisma.oAuthToken.deleteMany({
+    await getPrismaClient().oAuthToken.deleteMany({
       where: {
         authorization: {
           client: {
@@ -90,7 +90,7 @@ export function meilingV1UserAppsAuthorizedActionsAuthorizedUserPlugin(
       },
     });
 
-    await prisma.oAuthClientAuthorization.deleteMany({
+    await getPrismaClient().oAuthClientAuthorization.deleteMany({
       where: {
         client: {
           id: req.client.id,

@@ -1,10 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { meilingV1UserActionGetUser } from '../..';
-import { prisma } from '../../../../../../..';
 import { Client, ClientAccessControls, ClientAuthorization, Token, User, Utils } from '../../../../../../../common';
 import { TokenMetadata } from '../../../../../../../common/token';
 import { sendMeilingError } from '../../../../error';
 import { MeilingV1ErrorType } from '../../../../interfaces';
+import { getPrismaClient } from '../../../../../../../resources/prisma';
 
 interface DeviceCode {
   user_code: string;
@@ -37,7 +37,7 @@ export async function meilingV1OAuthClientDeviceAuthHandler(req: FastifyRequest,
 
   const minimumIssuedAt = new Date(new Date().getTime() - 1000 * Token.getValidTimeByType(type));
 
-  const deviceTokens = await prisma.oAuthToken.findMany({
+  const deviceTokens = await getPrismaClient().oAuthToken.findMany({
     where: {
       issuedAt: {
         gte: minimumIssuedAt,
@@ -86,7 +86,7 @@ export async function meilingV1OAuthClientDeviceAuthHandler(req: FastifyRequest,
     return;
   }
 
-  await prisma.oAuthClientAuthorization.update({
+  await getPrismaClient().oAuthClientAuthorization.update({
     where: {
       id: authorization.id,
     },
@@ -107,7 +107,7 @@ export async function meilingV1OAuthClientDeviceAuthHandler(req: FastifyRequest,
 
   metadata.data.deviceCode.isAuthorized = true;
 
-  await prisma.oAuthToken.update({
+  await getPrismaClient().oAuthToken.update({
     where: {
       token: userCode.token,
     },

@@ -2,7 +2,6 @@ import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import libphonenumberJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '.';
-import { prisma } from '../../..';
 import { User, Utils } from '../../../common';
 import {
   convertToNotificationMethod,
@@ -10,7 +9,7 @@ import {
   TemplateId,
   TemplateLanguage,
 } from '../../../common/notification';
-import config from '../../../config';
+import config from '../../../resources/config';
 import { MeilingV1Challenge } from './common';
 import { generateChallenge, isChallengeRateLimited, verifyChallenge } from './common/challenge';
 import { setAuthorizationStatus, setPasswordResetSession } from './common/session';
@@ -18,6 +17,7 @@ import { getAvailableExtendedAuthenticationMethods } from './common/user';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType, MeilingV1PasswordResetSession } from './interfaces';
 import { MeilingV1ExtendedAuthMethods, MeilingV1PasswordReset } from './interfaces/query';
+import { getPrismaClient } from '../../../resources/prisma';
 
 export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
@@ -41,7 +41,7 @@ export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: Fas
     }
 
     const uuid = session.passwordReset.passwordResetUser;
-    await prisma.authorization.deleteMany({
+    await getPrismaClient().authorization.deleteMany({
       where: {
         method: 'PASSWORD',
         user: {

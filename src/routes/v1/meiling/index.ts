@@ -1,7 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
 import fastifyCors from 'fastify-cors';
-import { isDevelopment } from '../../..';
-import config from '../../../config';
+import config from '../../../resources/config';
 import { meilingV1AppsPlugin } from './apps';
 import { meilingV1AuthorizationPlugin } from './authorization';
 import { MeilingV1Session } from './common';
@@ -13,6 +12,7 @@ import { meilingV1SigninHandler } from './signin';
 import { meilingV1SignoutHandler } from './signout';
 import { v1MeilingSignupPlugin } from './signup/';
 import { meilingV1UserPlugin } from './users';
+import { NodeEnvironment } from '../../../interface';
 
 export interface FastifyRequestWithSession extends FastifyRequest {
   session: SessionObject;
@@ -20,7 +20,7 @@ export interface FastifyRequestWithSession extends FastifyRequest {
 
 export function v1MeilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.register(fastifyCors, {
-    origin: isDevelopment ? '*' : config.frontend.url,
+    origin: config.node.environment === NodeEnvironment.Development ? '*' : config.frontend.url,
   });
 
   app.get('/', (req, rep) => {

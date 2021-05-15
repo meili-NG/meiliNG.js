@@ -1,10 +1,10 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
-import { prisma } from '../../../../../../../..';
 import { Utils } from '../../../../../../../../common';
 import { getRedirectUris } from '../../../../../../../../common/client';
 import { sendMeilingError } from '../../../../../error';
 import { MeilingV1ErrorType } from '../../../../../interfaces';
+import { getPrismaClient } from '../../../../../../../../resources/prisma';
 
 interface MeilingRedirectUriPostRequest {
   redirect_uri: string;
@@ -17,7 +17,7 @@ export function meilingV1UserAppsRedirectUriCRUDPlugin(
 ): void {
   app.get('/', async (req_, rep) => {
     const req = req_ as MeilingV1ClientRequest;
-    const redirectUris = await prisma.oAuthClientRedirectUris.findMany({
+    const redirectUris = await getPrismaClient().oAuthClientRedirectUris.findMany({
       where: {
         client: {
           id: req.client.id,
@@ -57,7 +57,7 @@ export function meilingV1UserAppsRedirectUriCRUDPlugin(
 
     const redirectUri = redirect_uri;
 
-    const conflicts = await prisma.oAuthClientRedirectUris.count({
+    const conflicts = await getPrismaClient().oAuthClientRedirectUris.count({
       where: {
         redirectUri,
         client: {
@@ -71,7 +71,7 @@ export function meilingV1UserAppsRedirectUriCRUDPlugin(
       return;
     }
 
-    await prisma.oAuthClientRedirectUris.create({
+    await getPrismaClient().oAuthClientRedirectUris.create({
       data: {
         redirectUri,
         client: {
@@ -109,7 +109,7 @@ export function meilingV1UserAppsRedirectUriCRUDPlugin(
 
     const redirectUri = redirect_uri;
 
-    const deleteCount = await prisma.oAuthClientRedirectUris.count({
+    const deleteCount = await getPrismaClient().oAuthClientRedirectUris.count({
       where: {
         redirectUri,
         client: {
@@ -123,7 +123,7 @@ export function meilingV1UserAppsRedirectUriCRUDPlugin(
       return;
     }
 
-    await prisma.oAuthClientRedirectUris.deleteMany({
+    await getPrismaClient().oAuthClientRedirectUris.deleteMany({
       where: {
         redirectUri,
         client: {
@@ -144,7 +144,7 @@ export function meilingV1UserAppsRedirectUriCRUDPlugin(
       return;
     }
 
-    const match = await prisma.oAuthClientRedirectUris.findFirst({
+    const match = await getPrismaClient().oAuthClientRedirectUris.findFirst({
       where: {
         id: (req.params as any).uuid,
         client: {
@@ -171,7 +171,7 @@ export function meilingV1UserAppsRedirectUriCRUDPlugin(
       return;
     }
 
-    const matches = await prisma.oAuthClientRedirectUris.count({
+    const matches = await getPrismaClient().oAuthClientRedirectUris.count({
       where: {
         id: (req.params as any).uuid,
         client: {
@@ -210,7 +210,7 @@ export function meilingV1UserAppsRedirectUriCRUDPlugin(
 
     const redirectUri = redirect_uri;
 
-    const matchingCount = await prisma.oAuthClientRedirectUris.count({
+    const matchingCount = await getPrismaClient().oAuthClientRedirectUris.count({
       where: {
         redirectUri,
         client: {
@@ -224,7 +224,7 @@ export function meilingV1UserAppsRedirectUriCRUDPlugin(
       return;
     }
 
-    await prisma.oAuthClientRedirectUris.update({
+    await getPrismaClient().oAuthClientRedirectUris.update({
       where: {
         id: (req.params as any).uuid,
       },

@@ -1,9 +1,9 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { meilingV1UserActionGetUser } from '../..';
-import { prisma } from '../../../../../../..';
 import { ClientAuthorization, Token, User, Utils } from '../../../../../../../common';
 import { sendMeilingError } from '../../../../error';
 import { MeilingV1ErrorType } from '../../../../interfaces';
+import { getPrismaClient } from '../../../../../../../resources/prisma';
 
 interface DeviceCode {
   user_code: string;
@@ -39,7 +39,7 @@ export async function meilingV1OAuthClientDeviceAuthCheckHandler(
 
   const minimumIssuedAt = new Date(new Date().getTime() - 1000 * Token.getValidTimeByType(type));
 
-  const deviceTokens = await prisma.oAuthToken.findMany({
+  const deviceTokens = await getPrismaClient().oAuthToken.findMany({
     where: {
       issuedAt: {
         gte: minimumIssuedAt,

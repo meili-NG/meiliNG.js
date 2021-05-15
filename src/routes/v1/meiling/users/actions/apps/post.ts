@@ -1,10 +1,10 @@
 import { Group as GroupModel, Permission } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { prisma } from '../../../../../..';
 import { Client, Group, User, Utils } from '../../../../../../common';
 import { MeilingV1Session } from '../../../common';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
+import { getPrismaClient } from '../../../../../../resources/prisma';
 
 interface MeilingV1AppPostBody {
   name: string;
@@ -58,7 +58,7 @@ async function meilingV1AppPostHandler(req: FastifyRequest, rep: FastifyReply): 
 
   for (const permission of permissions) {
     permissionsPromises.push(
-      await prisma.permission.findUnique({
+      await getPrismaClient().permission.findUnique({
         where: {
           name: permission,
         },
@@ -125,7 +125,7 @@ async function meilingV1AppPostHandler(req: FastifyRequest, rep: FastifyReply): 
     });
   }
 
-  const client = await prisma.oAuthClient.create({
+  const client = await getPrismaClient().oAuthClient.create({
     data: {
       name: body.name,
       image: body.image,

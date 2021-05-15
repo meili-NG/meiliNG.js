@@ -2,12 +2,12 @@ import bcrypt from 'bcryptjs';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import libmobilephoneJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '..';
-import { prisma } from '../../../..';
 import { User, Utils } from '../../../../common';
-import config from '../../../../config';
+import config from '../../../../resources/config';
 import { getAuthorizationStatus, setAuthorizationStatus } from '../common/session';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
+import { getPrismaClient } from '../../../../resources/prisma';
 
 interface MeilingV1Signup {
   username: string;
@@ -117,7 +117,7 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
   }
 
   if (config.meiling.preventDuplicates.email) {
-    const emails = await prisma.email.findMany({
+    const emails = await getPrismaClient().email.findMany({
       where: {
         email,
         isPrimary: true,
@@ -131,7 +131,7 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
   }
 
   if (config.meiling.preventDuplicates.phone) {
-    const phones = await prisma.phone.findMany({
+    const phones = await getPrismaClient().phone.findMany({
       where: {
         phone: phone.formatInternational(),
       },
@@ -143,7 +143,7 @@ export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyRe
     }
   }
 
-  await prisma.user.create({
+  await getPrismaClient().user.create({
     data: {
       username,
       name: name.name,

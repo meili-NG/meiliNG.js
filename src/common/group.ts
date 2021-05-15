@@ -1,5 +1,5 @@
 import { Group } from '@prisma/client';
-import { prisma } from '..';
+import { getPrismaClient } from '../resources/prisma';
 
 export function getId(group: string | Group): string {
   if (typeof group === 'string') {
@@ -9,7 +9,7 @@ export function getId(group: string | Group): string {
 }
 
 export async function getInfo(group: string | Group): Promise<Group | undefined> {
-  const groupData = await prisma.group.findUnique({
+  const groupData = await getPrismaClient().group.findUnique({
     where: {
       id: getId(group),
     },

@@ -1,11 +1,11 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1ClientRequest } from '.';
-import { prisma } from '../../../../../..';
 import { Client } from '../../../../../../common';
 import { MeilingV1Session } from '../../../common';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 import { MeilingV1AppParams } from './interface';
+import { getPrismaClient } from '../../../../../../resources/prisma';
 
 async function meilingV1UserAppDeleteHandler(req_: FastifyRequest, rep: FastifyReply): Promise<void> {
   const req = req_ as MeilingV1ClientRequest;
@@ -17,7 +17,7 @@ async function meilingV1UserAppDeleteHandler(req_: FastifyRequest, rep: FastifyR
 
   const client = req.client;
 
-  await prisma.oAuthToken.deleteMany({
+  await getPrismaClient().oAuthToken.deleteMany({
     where: {
       authorization: {
         client: {
@@ -27,7 +27,7 @@ async function meilingV1UserAppDeleteHandler(req_: FastifyRequest, rep: FastifyR
     },
   });
 
-  await prisma.oAuthClientAuthorization.deleteMany({
+  await getPrismaClient().oAuthClientAuthorization.deleteMany({
     where: {
       client: {
         id: client.id,
@@ -35,7 +35,7 @@ async function meilingV1UserAppDeleteHandler(req_: FastifyRequest, rep: FastifyR
     },
   });
 
-  await prisma.oAuthClientRedirectUris.deleteMany({
+  await getPrismaClient().oAuthClientRedirectUris.deleteMany({
     where: {
       client: {
         id: client.id,
@@ -43,7 +43,7 @@ async function meilingV1UserAppDeleteHandler(req_: FastifyRequest, rep: FastifyR
     },
   });
 
-  await prisma.oAuthClientSecrets.deleteMany({
+  await getPrismaClient().oAuthClientSecrets.deleteMany({
     where: {
       client: {
         id: client.id,
@@ -51,7 +51,7 @@ async function meilingV1UserAppDeleteHandler(req_: FastifyRequest, rep: FastifyR
     },
   });
 
-  await prisma.oAuthClient.delete({
+  await getPrismaClient().oAuthClient.delete({
     where: {
       id: client.id,
     },

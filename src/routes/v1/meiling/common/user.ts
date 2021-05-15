@@ -1,7 +1,7 @@
 import { Authorization, User } from '@prisma/client';
-import { prisma } from '../../../..';
 import { MeilingV1ExtendedAuthMethods, MeilingV1SigninType } from '../interfaces';
 import { convertAuthentication } from './database';
+import { getPrismaClient } from '../../../../resources/prisma';
 
 export async function getAvailableExtendedAuthenticationMethods(
   user?: User | string,
@@ -22,7 +22,7 @@ export async function getAvailableExtendedAuthenticationMethods(
   let auths;
 
   if (signinType !== undefined) {
-    auths = await prisma.authorization.findMany({
+    auths = await getPrismaClient().authorization.findMany({
       where: {
         userId: uuid,
         allowSingleFactor: signinType === MeilingV1SigninType.PASSWORDLESS ? true : undefined,
@@ -32,7 +32,7 @@ export async function getAvailableExtendedAuthenticationMethods(
       },
     });
   } else {
-    auths = await prisma.authorization.findMany({
+    auths = await getPrismaClient().authorization.findMany({
       where: {
         userId: uuid,
         method: signinMethod !== undefined ? convertAuthentication(signinMethod) : undefined,

@@ -1,7 +1,7 @@
 import { FastifyReply } from 'fastify';
 import JWT from 'jsonwebtoken';
 import { OAuth2ErrorResponseType } from '../interfaces';
-import config from '../../../../config';
+import config from '../../../../resources/config';
 import { sendOAuth2Error } from '../error';
 
 export async function oAuth2IDTokenInfoHandler(token: string, rep: FastifyReply): Promise<void> {

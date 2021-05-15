@@ -4,7 +4,7 @@ import { FastifyRequestWithSession } from '..';
 import * as Notification from '../../../../common/notification';
 import { generateToken } from '../../../../common/token';
 import * as Utils from '../../../../common/utils';
-import config from '../../../../config';
+import config from '../../../../resources/config';
 import { MeilingV1Challenge } from '../common';
 import { appendAuthorizationStatus } from '../common/session';
 import { sendMeilingError } from '../error';

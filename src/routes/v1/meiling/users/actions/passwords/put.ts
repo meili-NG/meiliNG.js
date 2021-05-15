@@ -2,10 +2,10 @@ import bcrypt from 'bcryptjs';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { PasswordChangeBody } from '.';
 import { meilingV1UserActionGetUser } from '..';
-import { prisma } from '../../../../../..';
 import { User, Utils } from '../../../../../../common';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
+import { getPrismaClient } from '../../../../../../resources/prisma';
 
 export async function meilingV1OAuthClientPasswordsPutHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
@@ -41,8 +41,10 @@ export async function meilingV1OAuthClientPasswordsPutHandler(req: FastifyReques
 
   for (const passwordRowToChange of passwordRowsToChange) {
     if (passwordRowToChange) {
-      await prisma.authorization.update({
+      await getPrismaClient().authorization.update({
         where: {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           id: passwordRowToChange.id,
         },
         data: {

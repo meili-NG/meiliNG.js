@@ -1,4 +1,8 @@
 module.exports = {
+  node: {
+    /** Overwrite Node **/
+    environment: 'development',
+  },
   frontend: {
     /** Please enter the frontend address. Used for cors origin and login redirects. */
     url: ['https://login.appie.stella-it.com', 'https://meiling-dev.stella-it.com', 'http://localhost:3000'],

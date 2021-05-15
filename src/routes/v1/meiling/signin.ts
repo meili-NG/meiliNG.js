@@ -5,7 +5,7 @@ import { FastifyRequestWithSession } from '.';
 import { User, Utils } from '../../../common';
 import * as Notification from '../../../common/notification';
 import { AuthorizationJSONObject } from '../../../common/user';
-import config from '../../../config';
+import config from '../../../resources/config';
 import { MeilingV1Challenge, MeilingV1Database, MeilingV1Session, MeilingV1User } from './common';
 import { getMeilingAvailableAuthMethods } from './common/challenge';
 import { sendMeilingError } from './error';

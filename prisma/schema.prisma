@@ -1,0 +1,222 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id String @id @default(uuid())
+
+  username String @unique
+
+  name       String
+  familyName String?
+  givenName  String?
+  middleName String?
+
+  emails Email[]
+  phones Phone[]
+
+  profileUrl String @default("")
+
+  groups Group[]
+
+  ownedClients      OAuthClient[]
+  authorizedClients OAuthClientAuthorization[]
+
+  oAuthAccessControls OAuthUserAccessControls[]
+
+  auths              Authorization[]
+  constentedPolicies PolicyConsent[]
+
+  isActive     Boolean @default(true)
+  useTwoFactor Boolean @default(false)
+
+  createdAt          DateTime             @default(now())
+  lastSignIn         DateTime             @default(now())
+  lastAuthenticated  DateTime             @default(now())
+  ownedClientSecrets OAuthClientSecrets[]
+}
+
+model Email {
+  id        String   @id @default(uuid())
+  email     String
+  user      User?    @relation(fields: [userId], references: [id])
+  addedAt   DateTime @default(now())
+  verified  Boolean  @default(false)
+  allowUse  Boolean  @default(true)
+  isPrimary Boolean  @default(false)
+  userId    String?
+}
+
+model Phone {
+  id        String   @id @default(uuid())
+  phone     String
+  isPrimary Boolean  @default(false)
+  addedAt   DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+}
+
+enum AuthorizationMethod {
+  PGP_KEY
+  OTP
+  PASSWORD
+  SSH_KEY
+  SMS
+  EMAIL
+  SECURITY_KEY
+}
+
+model Authorization {
+  id                 String              @id @default(uuid())
+  method             AuthorizationMethod
+  data               Json?
+  allowSingleFactor  Boolean             @default(false)
+  allowTwoFactor     Boolean             @default(false)
+  allowPasswordReset Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  user               User?               @relation(fields: [userId], references: [id])
+  userId             String?
+}
+
+model Group {
+  id   String @id @default(uuid())
+  name String
+
+  users               User[]
+
+  oAuthAccessControls OAuthUserAccessControls[]
+}
+
+model OAuthClient {
+  id                          String                     @id @default(uuid())
+  name                        String
+  image                       String
+  secrets                     OAuthClientSecrets[]
+  accessControls              OAuthClientAccessControls  @relation(fields: [aclId], references: [id])
+  redirectUris                OAuthClientRedirectUris[]
+  authorizations              OAuthClientAuthorization[]
+  privacy                     String
+  terms                       String
+  createdAt                   DateTime                   @default(now())
+  owners                      User[]
+  aclId                       String
+}
+
+model OAuthClientRedirectUris {
+  id            String       @id @default(uuid())
+  redirectUri   String
+  client        OAuthClient? @relation(fields: [clientId], references: [id])
+  clientId      String?
+}
+
+model OAuthClientAccessControls {
+  id                        String                   @id @default(uuid())
+  userAccessControls        OAuthUserAccessControls? @relation(fields: [userAclId], references: [id])
+  permissions               Permission[]
+  client                    OAuthClient[]
+  userAclId                 String?
+}
+
+model OAuthUserAccessControls {
+  id                        String                      @id @default(uuid())
+  authorizedUsers           User[]
+  authorizedGroups          Group[]
+  clientAcls                OAuthClientAccessControls[]
+}
+
+model OAuthClientSecrets {
+  id            String       @id @default(uuid())
+  secret        String
+  issuer        User         @relation(fields: [userId], references: [id])
+  issuedAt      DateTime     @default(now())
+  client        OAuthClient? @relation(fields: [clientId], references: [id])
+  clientId      String?
+  userId        String
+}
+
+model OAuthClientAuthorization {
+  id            String       @id @default(uuid())
+  user          User?        @relation(fields: [userId], references: [id])
+  client        OAuthClient  @relation(fields: [clientId], references: [id])
+  permissions   Permission[]
+  authorizedAt  DateTime     @default(now())
+  lastUpdatedAt DateTime     @default(now())
+  OAuthToken    OAuthToken[]
+  userId        String?
+  clientId      String
+}
+
+model Permission {
+  name           String                      @id
+  explanation    String?
+  accessControls OAuthClientAccessControls[]
+  authorizations OAuthClientAuthorization[]
+}
+
+model Policy {
+  id            String          @id @default(uuid())
+  name          String
+  versions      PolicyVersion[]
+  lastUpdatedAt DateTime        @default(now())
+  policyConsent PolicyConsent[]
+}
+
+model PolicyVersion {
+  id         String   @id @default(uuid())
+  url        String
+  releasedAt DateTime @default(now())
+  policy     Policy?  @relation(fields: [policyId], references: [id])
+  policyId   String?
+}
+
+model PolicyConsent {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  policy    Policy   @relation(fields: [policyId], references: [id])
+  consent   Boolean  @default(false)
+  consentAt DateTime @default(now())
+  userId    String
+  policyId  String
+}
+
+enum OAuthTokenType {
+  ACCESS_TOKEN
+  REFRESH_TOKEN
+  ACCOUNT_TOKEN
+  AUTHORIZATION_CODE
+  DEVICE_CODE
+}
+
+model OAuthToken {
+  token                      String                   @id @default(uuid())
+  type                       OAuthTokenType
+  authorization              OAuthClientAuthorization @relation(fields: [authorizationId], references: [id])
+  issuedAt                   DateTime                 @default(now())
+  metadata                   Json?
+  authorizationId            String
+}
+
+model MeilingSessionV1Token {
+  token     String   @id
+  ip        String
+  issuedAt  DateTime @default(now())
+  lastUsed  DateTime @default(now())
+  expiresAt DateTime
+  session   Json
+}
+
+model MeilingV1Verification {
+  token            String   @id
+  verificationData Json
+  isValid          Boolean  @default(true)
+  issuedAt         DateTime @default(now())
+  expiresAt        DateTime
+}

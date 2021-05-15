@@ -1,32 +1,24 @@
 module.exports = {
-  parser: '@typescript-eslint/parser', // use typescript eslint parser
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 2020, // Let's use es2020!
-    sourceType: 'module', // you are going to use npmjs.com right?
-    /*
-    ecmaFeatures: {
-      jsx: true // React: Allow JSX
-    }
-    */
+    project: 'tsconfig.json',
+    sourceType: 'module',
   },
-  /*
-  settings: {
-    react: {
-      version: "detect" // React: Detect React Version
-    }
-  },
-  */
+  plugins: ['@typescript-eslint/eslint-plugin'],
   extends: [
-    'plugin:@typescript-eslint/recommended', // use recommended rule of @typescript-eslint/eslint-plugin
-    // "plugin:react/recommended", // React: enable react plugin
-    'prettier/@typescript-eslint', // mitigate conflict between eslint and prettier
-    'plugin:prettier/recommended', // enable eslint
+    'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
   ],
+  root: true,
+  env: {
+    node: true,
+    jest: true,
+  },
+  ignorePatterns: ['.eslintrc.js'],
   rules: {
-    // put your eslint rules here:
-    // e.g. "@typescript-eslint/explicit-function-return-type": "off",
-    'no-unused-vars': 'off',
-    '@typescript-eslint/no-unused-vars': ['warn'],
-    'require-await': 'warn',
+    '@typescript-eslint/interface-name-prefix': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
   },
 };

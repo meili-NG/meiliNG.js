@@ -117,9 +117,6 @@ dist
 ehthumbs.db
 Thumbs.db
 
-# Temporary stuff
-/prisma/migrations
-
 # File based Token Sessions
 tokenSession.json
 src/.legacy

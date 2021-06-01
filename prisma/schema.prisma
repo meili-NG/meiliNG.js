@@ -20,6 +20,8 @@ model User {
   givenName  String?
   middleName String?
 
+  birthday DateTime?
+
   emails Email[]
   phones Phone[]
 

@@ -1,7 +1,8 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from 'fastify';
-import { isDevelopment, packageJson } from '..';
-
+import { info as packageJson } from '../resources/package';
+import config from '../resources/config';
 import v1Plugin from './v1';
+import { NodeEnvironment } from '../interface';
 
 function meilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.route({
@@ -23,10 +24,10 @@ function handleRoot(req: FastifyRequest, rep: FastifyReply): void {
       name: packageJson.name,
       description: packageJson.description,
       repository: packageJson.repository,
-      version: isDevelopment ? packageJson.version : undefined,
+      version: config.node.environment === NodeEnvironment.Development ? packageJson.version : undefined,
     },
     poweredBy: packageJson.poweredBy,
-    isDevelopment,
+    isDevelopment: config.node.environment === NodeEnvironment.Development,
   };
 
   const helloWorld = {

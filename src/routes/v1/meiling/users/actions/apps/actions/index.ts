@@ -9,8 +9,6 @@ import appAuthPlugin from './auth';
 import { appRedirectURIPlugin } from './redirect_uri';
 import appSessionPlugin from './sessions';
 
-const prisma = new PrismaClient();
-
 export function appActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.register(authorizedAppsActionsPlugin);
   app.register(appOwnerActionsPlugin);

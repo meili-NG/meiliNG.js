@@ -1,9 +1,8 @@
 import { PrismaClient } from '.prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { getPrismaClient } from '../../../resources/prisma';
 import { sendOAuth2Error } from './error';
 import { OAuth2ErrorResponseType } from './interfaces';
-
-const prisma = new PrismaClient();
 
 interface OAuth2QueryRevokeParameters {
   token: string;
@@ -17,7 +16,7 @@ export async function oAuth2RevokeTokenHandler(req: FastifyRequest, rep: Fastify
     return;
   }
 
-  const del = await prisma.oAuthToken.delete({
+  const del = await getPrismaClient().oAuthToken.delete({
     where: {
       token: query?.token,
     },

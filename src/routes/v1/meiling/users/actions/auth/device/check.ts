@@ -2,10 +2,9 @@ import { PrismaClient } from '.prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '../..';
 import { ClientAuthorization, Token, User, Utils } from '../../../../../../../common';
+import { getPrismaClient } from '../../../../../../../resources/prisma';
 import { sendMeilingError } from '../../../../error';
 import { MeilingV1ErrorType } from '../../../../interfaces';
-
-const prisma = new PrismaClient();
 
 interface DeviceCode {
   user_code: string;
@@ -38,7 +37,7 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
 
   const minimumIssuedAt = new Date(new Date().getTime() - 1000 * Token.getValidTimeByType(type));
 
-  const deviceTokens = await prisma.oAuthToken.findMany({
+  const deviceTokens = await getPrismaClient().oAuthToken.findMany({
     where: {
       issuedAt: {
         gte: minimumIssuedAt,

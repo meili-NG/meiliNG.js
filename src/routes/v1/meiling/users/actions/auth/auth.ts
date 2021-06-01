@@ -3,11 +3,10 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1UserOAuthAuthQuery } from '.';
 import { getUserFromActionRequest } from '..';
 import { Client, ClientAccessControls, ClientAuthorization, Token, User, Utils } from '../../../../../../common';
+import { getPrismaClient } from '../../../../../../resources/prisma';
 import { OAuth2QueryCodeChallengeMethod, OAuth2QueryResponseType } from '../../../../oauth2/interfaces';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
-
-const prisma = new PrismaClient();
 
 export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const userBase = (await getUserFromActionRequest(req)) as User.UserInfoObject;
@@ -65,7 +64,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
   const permissionsPromise: Promise<Permission | null>[] = [];
   scopes.forEach((scope) =>
     permissionsPromise.push(
-      prisma.permission.findFirst({
+      getPrismaClient().permission.findFirst({
         where: {
           name: scope,
         },

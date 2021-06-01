@@ -3,7 +3,7 @@ import { MeilingV1Challenge, MeilingV1Database } from '.';
 import { Token } from '../../../../common';
 import { AuthorizationJSONObject, AuthorizationOTPObject, AuthorizationPGPSSHKeyObject } from '../../../../common/user';
 import { validateOTP, validatePGPSign } from '../../../../common/validate';
-import config from '../../../../config';
+import config from '../../../../resources/config';
 import {
   MeilingV1ExtendedAuthMethods,
   MeilingV1SignInExtendedAuthentication,

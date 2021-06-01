@@ -1,9 +1,11 @@
-import { isDevelopment, packageJson } from '../';
+import config from '../resources/config';
+import { info as packageJson } from '../resources/package';
 
 import Figlet from 'figlet';
 import chalk from 'chalk';
+import { NodeEnvironment } from '../interface';
 
-export function showBanner() {
+export const showBanner = (): void => {
   console.log(Figlet.textSync('Meiling'));
   console.log();
   console.log(`${chalk.bold('Meiling Project')} - ${chalk.italic(`ver. ${packageJson.version}`)}`);
@@ -18,14 +20,14 @@ export function showBanner() {
   console.log();
   console.log('Distributed under ' + chalk.bold('MIT License'));
   console.log();
-}
+};
 
-export function devModeCheck() {
-  if (isDevelopment) {
+export const devModeCheck = (): void => {
+  if (config.node.environment === NodeEnvironment.Development) {
     console.log(
       chalk.yellow('Launching in Development mode, ') +
         chalk.bgYellowBright(chalk.black(chalk.bold(' DO NOT USE THIS IN PRODUCTION. '))),
     );
     console.log();
   }
-}
+};

@@ -1,12 +1,11 @@
 import { PrismaClient } from '.prisma/client';
-
-const prisma = new PrismaClient();
+import { getPrismaClient } from '../resources/prisma';
 
 export async function testDatabase(): Promise<boolean> {
   try {
     console.log('[Startup] Checking Database Connection...');
-    await prisma.$connect();
-    await prisma.$executeRaw('SHOW TABLES');
+    await getPrismaClient().$connect();
+    await getPrismaClient().$executeRaw('SHOW TABLES');
     return true;
   } catch (e) {
     return false;

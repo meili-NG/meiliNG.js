@@ -1,15 +1,6 @@
-import {
-  OAuthClient,
-  OAuthClientAuthorization,
-  OAuthToken,
-  OAuthTokenType,
-  Permission,
-  PrismaClient,
-  User,
-} from '@prisma/client';
+import { OAuthClient, OAuthClientAuthorization, OAuthToken, OAuthTokenType, Permission, User } from '@prisma/client';
 import { Token } from '.';
-
-const prisma = new PrismaClient();
+import { getPrismaClient } from '../resources/prisma';
 
 export function getId(authorization: OAuthClientAuthorization | string): string {
   if (typeof authorization === 'string') {
@@ -22,7 +13,7 @@ export async function getById(
   authorization: OAuthClientAuthorization | string,
 ): Promise<OAuthClientAuthorization | undefined> {
   if (typeof authorization === 'string') {
-    const tmpAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+    const tmpAuthorization = await getPrismaClient().oAuthClientAuthorization.findFirst({
       where: {
         id: getId(authorization),
       },
@@ -41,7 +32,7 @@ export async function getClient(
   const tmpAuthorization = await getById(authorization);
   if (!tmpAuthorization) return;
 
-  const client = await prisma.oAuthClient.findFirst({
+  const client = await getPrismaClient().oAuthClient.findFirst({
     where: {
       id: tmpAuthorization.clientId,
     },
@@ -55,7 +46,7 @@ export async function getUser(authorization: OAuthClientAuthorization | string):
   if (!data) return;
   if (!data.userId) return;
 
-  const user = await prisma.user.findUnique({
+  const user = await getPrismaClient().user.findUnique({
     where: {
       id: data.userId,
     },
@@ -72,7 +63,7 @@ export async function createToken(
   // TODO: allow custom generator for token
   const tokenKey = Token.generateToken();
 
-  const token = await prisma.oAuthToken.create({
+  const token = await getPrismaClient().oAuthToken.create({
     data: {
       authorization: {
         connect: {
@@ -93,7 +84,7 @@ export async function createToken(
 }
 
 export async function getToken(authorization: OAuthClientAuthorization, type: OAuthTokenType): Promise<OAuthToken> {
-  let token = await prisma.oAuthToken.findFirst({
+  let token = await getPrismaClient().oAuthToken.findFirst({
     orderBy: [
       {
         issuedAt: 'desc',
@@ -115,7 +106,7 @@ export async function getToken(authorization: OAuthClientAuthorization, type: OA
 }
 
 export async function getAuthorizedPermissions(authorization: OAuthClientAuthorization): Promise<Permission[]> {
-  const permissions = await prisma.permission.findMany({
+  const permissions = await getPrismaClient().permission.findMany({
     where: {
       authorizations: {
         some: {
@@ -129,7 +120,7 @@ export async function getAuthorizedPermissions(authorization: OAuthClientAuthori
 }
 
 export async function updateLastUpdated(authorization: OAuthClientAuthorization | string): Promise<void> {
-  await prisma.oAuthClientAuthorization.update({
+  await getPrismaClient().oAuthClientAuthorization.update({
     where: {
       id: getId(authorization),
     },

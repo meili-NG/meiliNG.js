@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { isDevelopment } from '../../..';
-import config from '../../../config';
+import config from '../../../resources/config';
+import { NodeEnvironment } from '../../../interface';
 import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
@@ -11,7 +11,7 @@ export function sessionPlugin(app: FastifyInstance, opts: FastifyPluginOptions, 
       const authToken = (req.query as any)?.token;
 
       if (config.session.v1.debugTokens.includes(authToken)) {
-        if (isDevelopment) {
+        if (config.node.environment === NodeEnvironment.Development) {
           rep.send(await MeilingV1Session.getSessionFromRequest(req));
         } else {
           sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'unauthorized: not in development mode.');
@@ -57,7 +57,7 @@ export function sessionPlugin(app: FastifyInstance, opts: FastifyPluginOptions, 
       const authToken = (req.query as any)?.token;
 
       if (config.session.v1.debugTokens.includes(authToken)) {
-        if (isDevelopment) {
+        if (config.node.environment === NodeEnvironment.Development) {
           await MeilingV1Session.setSession(req, req.body as any);
           rep.send(await MeilingV1Session.getSessionFromRequest(req));
         } else {

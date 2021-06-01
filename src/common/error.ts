@@ -1,4 +1,4 @@
-import config from '../config';
+import config from '../resources/config';
 
 export function buildErrorCodeURL(code?: string): string | undefined {
   if (code !== undefined) {

@@ -1,10 +1,9 @@
 import { OAuthClient, OAuthTokenType, Permission, PrismaClient, User as UserModel } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 import { Client, ClientAuthorization, Token, User, Utils } from '.';
-import config from '../config';
+import config from '../resources/config';
+import { getPrismaClient } from '../resources/prisma';
 import { OAuth2QueryCodeChallengeMethod } from '../routes/v1/oauth2/interfaces';
-
-const prisma = new PrismaClient();
 
 export type TokenMetadata = null | TokenMetadataV1;
 
@@ -66,7 +65,7 @@ export async function getAuthorization(token: string, type?: OAuthTokenType) {
   if (!data?.authorizationId) return undefined;
 
   if (data) {
-    const authorization = await prisma.oAuthClientAuthorization.findUnique({
+    const authorization = await getPrismaClient().oAuthClientAuthorization.findUnique({
       where: {
         id: data.authorizationId,
       },
@@ -89,7 +88,7 @@ export async function getAuthorizedPermissions(token: string, type?: OAuthTokenT
 }
 
 export async function getData(token: string, type?: OAuthTokenType) {
-  const tokenData = await prisma.oAuthToken.findUnique({
+  const tokenData = await getPrismaClient().oAuthToken.findUnique({
     where: {
       token,
     },
@@ -158,7 +157,7 @@ export async function getMetadata(token: string, type?: OAuthTokenType): Promise
 }
 
 export async function setMetadata(token: string, metadata: Token.TokenMetadata) {
-  await prisma.oAuthToken.update({
+  await getPrismaClient().oAuthToken.update({
     where: {
       token,
     },

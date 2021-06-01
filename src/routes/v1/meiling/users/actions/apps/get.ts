@@ -3,11 +3,10 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1ClientRequest } from '.';
 import { getUserFromActionRequest } from '..';
 import { Client, ClientAccessControls, User } from '../../../../../../common';
+import { getPrismaClient } from '../../../../../../resources/prisma';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 import { MeilingV1AppParams } from './interface';
-
-const prisma = new PrismaClient();
 
 async function appGetHandler(req_: FastifyRequest, rep: FastifyReply): Promise<void> {
   const req = req_ as MeilingV1ClientRequest;
@@ -22,7 +21,7 @@ async function appGetHandler(req_: FastifyRequest, rep: FastifyReply): Promise<v
   }
 
   if (req.status.authorized) {
-    const firstAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+    const firstAuthorization = await getPrismaClient().oAuthClientAuthorization.findFirst({
       where: {
         client: {
           id: req.client.id,
@@ -36,7 +35,7 @@ async function appGetHandler(req_: FastifyRequest, rep: FastifyReply): Promise<v
       },
     });
 
-    const lastAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+    const lastAuthorization = await getPrismaClient().oAuthClientAuthorization.findFirst({
       where: {
         client: {
           id: req.client.id,

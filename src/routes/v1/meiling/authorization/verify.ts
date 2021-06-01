@@ -1,12 +1,11 @@
 import { PrismaClient } from '.prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { FastifyRequestWithSession } from '..';
-import config from '../../../../config';
+import config from '../../../../resources/config';
+import { getPrismaClient } from '../../../../resources/prisma';
 import { setAuthorizationStatus } from '../common/session';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
-
-const prisma = new PrismaClient();
 
 type MeilingV1VerificationQuery = MeilingV1PhoneVerificationQuery | MeilingV1EmailVerificationQuery;
 
@@ -65,7 +64,7 @@ export async function meilingV1AuthorizationVerifyHandler(req: FastifyRequest, r
       verified = session.authorizationStatus.email.challenge.challenge == code;
       createdAt = session.authorizationStatus.email.challenge.challengeCreatedAt;
     } else if (token) {
-      const data = await prisma.meilingV1Verification.findUnique({
+      const data = await getPrismaClient().meilingV1Verification.findUnique({
         where: {
           token,
         },

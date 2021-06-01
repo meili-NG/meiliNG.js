@@ -3,10 +3,9 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { PasswordBody } from '.';
 import { getUserFromActionRequest } from '..';
 import { User } from '../../../../../../common';
+import { getPrismaClient } from '../../../../../../resources/prisma';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
-
-const prisma = new PrismaClient();
 
 export async function userPasswordDeleteHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
@@ -20,7 +19,7 @@ export async function userPasswordDeleteHandler(req: FastifyRequest, rep: Fastif
   const passwordsRaw = (await User.checkPassword(user, body.password)).filter((n) => n !== undefined);
   for (const passwordRaw of passwordsRaw) {
     if (passwordRaw) {
-      await prisma.authorization.delete({
+      await getPrismaClient().authorization.delete({
         where: {
           id: passwordRaw?.id,
         },

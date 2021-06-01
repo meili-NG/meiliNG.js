@@ -2,8 +2,7 @@ import { PrismaClient } from '.prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '..';
 import { Client, User } from '../../../../../../common';
-
-const prisma = new PrismaClient();
+import { getPrismaClient } from '../../../../../../resources/prisma';
 
 async function userAppsHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
@@ -16,7 +15,7 @@ async function userAppsHandler(req: FastifyRequest, rep: FastifyReply): Promise<
   const authorizedApps = await Promise.all(
     userData?.authorizedApps
       ? userData.authorizedApps.map(async (n) => {
-          const firstAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+          const firstAuthorization = await getPrismaClient().oAuthClientAuthorization.findFirst({
             where: {
               client: {
                 id: n.id,
@@ -30,7 +29,7 @@ async function userAppsHandler(req: FastifyRequest, rep: FastifyReply): Promise<
             },
           });
 
-          const lastAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+          const lastAuthorization = await getPrismaClient().oAuthClientAuthorization.findFirst({
             where: {
               client: {
                 id: n.id,

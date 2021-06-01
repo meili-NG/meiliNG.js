@@ -8,6 +8,9 @@ const path = require('path');
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 module.exports = {
+  node: {
+    environment: process.env.NODE_ENV || 'development',
+  },
   frontend: {
     url: process.env.FRONTEND_URLS ? process.env.FRONTEND_URLS.split(',') : ['http://frontend.meili.ng'],
   },

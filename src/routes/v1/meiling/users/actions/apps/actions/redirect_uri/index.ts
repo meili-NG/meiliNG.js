@@ -3,10 +3,9 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
 import { Utils } from '../../../../../../../../common';
 import { getRedirectUris } from '../../../../../../../../common/client';
+import { getPrismaClient } from '../../../../../../../../resources/prisma';
 import { sendMeilingError } from '../../../../../error';
 import { MeilingV1ErrorType } from '../../../../../interfaces';
-
-const prisma = new PrismaClient();
 
 interface MeilingRedirectUriPostRequest {
   redirect_uri: string;
@@ -15,7 +14,7 @@ interface MeilingRedirectUriPostRequest {
 export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', async (req_, rep) => {
     const req = req_ as MeilingV1ClientRequest;
-    const redirectUris = await prisma.oAuthClientRedirectUris.findMany({
+    const redirectUris = await getPrismaClient().oAuthClientRedirectUris.findMany({
       where: {
         client: {
           id: req.client.id,
@@ -55,7 +54,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
 
     const redirectUri = redirect_uri;
 
-    const conflicts = await prisma.oAuthClientRedirectUris.count({
+    const conflicts = await getPrismaClient().oAuthClientRedirectUris.count({
       where: {
         redirectUri,
         client: {
@@ -69,7 +68,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
       return;
     }
 
-    await prisma.oAuthClientRedirectUris.create({
+    await getPrismaClient().oAuthClientRedirectUris.create({
       data: {
         redirectUri,
         client: {
@@ -107,7 +106,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
 
     const redirectUri = redirect_uri;
 
-    const deleteCount = await prisma.oAuthClientRedirectUris.count({
+    const deleteCount = await getPrismaClient().oAuthClientRedirectUris.count({
       where: {
         redirectUri,
         client: {
@@ -121,7 +120,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
       return;
     }
 
-    await prisma.oAuthClientRedirectUris.deleteMany({
+    await getPrismaClient().oAuthClientRedirectUris.deleteMany({
       where: {
         redirectUri,
         client: {
@@ -142,7 +141,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
       return;
     }
 
-    const match = await prisma.oAuthClientRedirectUris.findFirst({
+    const match = await getPrismaClient().oAuthClientRedirectUris.findFirst({
       where: {
         id: (req.params as any).uuid,
         client: {
@@ -169,7 +168,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
       return;
     }
 
-    const matches = await prisma.oAuthClientRedirectUris.count({
+    const matches = await getPrismaClient().oAuthClientRedirectUris.count({
       where: {
         id: (req.params as any).uuid,
         client: {
@@ -208,7 +207,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
 
     const redirectUri = redirect_uri;
 
-    const matchingCount = await prisma.oAuthClientRedirectUris.count({
+    const matchingCount = await getPrismaClient().oAuthClientRedirectUris.count({
       where: {
         redirectUri,
         client: {
@@ -222,7 +221,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
       return;
     }
 
-    await prisma.oAuthClientRedirectUris.update({
+    await getPrismaClient().oAuthClientRedirectUris.update({
       where: {
         id: (req.params as any).uuid,
       },

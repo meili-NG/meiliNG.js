@@ -4,10 +4,9 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { PasswordChangeBody } from '.';
 import { getUserFromActionRequest } from '..';
 import { User, Utils } from '../../../../../../common';
+import { getPrismaClient } from '../../../../../../resources/prisma';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
-
-const prisma = new PrismaClient();
 
 export async function userPasswordUpdateHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
@@ -43,7 +42,7 @@ export async function userPasswordUpdateHandler(req: FastifyRequest, rep: Fastif
 
   for (const passwordRowToChange of passwordRowsToChange) {
     if (passwordRowToChange) {
-      await prisma.authorization.update({
+      await getPrismaClient().authorization.update({
         where: {
           id: passwordRowToChange.id,
         },

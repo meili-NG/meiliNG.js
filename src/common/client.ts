@@ -8,13 +8,12 @@ import {
   User as UserModel,
 } from '@prisma/client';
 import { ClientAuthorization, MeilingCommonOAuth2, User, Utils } from '.';
-import config from '../config';
+import config from '../resources/config';
+import { getPrismaClient } from '../resources/prisma';
 import { ClientACLRules, getAccessControlRules } from './clientAccessControls';
 
-const prisma = new PrismaClient();
-
 export async function getByClientId(clientId: string): Promise<ClientModel | null> {
-  const client = await prisma.oAuthClient.findFirst({
+  const client = await getPrismaClient().oAuthClient.findFirst({
     where: {
       id: clientId,
     },
@@ -24,7 +23,7 @@ export async function getByClientId(clientId: string): Promise<ClientModel | nul
 }
 
 export async function getClientOwners(clientId: string): Promise<UserModel[]> {
-  const owners = await prisma.user.findMany({
+  const owners = await getPrismaClient().user.findMany({
     where: {
       ownedClients: {
         some: {
@@ -43,7 +42,7 @@ export async function verifySecret(clientId: string, clientSecret?: string): Pro
     return false;
   }
 
-  const secrets = await prisma.oAuthClientSecrets.findMany({
+  const secrets = await getPrismaClient().oAuthClientSecrets.findMany({
     where: {
       clientId: clientId,
     },
@@ -70,7 +69,7 @@ export async function getAccessControl(clientId: string): Promise<OAuthClientAcc
   const client = await getByClientId(clientId);
   if (!client) return;
 
-  const acl = await prisma.oAuthClientAccessControls.findFirst({
+  const acl = await getPrismaClient().oAuthClientAccessControls.findFirst({
     where: {
       id: client.aclId,
     },
@@ -118,7 +117,7 @@ export async function getInfoForOwners(
     accessControls: await getAccessControlRules(acl),
     allowedPermissions: acl
       ? (
-          await prisma.permission.findMany({
+          await getPrismaClient().permission.findMany({
             where: {
               accessControls: {
                 some: {
@@ -163,7 +162,7 @@ export function shouldSkipAuthentication(clientId: string): boolean {
 
 export async function getRedirectUris(clientId: string): Promise<string[]> {
   const redirectUris = [];
-  const data = await prisma.oAuthClientRedirectUris.findMany({
+  const data = await getPrismaClient().oAuthClientRedirectUris.findMany({
     where: {
       clientId,
     },
@@ -187,7 +186,7 @@ export async function addRedirectUri(clientId: string, redirectUri: string): Pro
     return false;
   }
 
-  await prisma.oAuthClientRedirectUris.create({
+  await getPrismaClient().oAuthClientRedirectUris.create({
     data: {
       client: {
         connect: {
@@ -202,7 +201,7 @@ export async function addRedirectUri(clientId: string, redirectUri: string): Pro
 }
 
 export async function removeRedirectUri(clientId: string, redirectUri: string): Promise<boolean> {
-  const rawRedirectUris = await prisma.oAuthClientRedirectUris.findMany({
+  const rawRedirectUris = await getPrismaClient().oAuthClientRedirectUris.findMany({
     where: {
       clientId,
     },
@@ -216,7 +215,7 @@ export async function removeRedirectUri(clientId: string, redirectUri: string): 
   const matchingUris = rawRedirectUris.filter((n) => n.redirectUri === redirectUri);
   await Promise.all(
     matchingUris.map((n) =>
-      prisma.oAuthClientRedirectUris.delete({
+      getPrismaClient().oAuthClientRedirectUris.delete({
         where: {
           id: n.id,
         },
@@ -242,7 +241,7 @@ export async function createAuthorization(
     (p, q) => p.name === q.name,
   );
 
-  const authorization = await prisma.oAuthClientAuthorization.create({
+  const authorization = await getPrismaClient().oAuthClientAuthorization.create({
     data: {
       user: {
         connect: {

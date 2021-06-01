@@ -2,11 +2,10 @@ import { Permission, PrismaClient } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { Client, ClientAccessControls, Token, Utils } from '../../../../common';
 import { generateToken } from '../../../../common/token';
-import config from '../../../../config';
+import config from '../../../../resources/config';
+import { getPrismaClient } from '../../../../resources/prisma';
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType } from '../interfaces';
-
-const prisma = new PrismaClient();
 
 interface DeviceCodeRequestBody {
   client_id: string;
@@ -47,7 +46,7 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
   const permissionsPromise: Promise<Permission | null>[] = [];
   scopes.forEach((scope) =>
     permissionsPromise.push(
-      prisma.permission.findFirst({
+      getPrismaClient().permission.findFirst({
         where: {
           name: scope,
         },
@@ -95,7 +94,7 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
     }
   }
 
-  await prisma.oAuthToken.create({
+  await getPrismaClient().oAuthToken.create({
     data: {
       token: device_code,
       type,

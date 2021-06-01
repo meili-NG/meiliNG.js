@@ -3,15 +3,14 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
 import { getUserFromActionRequest } from '../../..';
 import { User } from '../../../../../../../../common';
-
-const prisma = new PrismaClient();
+import { getPrismaClient } from '../../../../../../../../resources/prisma';
 
 function appAuthPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', async (_req, rep) => {
     const user = (await getUserFromActionRequest(_req)) as User.UserInfoObject;
     const req = _req as MeilingV1ClientRequest;
 
-    const firstAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+    const firstAuthorization = await getPrismaClient().oAuthClientAuthorization.findFirst({
       where: {
         client: {
           id: req.client.id,
@@ -25,7 +24,7 @@ function appAuthPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: (
       },
     });
 
-    const lastAuthorization = await prisma.oAuthClientAuthorization.findFirst({
+    const lastAuthorization = await getPrismaClient().oAuthClientAuthorization.findFirst({
       where: {
         client: {
           id: req.client.id,
@@ -49,7 +48,7 @@ function appAuthPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: (
     const user = (await getUserFromActionRequest(_req)) as User.UserInfoObject;
     const req = _req as MeilingV1ClientRequest;
 
-    await prisma.oAuthToken.deleteMany({
+    await getPrismaClient().oAuthToken.deleteMany({
       where: {
         authorization: {
           client: {
@@ -62,7 +61,7 @@ function appAuthPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: (
       },
     });
 
-    await prisma.oAuthClientAuthorization.deleteMany({
+    await getPrismaClient().oAuthClientAuthorization.deleteMany({
       where: {
         client: {
           id: req.client.id,

@@ -3,8 +3,7 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
 import { getUserFromActionRequest } from '../../..';
 import { User } from '../../../../../../../../common';
-
-const prisma = new PrismaClient();
+import { getPrismaClient } from '../../../../../../../../resources/prisma';
 
 function appSessionPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
   app.get('/sessions', async (_req, rep) => {
@@ -12,7 +11,7 @@ function appSessionPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done
 
     const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
 
-    const sessions = await prisma.oAuthToken.findMany({
+    const sessions = await getPrismaClient().oAuthToken.findMany({
       where: {
         authorization: {
           client: {

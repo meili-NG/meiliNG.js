@@ -1,6 +1,12 @@
 import { OAuthTokenType } from '@prisma/client';
 import { TokenGenerator } from './common/token';
 
+export enum NodeEnvironment {
+  Production = 'production',
+  Development = 'development',
+  Testing = 'testing',
+}
+
 type SessionV1StorageConfig = SessionV1StorageFileConfig;
 
 interface SessionV1StorageFileConfig {
@@ -9,6 +15,9 @@ interface SessionV1StorageFileConfig {
 }
 
 export interface ConfigInterface {
+  node: {
+    environment: NodeEnvironment;
+  };
   frontend: {
     url: string[];
   };

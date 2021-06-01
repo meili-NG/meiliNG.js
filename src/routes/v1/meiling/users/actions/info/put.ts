@@ -4,7 +4,7 @@ import { getSanitizedUser } from '../../../../../../common/sanitize';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 
-export async function userGetInfo(req: FastifyRequest, rep: FastifyReply) {
+export async function userUpdateInfo(req: FastifyRequest, rep: FastifyReply) {
   const session = (req as FastifyRequestWithSession).session;
   const userRawSession = session.user;
 
@@ -16,6 +16,8 @@ export async function userGetInfo(req: FastifyRequest, rep: FastifyReply) {
 
       if (users.length === 1) {
         const user = await getSanitizedUser(users[0].id);
+
+        // do some magic.
 
         rep.send(user);
         return;

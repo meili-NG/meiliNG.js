@@ -5,7 +5,8 @@ import { sendMeilingError } from '../../error';
 import { MeilingV1ErrorType } from '../../interfaces';
 import { userAppPlugin } from './apps';
 import { clientAuthPlugin } from './auth';
-import { userGetInfo } from './info/list';
+import { userGetInfo } from './info/get';
+import { userUpdateInfo } from './info/put';
 import userPasswordPlugin from './passwords';
 
 export interface MeilingV1UserActionsParams {
@@ -27,6 +28,7 @@ export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOpti
   });
 
   app.get('/', userGetInfo);
+  app.put('/', userUpdateInfo);
 
   app.register(clientAuthPlugin, { prefix: '/auth' });
   app.register(userPasswordPlugin, { prefix: '/passwords' });

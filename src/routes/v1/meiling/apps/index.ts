@@ -1,10 +1,10 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import meilingV1AppInfoHandler from './get';
-import meilingV1AppListHandler from './list';
+import appInfoHandler from './get';
+import appListHandler from './list';
 
 export function appsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
-  app.get('/', meilingV1AppListHandler);
-  app.get('/:clientId', meilingV1AppInfoHandler);
+  app.get('/', appListHandler);
+  app.get('/:clientId', appInfoHandler);
 
   done();
 }

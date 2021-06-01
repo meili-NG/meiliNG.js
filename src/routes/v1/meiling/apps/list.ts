@@ -5,7 +5,7 @@ import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
 import { MeilingV1AppParams } from './interface';
 
-async function meilingV1AppListHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+async function appListHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const params = req.params as MeilingV1AppParams;
 
   const users = await MeilingV1Session.getLoggedIn(req);
@@ -30,4 +30,4 @@ async function meilingV1AppListHandler(req: FastifyRequest, rep: FastifyReply): 
   rep.send(clients);
 }
 
-export default meilingV1AppListHandler;
+export default appListHandler;

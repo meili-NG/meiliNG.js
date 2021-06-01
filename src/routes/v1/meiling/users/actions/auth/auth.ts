@@ -164,7 +164,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
         offline: query.access_type !== 'online',
         code_challenge: code_challenge
           ? {
-              method: (query.code_challenge_method as unknown) as OAuth2QueryCodeChallengeMethod,
+              method: query.code_challenge_method as unknown as OAuth2QueryCodeChallengeMethod,
               challenge: query.code_challenge as string,
             }
           : undefined,

@@ -235,9 +235,7 @@ export async function serialize(
   };
 }
 
-export function getTokenFromRequest(
-  req: FastifyRequest,
-):
+export function getTokenFromRequest(req: FastifyRequest):
   | {
       method: string;
       token: string;

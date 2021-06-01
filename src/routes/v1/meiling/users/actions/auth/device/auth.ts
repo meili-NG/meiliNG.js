@@ -49,7 +49,7 @@ export async function deviceCodeAuthorizeHandler(req: FastifyRequest, rep: Fasti
   });
 
   const matchingUserCodes = deviceTokens.filter(
-    (n) => ((n.metadata as unknown) as Token.TokenMetadataV1).data?.deviceCode?.userCode === query.user_code,
+    (n) => (n.metadata as unknown as Token.TokenMetadataV1).data?.deviceCode?.userCode === query.user_code,
   );
   if (matchingUserCodes.length === 0) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'no matching user_code found');
@@ -101,7 +101,7 @@ export async function deviceCodeAuthorizeHandler(req: FastifyRequest, rep: Fasti
     },
   });
 
-  const metadata = (userCode.metadata as unknown) as TokenMetadata;
+  const metadata = userCode.metadata as unknown as TokenMetadata;
   if (!metadata?.data?.deviceCode) {
     sendMeilingError(rep, MeilingV1ErrorType.INTERNAL_SERVER_ERROR, "token doesn't seems to be have proper metadata");
     return;

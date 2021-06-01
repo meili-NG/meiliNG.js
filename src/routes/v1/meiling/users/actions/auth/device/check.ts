@@ -48,7 +48,7 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
   });
 
   const matchingUserCodes = deviceTokens.filter(
-    (n) => ((n.metadata as unknown) as Token.TokenMetadataV1).data?.deviceCode?.userCode === query.user_code,
+    (n) => (n.metadata as unknown as Token.TokenMetadataV1).data?.deviceCode?.userCode === query.user_code,
   );
   if (matchingUserCodes.length === 0) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'no matching user_code found');

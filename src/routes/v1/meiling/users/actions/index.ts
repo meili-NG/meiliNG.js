@@ -4,10 +4,11 @@ import { MeilingV1Session } from '../../common';
 import { sendMeilingError } from '../../error';
 import { MeilingV1ErrorType } from '../../interfaces';
 import { userAppPlugin } from './apps';
-import { meilingV1OAuthClientAuthCheckHandler } from './auth';
+import { clientAuthPlugin, meilingV1OAuthClientAuthCheckHandler } from './auth';
 import { meilingV1OAuthClientAuthHandler } from './auth/auth';
 import { deviceCodeAuthorizeHandler } from './auth/device/auth';
 import { deviceCodeCheckHandler } from './auth/device/check';
+import { userGetInfo } from './info/list';
 import userPasswordPlugin from './passwords';
 
 export interface MeilingV1UserActionsParams {
@@ -28,14 +29,10 @@ export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOpti
     }
   });
 
-  app.get('/auth', meilingV1OAuthClientAuthCheckHandler);
-  app.post('/auth', meilingV1OAuthClientAuthHandler);
+  app.get('/', userGetInfo);
 
-  app.get('/auth/device', deviceCodeCheckHandler);
-  app.post('/auth/device', deviceCodeAuthorizeHandler);
-
+  app.register(clientAuthPlugin, { prefix: '/auth' });
   app.register(userPasswordPlugin, { prefix: '/passwords' });
-
   app.register(userAppPlugin, { prefix: '/apps' });
 
   done();

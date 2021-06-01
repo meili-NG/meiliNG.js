@@ -1,3 +1,4 @@
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1UserActionsParams } from '..';
 import {
   OAuth2QueryAccessType,
@@ -6,6 +7,9 @@ import {
   OAuth2QueryPrompt,
   OAuth2QueryResponseType,
 } from '../../../../oauth2/interfaces';
+import { meilingV1OAuthClientAuthHandler } from './auth';
+import { meilingV1OAuthClientAuthCheckHandler } from './check';
+import { deviceCodeAuthPlugin } from './device';
 
 export type MeilingV1UserOAuthAuthParams = MeilingV1UserActionsParams;
 
@@ -22,6 +26,15 @@ export interface MeilingV1UserOAuthAuthQuery {
   code_challenge_method?: OAuth2QueryCodeChallengeMethod;
   state?: string;
   nonce?: string;
+}
+
+export function clientAuthPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
+  app.get('/', meilingV1OAuthClientAuthCheckHandler);
+  app.post('/', meilingV1OAuthClientAuthHandler);
+
+  app.register(deviceCodeAuthPlugin);
+
+  done();
 }
 
 export * from './check';

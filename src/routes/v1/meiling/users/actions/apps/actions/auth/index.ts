@@ -77,6 +77,8 @@ function appAuthPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: (
       success: true,
     });
   });
+
+  done();
 }
 
 export default appAuthPlugin;

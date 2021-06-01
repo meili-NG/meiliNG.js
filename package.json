@@ -7,7 +7,7 @@
   "author": "Alex4386 <psh010209@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@prisma/client": "^2.23.0",
+    "@prisma/client": "2.24.0",
     "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",
     "chalk": "^4.1.0",
@@ -27,7 +27,6 @@
     "typescript": "^4.0.5"
   },
   "devDependencies": {
-    "@prisma/cli": "2.13.1",
     "@types/axios": "^0.14.0",
     "@types/bcryptjs": "^2.4.2",
     "@types/figlet": "^1.2.1",
@@ -43,7 +42,7 @@
     "husky": "^4.3.0",
     "lint-staged": "^10.5.1",
     "prettier": "^2.1.2",
-    "prisma": "^2.23.0",
+    "prisma": "2.24.0",
     "ts-node": "^9.0.0"
   },
   "poweredBy": {

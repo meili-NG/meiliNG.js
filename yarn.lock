@@ -91,20 +91,7 @@
     "@nodelib/fs.scandir" "2.1.4"
     fastq "^1.6.0"
 
-"@prisma/bar@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@prisma/bar/-/bar-0.0.1.tgz#088c4fbbb79c588391437ade9fd3a85527e753b3"
-  integrity sha512-FVLhwVkbfhXlBhroWfIXMLi+3Jh9IEzYp+9z+MUUiw3ZsbcoAil7CN9/QIjHc4/TcCRyRfuSmT7qCnn4O+TjJw==
-
-"@prisma/cli@2.13.1":
-  version "2.13.1"
-  resolved "https://registry.yarnpkg.com/@prisma/cli/-/cli-2.13.1.tgz#6af36f3e1a99852c6232202946043263a537cd95"
-  integrity sha512-1KIo29GFAM/oe56oVFB6SjLV+xaunBtcnln1v0KcSn0bx1MgdN00o0haB5qTqRwnqEMTqsS81zH8VwdIgQhn6A==
-  dependencies:
-    "@prisma/bar" "^0.0.1"
-    "@prisma/engines" "2.13.1-2.fcbc4bb2d306c86c28014f596b1e8c7980af8bd4"
-
-"@prisma/client@^2.23.0":
+"@prisma/client@2.24.0":
   version "2.24.0"
   resolved "https://registry.yarnpkg.com/@prisma/client/-/client-2.24.0.tgz#83404f98905998770625ec7f13ad73532b144eba"
   integrity sha512-y3BbJJMB3bhSXWpbqOlnAvnhvK0UYQMZZC5gacS+nR1eZl4MovVgl9syk6En3FXIQaneLukoiWfFaIxfDVZArw==
@@ -115,11 +102,6 @@
   version "2.24.0-30.f3e341280d96d0abc068f97e959ddf01f321a858"
   resolved "https://registry.yarnpkg.com/@prisma/engines-version/-/engines-version-2.24.0-30.f3e341280d96d0abc068f97e959ddf01f321a858.tgz#609fb53d9feb1efc8689b4ce6098af1b486ad29f"
   integrity sha512-KHns2Puc38woxnx3MKoUUW0tfR5yftDCmT/df0rUHe6ZcREt1kwI3dgvsOBz+6n7stuSNeLiU7uEkc7Ga3PgNA==
-
-"@prisma/engines@2.13.1-2.fcbc4bb2d306c86c28014f596b1e8c7980af8bd4":
-  version "2.13.1-2.fcbc4bb2d306c86c28014f596b1e8c7980af8bd4"
-  resolved "https://registry.yarnpkg.com/@prisma/engines/-/engines-2.13.1-2.fcbc4bb2d306c86c28014f596b1e8c7980af8bd4.tgz#4a6aba46db9be442712e4b14b5a72e1da830e837"
-  integrity sha512-APwZRomHG94bOc3jY6kaoEOkVdavN859c5hCFOjhy014Uut8v5+dg1lz3RzUaiiSHK8NwgGKrO5rqO09yGu8Eg==
 
 "@prisma/engines@2.24.0-30.f3e341280d96d0abc068f97e959ddf01f321a858":
   version "2.24.0-30.f3e341280d96d0abc068f97e959ddf01f321a858"
@@ -2180,7 +2162,7 @@ prettier@^2.1.2:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.3.0.tgz#b6a5bf1284026ae640f17f7ff5658a7567fc0d18"
   integrity sha512-kXtO4s0Lz/DW/IJ9QdWhAf7/NmPWQXkFr/r/WkR3vyI+0v8amTDxiaQSLzs8NBlytfLWX/7uQUMIW677yLKl4w==
 
-prisma@^2.23.0:
+prisma@2.24.0:
   version "2.24.0"
   resolved "https://registry.yarnpkg.com/prisma/-/prisma-2.24.0.tgz#7f2b25a11bd73dc1f9ab88e2fd92ff5fdddee85b"
   integrity sha512-kZBYxAkThSFfAZzTGpsihaNqNbGQVzkPhQ0XklLDetN36EpQXeeOQhS05DrzlGSQ7rG7w8mt3m3iDF0S/RD/qw==

@@ -18,7 +18,7 @@ export function appActionsPlugin(app: FastifyInstance, opts: FastifyPluginOption
   done();
 }
 
-export function authorizedAppsActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+function authorizedAppsActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.addHook('onRequest', (_req, rep, done) => {
     const req = _req as MeilingV1ClientRequest;
 
@@ -36,7 +36,7 @@ export function authorizedAppsActionsPlugin(app: FastifyInstance, opts: FastifyP
   done();
 }
 
-export function appOwnerActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+function appOwnerActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.addHook('onRequest', (_req, rep, done) => {
     const req = _req as MeilingV1ClientRequest;
 

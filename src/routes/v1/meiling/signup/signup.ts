@@ -1,13 +1,15 @@
+import { PrismaClient } from '.prisma/client';
 import bcrypt from 'bcryptjs';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import libmobilephoneJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '..';
-import { prisma } from '../../../..';
 import { User, Utils } from '../../../../common';
 import config from '../../../../config';
 import { getAuthorizationStatus, setAuthorizationStatus } from '../common/session';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
+
+const prisma = new PrismaClient();
 
 interface MeilingV1Signup {
   username: string;
@@ -17,7 +19,7 @@ interface MeilingV1Signup {
   name: Utils.MeilingV1SignupName;
 }
 
-export async function meilingV1SignupHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
   const body = req.body as MeilingV1Signup;
 

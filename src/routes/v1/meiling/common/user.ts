@@ -1,7 +1,8 @@
-import { Authorization, User } from '@prisma/client';
-import { prisma } from '../../../..';
+import { Authorization, PrismaClient, User } from '@prisma/client';
 import { MeilingV1ExtendedAuthMethods, MeilingV1SigninType } from '../interfaces';
 import { convertAuthentication } from './database';
+
+const prisma = new PrismaClient();
 
 export async function getAvailableExtendedAuthenticationMethods(
   user?: User | string,

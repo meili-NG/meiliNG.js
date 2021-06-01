@@ -12,7 +12,7 @@ import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
 import { MeilingV1ExtendedAuthMethods, MeilingV1SignInBody, MeilingV1SigninType } from './interfaces/query';
 
-export async function meilingV1SigninHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
   let body;
 

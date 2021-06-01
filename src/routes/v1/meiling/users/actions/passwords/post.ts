@@ -1,12 +1,12 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { PasswordBody } from '.';
-import { meilingV1UserActionGetUser } from '..';
+import { getUserFromActionRequest } from '..';
 import { User, Utils } from '../../../../../../common';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 
-export async function meilingV1OAuthClientPasswordsPostHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
-  const user = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
+export async function userPasswordCreateHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+  const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
 
   const body = req.body as PasswordBody;
   if (!Utils.isValidValue(body, body?.password)) {

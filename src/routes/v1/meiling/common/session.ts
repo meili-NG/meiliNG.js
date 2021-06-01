@@ -1,7 +1,6 @@
-import { User as UserModel } from '@prisma/client';
+import { PrismaClient, User as UserModel } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 import fs from 'fs';
-import { prisma } from '../../../..';
 import { Token, User } from '../../../../common';
 import { UserInfoObject } from '../../../../common/user';
 import config from '../../../../config';
@@ -12,6 +11,8 @@ import {
   MeilingV1SessionExtendedAuthentication,
 } from '../interfaces';
 import { MeilingV1ExtendedAuthMethods } from '../interfaces/query';
+
+const prisma = new PrismaClient();
 
 interface MeilingV1TokenDataFile {
   issuedTokens: MeilingV1TokenData[];

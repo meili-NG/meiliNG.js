@@ -1,11 +1,12 @@
-import { Permission } from '@prisma/client';
+import { Permission, PrismaClient } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { prisma } from '../../../..';
 import { Client, ClientAccessControls, Token, Utils } from '../../../../common';
 import { generateToken } from '../../../../common/token';
 import config from '../../../../config';
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType } from '../interfaces';
+
+const prisma = new PrismaClient();
 
 interface DeviceCodeRequestBody {
   client_id: string;

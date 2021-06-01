@@ -1,6 +1,15 @@
-import { OAuthClient, OAuthClientAuthorization, OAuthToken, OAuthTokenType, Permission, User } from '@prisma/client';
+import {
+  OAuthClient,
+  OAuthClientAuthorization,
+  OAuthToken,
+  OAuthTokenType,
+  Permission,
+  PrismaClient,
+  User,
+} from '@prisma/client';
 import { Token } from '.';
-import { prisma } from '..';
+
+const prisma = new PrismaClient();
 
 export function getId(authorization: OAuthClientAuthorization | string): string {
   if (typeof authorization === 'string') {

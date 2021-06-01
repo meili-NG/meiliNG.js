@@ -1,20 +1,18 @@
+import { PrismaClient } from '.prisma/client';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
-import { prisma } from '../../../../../../../..';
 import { Utils } from '../../../../../../../../common';
 import { getRedirectUris } from '../../../../../../../../common/client';
 import { sendMeilingError } from '../../../../../error';
 import { MeilingV1ErrorType } from '../../../../../interfaces';
 
+const prisma = new PrismaClient();
+
 interface MeilingRedirectUriPostRequest {
   redirect_uri: string;
 }
 
-export function meilingV1UserAppsRedirectUriCRUDPlugin(
-  app: FastifyInstance,
-  opts: FastifyPluginOptions,
-  done: () => void,
-): void {
+export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', async (req_, rep) => {
     const req = req_ as MeilingV1ClientRequest;
     const redirectUris = await prisma.oAuthClientRedirectUris.findMany({

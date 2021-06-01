@@ -1,15 +1,16 @@
-import { Permission } from '@prisma/client';
+import { Permission, PrismaClient } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1UserOAuthAuthQuery } from '.';
-import { meilingV1UserActionGetUser } from '..';
-import { prisma } from '../../../../../..';
+import { getUserFromActionRequest } from '..';
 import { Client, ClientAccessControls, ClientAuthorization, Token, User, Utils } from '../../../../../../common';
 import { OAuth2QueryCodeChallengeMethod, OAuth2QueryResponseType } from '../../../../oauth2/interfaces';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 
+const prisma = new PrismaClient();
+
 export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
-  const userBase = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
+  const userBase = (await getUserFromActionRequest(req)) as User.UserInfoObject;
 
   // get parameters and query
   let query = req.query as MeilingV1UserOAuthAuthQuery;

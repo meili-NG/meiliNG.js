@@ -2,23 +2,23 @@ import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
 import fastifyCors from 'fastify-cors';
 import { isDevelopment } from '../../..';
 import config from '../../../config';
-import { meilingV1AppsPlugin } from './apps';
+import { appsPlugin } from './apps';
 import { meilingV1AuthorizationPlugin } from './authorization';
 import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType, MeilingV1Session as SessionObject } from './interfaces';
-import { meilingV1LostPasswordHandler } from './lost-password';
-import { v1MeilingSessionPlugin } from './session';
-import { meilingV1SigninHandler } from './signin';
-import { meilingV1SignoutHandler } from './signout';
-import { v1MeilingSignupPlugin } from './signup/';
-import { meilingV1UserPlugin } from './users';
+import { lostPasswordHandler } from './lost-password';
+import { sessionPlugin } from './session';
+import { signinHandler } from './signin';
+import { signoutPlugin } from './signout';
+import { signupPlugin } from './signup/';
+import { userPlugin } from './users';
 
 export interface FastifyRequestWithSession extends FastifyRequest {
   session: SessionObject;
 }
 
-export function v1MeilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+export function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.register(fastifyCors, {
     origin: isDevelopment ? '*' : config.frontend.url,
   });
@@ -31,16 +31,12 @@ export function v1MeilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions
     });
   });
 
-  app.register(v1MeilingSessionPlugin, { prefix: '/session' });
-  app.register(v1MeilingSessionRequiredPlugin);
+  app.register(sessionPlugin, { prefix: '/session' });
+  app.register(sessionRequiredPlugin);
   done();
 }
 
-export function v1MeilingSessionRequiredPlugin(
-  app: FastifyInstance,
-  opts: FastifyPluginOptions,
-  done: () => void,
-): void {
+export function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.addHook('onRequest', async (req, rep) => {
     const session = await MeilingV1Session.getSessionFromRequest(req);
     if (!session) {
@@ -51,16 +47,15 @@ export function v1MeilingSessionRequiredPlugin(
     (req as FastifyRequestWithSession).session = session;
   });
 
-  app.post('/signin', meilingV1SigninHandler);
-  app.register(v1MeilingSignupPlugin, { prefix: '/signup' });
+  app.post('/signin', signinHandler);
+  app.register(signupPlugin, { prefix: '/signup' });
 
-  app.post('/lost-password', meilingV1LostPasswordHandler);
+  app.post('/lost-password', lostPasswordHandler);
 
-  app.get('/signout', meilingV1SignoutHandler);
-  app.get('/signout/:userId', meilingV1SignoutHandler);
+  app.register(signoutPlugin, { prefix: '/signout' });
 
-  app.register(meilingV1UserPlugin, { prefix: '/users' });
-  app.register(meilingV1AppsPlugin, { prefix: '/apps' });
+  app.register(userPlugin, { prefix: '/users' });
+  app.register(appsPlugin, { prefix: '/apps' });
   app.register(meilingV1AuthorizationPlugin, { prefix: '/authorization' });
 
   done();

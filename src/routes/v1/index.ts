@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { v1MeilingPlugin } from './meiling';
-import { meilingV1OAuth2 } from './oauth2';
+import { meilingV1Plugin } from './meiling';
+import { v1OAuth2Plugin } from './oauth2';
 
 function v1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', (req, rep) => {
@@ -10,9 +10,9 @@ function v1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => 
     });
   });
 
-  app.register(v1MeilingPlugin, { prefix: '/meiling' });
+  app.register(meilingV1Plugin, { prefix: '/meiling' });
 
-  app.register(meilingV1OAuth2, { prefix: '/oauth2' });
+  app.register(v1OAuth2Plugin, { prefix: '/oauth2' });
 
   done();
 }

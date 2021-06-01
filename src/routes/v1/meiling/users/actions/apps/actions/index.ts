@@ -1,29 +1,24 @@
+import { PrismaClient } from '.prisma/client';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '..';
-import { meilingV1UserActionGetUser } from '../..';
-import { prisma } from '../../../../../../..';
+import { getUserFromActionRequest } from '../..';
 import { User } from '../../../../../../../common';
 import { sendMeilingError } from '../../../../error';
 import { MeilingV1ErrorType } from '../../../../interfaces';
-import { meilingV1UserAppsRedirectUriCRUDPlugin } from './redirect_uri';
+import appAuthPlugin from './auth';
+import { appRedirectURIPlugin } from './redirect_uri';
+import appSessionPlugin from './sessions';
 
-export function meilingV1UserAppsAuthorizedActionsCombinedPlugin(
-  app: FastifyInstance,
-  opts: FastifyPluginOptions,
-  done: () => void,
-): void {
-  // TODO: fix this wonky name
-  app.register(meilingV1UserAppsAuthorizedActionsAuthorizedUserPlugin);
-  app.register(meilingV1UserAppsAuthorizedActionsOwnerPlugin);
+const prisma = new PrismaClient();
+
+export function appActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+  app.register(authorizedAppsActionsPlugin);
+  app.register(appOwnerActionsPlugin);
 
   done();
 }
 
-export function meilingV1UserAppsAuthorizedActionsAuthorizedUserPlugin(
-  app: FastifyInstance,
-  opts: FastifyPluginOptions,
-  done: () => void,
-): void {
+export function authorizedAppsActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.addHook('onRequest', (_req, rep, done) => {
     const req = _req as MeilingV1ClientRequest;
 
@@ -35,85 +30,13 @@ export function meilingV1UserAppsAuthorizedActionsAuthorizedUserPlugin(
     done();
   });
 
-  app.get('/auth', async (_req, rep) => {
-    const user = (await meilingV1UserActionGetUser(_req)) as User.UserInfoObject;
-    const req = _req as MeilingV1ClientRequest;
-
-    const firstAuthorization = await prisma.oAuthClientAuthorization.findFirst({
-      where: {
-        client: {
-          id: req.client.id,
-        },
-        user: {
-          id: user.id,
-        },
-      },
-      orderBy: {
-        authorizedAt: 'asc',
-      },
-    });
-
-    const lastAuthorization = await prisma.oAuthClientAuthorization.findFirst({
-      where: {
-        client: {
-          id: req.client.id,
-        },
-        user: {
-          id: user.id,
-        },
-      },
-      orderBy: {
-        authorizedAt: 'desc',
-      },
-    });
-
-    rep.send({
-      authorizedAt: firstAuthorization?.authorizedAt,
-      lastAuthAt: lastAuthorization?.authorizedAt,
-    });
-  });
-
-  app.delete('/auth', async (_req, rep) => {
-    const user = (await meilingV1UserActionGetUser(_req)) as User.UserInfoObject;
-    const req = _req as MeilingV1ClientRequest;
-
-    await prisma.oAuthToken.deleteMany({
-      where: {
-        authorization: {
-          client: {
-            id: req.client.id,
-          },
-          user: {
-            id: user.id,
-          },
-        },
-      },
-    });
-
-    await prisma.oAuthClientAuthorization.deleteMany({
-      where: {
-        client: {
-          id: req.client.id,
-        },
-        user: {
-          id: user.id,
-        },
-      },
-    });
-
-    rep.send({
-      success: true,
-    });
-  });
+  app.register(appAuthPlugin, { prefix: '/auth' });
+  app.register(appSessionPlugin, { prefix: '/sessions' });
 
   done();
 }
 
-export function meilingV1UserAppsAuthorizedActionsOwnerPlugin(
-  app: FastifyInstance,
-  opts: FastifyPluginOptions,
-  done: () => void,
-): void {
+export function appOwnerActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.addHook('onRequest', (_req, rep, done) => {
     const req = _req as MeilingV1ClientRequest;
 
@@ -122,7 +45,7 @@ export function meilingV1UserAppsAuthorizedActionsOwnerPlugin(
       throw new Error('Unauthorized!');
     }
 
-    app.register(meilingV1UserAppsRedirectUriCRUDPlugin, { prefix: '/redirect_uri' });
+    app.register(appRedirectURIPlugin, { prefix: '/redirect_uri' });
 
     done();
   });

@@ -1,18 +1,18 @@
 import { OAuthClient } from '@prisma/client';
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
-import { meilingV1UserActionGetUser } from '..';
+import { getUserFromActionRequest } from '..';
 import { Client, User } from '../../../../../../common';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
-import { meilingV1UserAppsAuthorizedActionsCombinedPlugin } from './actions';
-import meilingV1UserAppDeleteHandler from './delete';
-import meilingV1UserAppInfoHandler from './get';
-import meilingV1UserAppListHandler from './list';
+import { appActionsPlugin } from './actions';
+import appDeleteHandler from './delete';
+import appGetHandler from './get';
+import userAppsHandler from './list';
 
-export function meilingV1UserAppsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
-  app.get('/', meilingV1UserAppListHandler);
+export function userAppPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+  app.get('/', userAppsHandler);
 
-  app.register(meilingV1UserAppsAuthorizedActionsPlugin, { prefix: '/:clientId' });
+  app.register(userAppsActionsPlugin, { prefix: '/:clientId' });
 
   done();
 }
@@ -29,13 +29,9 @@ export interface MeilingV1ClientRequest extends FastifyRequest {
   };
 }
 
-export function meilingV1UserAppsAuthorizedActionsPlugin(
-  app: FastifyInstance,
-  opts: FastifyPluginOptions,
-  done: () => void,
-): void {
+export function userAppsActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.addHook('onRequest', async (req, rep) => {
-    const user = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
+    const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
     const clientId = (req.params as MeilingV1ClientIDParams).clientId;
 
     const userDetail = (await User.getDetailedInfo(user)) as User.UserDetailedObject;
@@ -58,9 +54,9 @@ export function meilingV1UserAppsAuthorizedActionsPlugin(
     (req as MeilingV1ClientRequest).client = client;
   });
 
-  app.get('/', meilingV1UserAppInfoHandler);
-  app.delete('/', meilingV1UserAppDeleteHandler);
-  app.register(meilingV1UserAppsAuthorizedActionsCombinedPlugin);
+  app.get('/', appGetHandler);
+  app.delete('/', appDeleteHandler);
+  app.register(appActionsPlugin);
 
   done();
 }

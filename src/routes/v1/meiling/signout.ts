@@ -1,3 +1,4 @@
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { FastifyRequestWithSession } from '.';
@@ -9,7 +10,14 @@ interface MeilingV1SignOutQuery {
   userId?: string;
 }
 
-export async function meilingV1SignoutHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+export function signoutPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
+  app.get('/', signoutHandler);
+  app.get('/:userId', signoutHandler);
+
+  done();
+}
+
+export async function signoutHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
 
   const userId = (req.query as MeilingV1SignOutQuery)?.userId

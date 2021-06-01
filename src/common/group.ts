@@ -1,5 +1,6 @@
-import { Group } from '@prisma/client';
-import { prisma } from '..';
+import { Group, PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export function getId(group: string | Group): string {
   if (typeof group === 'string') {

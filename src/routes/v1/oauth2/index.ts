@@ -1,13 +1,13 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fastifyCors from 'fastify-cors';
 import { oAuth2AuthHandler } from './auth';
-import { meilingV1OAuthDevice } from './device';
-import { oAuth2RevokeHandler } from './revoke';
+import { oAuth2DeviceHandler } from './device';
+import { oAuth2RevokeTokenHandler } from './revoke';
 import { oAuth2TokenHandler } from './token';
 import { oAuth2TokenInfoHandler } from './tokeninfo';
 import { oAuth2UserInfoHandler } from './userinfo';
 
-export function meilingV1OAuth2(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+export function v1OAuth2Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.register(fastifyCors, {
     origin: '*',
   });
@@ -35,10 +35,10 @@ export function meilingV1OAuth2(app: FastifyInstance, opts: FastifyPluginOptions
   app.route({
     method: ['GET', 'POST'],
     url: '/revoke',
-    handler: oAuth2RevokeHandler,
+    handler: oAuth2RevokeTokenHandler,
   });
 
-  app.register(meilingV1OAuthDevice, { prefix: '/device' });
+  app.register(oAuth2DeviceHandler, { prefix: '/device' });
 
   done();
 }

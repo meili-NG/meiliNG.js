@@ -1,10 +1,12 @@
+import { PrismaClient } from '.prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { meilingV1UserActionGetUser } from '..';
-import { prisma } from '../../../../../..';
+import { getUserFromActionRequest } from '..';
 import { Client, User } from '../../../../../../common';
 
-async function meilingV1UserAppListHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
-  const user = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
+const prisma = new PrismaClient();
+
+async function userAppsHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+  const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
   const userData = await User.getDetailedInfo(user);
 
   const createdApps = await Promise.all(
@@ -57,4 +59,4 @@ async function meilingV1UserAppListHandler(req: FastifyRequest, rep: FastifyRepl
   });
 }
 
-export default meilingV1UserAppListHandler;
+export default userAppsHandler;

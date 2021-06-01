@@ -1,8 +1,8 @@
+import { PrismaClient } from '.prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import libphonenumberJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '.';
-import { prisma } from '../../..';
 import { User, Utils } from '../../../common';
 import {
   convertToNotificationMethod,
@@ -19,7 +19,9 @@ import { sendMeilingError } from './error';
 import { MeilingV1ErrorType, MeilingV1PasswordResetSession } from './interfaces';
 import { MeilingV1ExtendedAuthMethods, MeilingV1PasswordReset } from './interfaces/query';
 
-export async function meilingV1LostPasswordHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+const prisma = new PrismaClient();
+
+export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
   let body;
 

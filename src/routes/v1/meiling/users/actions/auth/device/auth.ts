@@ -1,17 +1,19 @@
+import { PrismaClient } from '.prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { meilingV1UserActionGetUser } from '../..';
-import { prisma } from '../../../../../../..';
+import { getUserFromActionRequest } from '../..';
 import { Client, ClientAccessControls, ClientAuthorization, Token, User, Utils } from '../../../../../../../common';
 import { TokenMetadata } from '../../../../../../../common/token';
 import { sendMeilingError } from '../../../../error';
 import { MeilingV1ErrorType } from '../../../../interfaces';
 
+const prisma = new PrismaClient();
+
 interface DeviceCode {
   user_code: string;
 }
 
-export async function meilingV1OAuthClientDeviceAuthHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
-  const userBase = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
+export async function deviceCodeAuthorizeHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+  const userBase = (await getUserFromActionRequest(req)) as User.UserInfoObject;
   const type = 'DEVICE_CODE';
 
   // get parameters and query

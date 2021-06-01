@@ -1,13 +1,15 @@
+import { PrismaClient } from '.prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { prisma } from '../../..';
 import { sendOAuth2Error } from './error';
 import { OAuth2ErrorResponseType } from './interfaces';
+
+const prisma = new PrismaClient();
 
 interface OAuth2QueryRevokeParameters {
   token: string;
 }
 
-export async function oAuth2RevokeHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+export async function oAuth2RevokeTokenHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const query = req.query as OAuth2QueryRevokeParameters;
 
   if (!query?.token) {

@@ -4,12 +4,14 @@ import {
   OAuthClientAccessControls,
   OAuthClientAuthorization,
   Permission,
+  PrismaClient,
   User as UserModel,
 } from '@prisma/client';
 import { ClientAuthorization, MeilingCommonOAuth2, User, Utils } from '.';
-import { prisma } from '..';
 import config from '../config';
 import { ClientACLRules, getAccessControlRules } from './clientAccessControls';
+
+const prisma = new PrismaClient();
 
 export async function getByClientId(clientId: string): Promise<ClientModel | null> {
   const client = await prisma.oAuthClient.findFirst({

@@ -1,10 +1,11 @@
-import { Group as GroupModel, Permission } from '@prisma/client';
+import { Group as GroupModel, Permission, PrismaClient } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { prisma } from '../../../../../..';
 import { Client, Group, User, Utils } from '../../../../../../common';
 import { MeilingV1Session } from '../../../common';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
+
+const prisma = new PrismaClient();
 
 interface MeilingV1AppPostBody {
   name: string;
@@ -19,7 +20,7 @@ interface MeilingV1AppPostBody {
   terms: string;
 }
 
-async function meilingV1AppPostHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+async function appCreateHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const body = req.body as MeilingV1AppPostBody;
 
   const users = await MeilingV1Session.getLoggedIn(req);
@@ -172,4 +173,4 @@ async function meilingV1AppPostHandler(req: FastifyRequest, rep: FastifyReply): 
   rep.send(Client.sanitize(client));
 }
 
-export default meilingV1AppPostHandler;
+export default appCreateHandler;

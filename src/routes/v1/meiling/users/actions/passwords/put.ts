@@ -1,14 +1,16 @@
+import { PrismaClient } from '.prisma/client';
 import bcrypt from 'bcryptjs';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { PasswordChangeBody } from '.';
-import { meilingV1UserActionGetUser } from '..';
-import { prisma } from '../../../../../..';
+import { getUserFromActionRequest } from '..';
 import { User, Utils } from '../../../../../../common';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 
-export async function meilingV1OAuthClientPasswordsPutHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
-  const user = (await meilingV1UserActionGetUser(req)) as User.UserInfoObject;
+const prisma = new PrismaClient();
+
+export async function userPasswordUpdateHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+  const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
 
   const body = req.body as PasswordChangeBody;
   if (!Utils.isValidValue(body, body?.password, body?.newPassword)) {

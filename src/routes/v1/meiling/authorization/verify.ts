@@ -1,10 +1,12 @@
+import { PrismaClient } from '.prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { FastifyRequestWithSession } from '..';
-import { prisma } from '../../../..';
 import config from '../../../../config';
 import { setAuthorizationStatus } from '../common/session';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
+
+const prisma = new PrismaClient();
 
 type MeilingV1VerificationQuery = MeilingV1PhoneVerificationQuery | MeilingV1EmailVerificationQuery;
 

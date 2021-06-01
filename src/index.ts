@@ -13,7 +13,6 @@ export const packageJson = JSON.parse(fs.readFileSync('package.json', { encoding
 
 const env = process.env.NODE_ENV || 'development';
 
-export const prisma = new PrismaClient();
 export const isDevelopment = env === 'development';
 
 // some banner stuff

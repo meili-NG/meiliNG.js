@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { meilingV1SignupHandler } from './signup';
+import { signupHandler } from './signup';
 
-export function v1MeilingSignupPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
-  app.post('/', meilingV1SignupHandler);
+export function signupPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+  app.post('/', signupHandler);
 
   done();
 }

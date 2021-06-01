@@ -5,14 +5,16 @@ import {
   OAuthClientAuthorization,
   OAuthTokenType,
   Phone,
+  PrismaClient,
   User as UserModel,
 } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import JWT from 'jsonwebtoken';
 import { ClientAuthorization, User, Utils } from '.';
-import { prisma } from '../';
 import config from '../config';
 import { SanitizedClientModel } from './client';
+
+const prisma = new PrismaClient();
 
 export interface UserInfoObject extends UserModel {
   emails: Email[];

@@ -1,4 +1,3 @@
-import { PrismaClient } from '.prisma/client';
 import bcrypt from 'bcryptjs';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import libmobilephoneJs from 'libphonenumber-js';

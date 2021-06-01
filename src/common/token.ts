@@ -1,4 +1,4 @@
-import { OAuthClient, OAuthTokenType, Permission, PrismaClient, User as UserModel } from '@prisma/client';
+import { OAuthClient, OAuthTokenType, Permission, User as UserModel } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 import { Client, ClientAuthorization, Token, User, Utils } from '.';
 import config from '../resources/config';

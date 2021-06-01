@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import config from '../../../resources/config';
 import { NodeEnvironment } from '../../../interface';
+import config from '../../../resources/config';
 import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';

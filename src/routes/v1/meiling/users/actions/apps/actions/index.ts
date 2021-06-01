@@ -1,8 +1,5 @@
-import { PrismaClient } from '.prisma/client';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '..';
-import { getUserFromActionRequest } from '../..';
-import { User } from '../../../../../../../common';
 import { sendMeilingError } from '../../../../error';
 import { MeilingV1ErrorType } from '../../../../interfaces';
 import appAuthPlugin from './auth';

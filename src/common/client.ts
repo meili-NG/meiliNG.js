@@ -4,7 +4,6 @@ import {
   OAuthClientAccessControls,
   OAuthClientAuthorization,
   Permission,
-  PrismaClient,
   User as UserModel,
 } from '@prisma/client';
 import { ClientAuthorization, MeilingCommonOAuth2, User, Utils } from '.';

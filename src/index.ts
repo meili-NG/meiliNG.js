@@ -1,12 +1,11 @@
-import { Banner, Database } from './common';
-
-import { MeilingV1Session } from './routes/v1/meiling/common';
 import chalk from 'chalk';
-import config from './resources/config';
 import fastify from 'fastify';
 import fastifyFormbody from 'fastify-formbody';
 import fs from 'fs';
+import { Banner, Database } from './common';
+import config from './resources/config';
 import meilingPlugin from './routes';
+import { MeilingV1Session } from './routes/v1/meiling/common';
 
 // some banner stuff
 Banner.showBanner();

@@ -1,8 +1,6 @@
-import { PrismaClient } from '.prisma/client';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
 import { Utils } from '../../../../../../../../common';
-import { getRedirectUris } from '../../../../../../../../common/client';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
 import { sendMeilingError } from '../../../../../error';
 import { MeilingV1ErrorType } from '../../../../../interfaces';

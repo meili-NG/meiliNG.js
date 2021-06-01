@@ -1,4 +1,4 @@
-import { PrismaClient, User as UserModel } from '@prisma/client';
+import { User as UserModel } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 import fs from 'fs';
 import { Token, User } from '../../../../common';

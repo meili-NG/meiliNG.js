@@ -1,13 +1,4 @@
-import {
-  Email,
-  Group,
-  OAuthClient,
-  OAuthClientAuthorization,
-  OAuthTokenType,
-  Phone,
-  PrismaClient,
-  User as UserModel,
-} from '@prisma/client';
+import { Email, Group, OAuthTokenType, Phone, User as UserModel } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import JWT from 'jsonwebtoken';
 import { ClientAuthorization, User, Utils } from '.';

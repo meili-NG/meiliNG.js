@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
 import fastifyCors from 'fastify-cors';
-import config from '../../../resources/config';
 import { NodeEnvironment } from '../../../interface';
+import config from '../../../resources/config';
 import { appsPlugin } from './apps';
 import { meilingV1AuthorizationPlugin } from './authorization';
 import { MeilingV1Session } from './common';

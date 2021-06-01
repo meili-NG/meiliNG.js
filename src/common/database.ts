@@ -1,4 +1,3 @@
-import { PrismaClient } from '.prisma/client';
 import { getPrismaClient } from '../resources/prisma';
 
 export async function testDatabase(): Promise<boolean> {

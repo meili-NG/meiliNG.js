@@ -1,4 +1,3 @@
-import { PrismaClient } from '.prisma/client';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
 import { getUserFromActionRequest } from '../../..';

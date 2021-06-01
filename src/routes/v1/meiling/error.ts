@@ -1,9 +1,9 @@
+import chalk from 'chalk';
 import { FastifyReply } from 'fastify/types/reply';
 import { MeilingCommonError } from '../../../common';
-import { MeilingV1ErrorResponse, MeilingV1ErrorType } from './interfaces';
-import chalk from 'chalk';
 import { NodeEnvironment } from '../../../interface';
 import config from '../../../resources/config';
+import { MeilingV1ErrorResponse, MeilingV1ErrorType } from './interfaces';
 
 function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
   switch (type) {

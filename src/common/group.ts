@@ -1,4 +1,4 @@
-import { Group, PrismaClient } from '@prisma/client';
+import { Group } from '@prisma/client';
 import { getPrismaClient } from '../resources/prisma';
 
 export function getId(group: string | Group): string {

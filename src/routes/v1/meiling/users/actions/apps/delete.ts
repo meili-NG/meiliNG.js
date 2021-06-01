@@ -1,10 +1,8 @@
-import { PrismaClient } from '.prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1ClientRequest } from '.';
 import { getPrismaClient } from '../../../../../../resources/prisma';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
-import { MeilingV1AppParams } from './interface';
 
 async function appDeleteHandler(req_: FastifyRequest, rep: FastifyReply): Promise<void> {
   const req = req_ as MeilingV1ClientRequest;

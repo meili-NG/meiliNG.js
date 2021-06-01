@@ -1,4 +1,4 @@
-import { Group as GroupModel, Permission, PrismaClient } from '@prisma/client';
+import { Group as GroupModel, Permission } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { Client, Group, User, Utils } from '../../../../../../common';
 import { getPrismaClient } from '../../../../../../resources/prisma';

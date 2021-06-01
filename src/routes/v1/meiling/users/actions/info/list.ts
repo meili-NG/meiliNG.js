@@ -1,4 +1,4 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { FastifyRequestWithSession } from '../../..';
 import { getSanitizedUser } from '../../../../../../common/sanitize';
 import { sendMeilingError } from '../../../error';

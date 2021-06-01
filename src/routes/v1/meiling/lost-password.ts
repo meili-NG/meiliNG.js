@@ -1,4 +1,3 @@
-import { PrismaClient } from '.prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import libphonenumberJs from 'libphonenumber-js';

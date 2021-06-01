@@ -1,4 +1,3 @@
-import { PrismaClient } from '.prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { PasswordBody } from '.';
 import { getUserFromActionRequest } from '..';

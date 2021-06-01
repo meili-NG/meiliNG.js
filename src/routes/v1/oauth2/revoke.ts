@@ -1,4 +1,3 @@
-import { PrismaClient } from '.prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { getPrismaClient } from '../../../resources/prisma';
 import { sendOAuth2Error } from './error';

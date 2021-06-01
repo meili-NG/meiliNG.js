@@ -1,4 +1,4 @@
-import { Permission, PrismaClient } from '@prisma/client';
+import { Permission } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { Client, ClientAccessControls, Token, Utils } from '../../../../common';
 import { generateToken } from '../../../../common/token';

@@ -4,10 +4,7 @@ import { MeilingV1Session } from '../../common';
 import { sendMeilingError } from '../../error';
 import { MeilingV1ErrorType } from '../../interfaces';
 import { userAppPlugin } from './apps';
-import { clientAuthPlugin, meilingV1OAuthClientAuthCheckHandler } from './auth';
-import { meilingV1OAuthClientAuthHandler } from './auth/auth';
-import { deviceCodeAuthorizeHandler } from './auth/device/auth';
-import { deviceCodeCheckHandler } from './auth/device/check';
+import { clientAuthPlugin } from './auth';
 import { userGetInfo } from './info/list';
 import userPasswordPlugin from './passwords';
 

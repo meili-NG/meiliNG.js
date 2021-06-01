@@ -1,4 +1,4 @@
-import { Group, OAuthClientAccessControls, Permission, PrismaClient, User as UserModel } from '@prisma/client';
+import { Group, OAuthClientAccessControls, Permission, User as UserModel } from '@prisma/client';
 import { Client, User } from '.';
 import { getPrismaClient } from '../resources/prisma';
 

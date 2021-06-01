@@ -1,4 +1,3 @@
-import { PrismaClient } from '.prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '../..';
 import { Client, ClientAccessControls, ClientAuthorization, Token, User, Utils } from '../../../../../../../common';

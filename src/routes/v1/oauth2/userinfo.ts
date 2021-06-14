@@ -21,6 +21,12 @@ export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyRep
     return;
   }
 
+  const isValid = await Token.isValid(token.token, type);
+  if (!isValid) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'provided access_token is expired');
+    return;
+  }
+
   const scopes = perms.map((n) => n.name);
   if (!scopes.includes('openid')) {
     sendOAuth2Error(

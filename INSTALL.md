@@ -1,13 +1,13 @@
 <h1 align="center">Install</h1>
 <p align="center">This Guide will help you install Meiling Gatekeeper in no time.</p>
-<p align="right"><b>Last Update:</b> v.0.2.0</p>
+<p align="right"><b>Last Update:</b> v.0.3.1</p>
 
 ## Getting Started
 Hello, Welcome to Meiling Gatekeeper, an oAuth2 based authentication engine to build your customized login in no time.
 
 ## Installing Dependenices
 ### Installing Node
-Meiling engine works best with latest version of Node, Please go [here](https://nodejs.org/en/) to install it by yourself.
+Meiling engine works best with latest LTS version of Node, Please go [here](https://nodejs.org/en/) to install it by yourself.
 
 ### Installing Yarn
 Meiling engine uses [yarn](https://yarnpkg.com) for managing dependencies of application.  
@@ -57,18 +57,8 @@ You should set environment variable `DATABASE_URL` or edit [`.env` file](/.env) 
 * PostgreSQL: `postgresql://username:password@host:port/database?schema=public`
 * Microsoft SQL Server: Please refer to [Prisma: Getting Started with Microsoft SQL Server](https://www.prisma.io/docs/concepts/components/preview-features/sql-server/sql-server-start-from-scratch-typescript#connect-your-database)
 
-### Create Migration
-Prisma needs initial setup using migration on startup.  
-run `yarn prisma migrate dev --create-only --preview-feature` with account that has shadow database privileges (or dev machine).  
-
-> ⚠️ **Warning!**  
-> Do not delete generated ./prisma/migrations or its subdirectories,  
-> It will cause drift between local migration data and remote database, causing un-upgradable state.  
-> 
-> If you are moving installation back and forth, Please make sure you backup ./prisma/migrations with database dump.
-
 ### Deploy Migration to Production
-In order to deploy database migrations, run `yarn prisma migrate deploy --preview-feature`.  
+In order to deploy database migrations, run `yarn prisma migrate deploy`.  
 
 ## Configurations
 Configruation of Meiling differs by configuration method  

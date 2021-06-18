@@ -6,7 +6,12 @@ import { sendMeilingError } from '../meiling/error';
 import { MeilingV1ErrorType } from '../meiling/interfaces';
 
 const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
-  app.addHook('onRequest', async (req, rep) => {
+  app.addHook('onRequest', (req, rep) => {
+    if (!config.admin || !config.admin.tokens) {
+      sendMeilingError(rep, MeilingV1ErrorType.FORBIDDEN);
+      throw new Error('User is not providing proper login credentials for admin');
+    }
+
     const token = getTokenFromRequest(req);
     if (!token) {
       rep

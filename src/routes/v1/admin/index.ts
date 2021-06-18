@@ -6,6 +6,7 @@ import { NodeEnvironment } from '../../../interface';
 import config from '../../../resources/config';
 import { sendMeilingError } from '../meiling/error';
 import { MeilingV1ErrorType } from '../meiling/interfaces';
+import usersAdminHandler from './users';
 
 const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.register(fastifyCors, {
@@ -72,6 +73,8 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
       api: 'Scarlet Mansion Access Control Admin',
     });
   });
+
+  app.register(usersAdminHandler, { prefix: '/users' });
 
   done();
 };

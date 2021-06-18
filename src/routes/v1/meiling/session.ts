@@ -7,21 +7,6 @@ import { MeilingV1ErrorType } from './interfaces';
 
 export function sessionPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', async (req, rep) => {
-    if ((req.query as any)?.token && (req.query as any)?.token !== '') {
-      const authToken = (req.query as any)?.token;
-
-      if (config.session.v1.debugTokens.includes(authToken)) {
-        if (config.node.environment === NodeEnvironment.Development) {
-          rep.send(await MeilingV1Session.getSessionFromRequest(req));
-        } else {
-          sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'unauthorized: not in development mode.');
-        }
-      } else {
-        sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'unauthorized: invalid token.');
-      }
-      return;
-    }
-
     let token = MeilingV1Session.getTokenFromRequest(req);
 
     if (token) {

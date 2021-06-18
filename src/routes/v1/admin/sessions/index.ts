@@ -3,13 +3,13 @@ import { getPrismaClient } from '../../../../resources/prisma';
 import { sendMeilingError } from '../../meiling/error';
 import { MeilingV1ErrorType } from '../../meiling/interfaces';
 
-const sessionsPlugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
-  app.register(sessionPlugin, { prefix: '/:token' });
+const sessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
+  app.register(sessionAdminHandler, { prefix: '/:token' });
 
   done();
 };
 
-const sessionPlugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
+const sessionAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.addHook('onRequest', async (req, rep) => {
     const token = (req.params as { token: string }).token;
 
@@ -114,4 +114,4 @@ const sessionPlugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
   done();
 };
 
-export default sessionsPlugin;
+export default sessionsAdminHandler;

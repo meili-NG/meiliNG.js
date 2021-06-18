@@ -4,14 +4,12 @@ import { sendMeilingError } from '../../meiling/error';
 import { MeilingV1ErrorType } from '../../meiling/interfaces';
 
 const sessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
-  app.register(sessionAdminHandler, { prefix: '/:token' });
-
-  done();
-};
-
-const sessionAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.addHook('onRequest', async (req, rep) => {
-    const token = (req.params as { token: string }).token;
+    const token = (req.query as { token: string }).token;
+    if (!token || token.trim() === '') {
+      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
+      throw new Error('invalid query');
+    }
 
     const tokenData = await getPrismaClient().meilingSessionV1Token.findFirst({
       where: {
@@ -26,7 +24,7 @@ const sessionAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, d
   });
 
   app.get('/', async (req, rep) => {
-    const token = (req.params as { token: string }).token;
+    const token = (req.query as { token: string }).token;
 
     const tokenData = await getPrismaClient().meilingSessionV1Token.findFirst({
       where: {
@@ -43,7 +41,7 @@ const sessionAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, d
   });
 
   app.put('/', async (req, rep) => {
-    const token = (req.params as { token: string }).token;
+    const token = (req.query as { token: string }).token;
     const body = req.body as any | undefined;
 
     const tokenDataOld = await getPrismaClient().meilingSessionV1Token.findFirst({
@@ -100,7 +98,7 @@ const sessionAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, d
   });
 
   app.delete('/', async (req, rep) => {
-    const token = (req.params as { token: string }).token;
+    const token = (req.query as { token: string }).token;
 
     await getPrismaClient().meilingSessionV1Token.delete({
       where: {

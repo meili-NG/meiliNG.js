@@ -1,12 +1,23 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import fastifyCors from 'fastify-cors';
 import { Utils } from '../../../common';
 import { getTokenFromRequest } from '../../../common/token';
+import { NodeEnvironment } from '../../../interface';
 import config from '../../../resources/config';
 import { sendMeilingError } from '../meiling/error';
 import { MeilingV1ErrorType } from '../meiling/interfaces';
 
 const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
-  app.addHook('onRequest', (req, rep) => {
+  app.register(fastifyCors, {
+    origin:
+      config.node.environment === NodeEnvironment.Development
+        ? '*'
+        : config?.admin?.frontend?.url
+        ? config.admin.frontend.url
+        : config.frontend.url,
+  });
+
+  app.addHook('onRequest', (req, rep, next) => {
     if (!config.admin || !config.admin.tokens) {
       sendMeilingError(rep, MeilingV1ErrorType.FORBIDDEN);
       throw new Error('User is not providing proper login credentials for admin');
@@ -50,6 +61,8 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
     } else {
       sendMeilingError(rep, MeilingV1ErrorType.NOT_IMPLEMENTED);
     }
+
+    next();
   });
 
   app.get('/', (req, rep) => {

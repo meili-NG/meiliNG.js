@@ -110,6 +110,9 @@ module.exports = {
   },
   admin: {
     /** Configures admin tokens for calling /admin endpoints */
-    tokens: process.env.ADMIN_TOKENS.split(',') || [],
+    tokens: [],
+    frontend: {
+      url: [],
+    },
   },
 };

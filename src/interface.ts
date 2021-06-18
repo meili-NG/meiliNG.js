@@ -96,5 +96,8 @@ export interface ConfigInterface {
   };
   admin: {
     tokens: string[];
+    frontend: {
+      url: string[];
+    };
   };
 }

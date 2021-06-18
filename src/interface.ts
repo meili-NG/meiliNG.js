@@ -68,7 +68,6 @@ export interface ConfigInterface {
         maxTokenPerIP: number;
         timeframe: number;
       };
-      debugTokens: string[];
     };
   };
   token: {
@@ -94,5 +93,8 @@ export interface ConfigInterface {
     version: 1;
     host: string;
     key: string;
+  };
+  admin: {
+    tokens: string[];
   };
 }

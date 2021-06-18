@@ -60,7 +60,6 @@ module.exports = {
         maxTokenPerIP: Number(process.env.SESSION_V1_RATE_LIMIT_MAX_TOKEN_PER_IP) || 20,
         timeframe: Number(process.env.SESSION_V1_RATE_LIMIT_TIME_FRAME) || 600,
       },
-      debugTokens: process.env.SESSION_V1_DEBUG_TOKENS ? process.env.SESSION_V1_DEBUG_TOKENS.split(',') : [],
     },
   },
   token: {
@@ -96,5 +95,8 @@ module.exports = {
     version: Number(process.env.NOTIFICATION_API_VERSION) || 1,
     host: process.env.NOTIFICATION_API_HOST || 'https://notification.meili.ng',
     key: process.env.NOTIFICATION_API_KEY || 'YOUR NOTIFICATION API KEY',
+  },
+  admin: {
+    tokens: process.env.ADMIN_TOKENS.split(',') || [],
   },
 };

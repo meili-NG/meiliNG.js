@@ -18,7 +18,7 @@ export interface FastifyRequestWithSession extends FastifyRequest {
   session: SessionObject;
 }
 
-export function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.register(fastifyCors, {
     origin: config.node.environment === NodeEnvironment.Development ? '*' : config.frontend.url,
   });
@@ -36,7 +36,7 @@ export function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions
   done();
 }
 
-export function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.addHook('onRequest', async (req, rep) => {
     const session = await MeilingV1Session.getSessionFromRequest(req);
     if (!session) {
@@ -60,3 +60,5 @@ export function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginO
 
   done();
 }
+
+export default meilingV1Plugin;

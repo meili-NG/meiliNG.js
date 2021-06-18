@@ -7,7 +7,7 @@ import { oAuth2TokenHandler } from './token';
 import { oAuth2TokenInfoHandler } from './tokeninfo';
 import { oAuth2UserInfoHandler } from './userinfo';
 
-export function v1OAuth2Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+function oAuth2V1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.register(fastifyCors, {
     origin: '*',
   });
@@ -42,3 +42,5 @@ export function v1OAuth2Plugin(app: FastifyInstance, opts: FastifyPluginOptions,
 
   done();
 }
+
+export default oAuth2V1Plugin;

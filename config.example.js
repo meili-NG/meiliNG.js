@@ -69,8 +69,6 @@ module.exports = {
         /** Preceding rate limit will applied to following time window */
         timeframe: 600,
       },
-      /** DEBUG ONLY: ALLOW USAGE OF /v1/meiling/session?token={{token}} for viewing session data in Development mode */
-      debugTokens: [],
     },
   },
   token: {
@@ -109,5 +107,9 @@ module.exports = {
     version: 1,
     host: 'https://notification.stella-api.dev',
     key: 'YOUR NOTIFICATION API KEY',
+  },
+  admin: {
+    /** Configures admin tokens for calling /admin endpoints */
+    tokens: process.env.ADMIN_TOKENS.split(',') || [],
   },
 };

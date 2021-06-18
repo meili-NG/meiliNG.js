@@ -19,6 +19,7 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
     case MeilingV1ErrorType.AUTHENTICATION_NOT_CURRENT_CHALLENGE_METHOD:
     case MeilingV1ErrorType.TWO_FACTOR_AUTHENTICATION_REQUEST_NOT_GENERATED:
     case MeilingV1ErrorType.INVALID_REQUEST:
+    case MeilingV1ErrorType.INVALID_TOKEN:
     case MeilingV1ErrorType.INVALID_SIGNIN_METHOD:
     case MeilingV1ErrorType.INVALID_SIGNIN_TYPE:
     case MeilingV1ErrorType.ALREADY_SIGNED_IN:
@@ -37,6 +38,9 @@ function getMeilingErrorStatusCode(type: MeilingV1ErrorType) {
     case MeilingV1ErrorType.APPLICATION_NOT_AUTHORIZED_SCOPES:
     case MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID:
       return 401;
+
+    case MeilingV1ErrorType.FORBIDDEN:
+      return 403;
 
     case MeilingV1ErrorType.APPLICATION_NOT_FOUND:
     case MeilingV1ErrorType.NOT_FOUND:

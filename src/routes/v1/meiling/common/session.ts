@@ -1,4 +1,4 @@
-import { User as UserModel } from '@prisma/client';
+import { MeilingSessionV1Token, User as UserModel } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 import fs from 'fs';
 import { Token, User } from '../../../../common';
@@ -49,19 +49,53 @@ export function loadSessionSaveFiles(): void {
   }
 }
 
-export function garbageCollect(): void {
-  // remove duplicates
-  tokenSessions.issuedTokens = tokenSessions.issuedTokens.filter(
-    (n, i) =>
-      tokenSessions.issuedTokens
-        .map((v, i) => (v.token === n.token ? i : undefined))
-        .filter((n) => n !== undefined)[0] === i,
-  );
+export async function garbageCollect(): Promise<void> {
+  if (config.session.v1.storage) {
+    if (config.session.v1.storage.type === 'file') {
+      // remove duplicates
+      tokenSessions.issuedTokens = tokenSessions.issuedTokens.filter(
+        (n, i) =>
+          tokenSessions.issuedTokens
+            .map((v, i) => (v.token === n.token ? i : undefined))
+            .filter((n) => n !== undefined)[0] === i,
+      );
 
-  // remove expired
-  tokenSessions.issuedTokens = tokenSessions.issuedTokens.filter((n) => n.expiresAt.getTime() > new Date().getTime());
+      // remove expired
+      tokenSessions.issuedTokens = tokenSessions.issuedTokens.filter(
+        (n) => n.expiresAt.getTime() > new Date().getTime(),
+      );
 
-  saveSession();
+      saveSession();
+    }
+  } else {
+    await getPrismaClient().meilingSessionV1Token.deleteMany({
+      where: {
+        expiresAt: {
+          lt: new Date(),
+        },
+      },
+    });
+  }
+}
+
+export async function isValid(token: string): Promise<boolean> {
+  let matchedToken: MeilingSessionV1Token | MeilingV1TokenData | null;
+  if (config.session.v1.storage) {
+    const matchedTokens = tokenSessions.issuedTokens.filter((t) => t.token === token);
+    matchedToken = matchedTokens.length > 0 ? matchedTokens[0] : null;
+  } else {
+    matchedToken = await getPrismaClient().meilingSessionV1Token.findUnique({
+      where: {
+        token,
+      },
+    });
+  }
+
+  if (!matchedToken) {
+    return false;
+  } else {
+    return matchedToken.expiresAt.getTime() >= new Date().getTime();
+  }
 }
 
 export function saveSession(): void {
@@ -77,7 +111,7 @@ export async function isToken(token?: string): Promise<boolean> {
 
   let result;
 
-  if (config.session.v1.storage) {
+  if (config.session.v1.storage && config.session.v1.storage.type === 'file') {
     const matchedTokens = tokenSessions.issuedTokens.filter((t) => t.token === token);
     result = matchedTokens.length === 1;
   } else {
@@ -179,7 +213,7 @@ export async function getSessionFromRequest(req: FastifyRequest): Promise<Meilin
           },
         });
 
-        if (tokenData) {
+        if (tokenData && new Date().getTime() < tokenData.expiresAt.getTime()) {
           data = tokenData.session as MeilingV1Session;
         }
       }
@@ -187,6 +221,8 @@ export async function getSessionFromRequest(req: FastifyRequest): Promise<Meilin
   }
 
   if (data !== undefined) {
+    await setSession(req, data);
+
     if (data.user) {
       for (const user of data.user) {
         // not async function since we don't need to wait it to complete.

@@ -40,14 +40,16 @@ app.register(fastifyFormbody);
     process.exit(1);
   }
 
-  console.log('[Startup] Running Garbage Collect for Meiling Sessions...');
-  await MeilingV1Session.garbageCollect();
+  if (!process.argv.includes('--no-cleanup')) {
+    console.log('[Startup] Running Garbage Collect for Meiling Sessions...');
+    await MeilingV1Session.garbageCollect();
 
-  console.log('[Startup] Running Garbage Collect for OAuth2 Tokens...');
-  await Token.garbageCollect();
+    console.log('[Startup] Running Garbage Collect for OAuth2 Tokens...');
+    await Token.garbageCollect();
 
-  console.log('[Startup] Running Garbage Collect for OAuth2 ACL Data...');
-  await ClientAuthorization.garbageCollect();
+    console.log('[Startup] Running Garbage Collect for OAuth2 ACL Data...');
+    await ClientAuthorization.garbageCollect();
+  }
 
   console.log('[Startup] Registering Root Endpoints...');
   app.register(meilingPlugin);

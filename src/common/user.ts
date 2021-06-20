@@ -569,8 +569,14 @@ export async function createIDToken(
           }
         : config.openid.jwt.privateKey.key;
 
+    // edge case handling
+    let algorithm = config.openid.jwt.algorithm;
+    if ((algorithm as string) === 'ES256K') {
+      algorithm = 'ES256';
+    }
+
     return JWT.sign(jwtData, key, {
-      algorithm: config.openid.jwt.algorithm,
+      algorithm,
       issuer: config.openid.issuingAuthority,
     });
   } else {

@@ -97,7 +97,8 @@ export function getCryptoSafeInteger(bound?: number): number {
   return array[0] % bound;
 }
 
-export function checkBase64(string: string) {
-  const regex = /^(?:[a-zA-Z0-9+\/]{4})*(?:|(?:[a-zA-Z0-9+\/]{3}=)|(?:[a-zA-Z0-9+\/]{2}==)|(?:[a-zA-Z0-9+\/]{1}===))$/;
+export function checkBase64(string: string): boolean {
+  const regex =
+    /^(?:([a-zA-Z0-9+\/]|[a-zA-Z0-9_-]){4})*(?:|(?:([a-zA-Z0-9+\/]|[a-zA-Z0-9_-]){3}=)|(?:([a-zA-Z0-9+\/]|[a-zA-Z0-9_-]){2}==)|(?:([a-zA-Z0-9+\/]|[a-zA-Z0-9_-]){1}===))$/;
   return regex.test(string);
 }

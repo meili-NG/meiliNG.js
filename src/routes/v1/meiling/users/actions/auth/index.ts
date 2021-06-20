@@ -26,6 +26,7 @@ export interface MeilingV1UserOAuthAuthQuery {
   code_challenge_method?: OAuth2QueryCodeChallengeMethod;
   state?: string;
   nonce?: string;
+  display?: string;
 }
 
 export function clientAuthPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {

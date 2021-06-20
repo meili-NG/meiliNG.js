@@ -37,6 +37,11 @@ export async function meilingV1OAuthClientAuthCheckHandler(req: FastifyRequest, 
     return;
   }
 
+  if (query.display === 'page') {
+    sendMeilingError(rep, MeilingV1ErrorType.APPLICATION_USER_ACTION_REQUIRED);
+    return;
+  }
+
   // get userData of selected user
   const userData = await User.getDetailedInfo(userBase);
   if (!userData) {

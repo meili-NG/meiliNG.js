@@ -221,7 +221,10 @@ export async function getSessionFromRequest(req: FastifyRequest): Promise<Meilin
   }
 
   if (data !== undefined) {
-    await setSession(req, data);
+    if (token) {
+      await markTokenAsUsed(token);
+      await extendTokenExpiration(token);
+    }
 
     if (data.user) {
       for (const user of data.user) {
@@ -236,6 +239,43 @@ export async function getSessionFromRequest(req: FastifyRequest): Promise<Meilin
   return data;
 }
 
+export async function markTokenAsUsed(token: string): Promise<void> {
+  if (config.session.v1.storage) {
+    const tokenData = tokenSessions.issuedTokens.find((n) => n.token === token);
+    if (tokenData) {
+      tokenData.lastUsed = new Date();
+    }
+  } else {
+    await getPrismaClient().meilingSessionV1Token.update({
+      where: {
+        token,
+      },
+      data: {
+        lastUsed: new Date(),
+      },
+    });
+  }
+}
+
+export async function extendTokenExpiration(token: string): Promise<void> {
+  const newExpiration = new Date(new Date().getTime() + config.session.v1.maxAge * 1000);
+  if (config.session.v1.storage) {
+    const tokenData = tokenSessions.issuedTokens.find((n) => n.token === token);
+    if (tokenData) {
+      tokenData.expiresAt = newExpiration;
+    }
+  } else {
+    await getPrismaClient().meilingSessionV1Token.update({
+      where: {
+        token,
+      },
+      data: {
+        expiresAt: newExpiration,
+      },
+    });
+  }
+}
+
 export async function setSession(req: FastifyRequest, data?: MeilingV1Session): Promise<void> {
   if (req.headers.authorization && req.headers.authorization.includes('Bearer')) {
     const token = await getTokenFromRequest(req);
@@ -243,25 +283,18 @@ export async function setSession(req: FastifyRequest, data?: MeilingV1Session): 
     if (token) {
       if (await isToken(token)) {
         if (data) {
-          const newExpiration = new Date(new Date().getTime() + config.session.v1.maxAge * 1000);
-          if (config.session.v1.storage) {
-            const tokenData = tokenSessions.issuedTokens.find((n) => n.token === token);
-            if (tokenData) {
-              tokenData.session = data;
-              tokenData.expiresAt = newExpiration;
+          await markTokenAsUsed(token);
+          await extendTokenExpiration(token);
+
+          if (data.user) {
+            for (const user of data.user) {
+              if (user.id) {
+                try {
+                  // not async function since we don't need to wait it to complete.
+                  User.updateLastAuthenticated(user.id);
+                } catch (e) {}
+              }
             }
-          } else {
-            await getPrismaClient().meilingSessionV1Token.update({
-              where: {
-                token,
-              },
-              data: {
-                ip: req.ip,
-                session: data as any,
-                expiresAt: newExpiration,
-                lastUsed: new Date(),
-              },
-            });
           }
         } else {
           tokenSessions.issuedTokens = tokenSessions.issuedTokens.filter((n) => n.token !== token);

@@ -36,7 +36,7 @@ The key featues of Meiling Gatekeeper are:
   Just follow the communication API standards defined in API Docs to generate your own login infrastructure with your design.  
     
   Take your BI even on Logins, Let your front-end developer/designers fly.  
-* oAuth2 and OpenID Connect Compliant.
+* oAuth2 and OpenID Connect<sup><a href="https://github.com/meiling-gatekeeper/meiling/issues/16">*</a></sup> Compliant.
 * Similar API Structure with good ol' friend, Google's oAuth2 API.  
 
 Also just like conventional login systems:

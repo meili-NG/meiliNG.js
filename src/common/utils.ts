@@ -101,7 +101,7 @@ export function checkBase64(string: string) {
   let convertedString = string;
   if (string.includes('-') || string.includes('/')) {
     convertedString = convertedString.replace(/\-/g, '+').replace(/\_/g, '/');
-    convertedString.padEnd(Math.ceil(convertedString.length / 4) * 4, '=');
+    convertedString = convertedString.padEnd(Math.ceil(convertedString.length / 4) * 4, '=');
     console.log(convertedString);
   }
 

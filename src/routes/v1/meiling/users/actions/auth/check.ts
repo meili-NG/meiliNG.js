@@ -11,24 +11,29 @@ import { MeilingV1ErrorType } from '../../../interfaces';
 export async function meilingV1OAuthClientAuthCheckHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const userBase = (await getUserFromActionRequest(req)) as User.UserInfoObject;
 
-  // get parameters and query
-  let query = req.query as MeilingV1UserOAuthAuthQuery;
-  const body = req.body as MeilingV1UserOAuthAuthQuery;
+  const query = {
+    ...(req.body ? (req.body as any) : {}),
+    ...(req.query ? (req.query as any) : {}),
+  } as MeilingV1UserOAuthAuthQuery;
 
-  // validate
-  if (!Utils.isValidValue(query, query.client_id, query.redirect_uri, query.response_type, query.scope)) {
-    if (!Utils.isValidValue(body, body.client_id, body.redirect_uri, body.response_type, body.scope)) {
-      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'missing query.');
-      return;
-    } else {
-      query = body;
-      return;
-    }
+  // validation
+  if (!query.client_id) {
+    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'missing client_id');
+    return;
   }
 
-  // validate
-  if (!Utils.isValidValue(query.client_id, query.redirect_uri, query.response_type, query.scope)) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'missing query.');
+  if (!query.response_type) {
+    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'missing response_type');
+    return;
+  }
+
+  if (!query.scope) {
+    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'missing scope');
+    return;
+  }
+
+  if (!query.redirect_uri) {
+    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'missing redirect_uri');
     return;
   }
 

@@ -3,7 +3,7 @@ import { Token } from '.';
 import { getPrismaClient } from '../resources/prisma';
 
 export async function garbageCollect(): Promise<void> {
-  const oAuthACLs = await getPrismaClient().oAuthClientAccessControls.findMany({});
+  const oAuthACLs = await getPrismaClient().oAuthClientAuthorization.findMany({});
 
   for (const oAuthACL of oAuthACLs) {
     const tokenCount = await getPrismaClient().oAuthToken.count({
@@ -15,7 +15,7 @@ export async function garbageCollect(): Promise<void> {
     });
 
     if (tokenCount === 0) {
-      await getPrismaClient().oAuthClientAccessControls.delete({
+      await getPrismaClient().oAuthClientAuthorization.delete({
         where: {
           id: oAuthACL.id,
         },

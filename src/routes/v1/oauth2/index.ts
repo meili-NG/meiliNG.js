@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fastifyCors from 'fastify-cors';
 import { oAuth2AuthHandler } from './auth';
+import oAuth2CertsHandler from './certs';
 import { oAuth2DeviceHandler } from './device';
 import { oAuth2RevokeTokenHandler } from './revoke';
 import { oAuth2TokenHandler } from './token';
@@ -21,6 +22,7 @@ function oAuth2V1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: 
   });
 
   app.get('/auth', oAuth2AuthHandler);
+  app.get('/certs', oAuth2CertsHandler);
   app.post('/token', oAuth2TokenHandler);
   app.route({
     method: ['GET', 'POST'],

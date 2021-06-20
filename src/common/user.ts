@@ -529,12 +529,17 @@ export async function createIDToken(
   const data = await getDetailedInfo(user);
   if (!data) return undefined;
 
-  const namePerm = permissions && permissions.includes('name');
+  const namePerm = permissions && (permissions.includes('name') || permissions.includes('profile'));
   const nameDetail = {
     family_name: data.familyName,
     given_name: data.givenName,
     middle_name: data.middleName,
     name: data.name,
+  };
+
+  const profilePerm = permissions && permissions.includes('profile');
+  const profileDetail = {
+    birthdate: data.birthday ? data.birthday : undefined,
   };
 
   const emailPerm = permissions && permissions.includes('email');
@@ -551,6 +556,7 @@ export async function createIDToken(
     iat: Math.floor(new Date().getTime() / 1000),
     exp: Math.floor(new Date(new Date().getTime() + 1000 * config.token.invalidate.openid).getTime() / 1000),
     ...(namePerm ? nameDetail : {}),
+    ...(profilePerm ? profileDetail : {}),
     nickname: data.name,
     preferred_username: data.username,
     picture: data.profileUrl,

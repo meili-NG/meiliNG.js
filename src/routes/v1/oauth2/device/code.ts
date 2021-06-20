@@ -4,6 +4,7 @@ import { Client, ClientAccessControls, Token, Utils } from '../../../../common';
 import { generateToken } from '../../../../common/token';
 import config from '../../../../resources/config';
 import { getPrismaClient } from '../../../../resources/prisma';
+import { parseClientInfo } from '../common';
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType } from '../interfaces';
 
@@ -13,15 +14,23 @@ interface DeviceCodeRequestBody {
 }
 
 export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+  const result = parseClientInfo(req);
+
+  if (!result) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client id');
+    return;
+  }
+
+  const { clientId } = result;
   const body = req.body as DeviceCodeRequestBody;
   const type = 'DEVICE_CODE';
 
-  if (!Utils.isValidValue(body, body.client_id, body.scope)) {
+  if (!Utils.isValidValue(body, clientId, body.scope)) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST);
     return;
   }
 
-  const client = await Client.getByClientId(body.client_id);
+  const client = await Client.getByClientId(clientId);
   if (!client) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST, 'no client found');
     return;

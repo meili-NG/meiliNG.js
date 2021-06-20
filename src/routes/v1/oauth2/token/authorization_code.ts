@@ -1,21 +1,26 @@
 import crypto from 'crypto';
-import { FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { Client, ClientAuthorization, Token, User, Utils } from '../../../../common';
+import { parseClientInfo } from '../common';
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType, OAuth2QueryTokenAuthorizationCodeParameters } from '../interfaces';
 
-export async function oAuth2AuthorizationCodeHandler(
-  body: OAuth2QueryTokenAuthorizationCodeParameters,
-  rep: FastifyReply,
-): Promise<void> {
-  const clientId = body.client_id;
-  const clientSecret = body.client_secret;
+export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+  const result = parseClientInfo(req);
+
+  if (!result) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client id');
+    return;
+  }
+
+  const { clientId, clientSecret } = result;
+  const body = req.body as OAuth2QueryTokenAuthorizationCodeParameters;
 
   const token = body.code;
   const type = 'AUTHORIZATION_CODE';
 
   if (!(await Client.getByClientId(clientId))) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid clientId');
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client id');
     return;
   }
 

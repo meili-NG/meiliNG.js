@@ -1,20 +1,25 @@
-import { FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { Client, ClientAuthorization, Token, Utils } from '../../../../common';
+import { parseClientInfo } from '../common';
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType, OAuth2QueryTokenRefreshTokenParameters } from '../interfaces';
 
-export async function oAuth2RefreshTokenHandler(
-  body: OAuth2QueryTokenRefreshTokenParameters,
-  rep: FastifyReply,
-): Promise<void> {
-  const clientId = body.client_id;
-  const clientSecret = body.client_secret;
+export async function oAuth2RefreshTokenHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+  const result = parseClientInfo(req);
+
+  if (!result) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client id');
+    return;
+  }
+
+  const { clientId, clientSecret } = result;
+  const body = req.body as OAuth2QueryTokenRefreshTokenParameters;
 
   const token = body.refresh_token;
   const type = 'REFRESH_TOKEN';
 
   if (!(await Client.getByClientId(clientId))) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid clientId');
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client id');
     return;
   }
 

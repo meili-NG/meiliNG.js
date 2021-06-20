@@ -7,7 +7,7 @@ export function sendOAuth2Error(
   error: OAuth2ErrorResponseType,
   description?: string,
   errorCode?: string,
-) {
+): void {
   let statusCode = 500;
 
   switch (error) {

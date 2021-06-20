@@ -81,7 +81,7 @@ export function checkIDTokenIssueCredentials(): true | string {
 }
 
 export async function runStartupGarbageCollection(): Promise<void> {
-  if (!process.argv.includes('--no-cleanup')) {
+  if (process.argv.includes('--run-cleanup')) {
     console.log('[Startup] Running Garbage Collect for Meiling Sessions...');
     await MeilingV1Session.garbageCollect();
 

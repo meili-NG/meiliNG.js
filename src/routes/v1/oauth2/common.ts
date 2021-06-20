@@ -42,10 +42,15 @@ export function parseClientInfo(req: FastifyRequest):
   let clientSecret: string | undefined = undefined;
 
   if (token && token.method === 'Basic') {
-    const firstSeperator = token.token.indexOf(':');
+    if (!Utils.checkBase64(token.token)) {
+      return undefined;
+    }
 
-    clientId = token.token.slice(0, firstSeperator);
-    clientSecret = token.token.slice(firstSeperator + 1);
+    const tokenString = Buffer.from(token.token).toString('base64');
+    const firstSeperator = tokenString.indexOf(':');
+
+    clientId = tokenString.slice(0, firstSeperator);
+    clientSecret = tokenString.slice(firstSeperator + 1);
   } else {
     const body = req.body as OAuth2QueryBodyParameters;
 

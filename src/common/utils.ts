@@ -101,7 +101,8 @@ export function checkBase64(string: string) {
   let convertedString = string;
   if (string.includes('-') || string.includes('/')) {
     convertedString = convertedString.replace(/\-/g, '+').replace(/\_/g, '/');
-    convertedString.padEnd(Math.max(convertedString.length / 4) * 4, '=');
+    convertedString.padEnd(Math.ceil(convertedString.length / 4) * 4, '=');
+    console.log(convertedString);
   }
 
   const regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$/;

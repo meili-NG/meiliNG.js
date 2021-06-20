@@ -534,7 +534,7 @@ export async function createIDToken(
     family_name: data.familyName,
     given_name: data.givenName,
     middle_name: data.middleName,
-    nickname: data.name,
+    name: data.name,
   };
 
   const emailPerm = permissions && permissions.includes('email');
@@ -550,8 +550,8 @@ export async function createIDToken(
     auth_time: Math.floor(new Date(data.lastAuthenticated).getTime() / 1000),
     iat: Math.floor(new Date().getTime() / 1000),
     exp: Math.floor(new Date(new Date().getTime() + 1000 * config.token.invalidate.openid).getTime() / 1000),
-    name: data.name,
     ...(namePerm ? nameDetail : {}),
+    nickname: data.name,
     preferred_username: data.username,
     picture: data.profileUrl,
     email: emailPerm && email ? email.email : undefined,

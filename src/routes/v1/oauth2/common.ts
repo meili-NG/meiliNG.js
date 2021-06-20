@@ -46,7 +46,7 @@ export function parseClientInfo(req: FastifyRequest):
       return undefined;
     }
 
-    const tokenString = Buffer.from(token.token).toString('base64');
+    const tokenString = Buffer.from(token.token, 'base64').toString('utf-8');
     const firstSeperator = tokenString.indexOf(':');
 
     clientId = tokenString.slice(0, firstSeperator);

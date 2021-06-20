@@ -15,7 +15,12 @@ export async function garbageCollect(): Promise<void> {
     });
 
     // run squash
-    const userAuths = oAuthACLs.filter((n) => n.userId === oAuthACL.userId && n.clientId === oAuthACL.clientId);
+    const userAuths = await getPrismaClient().oAuthClientAuthorization.findMany({
+      where: {
+        userId: oAuthACL.userId,
+        clientId: oAuthACL.clientId,
+      },
+    });
     if (userAuths.length > 0) {
       let firstAuth: OAuthClientAuthorization | undefined = undefined;
       let lastAuth: OAuthClientAuthorization | undefined = undefined;

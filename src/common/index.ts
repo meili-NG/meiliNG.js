@@ -6,6 +6,7 @@ export * as Database from './database';
 export * as MeilingCommonError from './error';
 export * as Group from './group';
 export * as MeilingCommonOAuth2 from './oauth2';
+export * as Startup from './startup';
 export * as Token from './token';
 export * as User from './user';
 export * as Utils from './utils';

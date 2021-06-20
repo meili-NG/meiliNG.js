@@ -1,4 +1,5 @@
 import { OAuthTokenType } from '@prisma/client';
+import { Algorithm } from 'jsonwebtoken';
 import { TokenGenerator } from './common/token';
 
 export enum NodeEnvironment {
@@ -23,7 +24,17 @@ export interface ConfigInterface {
   };
   openid: {
     issuingAuthority: string;
-    secretKey: string;
+    jwt: {
+      algorithm: Algorithm;
+      publicKey?: {
+        key?: string;
+        passphrase?: string;
+      };
+      privateKey?: {
+        key?: string;
+        passphrase?: string;
+      };
+    };
   };
   fastify: {
     listen: number | string;

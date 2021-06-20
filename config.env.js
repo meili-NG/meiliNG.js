@@ -16,7 +16,17 @@ module.exports = {
   },
   openid: {
     issuingAuthority: process.env.OPENID_ISSUING_AUTHORITY || 'http://demo.meili.ng',
-    secretKey: process.env.OPENID_SECRET_KEY || 'YOUR OPENID SECRET',
+    jwt: {
+      algorithm: process.env.OPENID_JWT_ALGORITHM || 'RS256',
+      publicKey: {
+        key: process.env.OPENID_JWT_PUBLIC_KEY || undefined,
+        passphrase: process.env.OPENID_JWT_PUBLIC_KEY_PASSPHRASE || undefined,
+      },
+      privateKey: {
+        key: process.env.OPENID_JWT_PRIVATE_KEY || undefined,
+        passphrase: process.env.OPENID_JWT_PRIVATE_KEY_PASSPHRASE || undefined,
+      },
+    },
   },
   fastify: {
     listen: isNaN(process.env.FASTIFY_LISTEN) ? process.env.FASTIFY_LISTEN : Number(process.env.FASTIFY_LISTEN) || 3000,

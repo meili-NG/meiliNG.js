@@ -10,8 +10,18 @@ module.exports = {
   openid: {
     /** The name to be set as the JWT issuer. */
     issuingAuthority: 'https://meiling.stella-api.dev',
-    /** OPENID JWT encryption key. */
-    secretKey: 'YOUR OPENID SECRET',
+    /** OPENID JWT encryption/decryption key. */
+    jwt: {
+      algorithm: 'RS256',
+      publicKey: {
+        key: '',
+        passphrase: undefined,
+      },
+      privateKey: {
+        key: '',
+        passphrase: undefined,
+      },
+    },
   },
   fastify: {
     /** Specifies the port number or socket file location. */

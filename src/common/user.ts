@@ -545,12 +545,10 @@ export async function createIDToken(
 
   const jwtData = {
     sub: data.id,
-    iss: config.openid.issuingAuthority,
     aud: clientId,
-    nonce: nonce,
+    nonce,
     auth_time: data.lastAuthenticated,
     iat: new Date().getUTCSeconds(),
-    exp: new Date(new Date().getTime() + 1000 * config.token.invalidate.openid).getUTCSeconds(),
     name: data.name,
     ...(namePerm ? nameDetail : {}),
     preferred_username: data.username,
@@ -561,5 +559,21 @@ export async function createIDToken(
     phone_verified: phonePerm && phone ? true : undefined,
   };
 
-  return JWT.sign(jwtData, config.openid.secretKey);
+  if (config.openid.jwt.privateKey?.key !== undefined) {
+    const key =
+      config.openid.jwt.privateKey.passphrase !== undefined
+        ? {
+            key: config.openid.jwt.privateKey.key,
+            passphrase: config.openid.jwt.privateKey.passphrase,
+          }
+        : config.openid.jwt.privateKey.key;
+
+    return JWT.sign(jwtData, key, {
+      algorithm: config.openid.jwt.algorithm,
+      issuer: config.openid.issuingAuthority,
+      expiresIn: 1000 * config.token.invalidate.openid,
+    });
+  } else {
+    return undefined;
+  }
 }

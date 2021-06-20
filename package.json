@@ -23,6 +23,7 @@
     "nodemon": "^2.0.7",
     "openpgp": "^4.10.9",
     "pino-pretty": "^4.3.0",
+    "prompts": "^2.4.1",
     "speakeasy": "^2.0.0",
     "typescript": "^4.0.5"
   },
@@ -62,7 +63,8 @@
     "migrate:dev": "prisma migrate dev --preview-feature",
     "migrate:reset": "prisma migrate reset --preview-feature",
     "migrate:redeploy": "prisma migrate reset --preview-feature; rm -rf ./prisma/migrations/; prisma migrate dev --preview-feature",
-    "generate": "prisma generate"
+    "generate": "prisma generate",
+    "keygen": "node ./keygen.js"
   },
   "husky": {
     "hooks": {

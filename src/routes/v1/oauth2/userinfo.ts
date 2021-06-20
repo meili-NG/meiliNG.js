@@ -7,7 +7,19 @@ import { OAuth2ErrorResponseType } from './interfaces';
 export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const type = 'ACCESS_TOKEN';
 
-  const token = Token.getTokenFromRequest(req);
+  let token = Token.getTokenFromRequest(req);
+  if (!token) {
+    if (req.body) {
+      const accessToken = (req.body as any).access_token;
+      if (accessToken) {
+        token = {
+          method: 'Bearer',
+          token: accessToken,
+        };
+      }
+    }
+  }
+
   if (!token) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'provided access_token is invalid');
     return;

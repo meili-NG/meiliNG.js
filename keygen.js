@@ -11,8 +11,10 @@ const prompts = require('prompts');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
 
+const envFile = path.join(__dirname, '.env');
+
 // load dotenv if necessary.
-dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: envFile });
 
 if (process.env.OPENID_JWT_ALGORITHM || process.env.OPENID_JWT_PUBLIC_KEY || process.env.OPENID_JWT_PRIVATE_KEY) {
   console.error(chalk.redBright('It seems .env file is already configured.'));
@@ -169,8 +171,27 @@ if (process.env.OPENID_JWT_ALGORITHM || process.env.OPENID_JWT_PUBLIC_KEY || pro
     `OPENID_JWT_PRIVATE_KEY=${JSON.stringify(privKey)}\n` +
     (privPassphrase ? `OPENID_JWT_PRIVATE_KEY_PASSPHRASE=${JSON.stringify(privPassphrase)}\n` : '');
 
-  if (fs.existsSync(path.join(__dirname, '.env'))) {
-    const envFile = path.join(__dirname, '.env');
+  let applyNow = false;
+
+  if (fs.existsSync(envFile)) {
+    applyNow = (
+      await prompts({
+        type: 'confirm',
+        name: 'result',
+        message: '.env file was found.',
+      })
+    ).result;
+  }
+
+  if (applyNow) {
     fs.appendFileSync(envFile, envFileOutput);
+    console.log(chalk.greenBright('Configuration was applied to ', chalk.bold('.env'), 'file!'));
+  } else {
+    console.log('Please manually configure the following:');
+    console.log('openid.jwt.algorithm:', algorithm);
+    console.log('openid.jwt.publicKey.key:', pubKey);
+    if (pubPassphrase) console.log('openid.jwt.publicKey.passphrase:', pubPassphrase);
+    console.log('openid.jwt.privateKey.key:', privKey);
+    if (privPassphrase) console.log('openid.jwt.privateKey.passphrase:', privPassphrase);
   }
 })();

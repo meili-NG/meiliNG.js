@@ -2,6 +2,28 @@ import { OAuthClient, OAuthClientAuthorization, OAuthToken, OAuthTokenType, Perm
 import { Token } from '.';
 import { getPrismaClient } from '../resources/prisma';
 
+export async function garbageCollect(): Promise<void> {
+  const oAuthACLs = await getPrismaClient().oAuthClientAccessControls.findMany({});
+
+  for (const oAuthACL of oAuthACLs) {
+    const tokenCount = await getPrismaClient().oAuthToken.count({
+      where: {
+        authorization: {
+          id: oAuthACL.id,
+        },
+      },
+    });
+
+    if (tokenCount === 0) {
+      await getPrismaClient().oAuthClientAccessControls.delete({
+        where: {
+          id: oAuthACL.id,
+        },
+      });
+    }
+  }
+}
+
 export function getId(authorization: OAuthClientAuthorization | string): string {
   if (typeof authorization === 'string') {
     return authorization;

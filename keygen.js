@@ -33,7 +33,7 @@ if (process.env.OPENID_JWT_ALGORITHM || process.env.OPENID_JWT_PUBLIC_KEY || pro
         { title: 'RS384', value: 'RS384' },
         { title: 'RS512', value: 'RS384' },
 
-        { title: 'ES256', description: 'The modern signing algorithm for JWT', value: 'ES256' },
+        { title: 'ES256K', description: 'The modern signing algorithm for JWT', value: 'ES256K' },
         { title: 'ES384', value: 'ES384' },
         { title: 'ES512', value: 'ES512' },
       ],
@@ -81,7 +81,7 @@ if (process.env.OPENID_JWT_ALGORITHM || process.env.OPENID_JWT_PUBLIC_KEY || pro
     };
   } else {
     const namedCurve =
-      algorithm === 'ES256'
+      algorithm === 'ES256K'
         ? 'secp256k1'
         : algorithm === 'ES384'
         ? 'secp384r1'

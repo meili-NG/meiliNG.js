@@ -178,7 +178,7 @@ if (process.env.OPENID_JWT_ALGORITHM || process.env.OPENID_JWT_PUBLIC_KEY || pro
       await prompts({
         type: 'confirm',
         name: 'result',
-        message: '.env file was found.',
+        message: '.env file was found., Update the .env file?',
       })
     ).result;
   }

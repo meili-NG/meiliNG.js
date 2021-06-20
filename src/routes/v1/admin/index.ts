@@ -6,6 +6,7 @@ import { NodeEnvironment } from '../../../interface';
 import config from '../../../resources/config';
 import { sendMeilingError } from '../meiling/error';
 import { MeilingV1ErrorType } from '../meiling/interfaces';
+import appsAdminHandler from './apps';
 import internalAdminHandler from './internal';
 import sessionsAdminHandler from './sessions';
 import usersAdminHandler from './users';
@@ -77,6 +78,7 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
   });
 
   app.register(usersAdminHandler, { prefix: '/users' });
+  app.register(appsAdminHandler, { prefix: '/apps' });
   app.register(sessionsAdminHandler, { prefix: '/sessions' });
   app.register(internalAdminHandler, { prefix: '/internal' });
 

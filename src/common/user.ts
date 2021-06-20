@@ -547,7 +547,7 @@ export async function createIDToken(
     sub: data.id,
     aud: clientId,
     nonce,
-    auth_time: data.lastAuthenticated,
+    auth_time: Math.floor(new Date(data.lastAuthenticated).getTime() / 1000),
     iat: Math.floor(new Date().getTime() / 1000),
     exp: Math.floor(new Date(new Date().getTime() + 1000 * config.token.invalidate.openid).getTime() / 1000),
     name: data.name,

@@ -6,7 +6,12 @@ const pem2jwk = require('pem2jwk');
 
 const oAuth2CertsHandler = (req: FastifyRequest, rep: FastifyReply): void => {
   rep.send({
-    keys: [pem2jwk(config.openid.jwt.publicKey)],
+    keys: [
+      {
+        kid: config.openid.jwt.keyId,
+        ...pem2jwk(config.openid.jwt.publicKey),
+      },
+    ],
   });
 };
 

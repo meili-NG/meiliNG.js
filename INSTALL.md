@@ -62,7 +62,7 @@ In order to deploy database migrations, run `yarn prisma migrate deploy`.
 
 ## Configurations
 Configruation of Meiling differs by configuration method  
-(1. using `config.js`, 2. using environment variables)  
+(1. using environment variables, 2. using `config.js`)  
 
 Please check your configuration method beforehand.
 
@@ -85,8 +85,10 @@ e.g. `https://meiling.stella-api.dev`
 #### Configuring OpenID JWT SecretKey
 These are the secret key to sign your OpenID Token. Please make sure this is long enough and random enough.
 
-* env: `OPENID_SECRET_KEY`
-* config.js: `openid.secretKey`
+**Please Run the following:**  
+```bash
+yarn genkey
+```
 
 ### Configuring Port to Listen
 * env: `FASTIFY_LISTEN`
@@ -97,6 +99,8 @@ These are the public hostname when you call meiling server.
 
 * env: `MEILING_HOSTNAME`
 * config.js: `meiling.hostname`
+
+### 
 
 ### Configuring Notification API
 TODO

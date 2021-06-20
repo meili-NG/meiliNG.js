@@ -26,6 +26,7 @@ export interface ConfigInterface {
     issuingAuthority: string;
     jwt: {
       algorithm: Algorithm;
+      keyId: string;
       publicKey?: {
         key?: string;
         passphrase?: string;

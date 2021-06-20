@@ -1,6 +1,6 @@
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
-import { validateCommonBody } from '../common';
+import { validateCommonRequest } from '../common';
 import { sendOAuth2Error } from '../error';
 import { OAuth2ErrorResponseType, OAuth2QueryBodyParameters, OAuth2QueryGrantType } from '../interfaces';
 import { oAuth2AuthorizationCodeHandler } from './authorization_code';
@@ -12,7 +12,7 @@ import { oAuth2RefreshTokenHandler } from './refresh_token';
 
 export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const body = req.body as OAuth2QueryBodyParameters;
-  const validationResult = await validateCommonBody(body, false);
+  const validationResult = await validateCommonRequest(req, false);
 
   if (validationResult !== true) {
     sendOAuth2Error(rep, validationResult);
@@ -20,11 +20,11 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
   }
 
   if (body.grant_type === OAuth2QueryGrantType.AUTHORIZATION_CODE) {
-    await oAuth2AuthorizationCodeHandler(body, rep);
+    await oAuth2AuthorizationCodeHandler(req, rep);
   } else if (body.grant_type === OAuth2QueryGrantType.REFRESH_TOKEN) {
-    await oAuth2RefreshTokenHandler(body, rep);
+    await oAuth2RefreshTokenHandler(req, rep);
   } else if (body.grant_type === OAuth2QueryGrantType.DEVICE_CODE) {
-    await oAuth2DeviceCodeHandler(body, rep);
+    await oAuth2DeviceCodeHandler(req, rep);
   } else {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.UNSUPPORTED_GRANT_TYPE);
   }

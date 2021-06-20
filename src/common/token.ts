@@ -45,6 +45,38 @@ export function generateToken(length?: number, chars?: string) {
   return token;
 }
 
+export async function garbageCollect(): Promise<void> {
+  const expiresInCode = getExpiresInByType('AUTHORIZATION_CODE', new Date());
+  await getPrismaClient().oAuthToken.deleteMany({
+    where: {
+      type: 'AUTHORIZATION_CODE',
+      issuedAt: {
+        lte: new Date(new Date().getTime() - expiresInCode * 1000),
+      },
+    },
+  });
+
+  const expiresInAccessToken = getExpiresInByType('ACCESS_TOKEN', new Date());
+  await getPrismaClient().oAuthToken.deleteMany({
+    where: {
+      type: 'ACCESS_TOKEN',
+      issuedAt: {
+        lte: new Date(new Date().getTime() - expiresInAccessToken * 1000),
+      },
+    },
+  });
+
+  const expiresInRefreshToken = getExpiresInByType('REFRESH_TOKEN', new Date());
+  await getPrismaClient().oAuthToken.deleteMany({
+    where: {
+      type: 'REFRESH_TOKEN',
+      issuedAt: {
+        lte: new Date(new Date().getTime() - expiresInRefreshToken * 1000),
+      },
+    },
+  });
+}
+
 export function generateTokenViaType(type?: OAuthTokenType) {
   if (!type) return generateToken();
   const generator = config.token.generators?.tokens[type]

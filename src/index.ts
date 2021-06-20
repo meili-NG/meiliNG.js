@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import fastify from 'fastify';
 import fastifyFormbody from 'fastify-formbody';
 import fs from 'fs';
-import { Banner, Database } from './common';
+import { Banner, Database, Token } from './common';
 import config from './resources/config';
 import meilingPlugin from './routes';
 import { MeilingV1Session } from './routes/v1/meiling/common';
@@ -39,6 +39,12 @@ app.register(fastifyFormbody);
     console.log();
     process.exit(1);
   }
+
+  console.log('[Startup] Running Garbage Collect for Meiling Sessions...');
+  await MeilingV1Session.garbageCollect();
+
+  console.log('[Startup] Running Garbage Collect for OAuth2 Tokens...');
+  await Token.garbageCollect();
 
   console.log('[Startup] Registering Root Endpoints...');
   app.register(meilingPlugin);

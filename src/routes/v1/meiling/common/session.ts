@@ -286,6 +286,15 @@ export async function setSession(req: FastifyRequest, data?: MeilingV1Session): 
           await markTokenAsUsed(token);
           await extendTokenExpiration(token);
 
+          await getPrismaClient().meilingSessionV1Token.update({
+            where: {
+              token,
+            },
+            data: {
+              session: data as any,
+            },
+          });
+
           if (data.user) {
             for (const user of data.user) {
               if (user.id) {

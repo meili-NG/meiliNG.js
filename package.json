@@ -1,6 +1,6 @@
 {
   "name": "meiling",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "An easy-to-use, open-source oAuth2 Authentication Provider",
   "main": "dist/",
   "repository": "https://github.com/Stella-IT/meiling",

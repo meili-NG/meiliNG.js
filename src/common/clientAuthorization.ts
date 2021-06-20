@@ -3,81 +3,112 @@ import { Token } from '.';
 import { getPrismaClient } from '../resources/prisma';
 
 export async function garbageCollect(): Promise<void> {
-  const oAuthACLs = await getPrismaClient().oAuthClientAuthorization.findMany({});
+  const squashedData: {
+    userId: string;
+    clientId: string;
+    id: string;
+  }[] = [];
 
-  for (const oAuthACL of oAuthACLs) {
-    const tokenCount = await getPrismaClient().oAuthToken.count({
-      where: {
-        authorization: {
-          id: oAuthACL.id,
-        },
-      },
-    });
+  const [clients, users] = await Promise.all([
+    getPrismaClient().oAuthClient.findMany(),
+    getPrismaClient().user.findMany(),
+  ]);
 
-    // run squash
-    const userAuths = await getPrismaClient().oAuthClientAuthorization.findMany({
-      where: {
-        userId: oAuthACL.userId,
-        clientId: oAuthACL.clientId,
-      },
-    });
-    if (userAuths.length > 0) {
-      let firstAuth: OAuthClientAuthorization | undefined = undefined;
-      let lastAuth: OAuthClientAuthorization | undefined = undefined;
-      const bestPermissions: Permission[] = [];
+  for (const user of users) {
+    const promises: Promise<void>[] = [];
 
-      for (const userAuth of userAuths) {
-        const permissions = await getPrismaClient().permission.findMany({
-          where: {
-            authorizations: {
-              some: {
-                id: userAuth.id,
+    for (const client of clients) {
+      promises.push(
+        (async () => {
+          const where = {
+            userId: user.id,
+            clientId: client.id,
+          };
+
+          const authorizations = await getPrismaClient().oAuthClientAuthorization.findMany({
+            where,
+          });
+
+          const killAuthorizationList: string[] = [];
+
+          const bestPermissions: Permission[] = [];
+          for (const authorization of authorizations) {
+            const permissions = await getPrismaClient().permission.findMany({
+              where: {
+                authorizations: {
+                  some: {
+                    id: authorization.id,
+                  },
+                },
               },
-            },
-          },
-        });
+            });
 
-        const notInBestPermissions = permissions.filter(
-          (n) => bestPermissions.filter((o) => n.name === o.name).length === 0,
-        );
-        bestPermissions.push(...notInBestPermissions);
+            const isZero = await getPrismaClient().oAuthToken.count({
+              where: {
+                authorization: {
+                  id: authorization.id,
+                },
+              },
+            });
 
-        if (firstAuth === undefined || userAuth.authorizedAt.getTime() < firstAuth.authorizedAt.getTime()) {
-          firstAuth = userAuth;
-        }
+            if (isZero === 0) {
+              killAuthorizationList.push(authorization.id);
+            }
 
-        if (lastAuth === undefined || userAuth.authorizedAt.getTime() > lastAuth.authorizedAt.getTime()) {
-          lastAuth = userAuth;
-        }
-      }
+            const notInBestPermissions = permissions.filter(
+              (n) => bestPermissions.filter((o) => n.name === o.name).length === 0,
+            );
+            bestPermissions.push(...notInBestPermissions);
+          }
 
-      if (firstAuth && firstAuth.id === oAuthACL.id) {
-        await getPrismaClient().oAuthClientAuthorization.update({
-          where: {
-            id: oAuthACL.id,
-          },
-          data: {
-            permissions: {
-              connect: bestPermissions.map((n) => {
-                return {
-                  name: n.name,
-                };
-              }),
-            },
-            lastUpdatedAt: lastAuth?.lastUpdatedAt,
-          },
-        });
-        continue;
-      }
+          if (authorizations.length === 0) return;
+          const [firstAuth, lastAuth] = await Promise.all([
+            getPrismaClient().oAuthClientAuthorization.findFirst({
+              where,
+              orderBy: {
+                authorizedAt: 'asc',
+              },
+            }),
+            getPrismaClient().oAuthClientAuthorization.findFirst({
+              where,
+              orderBy: {
+                lastUpdatedAt: 'desc',
+              },
+            }),
+          ]);
+
+          if (firstAuth) {
+            await getPrismaClient().oAuthClientAuthorization.update({
+              where: {
+                id: firstAuth.id,
+              },
+              data: {
+                authorizedAt: firstAuth.authorizedAt,
+                lastUpdatedAt: lastAuth?.lastUpdatedAt,
+              },
+            });
+          }
+
+          const realKillList = killAuthorizationList.filter(
+            (n) => firstAuth && n !== firstAuth.id && lastAuth && n !== lastAuth.id,
+          );
+
+          await Promise.all(
+            realKillList.map(async (n) => {
+              if (n !== undefined) {
+                await getPrismaClient().oAuthClientAuthorization.delete({
+                  where: {
+                    id: n,
+                  },
+                });
+              }
+            }),
+          );
+        })(),
+      );
     }
 
-    if (tokenCount === 0) {
-      await getPrismaClient().oAuthClientAuthorization.delete({
-        where: {
-          id: oAuthACL.id,
-        },
-      });
-    }
+    await Promise.all(promises);
   }
 }
 

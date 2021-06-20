@@ -549,6 +549,7 @@ export async function createIDToken(
     nonce,
     auth_time: data.lastAuthenticated,
     iat: new Date().getUTCSeconds(),
+    exp: new Date(new Date().getTime() + 1000 * config.token.invalidate.openid).getUTCSeconds(),
     name: data.name,
     ...(namePerm ? nameDetail : {}),
     preferred_username: data.username,
@@ -571,7 +572,6 @@ export async function createIDToken(
     return JWT.sign(jwtData, key, {
       algorithm: config.openid.jwt.algorithm,
       issuer: config.openid.issuingAuthority,
-      expiresIn: 1000 * config.token.invalidate.openid,
     });
   } else {
     return undefined;

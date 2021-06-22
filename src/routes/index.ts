@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from 'fastify';
-import { info as packageJson } from '../resources/package';
-import config from '../resources/config';
-import v1Plugin from './v1';
 import { NodeEnvironment } from '../interface';
+import config from '../resources/config';
+import { info as packageJson } from '../resources/package';
+import v1Plugin from './v1';
 
 function meilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.route({
@@ -26,7 +26,6 @@ function handleRoot(req: FastifyRequest, rep: FastifyReply): void {
       repository: packageJson.repository,
       version: config.node.environment === NodeEnvironment.Development ? packageJson.version : undefined,
     },
-    poweredBy: packageJson.poweredBy,
     isDevelopment: config.node.environment === NodeEnvironment.Development,
   };
 

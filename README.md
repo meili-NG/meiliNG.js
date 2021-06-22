@@ -66,6 +66,11 @@ If you are familiar with it, Using Meiling Gatekeeper needs just a little code c
 <p align="right">- <a href="https://github.com/Alex4386">Alex4386</a> - <b>Stella IT Inc.</b></p>
 
 
+## Documentations
+These are the documentations for helping you try Meiling Gatekeeper on your hands!
+
+* **API Docs**: [https://documenter.getpostman.com/view/14310965/TWDXnc3q](https://documenter.getpostman.com/view/14310965/TWDXnc3q)
+* **Install Guide**: [./INSTALL.md](./INSTALL.md)
 
 ## License
 Distributed under [MIT License](LICENSE).  

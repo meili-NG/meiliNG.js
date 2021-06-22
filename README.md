@@ -64,14 +64,10 @@ If you are familiar with it, Using Meiling Gatekeeper needs just a little code c
 
 ## Build Status
 
-<table border="1" width="100%">
-<tbody>
-<tr>
-<td align="center"><b>ESLint</b></td>
-<td><img src="https://github.com/meiling-gatekeeper/meiling/workflows/ESLint/badge.svg" alt="ESLint"></td>
-</tr>
-</tbody>
-</table>
+| Name                      | Status                                                                                                         |
+|---------------------------|----------------------------------------------------------------------------------------------------------------|
+| ESLint                    | ![ESLint](https://github.com/meiling-gatekeeper/meiling/workflows/ESLint/badge.svg)                    |
+
 
 ## License
 Distributed under [MIT License](LICENSE).  

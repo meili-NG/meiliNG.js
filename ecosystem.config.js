@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+const dotenv = require('dotenv');
+const path = require('path');
+
+dotenv.config({ path: path.join(__dirname, '.env') });
+
 module.exports = {
   apps: [
     {
@@ -10,9 +15,6 @@ module.exports = {
       env: {
         // You should configure it here.
         NODE_ENV: 'production',
-
-        FASTIFY_LISTEN: 8080,
-        FASTIFY_USE_PROXY: 1,
       },
     },
   ],

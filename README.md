@@ -27,10 +27,10 @@ Just follow the API Specs and You can use whatever front-end design you want.
 <sub>* Conditions apply, In order to use full compatibility Meiling Gatekeeper provides with OpenID, you need to follow some specs.</sub>
 
 ### Written in Node.JS
-Meiling Gatekeeper is written in Node.JS and TypeScript, which you can easily understand. Tweak it whatever you want.
+Meiling Gatekeeper is written in Node.JS and TypeScript, that you can  understand easily. Tweak it whatever you want.
 
 ### Extensible Database with [Prisma](https://prisma.io)
-Meiling Gatekeeper utilizes [Prisma 2](https://github.com/prisma/prisma), an ORM designed for Node.JS and TypeScript which can easily extend databases. You can modify and extend databases whatever you want*.
+Meiling Gatekeeper utilizes [Prisma 2](https://github.com/prisma/prisma), an ORM designed for Node.JS and TypeScript that you can easily extend databases. You can modify and extend databases whatever you want*.
 
 <sub>* Conditions apply, Customizing Database Schema can lead to drift if later versions of Meiling uses different schema, In that case you need to create migrations manually.</sub>
 

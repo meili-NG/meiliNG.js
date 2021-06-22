@@ -65,7 +65,8 @@
     "migrate:reset": "prisma migrate reset --preview-feature",
     "migrate:redeploy": "prisma migrate reset --preview-feature; rm -rf ./prisma/migrations/; prisma migrate dev --preview-feature",
     "generate": "prisma generate",
-    "keygen": "node ./keygen.js"
+    "keygen": "node ./keygen.js",
+    "cleanup": "node ./dist/cleanup.js"
   },
   "husky": {
     "hooks": {

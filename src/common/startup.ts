@@ -80,15 +80,15 @@ export function checkIDTokenIssueCredentials(): true | string {
   }
 }
 
-export async function runStartupGarbageCollection(): Promise<void> {
-  if (process.argv.includes('--run-cleanup')) {
+export async function runStartupGarbageCollection(force?: boolean): Promise<void> {
+  if (process.argv.includes('--run-cleanup') || force) {
     console.log('[Startup] Running Garbage Collect for Meiling Sessions...');
     await MeilingV1Session.garbageCollect();
 
     console.log('[Startup] Running Garbage Collect for OAuth2 Tokens...');
     await Token.garbageCollect();
 
-    console.log('[Startup] Running Garbage Collect for OAuth2 ACL Data...');
+    console.log('[Startup] Running Garbage Collect for OAuth2 ACL Data... This may take awhile...');
     await ClientAuthorization.garbageCollect();
   }
 }

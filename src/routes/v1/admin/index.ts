@@ -73,12 +73,11 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
   app.get('/', (req, rep) => {
     rep.send({
       version: 1,
-      engine: 'Meiling Project',
-      api: 'Scarlet Mansion Access Control Admin',
       about: {
-        name: packageJson.name,
-        description: packageJson.description,
-        repository: packageJson.repository,
+        name: 'Scarlet Mansion Access Control Admin',
+        description: "The Administration API Endpoints for Managing Scarlet Mansion's access control system",
+      },
+      debug: {
         version: packageJson.version,
       },
     });

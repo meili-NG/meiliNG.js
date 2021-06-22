@@ -58,8 +58,8 @@ module.exports = {
       interval: Number(process.env.MEILING_DEVICE_CODE_INTERVAL) || 5,
     },
     preventDuplicates: {
-      email: process.env.MEILING_PREVENT_DUPLICATES_EMAIL.toLowerCase() === 'true' || false,
-      phone: process.env.MEILING_PREVENT_DUPLICATES_PHONE.toLowerCase() === 'true' || false,
+      email: /^true$/gi.test(process.env.MEILING_PREVENT_DUPLICATES_EMAIL) || false,
+      phone: /^true$/gi.test(process.env.MEILING_PREVENT_DUPLICATES_PHONE) || false,
     },
   },
   session: {

@@ -24,10 +24,7 @@ module.exports = {
       ref: 'origin/main',
       repo: 'https://github.com/meiling-gatekeeper/meiling',
       path: '/var/meiling',
-      'post-deploy': 'yarn && yarn build && yarn cleanup && pm2 startOrRestart ecosystem.config.js',
-      env: {
-        ...process.env,
-      },
+      'post-deploy': `yarn && yarn build && pm2 startOrRestart ecosystem.config.js`,
     },
   },
 };

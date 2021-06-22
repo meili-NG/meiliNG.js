@@ -15,6 +15,8 @@ module.exports = {
       env: {
         // You should configure it here.
         NODE_ENV: 'production',
+
+        ...process.env,
       },
     },
   ],

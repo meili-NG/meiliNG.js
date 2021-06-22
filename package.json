@@ -3,7 +3,7 @@
   "version": "0.4.1",
   "description": "An easy-to-use, open-source oAuth2 Authentication Provider",
   "main": "dist/",
-  "repository": "https://github.com/Stella-IT/meiling",
+  "repository": "https://github.com/meiling-gatekeeper/meiling",
   "author": "Alex4386 <psh010209@gmail.com>",
   "license": "MIT",
   "dependencies": {

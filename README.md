@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="https://github.com/meiling-gatekeeper/meiling/workflows/ESLint/badge.svg" />
+  <a href="https://github.com/meiling-gatekeeper/meiling/actions/workflows/eslint.yml"><img src="https://github.com/meiling-gatekeeper/meiling/actions/workflows/eslint.yml/badge.svg" /></a>
 </p>
 
 <hr>

@@ -79,6 +79,7 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
       },
       debug: {
         version: packageJson.version,
+        isDevelopment: config.node.environment === NodeEnvironment.Development,
       },
     });
   });

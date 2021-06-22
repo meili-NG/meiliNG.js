@@ -26,7 +26,6 @@ function handleRoot(req: FastifyRequest, rep: FastifyReply): void {
       repository: packageJson.repository,
       version: config.node.environment === NodeEnvironment.Development ? packageJson.version : undefined,
     },
-    isDevelopment: config.node.environment === NodeEnvironment.Development,
   };
 
   const helloWorld = {

@@ -19,11 +19,12 @@ module.exports = {
 
   deploy: {
     production: {
-      user: 'root',
-      host: 'meiling-deploy',
+      user: process.env.DEPLOY_PRODUCTION_USER,
+      host: process.env.DEPLOY_PRODUCTION_HOST,
       ref: 'origin/main',
       repo: 'https://github.com/meiling-gatekeeper/meiling',
-      path: '/var/meiling',
+      path: process.env.DEPLOY_PRODUCTION_PATH,
+      'pre-deploy-local': `scp -Cr ./.env ${process.env.DEPLOY_PRODUCTION_USER}@${process.env.DEPLOY_PRODUCTION_HOST}:${process.env.DEPLOYY_PRODUCTION_PATH}/current`,
       'post-deploy': `yarn && yarn build && pm2 startOrRestart ecosystem.config.js`,
     },
   },

@@ -4,6 +4,7 @@ import { Utils } from '../../../common';
 import { getTokenFromRequest } from '../../../common/token';
 import { NodeEnvironment } from '../../../interface';
 import config from '../../../resources/config';
+import { info as packageJson } from '../../../resources/package';
 import { sendMeilingError } from '../meiling/error';
 import { MeilingV1ErrorType } from '../meiling/interfaces';
 import appsAdminHandler from './apps';
@@ -74,6 +75,12 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
       version: 1,
       engine: 'Meiling Project',
       api: 'Scarlet Mansion Access Control Admin',
+      about: {
+        name: packageJson.name,
+        description: packageJson.description,
+        repository: packageJson.repository,
+        version: packageJson.version,
+      },
     });
   });
 

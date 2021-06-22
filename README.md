@@ -3,7 +3,11 @@
   <strong>An easy-to-use, open-source, flexible oAuth2 Authentication Provider and OpenID Connect Server</strong>
 </p>
 <p align="center">
-  Meiling Gatekeeper is very flexible, open-source, node.js based oAuth2 Server and <br>OpenID Connect Server for tweaking for your needs
+  Meiling Gatekeeper is very flexible, open-source, node.js based oAuth2 Server and <br>OpenID Connect Server for tweaking for your needs.
+</p>
+
+<p align="center">
+  <img src="https://github.com/meiling-gatekeeper/meiling/workflows/ESLint/badge.svg" />
 </p>
 
 <hr>
@@ -61,12 +65,6 @@ If you are familiar with it, Using Meiling Gatekeeper needs just a little code c
 > With **its flexibility,** Stella IT can provide **fully home-grown front-end and design** for account system which totally reflects Stella IT's Brand Design and Design Language.  
 <p align="right">- <a href="https://github.com/Alex4386">Alex4386</a> - <b>Stella IT Inc.</b></p>
 
-
-## Build Status
-
-| Name                      | Status                                                                                                         |
-|---------------------------|----------------------------------------------------------------------------------------------------------------|
-| ESLint                    | ![ESLint](https://github.com/meiling-gatekeeper/meiling/workflows/ESLint/badge.svg)                    |
 
 
 ## License

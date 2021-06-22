@@ -24,7 +24,7 @@ Named after [a Gatekeeper in Touhou Project](https://hong.meili.ng),
 Meiling Gatekeeper just gives you session token, everything you do on the front-end is totally free for you*.  
 Just follow the API Specs and You can use whatever front-end design you want.
 
-<small>* Conditions apply, In order to use full compatibility Meiling Gatekeeper provides with OpenID, you need to follow some specs.</small>
+<sub>* Conditions apply, In order to use full compatibility Meiling Gatekeeper provides with OpenID, you need to follow some specs.</sub>
 
 ### Written in Node.JS
 Meiling Gatekeeper is written in Node.JS and TypeScript, which you can easily understand. Tweak it whatever you want.
@@ -32,7 +32,7 @@ Meiling Gatekeeper is written in Node.JS and TypeScript, which you can easily un
 ### Extensible Database with [Prisma](https://prisma.io)
 Meiling Gatekeeper utilizes [Prisma 2](https://github.com/prisma/prisma), an ORM designed for Node.JS and TypeScript which can easily extend databases. You can modify and extend databases whatever you want*.
 
-<small>* Conditions apply, Customizing Database Schema can lead to drift if later versions of Meiling uses different schema, In that case you need to create migrations manually.</small>
+<sub>* Conditions apply, Customizing Database Schema can lead to drift if later versions of Meiling uses different schema, In that case you need to create migrations manually.</sub>
 
 ### Built for Modern Infrastructures
 Meiling Gatekeeper supports Docker, PM2 out of the box. You just need to run it whatever you want*.
@@ -40,9 +40,9 @@ Meiling Gatekeeper supports Docker, PM2 out of the box. You just need to run it 
 ### Modern but compatible
 Meiling Gatekeeper provides Modern APIs, but also provides great compatibility* with oAuth2 and OpenID specifications**.
 
-<small>* Your mileage may vary due to your server configuration. Also, Meiling gatekeeper is not finalized yet. expect bugs.
-</small>  
-<small>** Meiling Gatekeeper is <a href="https://user-images.githubusercontent.com/27724108/123002109-7abecf80-d3ec-11eb-85c8-5a349fe152c0.png">not OpenID Certified</a> at the moment. Please refer to <a href="https://github.com/meiling-gatekeeper/meiling/issues/16">Issue #16</a> for more information.</small>
+<sub>* Your mileage may vary due to your server configuration. Also, Meiling gatekeeper is not finalized yet. expect bugs.
+</sub>  
+<sub>** Meiling Gatekeeper is <a href="https://user-images.githubusercontent.com/27724108/123002109-7abecf80-d3ec-11eb-85c8-5a349fe152c0.png">not OpenID Certified</a> at the moment. Please refer to <a href="https://github.com/meiling-gatekeeper/meiling/issues/16">Issue #16</a> for more information.</sub>
 
 ### Built to secure
 Meiling Gatekeeper contains several security features such as:

@@ -18,9 +18,9 @@ module.exports = {
   ],
 
   deploy: {
-    sample: {
+    production: {
       user: 'root',
-      host: 'example.host.meili.ng',
+      host: 'meiling-deploy',
       ref: 'origin/main',
       repo: 'https://github.com/meiling-gatekeeper/meiling',
       path: '/var/meiling',

@@ -123,6 +123,3 @@ src/.legacy
 
 # config.js
 config.js
-
-# PM2
-ecosystem.config.js

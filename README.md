@@ -1,13 +1,9 @@
 <h1 align="center">Meiling</h1>
 <p align="center">
-  <strong>An easy-to-use, open-source Gatekeeper for oAuth2 Authentication</strong>
+  <strong>An easy-to-use, open-source, flexible oAuth2 Authentication Provider and OpenID Connect Server</strong>
 </p>
 <p align="center">
-  Meiling allows users to build highly-configurable and open authentication infrastructure based on OAuth2 in no time.
-</p>
-
-<p align="center">
-  <img src="https://github.com/Stella-IT/meiling/workflows/ESLint/badge.svg" alt="ESLint">
+  Meiling is very flexible, open-source, node.js based oAuth2 Server / OpenID Connect Server for tweaking for your needs
 </p>
 
 <hr>
@@ -19,34 +15,63 @@
 
 <hr>
 
-<!-- Add some system specific stuff here -->
-<strong>API Docs:</strong> <a alt="Postman" href="https://documenter.getpostman.com/view/14310965/TWDXnc3q">Postman</a><br>
-<strong>Install Guide:</strong> <a alt="Install Guide" href="INSTALL.md">Install Guide</a>
+## What is Meiling Gatekeeper?
+Named after [a Gatekeeper in Touhou Project](https://hong.meili.ng),  
+**Meiling Gatekeeper is a oAuth2 Server / OpenID Connect Server which is customizable and tweakable whenever and wherever you want.**
 
-<hr>
+## Why should I use Meiling?
+### Unbeatable customizability
+Meiling Gatekeeper just gives you session token, everything you do on the front-end is totally free for you*.  
+Just follow the API Specs and You can use whatever front-end design you want.
 
-<h2 align="center">Unstable!</h2>
-<p align="center">This software is still in "Release-Candidate" stage but its VERSION 1 API could be unstable. Expect bugs.</p>
+<small>* Conditions apply, In order to use full compatibility Meiling Gatekeeper provides with OpenID, you need to follow some specs.</small>
 
-<hr>
+### Written in Node.JS
+Meiling Gatekeeper is written in Node.JS and TypeScript, which you can easily understand. Tweak it whatever you want.
 
-## Features
-The key featues of Meiling Gatekeeper are:
-* highly-configurable client authentication interface.  
-  Just follow the communication API standards defined in API Docs to generate your own login infrastructure with your design.  
-    
-  Take your BI even on Logins, Let your front-end developer/designers fly.  
-* oAuth2 and OpenID Connect[*](https://github.com/meiling-gatekeeper/meiling/issues/16) Compliant.
-* Similar API Structure with good ol' friend, Google's oAuth2 API.  
+### Extensible Database with [Prisma](https://prisma.io)
+Meiling Gatekeeper utilizes [Prisma 2](https://github.com/prisma/prisma), an ORM designed for Node.JS and TypeScript which can easily extend databases. You can modify and extend databases whatever you want*.
 
-Also just like conventional login systems:
-* keeps users' login details and data private, That's always be mission of this [gatekeeper](https://en.touhouwiki.net/wiki/Hong_Meiling).
-* XSRF preventions using session tokens.
+<small>* Conditions apply, Customizing Database Schema can lead to drift if later versions of Meiling uses different schema, In that case you need to create migrations manually.</small>
 
-## Use cases
-Meiling Gatekeeper is used in:
-* [Stella IT Accounts](https://accounts.stella-it.com)  
-  With the launch of [Stella API](https://docs.stella-api.dev/), Stella IT opens its infrastructure for users and developers by providing programmable API. Stella IT uses Meiling Gatekeeper for providing authorization for all Stella APIs.
+### Built for Modern Infrastructures
+Meiling Gatekeeper supports Docker, PM2 out of the box. You just need to run it whatever you want*.
+
+### Modern but compatible
+Meiling Gatekeeper provides Modern APIs, but also provides great compatibility* with oAuth2 and OpenID specifications**.
+
+<small>* Your mileage may vary due to your server configuration. Also, Meiling gatekeeper is not finalized yet. expect bugs.
+</small>  
+<small>** Meiling Gatekeeper is <a href="https://user-images.githubusercontent.com/27724108/123002109-7abecf80-d3ec-11eb-85c8-5a349fe152c0.png">not OpenID Certified</a> at the moment. Please refer to <a href="https://github.com/meiling-gatekeeper/meiling/issues/16">Issue #16</a> for more information.</small>
+
+### Built to secure
+Meiling Gatekeeper contains several security features such as:
+* XSRF Token Support
+* PKCE Support
+* JWKS Support
+
+### Easy and Familiarity
+Meiling Gatekeeper's API Structure was designed after Google's oAuth2 API.  
+If you are familiar with it, Using Meiling Gatekeeper needs just a little code change.  
+
+
+## See Meiling in Production
+
+### Stella IT Accounts
+> With **its flexibility,** Stella IT can provide **fully home-grown front-end and design** for account system which totally reflects Stella IT's Brand Design and Design Language.  
+<p align="right">- <a href="https://github.com/Alex4386">Alex4386</a> - <b>Stella IT Inc.</b></p>
+
+
+## Build Status
+
+<table border="1" width="100%">
+<tbody>
+<tr>
+<td align="center"><b>ESLint</b></td>
+<td><img src="https://github.com/meiling-gatekeeper/meiling/workflows/ESLint/badge.svg" alt="ESLint"></td>
+</tr>
+</tbody>
+</table>
 
 ## License
 Distributed under [MIT License](LICENSE).  

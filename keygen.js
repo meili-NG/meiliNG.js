@@ -1,14 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+/* eslint-disable @typescript-eslint/no-var-requires */
 const dotenv = require('dotenv');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const crypto = require('crypto');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const chalk = require('chalk');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const prompts = require('prompts');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
 
 const envFile = path.join(__dirname, '.env');

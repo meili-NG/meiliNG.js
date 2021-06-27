@@ -15,16 +15,22 @@ export async function oAuth2RevokeTokenHandler(req: FastifyRequest, rep: Fastify
     return;
   }
 
-  const del = await getPrismaClient().oAuthToken.delete({
+  const delTarget = await getPrismaClient().oAuthToken.findUnique({
     where: {
       token: query?.token,
     },
   });
 
-  if (del !== null) {
+  if (delTarget !== null) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'token does not exist');
     return;
   }
+
+  await getPrismaClient().oAuthToken.delete({
+    where: {
+      token: query?.token,
+    },
+  });
 
   rep.send();
 }

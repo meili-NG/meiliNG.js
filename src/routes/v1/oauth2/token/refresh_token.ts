@@ -61,7 +61,6 @@ export async function oAuth2RefreshTokenHandler(req: FastifyRequest, rep: Fastif
   const scope = permissions.map((p) => p.name).join(' ');
 
   const accessToken = await ClientAuthorization.createToken(authorization, 'ACCESS_TOKEN');
-
   const currentRefreshToken = await ClientAuthorization.getToken(authorization, 'REFRESH_TOKEN');
 
   rep.send({

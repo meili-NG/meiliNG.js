@@ -201,7 +201,9 @@ export async function getToken(authorization: OAuthClientAuthorization, type: OA
       },
     ],
     where: {
-      authorization,
+      authorization: {
+        id: authorization.id,
+      },
       type,
     },
   });

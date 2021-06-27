@@ -63,12 +63,11 @@ export async function oAuth2RefreshTokenHandler(req: FastifyRequest, rep: Fastif
   const accessToken = await ClientAuthorization.createToken(authorization, 'ACCESS_TOKEN');
 
   const currentRefreshToken = await ClientAuthorization.getToken(authorization, 'REFRESH_TOKEN');
-  const shouldSendRefreshToken = token === currentRefreshToken.token;
 
   rep.send({
     access_token: accessToken.token,
     scope,
-    refresh_token: shouldSendRefreshToken ? currentRefreshToken.token : undefined,
+    refresh_token: currentRefreshToken.token,
     token_type: 'Bearer',
     expires_in: Token.getValidTimeByType('ACCESS_TOKEN'),
   });

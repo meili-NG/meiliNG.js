@@ -21,8 +21,8 @@ export async function oAuth2RevokeTokenHandler(req: FastifyRequest, rep: Fastify
     },
   });
 
-  if (delTarget !== null) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'token does not exist');
+  if (delTarget === null) {
+    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'token does not exist, check if it is valid token');
     return;
   }
 

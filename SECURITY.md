@@ -4,10 +4,10 @@
 Meiling Gatekeeper is still in heavy development,  
 therefore, you should keep your meiling gatekeeper to the latest version as much as possible.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| latest  | :white_check_mark: |
-| <latest | :x:                |
+| Version             | Supported          |
+| ------------------- | ------------------ |
+| latest              | :white_check_mark: |
+| any version lower   | :x:                |
 
 ## Reporting a Vulnerability
 

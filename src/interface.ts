@@ -105,6 +105,9 @@ export interface ConfigInterface {
     version: 1;
     host: string;
     key: string;
+    settings?: {
+      useAlimtalkForSouthKorea?: boolean;
+    };
   };
   admin: {
     tokens: string[];

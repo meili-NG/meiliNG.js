@@ -104,6 +104,10 @@ module.exports = {
     version: Number(process.env.NOTIFICATION_API_VERSION) || 1,
     host: process.env.NOTIFICATION_API_HOST || 'https://notification.meili.ng',
     key: process.env.NOTIFICATION_API_KEY || 'YOUR NOTIFICATION API KEY',
+    settings: {
+      useAlimtalkForSouthKorea:
+        /^true$/gi.test(process.env.NOTIFICATION_API_SETTINGS_USE_ALIMTALK_FOR_SOUTH_KOREA) || false,
+    },
   },
   admin: {
     tokens: process.env.ADMIN_TOKENS.split(',') || [],

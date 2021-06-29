@@ -118,6 +118,10 @@ module.exports = {
     version: 1,
     host: 'https://notification.stella-api.dev',
     key: 'YOUR NOTIFICATION API KEY',
+    settings: {
+      useAlimtalkForSouthKorea:
+        /^true$/gi.test(process.env.NOTIFICATION_API_SETTINGS_USE_ALIMTALK_FOR_SOUTH_KOREA) || false,
+    },
   },
   admin: {
     /** Configures admin tokens for calling /admin endpoints */

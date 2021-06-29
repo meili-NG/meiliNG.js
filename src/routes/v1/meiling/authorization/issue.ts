@@ -46,9 +46,6 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
 
         if (to === email) {
           const prevCreatedAt = new Date(session.authorizationStatus?.email?.challenge.challengeCreatedAt);
-          const estimatedExpiresAt = new Date(
-            prevCreatedAt.getTime() + 1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN,
-          );
 
           if (MeilingV1Challenge.isChallengeRateLimited(MeilingV1ExtendedAuthMethods.EMAIL, prevCreatedAt)) {
             sendMeilingError(
@@ -70,8 +67,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
           {
             to: email,
             variables: {
-              // TODO: remove eGovFrame-like variable name
-              코드: challenge,
+              code: challenge,
             },
           },
         ],
@@ -100,9 +96,6 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
 
         if (to && to.formatInternational() === phone.formatInternational()) {
           const prevCreatedAt = new Date(session.authorizationStatus?.phone?.challenge.challengeCreatedAt);
-          const estimatedExpiresAt = new Date(
-            prevCreatedAt.getTime() + 1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN,
-          );
 
           if (MeilingV1Challenge.isChallengeRateLimited(MeilingV1ExtendedAuthMethods.SMS, prevCreatedAt)) {
             sendMeilingError(
@@ -115,7 +108,13 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         }
       }
 
-      await Notification.sendNotification(Notification.NotificationMethod.SMS, {
+      let method: Notification.NotificationMethod = Notification.NotificationMethod.SMS;
+
+      if (phone.country === 'KR' && config) {
+        method = Notification.NotificationMethod.ALIMTALK;
+      }
+
+      await Notification.sendNotification(method, {
         type: 'template',
         templateId: Notification.TemplateId.AUTHORIZATION_CODE,
         lang,
@@ -124,8 +123,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
           {
             to: phone.formatInternational(),
             variables: {
-              // TODO: remove eGovFrame-like variable name
-              코드: challenge,
+              code: challenge,
             },
           },
         ],

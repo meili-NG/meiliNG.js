@@ -6,7 +6,8 @@ export function sessionPlugin(app: FastifyInstance, opts: FastifyPluginOptions, 
     let token = MeilingV1Session.getTokenFromRequest(req);
 
     if (token) {
-      if (await MeilingV1Session.isToken(token)) {
+      const [isToken, isValid] = await Promise.all([MeilingV1Session.isToken(token), MeilingV1Session.isValid(token)]);
+      if (isToken && isValid) {
         rep.send({
           success: true,
         });

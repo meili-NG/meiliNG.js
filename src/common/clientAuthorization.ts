@@ -3,15 +3,10 @@ import { Token } from '.';
 import { getPrismaClient } from '../resources/prisma';
 
 export async function garbageCollect(): Promise<void> {
-  const squashedData: {
-    userId: string;
-    clientId: string;
-    id: string;
-  }[] = [];
-
-  const [clients, users] = await Promise.all([
+  const [clients, users, authorizations] = await Promise.all([
     getPrismaClient().oAuthClient.findMany(),
     getPrismaClient().user.findMany(),
+    getPrismaClient().oAuthClientAuthorization.findMany(),
   ]);
 
   for (const user of users) {
@@ -25,31 +20,39 @@ export async function garbageCollect(): Promise<void> {
             clientId: client.id,
           };
 
-          const authorizations = await getPrismaClient().oAuthClientAuthorization.findMany({
-            where,
-          });
+          const permissionsAuths = await Promise.all(
+            authorizations
+              .filter((n) => {
+                return n.userId === user.id && n.clientId === client.id;
+              })
+              .map(async (n) => {
+                return {
+                  isZero: await getPrismaClient().oAuthToken.count({
+                    where: {
+                      authorization: {
+                        id: n.id,
+                      },
+                    },
+                  }),
+                  permissions: await getPrismaClient().permission.findMany({
+                    where: {
+                      authorizations: {
+                        some: {
+                          id: n.id,
+                        },
+                      },
+                    },
+                  }),
+                  ...n,
+                };
+              }),
+          );
 
           const killAuthorizationList: string[] = [];
 
           const bestPermissions: Permission[] = [];
-          for (const authorization of authorizations) {
-            const permissions = await getPrismaClient().permission.findMany({
-              where: {
-                authorizations: {
-                  some: {
-                    id: authorization.id,
-                  },
-                },
-              },
-            });
-
-            const isZero = await getPrismaClient().oAuthToken.count({
-              where: {
-                authorization: {
-                  id: authorization.id,
-                },
-              },
-            });
+          for (const authorization of permissionsAuths) {
+            const { isZero, permissions } = authorization;
 
             if (isZero === 0) {
               killAuthorizationList.push(authorization.id);
@@ -61,7 +64,7 @@ export async function garbageCollect(): Promise<void> {
             bestPermissions.push(...notInBestPermissions);
           }
 
-          if (authorizations.length === 0) return;
+          if (permissionsAuths.length === 0) return;
           const [firstAuth, lastAuth] = await Promise.all([
             getPrismaClient().oAuthClientAuthorization.findFirst({
               where,

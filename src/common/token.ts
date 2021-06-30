@@ -1,4 +1,11 @@
-import { OAuthClient, OAuthTokenType, Permission, User as UserModel } from '@prisma/client';
+import {
+  OAuthClient,
+  OAuthClientAuthorization,
+  OAuthToken,
+  OAuthTokenType,
+  Permission,
+  User as UserModel,
+} from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 import { Client, ClientAuthorization, Token, User, Utils } from '.';
 import config from '../resources/config';
@@ -33,7 +40,7 @@ export interface TokenGenerator {
   length?: number;
 }
 
-export function generateToken(length?: number, chars?: string) {
+export function generateToken(length?: number, chars?: string): string {
   if (length === undefined) length = config.token.generators.default.length as number;
   if (chars === undefined) chars = config.token.generators.default.chars as string;
 
@@ -77,7 +84,7 @@ export async function garbageCollect(): Promise<void> {
   });
 }
 
-export function generateTokenViaType(type?: OAuthTokenType) {
+export function generateTokenViaType(type?: OAuthTokenType): string {
   if (!type) return generateToken();
   const generator = config.token.generators?.tokens[type]
     ? config.token.generators?.tokens[type]
@@ -86,12 +93,15 @@ export function generateTokenViaType(type?: OAuthTokenType) {
   return generateToken(generator.length, generator.chars);
 }
 
-export function generateTokenViaGenerator(generator?: TokenGenerator) {
+export function generateTokenViaGenerator(generator?: TokenGenerator): string {
   if (!generator) return generateToken();
   return generateToken(generator.length, generator.chars);
 }
 
-export async function getAuthorization(token: string, type?: OAuthTokenType) {
+export async function getAuthorization(
+  token: string,
+  type?: OAuthTokenType,
+): Promise<OAuthClientAuthorization | null | undefined> {
   const data = await getData(token, type);
 
   if (!data?.authorizationId) return undefined;
@@ -111,7 +121,10 @@ export async function getAuthorization(token: string, type?: OAuthTokenType) {
   return;
 }
 
-export async function getAuthorizedPermissions(token: string, type?: OAuthTokenType) {
+export async function getAuthorizedPermissions(
+  token: string,
+  type?: OAuthTokenType,
+): Promise<Permission[] | undefined> {
   const authorization = await getAuthorization(token, type);
   if (!authorization) return;
 
@@ -119,7 +132,7 @@ export async function getAuthorizedPermissions(token: string, type?: OAuthTokenT
   return permissions;
 }
 
-export async function getData(token: string, type?: OAuthTokenType) {
+export async function getData(token: string, type?: OAuthTokenType): Promise<OAuthToken | undefined> {
   const tokenData = await getPrismaClient().oAuthToken.findUnique({
     where: {
       token,
@@ -174,7 +187,7 @@ export async function getClient(token: string, type?: OAuthTokenType): Promise<O
   return client && client !== null ? client : undefined;
 }
 
-export async function doesExist(token: string, type?: OAuthTokenType) {
+export async function doesExist(token: string, type?: OAuthTokenType): Promise<boolean> {
   return (await getData(token, type)) !== undefined;
 }
 
@@ -188,7 +201,7 @@ export async function getMetadata(token: string, type?: OAuthTokenType): Promise
   }
 }
 
-export async function setMetadata(token: string, metadata: Token.TokenMetadata) {
+export async function setMetadata(token: string, metadata: Token.TokenMetadata): Promise<void> {
   await getPrismaClient().oAuthToken.update({
     where: {
       token,
@@ -198,13 +211,13 @@ export async function setMetadata(token: string, metadata: Token.TokenMetadata) 
     },
   });
 }
-export function getValidTimeByType(type: OAuthTokenType) {
+export function getValidTimeByType(type: OAuthTokenType): number {
   return config?.token?.invalidate?.oauth[type] === undefined
     ? Number.MAX_SAFE_INTEGER
     : config?.token?.invalidate?.oauth[type];
 }
 
-export function getExpiresInByType(type: OAuthTokenType, issuedAt: Date) {
+export function getExpiresInByType(type: OAuthTokenType, issuedAt: Date): number {
   const invalidTimer = getValidTimeByType(type);
   const expiresAt = new Date(issuedAt.getTime() + 1000 * invalidTimer);
 

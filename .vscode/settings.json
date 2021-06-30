@@ -1,14 +1,10 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
   "[typescript]": {
-    "editor.codeActionsOnSave": {
-        "source.organizeImports": true
-    }
+    "editor.formatOnSave": true
   },
   "[typescriptreact]": {
-    "editor.codeActionsOnSave": {
-        "source.organizeImports": true
-    }
+    "editor.formatOnSave": true
   },
   "editor.tabSize": 2,
   "files.exclude": {

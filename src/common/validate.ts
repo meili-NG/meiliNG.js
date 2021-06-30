@@ -54,7 +54,7 @@ export async function sendOTPSMS(phone: PhoneNumber, challenge: string) {
       {
         to: phone.formatInternational(),
         variables: {
-          코드: challenge,
+          code: challenge,
         },
       },
     ],

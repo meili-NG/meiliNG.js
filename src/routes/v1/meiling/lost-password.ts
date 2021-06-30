@@ -172,9 +172,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
           {
             to,
             variables: {
-              // TODO: fix eGovFrame like template system.
-              // LDM's work required beforehand. est. 10d+
-              코드: challenge,
+              code: challenge,
             },
           },
         ],

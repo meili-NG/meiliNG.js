@@ -11,6 +11,7 @@ import { getMeilingAvailableAuthMethods } from './common/challenge';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
 import { MeilingV1ExtendedAuthMethods, MeilingV1SignInBody, MeilingV1SigninType } from './interfaces/query';
+import libmobilephoneJs from 'libphonenumber-js';
 
 export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
@@ -217,34 +218,56 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
 
       if (challenge) {
         if (signinMethod === MeilingV1ExtendedAuthMethods.EMAIL || signinMethod === MeilingV1ExtendedAuthMethods.SMS) {
-          if (to)
-            await Notification.sendNotification(
-              MeilingV1ExtendedAuthMethods.EMAIL === signinMethod
-                ? Notification.NotificationMethod.EMAIL
-                : MeilingV1ExtendedAuthMethods.SMS === signinMethod
-                ? Notification.NotificationMethod.SMS
-                : // FALLBACK - BAD PRACTICE
-                  Notification.NotificationMethod.SMS,
-              {
+          if (to) {
+            if (signinMethod === MeilingV1ExtendedAuthMethods.SMS) {
+              const phone = libmobilephoneJs(to);
+              if (phone) {
+                if (phone.country === 'KR') {
+                  await Notification.sendNotification(Notification.NotificationMethod.ALIMTALK, {
+                    type: 'template',
+                    templateId: Notification.TemplateId.AUTHORIZATION_CODE,
+                    lang: 'ko',
+                    messages: [
+                      {
+                        to,
+                        variables: {
+                          code: challenge,
+                        },
+                      },
+                    ],
+                  });
+                } else {
+                  await Notification.sendNotification(Notification.NotificationMethod.SMS, {
+                    type: 'template',
+                    templateId: Notification.TemplateId.AUTHORIZATION_CODE,
+                    lang: 'ko',
+                    messages: [
+                      {
+                        to,
+                        variables: {
+                          code: challenge,
+                        },
+                      },
+                    ],
+                  });
+                }
+              }
+            } else if (signinMethod === MeilingV1ExtendedAuthMethods.EMAIL) {
+              await Notification.sendNotification(Notification.NotificationMethod.EMAIL, {
                 type: 'template',
                 templateId: Notification.TemplateId.AUTHORIZATION_CODE,
-
-                // TODO: configurable default language
-                // user defined language
                 lang: 'ko',
                 messages: [
                   {
                     to,
                     variables: {
-                      // I want this to be fixed.
-                      // but KakaoTalk's eGovFrame-style template
-                      // system prevents me from doing it.
-                      코드: challenge,
+                      code: challenge,
                     },
                   },
                 ],
-              },
-            );
+              });
+            }
+          }
         }
       }
 

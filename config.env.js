@@ -66,7 +66,7 @@ module.exports = {
     v1: {
       maxAge: Number(process.env.SESSION_V1_MAX_AGE) || 604800,
       rateLimit: {
-        maxTokenPerIP: Number(process.env.SESSION_V1_RATE_LIMIT_MAX_TOKEN_PER_IP) || 20,
+        maxTokenPerIP: Number(process.env.SESSION_V1_RATE_LIMIT_MAX_TOKEN_PER_IP) || 10,
         timeframe: Number(process.env.SESSION_V1_RATE_LIMIT_TIME_FRAME) || 600,
       },
     },

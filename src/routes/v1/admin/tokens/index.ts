@@ -43,6 +43,10 @@ const tokensAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, do
     rep.send({
       ...tokenData,
       ...data,
+      expires_at: new Date(
+        Token.getExpiresInByType(tokenData.type, new Date()) * 1000 + new Date(tokenData.issuedAt).getTime(),
+      ),
+      is_valid: await Token.isValid(token, tokenData.type),
     });
   });
 

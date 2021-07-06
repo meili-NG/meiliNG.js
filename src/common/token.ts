@@ -225,7 +225,7 @@ export function getExpiresInByType(type: OAuthTokenType, issuedAt: Date): number
   return leftOver;
 }
 
-export async function getExpiresIn(token: string, type?: OAuthTokenType) {
+export async function getExpiresIn(token: string, type?: OAuthTokenType): Promise<number> {
   const data = await getData(token, type);
   if (!data) return -1;
 
@@ -235,7 +235,7 @@ export async function getExpiresIn(token: string, type?: OAuthTokenType) {
   return getExpiresInByType(type, issuedAt);
 }
 
-export function isValidByType(type: OAuthTokenType, issuedAt: Date) {
+export function isValidByType(type: OAuthTokenType, issuedAt: Date): boolean {
   return getExpiresInByType(type, issuedAt) > 0;
 }
 
@@ -243,7 +243,7 @@ export async function isValid(token: string, type?: OAuthTokenType): Promise<boo
   const data = await getData(token);
   if (!data) return false;
 
-  const issuedAt = data.issuedAt;
+  const issuedAt = new Date(data.issuedAt);
   type = data.type;
 
   return isValidByType(type, issuedAt);

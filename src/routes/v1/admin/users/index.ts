@@ -3,6 +3,8 @@ import { User } from '../../../../common';
 import { getPrismaClient } from '../../../../resources/prisma';
 import { sendMeilingError } from '../../meiling/error';
 import { MeilingV1ErrorType } from '../../meiling/interfaces';
+import userEmailsAdminHandler from './emails';
+import userPhonesAdminHandler from './phones';
 
 const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.get('/', async (req, rep) => {
@@ -108,6 +110,9 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
 
     rep.send(user);
   });
+
+  app.register(userEmailsAdminHandler, { prefix: '/emails' });
+  app.register(userPhonesAdminHandler, { prefix: '/phones' });
 
   done();
 };

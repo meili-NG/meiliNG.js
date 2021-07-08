@@ -2,6 +2,9 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { FastifyRequestWithSession } from '.';
+import { User } from '../../../common';
+import { BaridegiLogType, sendBaridegiLog } from '../../../common/baridegi';
+import { getTokenFromRequest } from '../../../common/token';
 import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
@@ -31,6 +34,12 @@ export async function signoutHandler(req: FastifyRequest, rep: FastifyReply): Pr
     } else {
       if (userId && user.filter((n) => n.id === userId).length > 0) {
         await MeilingV1Session.logout(req, userId);
+
+        sendBaridegiLog(BaridegiLogType.USER_SIGNOUT, {
+          ip: req.ip,
+          user: await User.getDetailedInfo(userId),
+          token: getTokenFromRequest(req)?.token,
+        });
       } else {
         sendMeilingError(rep, MeilingV1ErrorType.ALREADY_SIGNED_OUT, 'you are already signed out.');
         return;

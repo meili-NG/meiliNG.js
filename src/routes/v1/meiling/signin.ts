@@ -12,6 +12,8 @@ import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
 import { MeilingV1ExtendedAuthMethods, MeilingV1SignInBody, MeilingV1SigninType } from './interfaces/query';
 import libmobilephoneJs from 'libphonenumber-js';
+import { BaridegiLogType, sendBaridegiLog } from '../../../common/baridegi';
+import { getTokenFromRequest } from '../../../common/token';
 
 export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
@@ -388,6 +390,14 @@ please request this endpoint without challengeResponse field to request challeng
 
   User.updateLastAuthenticated(userToLogin);
   User.updateLastSignIn(userToLogin);
+
+  const user = await User.getDetailedInfo(userToLogin);
+
+  sendBaridegiLog(BaridegiLogType.USER_SIGNIN, {
+    ip: req.ip,
+    user,
+    token: getTokenFromRequest(req)?.token,
+  });
 
   rep.status(200).send({
     success: true,

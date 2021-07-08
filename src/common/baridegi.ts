@@ -6,6 +6,8 @@ export enum BaridegiLogType {
   AUTHORIZE_APP = 'authorize_app',
   CREATE_AUTHORIZATION_REQUEST = 'create_authorization_request',
   VERIFY_AUTHORIZATION_REQUEST = 'verify_authorization_request',
+  USER_SIGNIN = 'user_signin',
+  USER_SIGNOUT = 'user_signout',
 }
 
 export async function sendBaridegiLog(type: BaridegiLogType, metadata?: any): Promise<void> {

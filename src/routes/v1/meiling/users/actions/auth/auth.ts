@@ -171,6 +171,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
 
   sendBaridegiLog(BaridegiLogType.AUTHORIZE_APP, {
     response_type: query.response_type,
+    ip: req.ip,
     client,
     user: userData,
   });

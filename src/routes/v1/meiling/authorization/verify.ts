@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { FastifyRequestWithSession } from '..';
+import { BaridegiLogType, sendBaridegiLog } from '../../../../common/baridegi';
 import config from '../../../../resources/config';
 import { getPrismaClient } from '../../../../resources/prisma';
 import { setAuthorizationStatus } from '../common/session';
@@ -93,14 +94,24 @@ export async function meilingV1AuthorizationVerifyHandler(req: FastifyRequest, r
 
   if (verified) {
     if (new Date().getTime() < expiresAt.getTime()) {
+      let to = undefined;
+
       if (body.type === 'phone' && session.authorizationStatus.phone) {
         session.authorizationStatus.phone.isVerified = true;
+        to = session.authorizationStatus.phone.to;
       } else if (body.type === 'email' && session.authorizationStatus.email) {
         session.authorizationStatus.email.isVerified = true;
+        to = session.authorizationStatus.email.to;
       } else {
         sendMeilingError(rep, MeilingV1ErrorType.UNSUPPORTED_AUTHORIZATION_TYPE);
         return;
       }
+
+      sendBaridegiLog(BaridegiLogType.VERIFY_AUTHORIZATION_REQUEST, {
+        type: body.type,
+        ip: req.ip,
+        to,
+      });
     } else {
       sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_TIMEOUT);
       return;

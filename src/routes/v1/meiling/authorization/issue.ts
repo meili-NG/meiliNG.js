@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import libphonenumberJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '..';
+import { BaridegiLogType, sendBaridegiLog } from '../../../../common/baridegi';
 import * as Notification from '../../../../common/notification';
 import { generateToken } from '../../../../common/token';
 import * as Utils from '../../../../common/utils';
@@ -73,6 +74,12 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         ],
       });
 
+      sendBaridegiLog(BaridegiLogType.CREATE_AUTHORIZATION_REQUEST, {
+        type: body.type,
+        ip: req.ip,
+        to: email,
+      });
+
       await appendAuthorizationStatus(req, {
         email: {
           to: email,
@@ -127,6 +134,12 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
             },
           },
         ],
+      });
+
+      sendBaridegiLog(BaridegiLogType.CREATE_AUTHORIZATION_REQUEST, {
+        type: body.type,
+        ip: req.ip,
+        to: phone.formatInternational(),
       });
 
       await appendAuthorizationStatus(req, {

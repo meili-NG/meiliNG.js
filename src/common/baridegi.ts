@@ -4,6 +4,8 @@ import config from '../resources/config';
 export enum BaridegiLogType {
   NEW_SESSION = 'new_session',
   AUTHORIZE_APP = 'authorize_app',
+  CREATE_AUTHORIZATION_REQUEST = 'create_authorization_request',
+  VERIFY_AUTHORIZATION_REQUEST = 'verify_authorization_request',
 }
 
 export async function sendBaridegiLog(type: BaridegiLogType, metadata?: any): Promise<void> {

@@ -123,6 +123,13 @@ module.exports = {
         /^true$/gi.test(process.env.NOTIFICATION_API_SETTINGS_USE_ALIMTALK_FOR_SOUTH_KOREA) || false,
     },
   },
+  baridegiApi: {
+    version: 1,
+    host: 'https://baridegi.stella-api.dev',
+    serverId: 'baridegi_serverId',
+    integrationId: 'baridegi_integrationId',
+    token: 'baridegi_token',
+  },
   admin: {
     /** Configures admin tokens for calling /admin endpoints */
     tokens: [],

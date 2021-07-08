@@ -108,6 +108,13 @@ module.exports = {
         /^true$/gi.test(process.env.NOTIFICATION_API_SETTINGS_USE_ALIMTALK_FOR_SOUTH_KOREA) || false,
     },
   },
+  baridegiApi: {
+    version: Number(process.env.BARIDEGI_API_VERSION) || 1,
+    host: process.env.BARIDEGI_API_HOST || 'https://baridegi.stella-api.dev',
+    serverId: process.env.BARIDEGI_API_SERVER_ID || 'baridegi_server_id',
+    integrationId: process.env.BARIDEGI_API_INTEGRATION_ID || 'baridegi_integration_id',
+    token: process.env.BARIDEGI_API_TOKEN || 'baridegi_token',
+  },
   admin: {
     tokens: process.env.ADMIN_TOKENS.split(',') || [],
     frontend: {

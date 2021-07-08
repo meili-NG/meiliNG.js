@@ -109,6 +109,14 @@ export interface ConfigInterface {
       useAlimtalkForSouthKorea?: boolean;
     };
   };
+  baridegiApi?: {
+    version: 1;
+    host: string;
+    serverId: string;
+
+    integrationId: string;
+    token: string;
+  };
   admin: {
     tokens: string[];
     frontend: {

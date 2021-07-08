@@ -3,6 +3,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1UserOAuthAuthQuery } from '.';
 import { getUserFromActionRequest } from '..';
 import { Client, ClientAccessControls, ClientAuthorization, Token, User, Utils } from '../../../../../../common';
+import { BaridegiLogType, sendBaridegiLog } from '../../../../../../common/baridegi';
 import { getPrismaClient } from '../../../../../../resources/prisma';
 import { OAuth2QueryCodeChallengeMethod, OAuth2QueryResponseType } from '../../../../oauth2/interfaces';
 import { sendMeilingError } from '../../../error';
@@ -168,6 +169,12 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
     code_challenge = true;
   }
 
+  sendBaridegiLog(BaridegiLogType.AUTHORIZE_APP, {
+    respose_type: query.response_type,
+    client,
+    user: userData,
+  });
+
   if (query.response_type === OAuth2QueryResponseType.CODE) {
     const code = await ClientAuthorization.createToken(authorization, 'AUTHORIZATION_CODE', {
       version: 1,
@@ -184,7 +191,6 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
         },
       },
     });
-
     rep.send({
       code: code.token,
       state: query.state,

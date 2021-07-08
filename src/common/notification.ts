@@ -1,6 +1,7 @@
 import axios from 'axios';
 import config from '../resources/config';
 import { MeilingV1ExtendedAuthMethods } from '../routes/v1/meiling/interfaces';
+import { BaridegiLogType, sendBaridegiLog } from './baridegi';
 
 export type TemplateLanguage = 'ko' | 'en';
 

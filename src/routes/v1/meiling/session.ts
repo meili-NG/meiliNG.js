@@ -1,4 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import { BaridegiLogType, sendBaridegiLog } from '../../../common/baridegi';
 import { MeilingV1Session } from './common';
 
 export function sessionPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
@@ -20,6 +21,11 @@ export function sessionPlugin(app: FastifyInstance, opts: FastifyPluginOptions, 
       }
     } else {
       token = await MeilingV1Session.createToken(req);
+      sendBaridegiLog(BaridegiLogType.NEW_SESSION, {
+        ip: req.ip,
+        token: token,
+      });
+
       if (token) {
         rep.send({
           success: true,

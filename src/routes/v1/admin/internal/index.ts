@@ -5,15 +5,15 @@ import { sendMeilingError } from '../../meiling/error';
 import { MeilingV1ErrorType } from '../../meiling/interfaces';
 
 const internalAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
-  app.get('/housekeeping', async (req, rep) => {
+  app.get('/sakuya', async (req, rep) => {
     try {
-      console.log('[Housekeeping] Running Garbage Collect for Meiling Sessions...');
+      console.log('[Sakuya] Running Garbage Collect for Meiling Sessions...');
       await MeilingV1Session.garbageCollect();
 
-      console.log('[Housekeeping] Running Garbage Collect for OAuth2 Tokens...');
+      console.log('[Sakuya] Running Garbage Collect for OAuth2 Tokens...');
       await Token.garbageCollect();
 
-      console.log('[Housekeeping] Running Garbage Collect for OAuth2 ACL Data...');
+      console.log('[Sakuya] Running Garbage Collect for OAuth2 ACL Data...');
       await ClientAuthorization.garbageCollect();
 
       rep.send({ success: true });

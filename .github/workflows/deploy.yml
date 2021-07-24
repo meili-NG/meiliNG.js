@@ -8,6 +8,8 @@ on:
     branches: [ main ]
     paths:
       - "src/**/*.ts"
+  release:
+    types: [created]
 
 jobs:
   build:

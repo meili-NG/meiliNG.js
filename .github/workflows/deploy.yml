@@ -5,10 +5,9 @@ name: 🏗️ Deploy to Stella IT Accounts Production
 
 on:
   push:
+    branches: [ main ]
     paths:
-      branches: [ main ]
-      paths:
-        - "src/**/*.ts"
+      - "src/**/*.ts"
 
 jobs:
   build:

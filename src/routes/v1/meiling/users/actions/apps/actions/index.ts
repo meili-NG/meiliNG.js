@@ -40,10 +40,10 @@ function appOwnerActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
       throw new Error('Unauthorized!');
     }
 
-    app.register(appRedirectURIPlugin, { prefix: '/redirect_uri' });
-
     done();
   });
+
+  app.register(appRedirectURIPlugin, { prefix: '/redirect_uri' });
 
   done();
 }

@@ -14,7 +14,7 @@ export interface UserInfoObject extends UserModel {
 
 export interface UserDetailedObject extends UserInfoObject {
   authorizedApps: SanitizedClientModel[];
-  createdApps: SanitizedClientModel[];
+  ownedApps: SanitizedClientModel[];
 }
 
 export type AuthorizationJSONObject =
@@ -123,7 +123,7 @@ export async function getDetailedInfo(user: UserModel | string): Promise<UserDet
   const baseUser = await getInfo(user);
   if (!baseUser) return;
 
-  const [authorizedAppsDatabase, createdAppsDatabase] = await Promise.all([
+  const [authorizedAppsDatabase, ownedAppsDatabase] = await Promise.all([
     getPrismaClient().oAuthClientAuthorization.findMany({
       where: {
         userId: baseUser.id,
@@ -147,30 +147,30 @@ export async function getDetailedInfo(user: UserModel | string): Promise<UserDet
   authorizedAppsDatabase.map((n) => authorizedAppPromises.push(ClientAuthorization.getClient(n)));
 
   // TODO: remove this totally unnecessary async.
-  createdAppsDatabase.map((n) => createdAppPromises.push((async () => n)()));
+  ownedAppsDatabase.map((n) => createdAppPromises.push((async () => n)()));
 
-  const [authorizedAppsPromisesPromise, createdAppsPromisesPromise] = await Promise.all([
+  const [authorizedAppsPromisesPromise, ownedAppsPromisesPromise] = await Promise.all([
     Promise.all(authorizedAppPromises),
     Promise.all(createdAppPromises),
   ]);
 
   let authorizedApps = [];
-  let createdApps = [];
+  let ownedApps = [];
 
   for (const authorizedApp of await authorizedAppsPromisesPromise) {
     authorizedApps.push(authorizedApp);
   }
-  for (const cratedApp of await createdAppsPromisesPromise) {
-    createdApps.push(cratedApp);
+  for (const cratedApp of await ownedAppsPromisesPromise) {
+    ownedApps.push(cratedApp);
   }
 
   authorizedApps = Utils.getUnique(authorizedApps, (m, n) => m.id === n.id);
-  createdApps = Utils.getUnique(createdApps, (m, n) => m.id === n.id);
+  ownedApps = Utils.getUnique(ownedApps, (m, n) => m.id === n.id);
 
   const userObj: UserDetailedObject = {
     ...baseUser,
     authorizedApps,
-    createdApps,
+    ownedApps,
   };
 
   return userObj;

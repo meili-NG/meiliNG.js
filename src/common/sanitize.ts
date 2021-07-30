@@ -11,9 +11,9 @@ export async function getSanitizedUser(user: string): Promise<User.UserDetailedO
     }
   }
 
-  if (userData?.createdApps) {
-    for (let i = 0; i < userData.createdApps.length; i++) {
-      userData.createdApps[i] = Client.sanitize(userData.createdApps[i]);
+  if (userData?.ownedApps) {
+    for (let i = 0; i < userData.ownedApps.length; i++) {
+      userData.ownedApps[i] = Client.sanitize(userData.ownedApps[i]);
     }
   }
 

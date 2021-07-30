@@ -7,8 +7,8 @@ async function userAppsHandler(req: FastifyRequest, rep: FastifyReply): Promise<
   const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
   const userData = await User.getDetailedInfo(user);
 
-  const createdApps = await Promise.all(
-    userData?.createdApps ? userData.createdApps.map((n) => Client.getInfoForOwners(n)) : [],
+  const ownedApps = await Promise.all(
+    userData?.ownedApps ? userData.ownedApps.map((n) => Client.getInfoForOwners(n)) : [],
   );
 
   const authorizedApps = await Promise.all(
@@ -52,7 +52,7 @@ async function userAppsHandler(req: FastifyRequest, rep: FastifyReply): Promise<
   );
 
   rep.send({
-    createdApps,
+    ownedApps,
     authorizedApps,
   });
 }

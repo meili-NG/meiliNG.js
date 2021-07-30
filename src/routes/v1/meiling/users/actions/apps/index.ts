@@ -36,7 +36,7 @@ export function userAppsActionsPlugin(app: FastifyInstance, opts: FastifyPluginO
 
     const userDetail = (await User.getDetailedInfo(user)) as User.UserDetailedObject;
 
-    const owned = userDetail.createdApps.filter((n) => n.id === clientId).length > 0;
+    const owned = userDetail.ownedApps.filter((n) => n.id === clientId).length > 0;
     const authorized = userDetail.authorizedApps.filter((n) => n.id === clientId).length > 0;
 
     if (!owned && !authorized) {

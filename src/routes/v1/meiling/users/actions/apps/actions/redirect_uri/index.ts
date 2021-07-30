@@ -180,6 +180,15 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
       return;
     }
 
+    await getPrismaClient().oAuthClientRedirectUris.deleteMany({
+      where: {
+        id: (req.params as any).uuid,
+        client: {
+          id: req.client.id,
+        },
+      },
+    });
+
     rep.send();
   });
 

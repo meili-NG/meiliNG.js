@@ -25,7 +25,11 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
     });
 
     // TODO: Implement sanitizing
-    rep.send(securityKeys.map((n) => ({})));
+    rep.send(
+      securityKeys.map((n) => ({
+        id: n.id,
+      })),
+    );
   });
 
   done();

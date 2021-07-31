@@ -27,6 +27,7 @@ function userPGPPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: (
 
     rep.send(
       pgpKeys.map((n) => ({
+        id: n.id,
         name: (n.data as any).data.name,
         key: (n.data as unknown as AuthorizationPGPSSHKeyObject).data.key,
       })),

@@ -13,7 +13,7 @@ export interface PasswordChangeBody {
   newPassword: string;
 }
 
-function userPasswordPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
+function userPasswordsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', userPasswordGetHandler);
   app.post('/', userPasswordCreateHandler);
   app.put('/', userPasswordUpdateHandler);
@@ -22,4 +22,4 @@ function userPasswordPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
   done();
 }
 
-export default userPasswordPlugin;
+export default userPasswordsPlugin;

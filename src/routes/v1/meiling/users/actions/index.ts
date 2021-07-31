@@ -7,7 +7,8 @@ import { userAppPlugin } from './apps';
 import { clientAuthPlugin } from './auth';
 import { userGetInfo } from './info/get';
 import { userUpdateInfo } from './info/put';
-import userPasswordPlugin from './passwords';
+import userSecurityPlugin from './security';
+import userPasswordsPlugin from './security/passwords';
 
 export interface MeilingV1UserActionsParams {
   userId: string;
@@ -30,9 +31,14 @@ export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOpti
   app.get('/', userGetInfo);
   app.put('/', userUpdateInfo);
 
+  // TODO: Remove this later.
+  // legacy compatibility reasons. will be deprecated in future.
+  // migrate to `/v1/security/passwords`.
+  app.register(userPasswordsPlugin, { prefix: '/passwords' });
+
   app.register(clientAuthPlugin, { prefix: '/auth' });
-  app.register(userPasswordPlugin, { prefix: '/passwords' });
   app.register(userAppPlugin, { prefix: '/apps' });
+  app.register(userSecurityPlugin, { prefix: '/security' });
 
   done();
 }

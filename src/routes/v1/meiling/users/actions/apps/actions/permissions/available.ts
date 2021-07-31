@@ -24,7 +24,7 @@ async function permissionsGetAvailableHandler(_req: FastifyRequest, rep: Fastify
         },
       })
     ).map((n) => n.name) as string[]
-  ).filter((n) => permissions.includes(n));
+  ).filter((n) => !permissions.includes(n));
 
   rep.send(response);
 }

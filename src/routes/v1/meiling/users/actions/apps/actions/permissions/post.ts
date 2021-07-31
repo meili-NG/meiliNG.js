@@ -40,7 +40,7 @@ async function permissionsPostHandler(_req: FastifyRequest, rep: FastifyReply): 
         },
       })
     ).map((n) => n.name) as string[]
-  ).filter((n) => permissions.includes(n));
+  ).filter((n) => !permissions.includes(n));
 
   const toAdd = permissionsToAdd.filter((n) => availables.includes(n));
   if (toAdd.length === 0) {

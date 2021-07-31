@@ -161,6 +161,8 @@ model Permission {
   explanation    String?
   accessControls OAuthClientAccessControls[]
   authorizations OAuthClientAuthorization[]
+
+  isAvailable    Boolean @default(true)
 }
 
 model Policy {

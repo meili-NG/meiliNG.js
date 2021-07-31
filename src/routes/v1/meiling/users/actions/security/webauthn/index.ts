@@ -28,6 +28,7 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
     rep.send(
       securityKeys.map((n) => ({
         id: n.id,
+        createdAt: n.createdAt,
       })),
     );
   });

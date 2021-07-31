@@ -42,6 +42,7 @@ async function permissionsDeleteHandler(_req: FastifyRequest, rep: FastifyReply)
   }
 
   const newPermissions = permissions.filter((n) => !toRemove.includes(n));
+  console.log('testPerm', permissionsToRemove, permissions, toRemove, newPermissions);
 
   await getPrismaClient().oAuthClientAccessControls.update({
     where: {

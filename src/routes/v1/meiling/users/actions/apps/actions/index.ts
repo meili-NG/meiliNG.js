@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '..';
 import { sendMeilingError } from '../../../../error';
 import { MeilingV1ErrorType } from '../../../../interfaces';
+import { appPermissionsPlugin } from './permissions';
 import appAuthPlugin from './auth';
 import { appRedirectURIPlugin } from './redirect_uri';
 import appSessionPlugin from './sessions';
@@ -44,6 +45,7 @@ function appOwnerActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
   });
 
   app.register(appRedirectURIPlugin, { prefix: '/redirect_uri' });
+  app.register(appPermissionsPlugin, { prefix: '/permissions' });
 
   done();
 }

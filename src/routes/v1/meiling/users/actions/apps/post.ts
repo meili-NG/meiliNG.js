@@ -1,5 +1,6 @@
 import { Group as GroupModel, Permission } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { getUserFromActionRequest } from '..';
 import { Client, Group, User, Utils } from '../../../../../../common';
 import { getPrismaClient } from '../../../../../../resources/prisma';
 import { MeilingV1Session } from '../../../common';
@@ -14,7 +15,6 @@ interface MeilingV1AppPostBody {
     groups?: string[];
     permissions: string[];
   };
-  ownerId: string;
   privacy: string;
   terms: string;
 }
@@ -28,21 +28,12 @@ async function appCreateHandler(req: FastifyRequest, rep: FastifyReply): Promise
     return;
   }
 
-  if (
-    !Utils.isValidValue(
-      body?.name,
-      body?.ownerId,
-      body?.image,
-      body?.privacy,
-      body?.terms,
-      body?.accessControl?.permissions,
-    )
-  ) {
+  if (!Utils.isValidValue(body?.name, body?.image, body?.privacy, body?.terms, body?.accessControl?.permissions)) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
     return;
   }
 
-  const owner = await User.getInfo(body.ownerId);
+  const owner = await getUserFromActionRequest(req);
   if (!owner) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'invalid ownerId');
     return;

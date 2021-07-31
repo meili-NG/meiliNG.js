@@ -6,6 +6,7 @@ import { appPermissionsPlugin } from './permissions';
 import appAuthPlugin from './auth';
 import { appRedirectURIPlugin } from './redirect_uri';
 import appSessionPlugin from './sessions';
+import { appClientSecretPlugin } from './client_secret';
 
 export function appActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.register(authorizedAppsActionsPlugin);
@@ -45,6 +46,7 @@ function appOwnerActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
   });
 
   app.register(appRedirectURIPlugin, { prefix: '/redirect_uri' });
+  app.register(appClientSecretPlugin, { prefix: '/client_secret' });
   app.register(appPermissionsPlugin, { prefix: '/permissions' });
 
   done();

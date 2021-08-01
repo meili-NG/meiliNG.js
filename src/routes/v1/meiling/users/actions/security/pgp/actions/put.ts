@@ -1,7 +1,7 @@
 import { raw } from '@prisma/client/runtime';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '../../..';
-import { Utils } from '../../../../../../../../common';
+import { User, Utils } from '../../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
 import { convertAuthentication } from '../../../../../common/database';
 import { sendMeilingError } from '../../../../../error';
@@ -54,6 +54,8 @@ async function userPGPActionPutKey(req: FastifyRequest, rep: FastifyReply): Prom
       allowTwoFactor: typeof body?.allowTwoFactor === 'boolean' ? body.allowTwoFactor : undefined,
     },
   });
+
+  await User.prevent2FALockout(user.id);
 
   rep.send({ success: true });
 }

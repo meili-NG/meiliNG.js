@@ -1,4 +1,4 @@
-import { Email, Group, OAuthTokenType, Phone, User as UserModel } from '@prisma/client';
+import { Email, Group, OAuthTokenType, Phone, prisma, User as UserModel } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import JWT from 'jsonwebtoken';
 import { ClientAuthorization, User, Utils } from '.';
@@ -587,5 +587,39 @@ export async function createIDToken(
     });
   } else {
     return undefined;
+  }
+}
+
+export async function prevent2FALockout(user: UserModel | string): Promise<void> {
+  const data = await getInfo(user);
+  if (!data) return undefined;
+
+  const authorizations = await getPrismaClient().authorization.count({
+    where: {
+      AND: [
+        {
+          allowTwoFactor: true,
+          user: {
+            id: data.id,
+          },
+        },
+        {
+          NOT: {
+            method: 'PASSWORD',
+          },
+        },
+      ],
+    },
+  });
+
+  if (authorizations === 0) {
+    await getPrismaClient().user.update({
+      where: {
+        id: data.id,
+      },
+      data: {
+        useTwoFactor: false,
+      },
+    });
   }
 }

@@ -4,6 +4,7 @@ import { getPrismaClient } from '../../../../../../../resources/prisma';
 import { convertAuthentication } from '../../../../common/database';
 import { sendMeilingError } from '../../../../error';
 import { MeilingV1ErrorType, MeilingV1ExtendedAuthMethods } from '../../../../interfaces';
+import userWebAuthnActionsPlugin from './actions';
 
 function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', async (req, rep) => {
@@ -32,6 +33,8 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
       })),
     );
   });
+
+  app.register(userWebAuthnActionsPlugin, { prefix: '/:tokenId' });
 
   done();
 }

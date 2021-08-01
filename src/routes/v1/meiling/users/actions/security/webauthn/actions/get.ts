@@ -1,23 +1,22 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '../../..';
 import { Utils } from '../../../../../../../../common';
-import { AuthorizationPGPSSHKeyObject } from '../../../../../../../../common/user';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
 import { convertAuthentication } from '../../../../../common/database';
 import { sendMeilingError } from '../../../../../error';
 import { MeilingV1ExtendedAuthMethods, MeilingV1ErrorType } from '../../../../../interfaces';
 
-const dbType = convertAuthentication(MeilingV1ExtendedAuthMethods.PGP_SIGNATURE);
+const dbType = convertAuthentication(MeilingV1ExtendedAuthMethods.SECURITY_KEY);
 
-async function userPGPActionGetKey(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+async function userWebAuthnActionGetKey(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = await getUserFromActionRequest(req);
   if (!user) {
     sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
     return;
   }
 
-  const pgpId = (req.params as any).pgpId;
-  if (!Utils.isNotBlank(pgpId)) {
+  const tokenId = (req.params as any).tokenId;
+  if (!Utils.isNotBlank(tokenId)) {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
     return;
   }
@@ -28,7 +27,7 @@ async function userPGPActionGetKey(req: FastifyRequest, rep: FastifyReply): Prom
         id: user.id,
       },
       method: dbType,
-      id: pgpId,
+      id: tokenId,
     },
   });
 
@@ -41,7 +40,6 @@ async function userPGPActionGetKey(req: FastifyRequest, rep: FastifyReply): Prom
     id: keyData.id,
     createdAt: keyData.createdAt,
     name: (keyData.data as any).data.name,
-    key: (keyData.data as unknown as AuthorizationPGPSSHKeyObject).data.key,
 
     allowSingleFactor: keyData.allowSingleFactor,
     allowTwoFactor: keyData.allowTwoFactor,
@@ -49,4 +47,4 @@ async function userPGPActionGetKey(req: FastifyRequest, rep: FastifyReply): Prom
   });
 }
 
-export default userPGPActionGetKey;
+export default userWebAuthnActionGetKey;

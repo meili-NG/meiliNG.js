@@ -70,7 +70,7 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
           icon: user.profileUrl ? user.profileUrl : undefined,
         },
         rp: {
-          id: config.openid.issuingAuthority,
+          id: new URL(config.openid.issuingAuthority).hostname,
         },
         challenge,
       });

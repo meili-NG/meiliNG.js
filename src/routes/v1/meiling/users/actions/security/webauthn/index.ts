@@ -48,7 +48,7 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
       return;
     }
 
-    if (Utils.isNotBlank(body.challenge)) {
+    if (Utils.isNotBlank(body.id, body.response, body.response?.attenationObject, body)) {
       // TODO: Implement registration procedure
     } else {
       const challenge = Token.generateToken(64);
@@ -68,9 +68,6 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
           name: user.username,
           displayName: user.name,
           icon: user.profileUrl ? user.profileUrl : undefined,
-        },
-        rp: {
-          id: new URL(config.openid.issuingAuthority).hostname,
         },
         challenge,
       });

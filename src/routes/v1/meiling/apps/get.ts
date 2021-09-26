@@ -9,17 +9,20 @@ async function appInfoHandler(req: FastifyRequest, rep: FastifyReply) {
   const params = req.params as MeilingV1AppParams;
   const clientId = params.clientId;
 
-  const users = await MeilingV1Session.getLoggedIn(req);
-  if (users.length === 0) {
-    sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
-    return;
-  }
-
   if (clientId) {
     const client = await Client.getByClientId(clientId);
     const acl = await Client.getAccessControl(clientId);
     if (!client || !acl) {
       sendMeilingError(rep, MeilingV1ErrorType.APPLICATION_NOT_FOUND);
+      return;
+    }
+
+    const users = await MeilingV1Session.getLoggedIn(req);
+    if (users.length === 0) {
+      // If no user access controls, returning client info.
+      if (!acl.userAclId) rep.send(Client.sanitize(client));
+      // If not, returning unauthorized error.
+      else sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
       return;
     }
 

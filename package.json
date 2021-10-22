@@ -29,6 +29,8 @@
     "typescript": "^4.0.5"
   },
   "devDependencies": {
+    "@swc/cli": "^0.1.51",
+    "@swc/core": "^1.2.102",
     "@types/axios": "^0.14.0",
     "@types/bcryptjs": "^2.4.2",
     "@types/figlet": "^1.2.1",
@@ -49,10 +51,10 @@
   },
   "scripts": {
     "debug": "ts-node ./src/",
-    "build": "tsc",
+    "build": "swc src --out-dir dist/ --sync",
     "build:docker": "docker build .",
     "start:dev": "nodemon",
-    "start:prod": "tsc && NODE_ENV=production node ./dist/",
+    "start:prod": "swc src --out-dir dist/ --sync && NODE_ENV=production node ./dist/",
     "start": "NODE_ENV=production node ./dist/",
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
     "studio": "NODE_ENV=production prisma studio",

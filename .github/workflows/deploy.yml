@@ -45,17 +45,17 @@ jobs:
       run: yarn build
     - name: 🌐 Setting up deploy env variables
       run: echo $DEPLOY_ENV > ./.env
-      with:
-        DEPLOY_KEY: ${{ secrets.S4AIT_DEPLOY_ENV }}
+      env:
+        DEPLOY_ENV: ${{ secrets.S4AIT_DEPLOY_ENV }}
     - name: 🔒 Setting up deploy key
       run: echo $DEPLOY_KEY > ~/.ssh/id_rsa_deploy
-      with:
+      env:
         DEPLOY_KEY: ${{ secrets.S4AIT_DEPLOY_KEY }}
     - name: 🔒 Setting up SSH config
       run: |
         PWD=`pwd`
         echo "Host \"meiling-deploy\"\n  HostName ${DEPLOY_TARGET}\n  Port 22\n  IdentityFile ${HOME}/.ssh/id_rsa_deploy"
-      with:
+      env:
         DEPLOY_TARGET: ${{ secrets.S4AIT_DEPLOY_TARGET }}
     - name: 🚧 Deploying to production
       run: pm2 deploy production

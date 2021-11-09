@@ -16,17 +16,15 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [12.x, 14.x]
+
 
     steps:
     - name: 🚧 Checkout repository
       uses: actions/checkout@v2
-    - name: 🚧 Use Node.js ${{ matrix.node-version }}
+    - name: 🚧 Use Node.js 14.x
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 14.x
     - name: 🚧 Installing Yarn
       run: npm install -g yarn
     - name: 🗄️ Cache Node Modules
@@ -48,7 +46,7 @@ jobs:
       env:
         DEPLOY_ENV: ${{ secrets.S4AIT_DEPLOY_ENV }}
     - name: 🔒 Setting up deploy key
-      run: echo $DEPLOY_KEY > ~/.ssh/id_rsa_deploy
+      run: mkdir ~/.ssh && echo $DEPLOY_KEY > ~/.ssh/id_rsa_deploy
       env:
         DEPLOY_KEY: ${{ secrets.S4AIT_DEPLOY_KEY }}
     - name: 🔒 Setting up SSH config

@@ -36,7 +36,9 @@ jobs:
           **/node_modules
         key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
     - name: 📥 Installing dependencies
-      run: yarn
+      run: |
+        yarn
+        yarn global add pm2
     - name: 🏗️ Generate Prisma Typescript d.ts
       run: yarn generate
     - name: 🏗️ Build Typescript

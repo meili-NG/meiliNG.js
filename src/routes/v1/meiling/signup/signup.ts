@@ -88,7 +88,7 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
 
   // check with validation.
 
-  if (!(signupChallenge.email && signupChallenge.phone)) {
+  if (!(signupChallenge.email?.isVerified && signupChallenge.phone?.isVerified)) {
     sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_NOT_COMPLETED);
     return;
   }

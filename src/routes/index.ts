@@ -3,6 +3,7 @@ import { NodeEnvironment } from '../interface';
 import config from '../resources/config';
 import { info as packageJson } from '../resources/package';
 import v1Plugin from './v1';
+import wellKnownPlugin from './well-known';
 
 function meilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.route({
@@ -12,6 +13,7 @@ function meilingPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: (
   });
 
   app.register(v1Plugin, { prefix: '/v1' });
+  app.register(wellKnownPlugin, { prefix: '/.well-known' });
 
   done();
 }

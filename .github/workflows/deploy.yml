@@ -54,9 +54,12 @@ jobs:
     - name: 🔒 Setting up SSH config
       run: |
         PWD=`pwd`
-        echo "Host \"meiling-deploy\"\n  HostName ${DEPLOY_TARGET}\n  Port 22\n  IdentityFile ${HOME}/.ssh/id_rsa_deploy"
+        echo "Host \"meiling-deploy\"\n  HostName ${DEPLOY_TARGET}\n  Port 22\n  IdentityFile ${HOME}/.ssh/id_rsa_deploy" > ~/.ssh/config
       env:
         DEPLOY_TARGET: ${{ secrets.S4AIT_DEPLOY_TARGET }}
     - name: 🚧 Deploying to production
       run: pm2 deploy production
+      env:
+        DEPLOY_PRODUCTION_USER: 'root'
+        DEPLOY_PRODUCTION_HOST: 'meiling-deploy'
       

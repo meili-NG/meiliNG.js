@@ -176,6 +176,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
     user: userData,
   });
 
+  // TODO: make it capable to support multiple response_types at once. [refactor required]
   if (query.response_type === OAuth2QueryResponseType.CODE) {
     const code = await ClientAuthorization.createToken(authorization, 'AUTHORIZATION_CODE', {
       version: 1,

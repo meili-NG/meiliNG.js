@@ -8,6 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/meiling-gatekeeper/meiling/actions/workflows/eslint.yml"><img src="https://github.com/meiling-gatekeeper/meiling/actions/workflows/eslint.yml/badge.svg" /></a>
+  <a href="https://github.com/meiling-gatekeeper/meiling/actions/workflows/tsc.yml"><img src="https://github.com/meiling-gatekeeper/meiling/actions/workflows/tsc.yml/badge.svg" /></a>
 </p>
 
 <hr>

@@ -5,17 +5,15 @@ name: 🏗️ Deploy to Stella IT Accounts Production
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
-#    paths:
-#      - "src/**/*.ts"
-#  release:
-#    types: [created]
+
+  release:
+    types: [created]
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
+    environment: Stella IT Accounts Deployment
     steps:
     - name: 🚧 Checkout repository
       uses: actions/checkout@v2

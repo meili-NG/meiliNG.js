@@ -60,3 +60,4 @@ jobs:
       env:
         DEPLOY_PRODUCTION_HOST: ${{ secrets.S4AIT_DEPLOY_TARGET }}
         DEPLOY_PRODUCTION_KEY_PATH: '~/.ssh/id_rsa'
+        DEPLOY_PRODUCTION_BYPASS_KEY_CHECK: true

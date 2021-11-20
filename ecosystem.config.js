@@ -9,8 +9,8 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 let keyFile = process.env.DEPLOY_PRODUCTION_KEY_PATH || undefined;
 if (keyFile) keyFile.replace(/^~/g, os.homedir());
 
-let keyOption = "";
-if (keyOption) keyOption += "-i \""+keyFile+"\"";
+let keyOption = '';
+if (keyOption) keyOption += '-i "' + keyFile + '"';
 
 module.exports = {
   apps: [
@@ -37,6 +37,10 @@ module.exports = {
       path: process.env.DEPLOY_PRODUCTION_PATH,
       'pre-deploy-local': `node deploy-env.production.js`,
       'post-deploy': `yarn && yarn build && yarn generate && yarn prisma migrate deploy && pm2 startOrRestart ecosystem.config.js`,
+      key: keyFile,
+      ssh_options: [process.env.DEPLOY_PRODUCTION_BYPASS_KEY_CHECK ? 'StrictHostKeyChecking=no' : undefined].filter(
+        (n) => n !== undefined,
+      ),
     },
   },
 };

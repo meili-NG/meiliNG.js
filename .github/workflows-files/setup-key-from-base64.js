@@ -26,6 +26,6 @@ if (!base64) {
 }
 
 const result = Buffer.from(base64, 'base64');
-fs.writeFileSync(keyFilePath, result, {});
+fs.writeFileSync(keyFilePath, result);
 
 process.exit(0);

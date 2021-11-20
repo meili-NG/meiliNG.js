@@ -7,7 +7,7 @@ const os = require('os');
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 let keyFile = process.env.DEPLOY_PRODUCTION_KEY_PATH || undefined;
-if (keyFile) keyFile.replace(/^~/g, os.homedir());
+if (keyFile) keyFile = keyFile.replace(/^~/g, os.homedir());
 
 let keyOption = '';
 if (keyOption) keyOption += '-i "' + keyFile + '"';

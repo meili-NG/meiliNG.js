@@ -8,7 +8,7 @@ const os = require('os');
 const ssh = new NodeSSH();
 
 let keyFile = process.env.DEPLOY_PRODUCTION_KEY_PATH || undefined;
-if (keyFile) keyFile.replace(/^~/g, os.homedir());
+if (keyFile) keyFile = keyFile.replace(/^~/g, os.homedir());
 
 if (!keyFile) {
   const defaultKeyFile = path.join(os.homedir(), '.ssh', 'id_rsa');

@@ -52,4 +52,6 @@ jobs:
     - name: 🚧 Deploying to production
       run: pm2 deploy production
       env:
-        IS_GITHUB_ACTIONS: true
+        DEPLOY_PRODUCTION_KEY_PATH: '~/.ssh/id_rsa_deploy'
+        
+        

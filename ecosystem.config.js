@@ -35,7 +35,7 @@ module.exports = {
       ref: 'origin/main',
       repo: 'https://github.com/meiling-gatekeeper/meiling',
       path: process.env.DEPLOY_PRODUCTION_PATH,
-      'pre-deploy-local': `scp -o \"StrictHostKeyChecking=no\" -o \"LogLevel=ERROR\" ${keyOption} -Cr ./.env ${process.env.DEPLOY_PRODUCTION_USER}@${process.env.DEPLOY_PRODUCTION_HOST}:${process.env.DEPLOY_PRODUCTION_PATH}/current`,
+      'pre-deploy-local': `scp -o StrictHostKeyChecking=no -o LogLevel=ERROR ${keyOption} -Cr ./.env ${process.env.DEPLOY_PRODUCTION_USER}@${process.env.DEPLOY_PRODUCTION_HOST}:${process.env.DEPLOY_PRODUCTION_PATH}/current`,
       'post-deploy': `yarn && yarn build && yarn generate && yarn prisma migrate deploy && pm2 startOrRestart ecosystem.config.js`,
     },
   },

@@ -32,6 +32,6 @@ const result = Buffer.from(base64, 'base64');
 fs.writeFileSync(keyFilePath, result);
 
 // setup permissions to make ssh to use this key file
-fs.chmodSync(keyFilePath, '0400');
+fs.chmodSync(keyFilePath, '0700');
 
 process.exit(0);

@@ -15,3 +15,9 @@ const values = dotenv.parse(fs.readFileSync(envFilePath, {encoding: 'utf-8'}));
 
 console.log("Debug:");
 console.log(Object.keys(values));
+
+// DEBUG STUFF
+const debugValues = dotenv.parse(process.env.DEPLOY_ENV);
+
+console.log("Deploy:");
+console.log(Object.keys(debugValues));

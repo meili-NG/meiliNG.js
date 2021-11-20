@@ -47,6 +47,8 @@ jobs:
         DEPLOY_ENV: ${{ secrets.S4AIT_DEPLOY_ENV }}
     - name: 🕵️ Run Debug script for .env file
       run: node ./.github/workflows-files/env-deploy-validator.js
+      env:
+        DEPLOY_ENV: ${{ secrets.S4AIT_DEPLOY_ENV }}
     - name: 🔒 Setting up deploy key
       run: mkdir ~/.ssh && echo $DEPLOY_KEY > ~/.ssh/id_rsa_deploy
       env:

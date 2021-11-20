@@ -13,7 +13,7 @@ const config = {
   host: process.env.DEPLOY_PRODUCTION_HOST,
   username: process.env.DEPLOY_PRODUCTION_USER,
   path: process.env.DEPLOY_PRODUCTION_PATH
-}
+};
 
 (async () => {
   const session = await ssh.connect({

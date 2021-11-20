@@ -17,11 +17,11 @@ jobs:
     steps:
     - name: 🚧 Checkout repository
       uses: actions/checkout@v2
-    - name: 🚧 Use Node.js 14.x
+    - name: 📥 Use Node.js 14.x
       uses: actions/setup-node@v1
       with:
         node-version: 14.x
-    - name: 🚧 Installing Yarn
+    - name: 📥 Installing Yarn
       run: npm install -g yarn
     - name: 🗄️ Cache Node Modules
       uses: actions/cache@v2
@@ -35,11 +35,11 @@ jobs:
       run: |
         yarn
         npm i -g pm2
-    - name: 🏗️ Generate Prisma Typescript d.ts
+    - name: 📝 Generate Prisma Typescript d.ts
       run: yarn generate
-    - name: 🏗️ Build Typescript
+    - name: 👷 Build Typescript
       run: yarn build
-    - name: 🌐 Setting up deploy env variables
+    - name: 🛠️ Setting up deploy env variables
       run: node ./.github/workflows-files/get-dotenv-from-base64.js
       env:
         DEPLOY_ENV_BASE64: ${{ secrets.S4AIT_DEPLOY_ENV_BASE64 }}
@@ -50,11 +50,10 @@ jobs:
       env:
         DEPLOY_PRODUCTION_KEY_BASE64: ${{ secrets.S4AIT_DEPLOY_KEY_BASE64 }}
         DEPLOY_PRODUCTION_KEY_PATH: ~/.ssh/id_rsa
-    - name: 🔒 Checking deploy key
+    - name: 👨‍🏭 Checking directory structures
       run: |
-        ssh-keygen -l -f $DEPLOY_PRODUCTION_KEY_PATH
-      env:
-        DEPLOY_PRODUCTION_KEY_PATH: ~/.ssh/id_rsa
+        ls
+        ls ~/.ssh/
     - name: 🚧 Deploying to production
       run: pm2 deploy production
       env:

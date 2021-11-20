@@ -30,6 +30,9 @@ if (!base64) {
 const result = Buffer.from(base64, 'base64');
 
 fs.writeFileSync(keyFilePath, result);
+console.log(
+  chalk.greenBright`Exported to: ${keyFilePath}`
+)
 
 // setup permissions to make ssh to use this key file
 fs.chmodSync(keyFilePath, '0700');

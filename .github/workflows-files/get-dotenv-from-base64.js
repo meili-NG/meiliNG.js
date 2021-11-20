@@ -24,4 +24,10 @@ if (!base64) {
 const result = Buffer.from(base64, 'base64');
 fs.writeFileSync(envFilePath, result);
 
+
+console.log(
+  chalk.greenBright`Exported .env file to: ${envFilePath}`
+)
+
+
 process.exit(0);

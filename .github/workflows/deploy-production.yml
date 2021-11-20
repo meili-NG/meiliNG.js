@@ -49,16 +49,16 @@ jobs:
       run: node ./.github/workflows-files/setup-key-from-base64.js
       env:
         DEPLOY_PRODUCTION_KEY_BASE64: ${{ secrets.S4AIT_DEPLOY_KEY_BASE64 }}
-        DEPLOY_PRODUCTION_KEY_PATH: '~/.ssh/id_rsa'
+        DEPLOY_PRODUCTION_KEY_PATH: ~/.ssh/id_rsa
     - name: 🔒 Checking deploy key
       run: |
         ssh-keygen -l -f $DEPLOY_PRODUCTION_KEY_PATH
       env:
-        DEPLOY_PRODUCTION_KEY_PATH: '~/.ssh/id_rsa'
+        DEPLOY_PRODUCTION_KEY_PATH: ~/.ssh/id_rsa
     - name: 🚧 Deploying to production
       run: pm2 deploy production
       env:
         DEPLOY_PRODUCTION_HOST: ${{ secrets.S4AIT_DEPLOY_TARGET }}
-        DEPLOY_PRODUCTION_KEY_PATH: '~/.ssh/id_rsa'
+        DEPLOY_PRODUCTION_KEY_PATH: ~/.ssh/id_rsa
         DEPLOY_PRODUCTION_BYPASS_KEY_CHECK: true
         DEPLOY_PRODUCTION_SUPPRESS_SSH_LOG: true

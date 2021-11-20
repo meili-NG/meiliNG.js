@@ -11,7 +11,7 @@ const path = require('path');
 const os = require('os');
 
 const keyFilePath = process.env.DEPLOY_PRODUCTION_KEY_PATH;
-keyFilePath.replace(/^\~/g, os.homedir());
+keyFilePath.replace(/^~/g, os.homedir());
 
 if (!fs.existsSync(keyFilePath)) {
   fs.mkdirSync(keyFilePath, {recursive: true});

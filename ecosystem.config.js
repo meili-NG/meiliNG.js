@@ -2,8 +2,15 @@
 
 const dotenv = require('dotenv');
 const path = require('path');
+const os = require('os');
 
 dotenv.config({ path: path.join(__dirname, '.env') });
+
+let keyFile = process.env.DEPLOY_PRODUCTION_KEY_PATH || undefined;
+if (keyFile) keyFile.replace(/^~/g, os.homedir());
+
+let keyOption = "";
+if (keyOption) keyOption += "-o \"IdentityFile="+keyFile+"\" -i \""+keyFile+"\"";
 
 module.exports = {
   apps: [
@@ -28,7 +35,7 @@ module.exports = {
       ref: 'origin/main',
       repo: 'https://github.com/meiling-gatekeeper/meiling',
       path: process.env.DEPLOY_PRODUCTION_PATH,
-      'pre-deploy-local': `scp -o StrictHostKeyChecking=no -o LogLevel=ERROR ${process.env.DEPLOY_PRODUCTION_KEY_PATH ? "-o \"IdentityFile="+process.env.DEPLOY_PRODUCTION_KEY_PATH+"\"" : ""} -Cr ./.env ${process.env.DEPLOY_PRODUCTION_USER}@${process.env.DEPLOY_PRODUCTION_HOST}:${process.env.DEPLOY_PRODUCTION_PATH}/current`,
+      'pre-deploy-local': `scp -o \"StrictHostKeyChecking=no\" -o \"LogLevel=ERROR\" ${keyOption} -Cr ./.env ${process.env.DEPLOY_PRODUCTION_USER}@${process.env.DEPLOY_PRODUCTION_HOST}:${process.env.DEPLOY_PRODUCTION_PATH}/current`,
       'post-deploy': `yarn && yarn build && yarn generate && yarn prisma migrate deploy && pm2 startOrRestart ecosystem.config.js`,
     },
   },

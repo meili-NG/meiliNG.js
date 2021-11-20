@@ -20,13 +20,12 @@ async function openIdConfigurationHandler(req: FastifyRequest, rep: FastifyReply
   rep.send({
     issuer: config.openid.issuingAuthority,
     authorization_endpoint: buildMeilingURL('/v1/oauth2/auth'),
-    // TODO: add config to setup device authorization endpoint
-    // device_authorization_endpoint: buildMeilingURL("/v1/oauth2/auth"),
+    device_authorization_endpoint: config.meiling.deviceCode.verification_url,
     token_endpoint: buildMeilingURL('/v1/oauth2/auth'),
     userinfo_endpoint: buildMeilingURL('/v1/oauth2/userinfo'),
     jwks_uri: buildMeilingURL('/v1/oauth2/certs'),
     token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic'],
-    id_token_signing_alg_values_supportedd: [config.openid.jwt.algorithm],
+    id_token_signing_alg_values_supported: [config.openid.jwt.algorithm],
 
     //check_session_iframe: buildMeilingURL("/v1/oauth2/user"),
     //end_session_endpoint: buildMeilingURL("/v1/oauth2/user"),

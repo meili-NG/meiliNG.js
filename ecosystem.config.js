@@ -10,7 +10,7 @@ let keyFile = process.env.DEPLOY_PRODUCTION_KEY_PATH || undefined;
 if (keyFile) keyFile.replace(/^~/g, os.homedir());
 
 let keyOption = "";
-if (keyOption) keyOption += "-o \"IdentityFile="+keyFile+"\" -i \""+keyFile+"\"";
+if (keyOption) keyOption += "-i \""+keyFile+"\"";
 
 module.exports = {
   apps: [

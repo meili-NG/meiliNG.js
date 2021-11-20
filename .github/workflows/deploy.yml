@@ -50,6 +50,10 @@ jobs:
       env:
         DEPLOY_PRODUCTION_KEY_BASE64: ${{ secrets.S4AIT_DEPLOY_KEY_BASE64 }}
         DEPLOY_PRODUCTION_KEY_PATH: '~/.ssh/id_rsa_deploy'
+    - name: 🔒 Checking deploy key
+      run: ssh-keygen -l -f $DEPLOY_PRODUCTION_KEY_PATH
+      env:
+        DEPLOY_PRODUCTION_KEY_PATH: '~/.ssh/id_rsa_deploy'
     - name: 🚧 Deploying to production
       run: pm2 deploy production
       env:

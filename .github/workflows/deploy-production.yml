@@ -33,8 +33,10 @@ jobs:
         key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
     - name: 📥 Installing dependencies
       run: |
+        sudo apt update -y
+        sudo apt upgrade -y openssh-client
         yarn
-        yarn global add pm2
+        npm i -g pm2
     - name: 🏗️ Generate Prisma Typescript d.ts
       run: yarn generate
     - name: 🏗️ Build Typescript

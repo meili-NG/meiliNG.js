@@ -59,7 +59,4 @@ jobs:
         DEPLOY_TARGET: ${{ secrets.S4AIT_DEPLOY_TARGET }}
     - name: 🚧 Deploying to production
       run: pm2 deploy production
-      env:
-        DEPLOY_PRODUCTION_USER: 'root'
-        DEPLOY_PRODUCTION_HOST: 'meiling-deploy'
       

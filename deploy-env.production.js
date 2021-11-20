@@ -9,12 +9,22 @@ const ssh = new NodeSSH();
 let keyFile = process.env.DEPLOY_PRODUCTION_KEY_PATH || undefined;
 if (keyFile) keyFile.replace(/^~/g, os.homedir());
 
+if (!keyFile) {
+  const defaultKeyFile = path.join(os.homedir(), '.ssh', 'id_rsa');
+
+  if (fs.existsSync(defaultKeyFile)) {
+    keyFile = defaultKeyFile;
+  }
+}
+
 const config = {
   privateKey: keyFile,
   host: process.env.DEPLOY_PRODUCTION_HOST,
   username: process.env.DEPLOY_PRODUCTION_USER,
   path: process.env.DEPLOY_PRODUCTION_PATH,
 };
+
+console.log(keyFile);
 
 (async () => {
   const session = await ssh.connect({

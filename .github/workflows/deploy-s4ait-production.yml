@@ -1,7 +1,7 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: 🏗️ Deploy to Stella IT Accounts (Production)
+name: Deploy on Stella IT Accounts (Production)
 
 on:
   workflow_dispatch:
@@ -50,12 +50,8 @@ jobs:
       env:
         DEPLOY_PRODUCTION_KEY_BASE64: ${{ secrets.S4AIT_DEPLOY_KEY_BASE64 }}
         DEPLOY_PRODUCTION_KEY_PATH: ~/.ssh/id_rsa
-    - name: 👨‍🏭 Checking directory structures
-      run: |
-        ls
-        ls ~/.ssh/
     - name: 🚧 Deploying to production
-      run: pm2 deploy production
+      run: pm2 deploy production > /dev/null
       env:
         DEPLOY_PRODUCTION_HOST: ${{ secrets.S4AIT_DEPLOY_TARGET }}
         DEPLOY_PRODUCTION_KEY_PATH: ~/.ssh/id_rsa

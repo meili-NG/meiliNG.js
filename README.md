@@ -62,7 +62,10 @@ If you are familiar with it, Using Meiling Gatekeeper needs just a little code c
 ## See Meiling in Production
 
 ### [Stella IT Accounts](https://accounts.stella-it.com)
-> With **its flexibility,** Stella IT can provide **fully home-grown front-end and design** for account system which totally reflects Stella IT's Brand Design and Design Language.  
+> With **its flexibility,** Stella IT can provide **fully home-grown front-end and design** for account system which totally reflects Stella IT's Brand Design and Design Language.
+
+Currently, Stella IT Accounts automatically uses the stable version of Meiling by default.  
+Check: <a href="https://github.com/meiling-gatekeeper/meiling/actions/workflows/deploy-s4ait-production.yml"><img src="https://github.com/meiling-gatekeeper/meiling/actions/workflows/deploy-s4ait-production.yml/badge.svg" /></a> for automatic deployment status.
 <p align="right">- <a href="https://github.com/Alex4386">Alex4386</a> - <b>Stella IT Inc.</b></p>
 
 

@@ -49,14 +49,7 @@ jobs:
       run: mkdir ~/.ssh && echo $DEPLOY_KEY > ~/.ssh/id_rsa_deploy
       env:
         DEPLOY_KEY: ${{ secrets.S4AIT_DEPLOY_KEY }}
-    - name: 🔒 Setting up SSH config
-      run: |
-        echo "Host meiling-deploy" > $HOME/.ssh/config
-        echo "  HostName ${DEPLOY_TARGET}" >> $HOME/.ssh/config
-        echo "  Port 22" >> $HOME/.ssh/config
-        echo "  IdentityFile ${HOME}/.ssh/id_rsa_deploy" >> $HOME/.ssh/config
-      env:
-        DEPLOY_TARGET: ${{ secrets.S4AIT_DEPLOY_TARGET }}
     - name: 🚧 Deploying to production
       run: pm2 deploy production
-      
+      env:
+        IS_GITHUB_ACTIONS: true

@@ -33,8 +33,6 @@ jobs:
         key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
     - name: 📥 Installing dependencies
       run: |
-        sudo apt update -y
-        sudo apt upgrade -y openssh-client
         yarn
         npm i -g pm2
     - name: 🏗️ Generate Prisma Typescript d.ts
@@ -53,7 +51,9 @@ jobs:
         DEPLOY_PRODUCTION_KEY_BASE64: ${{ secrets.S4AIT_DEPLOY_KEY_BASE64 }}
         DEPLOY_PRODUCTION_KEY_PATH: '~/.ssh/id_rsa'
     - name: 🔒 Checking deploy key
-      run: ssh-keygen -l -f $DEPLOY_PRODUCTION_KEY_PATH
+      run: |
+        ssh-keygen -l -f $DEPLOY_PRODUCTION_KEY_PATH
+        ssh-add $DEPLOY_PRODUCTION_KEY_PATH
       env:
         DEPLOY_PRODUCTION_KEY_PATH: '~/.ssh/id_rsa'
     - name: 🚧 Deploying to production

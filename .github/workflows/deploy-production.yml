@@ -53,7 +53,6 @@ jobs:
     - name: 🔒 Checking deploy key
       run: |
         ssh-keygen -l -f $DEPLOY_PRODUCTION_KEY_PATH
-        ssh-add $DEPLOY_PRODUCTION_KEY_PATH
       env:
         DEPLOY_PRODUCTION_KEY_PATH: '~/.ssh/id_rsa'
     - name: 🚧 Deploying to production

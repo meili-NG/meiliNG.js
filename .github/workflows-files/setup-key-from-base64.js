@@ -10,7 +10,7 @@ const chalk = require('chalk');
 const path = require('path');
 const os = require('os');
 
-const keyFilePath = process.env.DEPLOY_PRODUCTION_KEY_PATH;
+let keyFilePath = process.env.DEPLOY_PRODUCTION_KEY_PATH;
 keyFilePath = keyFilePath.replace(/^~/g, os.homedir());
 
 if (!fs.existsSync(keyFilePath)) {

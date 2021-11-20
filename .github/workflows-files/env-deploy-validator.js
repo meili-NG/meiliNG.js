@@ -26,13 +26,4 @@ if (Object.keys(values).length === 0) {
   process.exit(1);
 } 
 
-const key = process.env.DEPLOY_KEY
-if (!key) {
-  console.error(`${
-    chalk.redBright(
-      chalk.bold`Error: invalid deploy key!`
-  )}`);
-  process.exit(1);
-}
-
 

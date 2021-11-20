@@ -4,20 +4,18 @@
 name: 🏗️ Deploy to Stella IT Accounts Production
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
-    paths:
-      - "src/**/*.ts"
-  release:
-    types: [created]
+#    paths:
+#      - "src/**/*.ts"
+#  release:
+#    types: [created]
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
-
-
-
     steps:
     - name: 🚧 Checkout repository
       uses: actions/checkout@v2
@@ -47,6 +45,8 @@ jobs:
       run: echo $DEPLOY_ENV > ./.env
       env:
         DEPLOY_ENV: ${{ secrets.S4AIT_DEPLOY_ENV }}
+    - name: 🕵️ Run Debug script for .env file
+      run: node ./.github/workflows-files/env-deploy-validator.js
     - name: 🔒 Setting up deploy key
       run: mkdir ~/.ssh && echo $DEPLOY_KEY > ~/.ssh/id_rsa_deploy
       env:

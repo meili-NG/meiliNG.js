@@ -38,9 +38,10 @@ module.exports = {
       'pre-deploy-local': `node deploy-env.production.js`,
       'post-deploy': `yarn && yarn build && yarn generate && yarn prisma migrate deploy && pm2 startOrRestart ecosystem.config.js`,
       key: keyFile,
-      ssh_options: [process.env.DEPLOY_PRODUCTION_BYPASS_KEY_CHECK ? 'StrictHostKeyChecking=no' : undefined].filter(
-        (n) => n !== undefined,
-      ),
+      ssh_options: [
+        process.env.DEPLOY_PRODUCTION_BYPASS_KEY_CHECK ? 'StrictHostKeyChecking=no' : undefined,
+        process.env.DEPLOY_PRODUCTION_SUPPRESS_SSH_LOG ? 'LogLevel=QUIET' : undefined,
+      ].filter((n) => n !== undefined),
     },
   },
 };

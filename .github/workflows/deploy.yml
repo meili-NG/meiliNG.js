@@ -46,7 +46,7 @@ jobs:
     - name: 🕵️ Run Debug script for .env file
       run: node ./.github/workflows-files/env-deploy-validator.js
     - name: 🔒 Setting up deploy key
-      run: node ./.github/workflows-files/env-deploy-validator.js
+      run: node ./.github/workflows-files/setup-key-from-base64.js
       env:
         DEPLOY_PRODUCTION_KEY_BASE64: ${{ secrets.S4AIT_DEPLOY_KEY_BASE64 }}
         DEPLOY_PRODUCTION_KEY_PATH: '~/.ssh/id_rsa_deploy'

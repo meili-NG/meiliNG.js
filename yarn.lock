@@ -489,6 +489,13 @@ asn1.js@^5.0.0, asn1.js@^5.2.0:
     minimalistic-assert "^1.0.0"
     safer-buffer "^2.1.0"
 
+asn1@^0.2.4:
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/asn1/-/asn1-0.2.6.tgz#0d3a7bb6e64e02a90c0303b31f292868ea09a08d"
+  integrity sha512-ix/FxPn0MDjeyJ7i/yoHGFt/EX6LyNbxSEhPPXODPL+KB0VPk86UYfL0lMdy+KCnv+fmvIzySwaK5COwqVbWTQ==
+  dependencies:
+    safer-buffer "~2.1.0"
+
 astral-regex@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/astral-regex/-/astral-regex-2.0.0.tgz#483143c567aeed4785759c0865786dc77d7d2e31"
@@ -525,6 +532,13 @@ base32.js@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/base32.js/-/base32.js-0.0.1.tgz#d045736a57b1f6c139f0c7df42518a84e91bb2ba"
   integrity sha1-0EVzalex9sE58MffQlGKhOkbsro=
+
+bcrypt-pbkdf@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/bcrypt-pbkdf/-/bcrypt-pbkdf-1.0.2.tgz#a4301d389b6a43f9b67ff3ca11a3f6637e360e9e"
+  integrity sha1-pDAdOJtqQ/m2f/PKEaP2Y342Dp4=
+  dependencies:
+    tweetnacl "^0.14.3"
 
 bcryptjs@^2.4.3:
   version "2.4.3"
@@ -788,6 +802,13 @@ cosmiconfig@^7.0.0:
     parse-json "^5.0.0"
     path-type "^4.0.0"
     yaml "^1.10.0"
+
+cpu-features@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/cpu-features/-/cpu-features-0.0.2.tgz#9f636156f1155fd04bdbaa028bb3c2fbef3cea7a"
+  integrity sha512-/2yieBqvMcRj8McNzkycjW2v3OIUOibBfd2dLEJ0nWts8NobAxwiyw9phVNS6oDL8x8tz9F7uNVFEVpJncQpeA==
+  dependencies:
+    nan "^2.14.1"
 
 create-hash@^1.1.0, create-hash@^1.1.2:
   version "1.2.0"
@@ -2017,7 +2038,7 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
-make-dir@^3.0.0:
+make-dir@^3.0.0, make-dir@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/make-dir/-/make-dir-3.1.0.tgz#415e967046b3a7f1d185277d84aa58203726a13f"
   integrity sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==
@@ -2129,6 +2150,11 @@ named-placeholders@^1.1.2:
   dependencies:
     lru-cache "^4.1.3"
 
+nan@^2.14.1, nan@^2.15.0:
+  version "2.15.0"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.15.0.tgz#3f34a473ff18e15c1b5626b62903b5ad6e665fee"
+  integrity sha512-8ZtvEnA2c5aYCZYd1cvgdnU6cqwixRoYg70xPLWUws5ORTa/lnw+u4amixRS/Ac5U5mQVgp9pnlSUnbNWFaWZQ==
+
 natural-compare@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
@@ -2150,6 +2176,18 @@ node-localstorage@~1.3.0:
   integrity sha512-NMWCSWWc6JbHT5PyWlNT2i8r7PgGYXVntmKawY83k/M0UJScZ5jirb61TLnqKwd815DfBQu+lR3sRw08SPzIaQ==
   dependencies:
     write-file-atomic "^1.1.4"
+
+node-ssh@^12.0.2:
+  version "12.0.2"
+  resolved "https://registry.yarnpkg.com/node-ssh/-/node-ssh-12.0.2.tgz#e5dbbdeda534638f3fd0520869194a86420c9e7a"
+  integrity sha512-2x9ztRZYY1QkbgP8dF34ucKLKs36aaDfcBvGOpX2ie+HjBAwlWRT6h7hHIstnPyQOQg9e3ZJ54vSI0MIoOUSoA==
+  dependencies:
+    is-stream "^2.0.0"
+    make-dir "^3.1.0"
+    sb-promise-queue "^2.1.0"
+    sb-scandir "^3.1.0"
+    shell-escape "^0.2.0"
+    ssh2 "^1.5.0"
 
 nodemon@^2.0.14:
   version "2.0.14"
@@ -2605,10 +2643,22 @@ safe-regex2@^2.0.0:
   dependencies:
     ret "~0.2.0"
 
-"safer-buffer@>= 2.1.2 < 3.0.0", safer-buffer@^2.1.0:
+"safer-buffer@>= 2.1.2 < 3.0.0", safer-buffer@^2.1.0, safer-buffer@~2.1.0:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
+
+sb-promise-queue@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/sb-promise-queue/-/sb-promise-queue-2.1.0.tgz#7e44bebef643f75d809a3db7f605b815d877a04d"
+  integrity sha512-zwq4YuP1FQFkGx2Q7GIkZYZ6PqWpV+bg0nIO1sJhWOyGyhqbj0MsTvK6lCFo5TQwX5pZr6SCQ75e8PCDCuNvkg==
+
+sb-scandir@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/sb-scandir/-/sb-scandir-3.1.0.tgz#31c346abb5184b73c5a25b286858f4299aa8756c"
+  integrity sha512-70BVm2xz9jn94zSQdpvYrEG101/UV9TVGcfWr9T5iob3QhCK4lYXeculfBqPGFv3XTeKgx4dpWyYIDeZUqo4kg==
+  dependencies:
+    sb-promise-queue "^2.1.0"
 
 secure-json-parse@^2.0.0:
   version "2.4.0"
@@ -2683,6 +2733,11 @@ shebang-regex@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/shebang-regex/-/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==
+
+shell-escape@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/shell-escape/-/shell-escape-0.2.0.tgz#68fd025eb0490b4f567a027f0bf22480b5f84133"
+  integrity sha1-aP0CXrBJC09WegJ/C/IkgLX4QTM=
 
 signal-exit@^3.0.2:
   version "3.0.3"
@@ -2779,6 +2834,17 @@ sqlstring@^2.3.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/sqlstring/-/sqlstring-2.3.2.tgz#cdae7169389a1375b18e885f2e60b3e460809514"
   integrity sha512-vF4ZbYdKS8OnoJAWBmMxCQDkiEBkGQYU7UZPtL8flbDRSNkhaXvRJ279ZtI6M+zDaQovVU4tuRgzK5fVhvFAhg==
+
+ssh2@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/ssh2/-/ssh2-1.5.0.tgz#4dc559ba98a1cbb420e8d42998dfe35d0eda92bc"
+  integrity sha512-iUmRkhH9KGeszQwDW7YyyqjsMTf4z+0o48Cp4xOwlY5LjtbIAvyd3fwnsoUZW/hXmTCRA3yt7S/Jb9uVjErVlA==
+  dependencies:
+    asn1 "^0.2.4"
+    bcrypt-pbkdf "^1.0.2"
+  optionalDependencies:
+    cpu-features "0.0.2"
+    nan "^2.15.0"
 
 string-argv@0.3.1:
   version "0.3.1"
@@ -2952,6 +3018,11 @@ tsutils@^3.21.0:
   integrity sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==
   dependencies:
     tslib "^1.8.1"
+
+tweetnacl@^0.14.3:
+  version "0.14.5"
+  resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
+  integrity sha1-WuaBd/GS1EViadEIr6k/+HQ/T2Q=
 
 type-check@^0.4.0, type-check@~0.4.0:
   version "0.4.0"

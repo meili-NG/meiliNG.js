@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 // Meiling Gatekeeper Continous Deployment Test file
 // Copyright (c) Alex4386, Distributed under MIT License
 

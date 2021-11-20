@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 // Meiling Gatekeeper Continous Deployment Setup Utility
 // dotenv to base64
 //

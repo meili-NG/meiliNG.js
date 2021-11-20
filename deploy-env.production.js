@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 
 const { NodeSSH } = require('node-ssh');
 const fs = require('fs');
@@ -12,10 +13,8 @@ const config = {
   privateKey: keyFile,
   host: process.env.DEPLOY_PRODUCTION_HOST,
   username: process.env.DEPLOY_PRODUCTION_USER,
-  path: process.env.DEPLOY_PRODUCTION_PATH
+  path: process.env.DEPLOY_PRODUCTION_PATH,
 };
-
-console.log(config);
 
 (async () => {
   const session = await ssh.connect({
@@ -39,4 +38,3 @@ console.log(config);
   session.dispose();
   process.exit(0);
 })();
-

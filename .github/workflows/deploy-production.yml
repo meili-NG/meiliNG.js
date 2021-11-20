@@ -59,3 +59,4 @@ jobs:
       run: pm2 deploy production
       env:
         DEPLOY_PRODUCTION_HOST: ${{ secrets.S4AIT_DEPLOY_TARGET }}
+        DEPLOY_PRODUCTION_KEY_PATH: '~/.ssh/id_rsa'

@@ -25,7 +25,7 @@ const config = {
   path: process.env.DEPLOY_PRODUCTION_PATH,
 };
 
-console.log(keyFile);
+console.log(config);
 
 (async () => {
   const session = await ssh.connect({

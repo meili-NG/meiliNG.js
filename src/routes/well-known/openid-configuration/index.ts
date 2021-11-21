@@ -24,7 +24,7 @@ async function openIdConfigurationHandler(req: FastifyRequest, rep: FastifyReply
     issuer: config.openid.issuingAuthority,
     authorization_endpoint: buildMeilingURL('/v1/oauth2/auth'),
     device_authorization_endpoint: config.meiling.deviceCode.verification_url,
-    token_endpoint: buildMeilingURL('/v1/oauth2/auth'),
+    token_endpoint: buildMeilingURL('/v1/oauth2/token'),
     userinfo_endpoint: buildMeilingURL('/v1/oauth2/userinfo'),
     jwks_uri: buildMeilingURL('/v1/oauth2/certs'),
     token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic'],

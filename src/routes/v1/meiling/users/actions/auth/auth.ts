@@ -165,6 +165,8 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
         );
         return;
       }
+
+      if (query.code_challenge) query.code_challenge.replace(/-/g, '+').replace(/_/g, '/');
     }
     code_challenge = true;
   }
@@ -184,9 +186,9 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
         offline: query.access_type !== 'online',
         code_challenge: code_challenge
           ? {
-              method: query.code_challenge_method as unknown as OAuth2QueryCodeChallengeMethod,
-              challenge: query.code_challenge as string,
-            }
+            method: query.code_challenge_method as unknown as OAuth2QueryCodeChallengeMethod,
+            challenge: query.code_challenge as string,
+          }
           : undefined,
         openid: {
           nonce: query.nonce,

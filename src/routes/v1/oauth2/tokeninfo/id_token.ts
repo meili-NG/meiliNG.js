@@ -10,9 +10,9 @@ export async function idTokenInfoHandler(token: string, rep: FastifyReply): Prom
       const key =
         config.openid.jwt.publicKey.passphrase !== undefined
           ? {
-              key: config.openid.jwt.publicKey.key,
-              passphrase: config.openid.jwt.publicKey.passphrase,
-            }
+            key: config.openid.jwt.publicKey.key,
+            passphrase: config.openid.jwt.publicKey.passphrase,
+          }
           : config.openid.jwt.publicKey.key;
 
       const result = JWT.verify(token, key, {
@@ -24,7 +24,12 @@ export async function idTokenInfoHandler(token: string, rep: FastifyReply): Prom
         return;
       }
 
-      rep.send(result);
+      rep
+        .headers({
+          'Cache-Control': 'no-store',
+          Pragma: 'no-cache',
+        })
+        .send(result);
     } else {
       sendOAuth2Error(
         rep,

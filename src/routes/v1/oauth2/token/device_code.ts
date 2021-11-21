@@ -78,7 +78,7 @@ export async function oAuth2DeviceCodeHandler(req: FastifyRequest, rep: FastifyR
   rep
     .headers({
       'Cache-Control': 'no-store',
-      Pragma: 'no-store',
+      Pragma: 'no-cache',
     })
     .send({
       access_token: accessToken.token,

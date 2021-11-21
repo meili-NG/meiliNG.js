@@ -17,10 +17,15 @@ export async function refreshTokenInfoHandler(token: string, rep: FastifyReply):
     return;
   }
 
-  rep.send({
-    refresh_token: data.token,
-    token_type: data.token_type,
-    expires_in: data.expires_in,
-    scope: data.scope,
-  });
+  rep
+    .headers({
+      'Cache-Control': 'no-store',
+      Pragma: 'no-cache',
+    })
+    .send({
+      refresh_token: data.token,
+      token_type: data.token_type,
+      expires_in: data.expires_in,
+      scope: data.scope,
+    });
 }

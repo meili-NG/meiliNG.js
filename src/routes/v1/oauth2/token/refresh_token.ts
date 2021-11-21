@@ -66,7 +66,7 @@ export async function oAuth2RefreshTokenHandler(req: FastifyRequest, rep: Fastif
   rep
     .headers({
       'Cache-Control': 'no-store',
-      Pragma: 'no-store',
+      Pragma: 'no-cache',
     })
     .send({
       access_token: accessToken.token,

@@ -134,7 +134,7 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
   rep
     .headers({
       'Cache-Control': 'no-store',
-      Pragma: 'no-store',
+      Pragma: 'no-cache',
     })
     .send({
       access_token: access_token.token,

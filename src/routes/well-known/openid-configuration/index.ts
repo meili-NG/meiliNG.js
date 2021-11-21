@@ -7,7 +7,10 @@ import { OAuth2QueryGrantType, OAuth2QueryResponseType } from '../../v1/oauth2/i
 
 function buildMeilingURL(path: string) {
   const url = new URL(config.meiling.hostname);
-  url.pathname += path;
+
+  if (url.pathname.endsWith('/') && path.startsWith('/')) {
+    url.pathname += path.replace(/^\//g, '');
+  }
   url.pathname = url.pathname.replace(/([^:]\/)\/+/g, '$1');
 
   return url.toString();

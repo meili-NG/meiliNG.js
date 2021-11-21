@@ -1,6 +1,6 @@
 <h1 align="center">Install</h1>
 <p align="center">This Guide will help you install Meiling Gatekeeper in no time.</p>
-<p align="right"><b>Last Update:</b> v.0.4.3</p>
+<p align="right"><b>Last Update:</b> v.0.4.5</p>
 
 ## Getting Started
 Hello, Welcome to Meiling Gatekeeper, an oAuth2 based authentication engine to build your customized login in no time.
@@ -26,10 +26,7 @@ Please run `yarn generate` if the prisma definition files are not properly gener
 
 ## Configuring Environment Variables
 Meiling engine comes with various config methods.  
-If you are using [config.env.js](/config.env.js) based configuration for Docker deployment or etc., It will be handy for you if you use [sample .env file (.env.example)](/.env.example) shipped with this repository. In order to use it, just copy `.env.example` to `.env`
-
-### Make Meiling use configs from environment variables (e.g. Docker Deployment)
-Copy [config.env.js](/config.env.js) to `config.js`.  
+You can use [sample .env file (.env.example)](/.env.example) shipped with this repository. In order to use it, just copy `.env.example` to `.env`
 
 ## Setting up Database
 
@@ -85,6 +82,9 @@ DATABASE_URL="mysql://username:password@host:port/database?schema=public"
 ### ==== CONFIGURATIONS FOR MEILING ==== 
 
 ## Meiling API configs
+
+# Hostname of Meiling (where this api will be served)
+MEILING_HOSTNAME="https://demo.meili.ng"
 
 # Allowed Frontend URLs (comma separated)
 # > These are the frontend URLs (the app user faces when using meiling)

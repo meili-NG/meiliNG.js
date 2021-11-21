@@ -131,15 +131,17 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
     refresh_token = await ClientAuthorization.createToken(authorization, 'REFRESH_TOKEN');
   }
 
-  rep.headers({
-    "Cache-Control": "no-store",
-    "Pragma": "no-store"
-  }).send({
-    access_token: access_token.token,
-    scope,
-    refresh_token: refresh_token?.token,
-    token_type: 'Bearer',
-    expires_in: Token.getValidTimeByType('ACCESS_TOKEN'),
-    id_token: scopes.includes('openid') ? await User.createIDToken(user, clientId, scopes, nonce) : undefined,
-  });
+  rep
+    .headers({
+      'Cache-Control': 'no-store',
+      Pragma: 'no-store',
+    })
+    .send({
+      access_token: access_token.token,
+      scope,
+      refresh_token: refresh_token?.token,
+      token_type: 'Bearer',
+      expires_in: Token.getValidTimeByType('ACCESS_TOKEN'),
+      id_token: scopes.includes('openid') ? await User.createIDToken(user, clientId, scopes, nonce) : undefined,
+    });
 }

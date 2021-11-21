@@ -131,7 +131,10 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
     refresh_token = await ClientAuthorization.createToken(authorization, 'REFRESH_TOKEN');
   }
 
-  rep.send({
+  rep.headers({
+    "Cache-Control": "no-store",
+    "Pragma": "no-store"
+  }).send({
     access_token: access_token.token,
     scope,
     refresh_token: refresh_token?.token,

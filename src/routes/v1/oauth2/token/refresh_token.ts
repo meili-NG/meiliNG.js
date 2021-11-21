@@ -63,7 +63,10 @@ export async function oAuth2RefreshTokenHandler(req: FastifyRequest, rep: Fastif
   const accessToken = await ClientAuthorization.createToken(authorization, 'ACCESS_TOKEN');
   const currentRefreshToken = await ClientAuthorization.getToken(authorization, 'REFRESH_TOKEN');
 
-  rep.send({
+  rep.headers({
+    "Cache-Control": "no-store",
+    "Pragma": "no-store"
+  }).send({
     access_token: accessToken.token,
     scope,
     refresh_token: currentRefreshToken.token,

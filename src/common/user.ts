@@ -331,10 +331,10 @@ export async function findByEmail(email: string, verified: boolean | undefined =
       n.userId === undefined || n.userId === null
         ? undefined
         : getPrismaClient().user.findFirst({
-          where: {
-            id: n.userId,
-          },
-        }),
+            where: {
+              id: n.userId,
+            },
+          }),
     )
     .filter((n) => n !== undefined && n !== null);
 
@@ -533,7 +533,7 @@ export async function createIDToken(
   const nameDetail = {
     family_name: data.familyName,
     given_name: data.givenName,
-    middle_name: data.middleName ? data.middleName : "",
+    middle_name: data.middleName ? data.middleName : '',
     name: data.name,
   };
 
@@ -570,9 +570,9 @@ export async function createIDToken(
     const key =
       config.openid.jwt.privateKey.passphrase !== undefined
         ? {
-          key: config.openid.jwt.privateKey.key,
-          passphrase: config.openid.jwt.privateKey.passphrase,
-        }
+            key: config.openid.jwt.privateKey.key,
+            passphrase: config.openid.jwt.privateKey.passphrase,
+          }
         : config.openid.jwt.privateKey.key;
 
     // edge case handling

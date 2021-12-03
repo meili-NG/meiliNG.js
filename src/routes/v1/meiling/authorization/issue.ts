@@ -76,6 +76,9 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
 
       sendBaridegiLog(BaridegiLogType.CREATE_AUTHORIZATION_REQUEST, {
         type: body.type,
+        notificationApi: {
+          rawType: Notification.NotificationMethod.EMAIL,
+        },
         ip: req.ip,
         to: email,
       });
@@ -138,6 +141,9 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
 
       sendBaridegiLog(BaridegiLogType.CREATE_AUTHORIZATION_REQUEST, {
         type: body.type,
+        notificationApi: {
+          rawType: Notification.NotificationMethod.EMAIL,
+        },
         ip: req.ip,
         to: phone.formatInternational(),
       });

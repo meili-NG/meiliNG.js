@@ -3,6 +3,7 @@ import { FastifyRequest } from 'fastify/types/request';
 import libphonenumberJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '.';
 import { User, Utils } from '../../../common';
+import { BaridegiLogType, sendBaridegiLog } from '../../../common/baridegi';
 import {
   convertToNotificationMethod,
   sendNotification,
@@ -163,6 +164,15 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
         sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID, 'invalid authorization method');
         return;
       }
+
+      sendBaridegiLog(BaridegiLogType.CREATE_AUTHORIZATION_REQUEST, {
+        type: currentMethod,
+        notificationApi: {
+          rawType: notificationMethod,
+        },
+        ip: req.ip,
+        to,
+      });
 
       await sendNotification(notificationMethod, {
         type: 'template',

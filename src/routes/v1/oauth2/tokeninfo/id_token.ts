@@ -24,7 +24,12 @@ export async function idTokenInfoHandler(token: string, rep: FastifyReply): Prom
         return;
       }
 
-      rep.send(result);
+      rep
+        .headers({
+          'Cache-Control': 'no-store',
+          Pragma: 'no-cache',
+        })
+        .send(result);
     } else {
       sendOAuth2Error(
         rep,

@@ -181,6 +181,8 @@ export async function meilingV1OAuthClientAuthCheckHandler(req: FastifyRequest, 
         );
         return;
       }
+
+      if (query.code_challenge) query.code_challenge.replace(/-/g, '+').replace(/_/g, '/');
     }
     code_challenge = true;
   }

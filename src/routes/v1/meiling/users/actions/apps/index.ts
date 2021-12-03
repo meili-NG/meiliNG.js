@@ -8,9 +8,11 @@ import { appActionsPlugin } from './actions';
 import appDeleteHandler from './delete';
 import appGetHandler from './get';
 import userAppsHandler from './list';
+import appCreateHandler from './post';
 
 export function userAppPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', userAppsHandler);
+  app.post('/', appCreateHandler);
 
   app.register(userAppsActionsPlugin, { prefix: '/:clientId' });
 

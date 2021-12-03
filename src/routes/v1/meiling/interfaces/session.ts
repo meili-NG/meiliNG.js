@@ -6,6 +6,15 @@ export interface MeilingV1Session {
   previouslyLoggedIn?: MeilingLoggedInUser[];
   authorizationStatus?: MeilingV1SessionAuthorizationStatus;
   passwordReset?: MeilingV1PasswordResetSession;
+  registering?: MeilingV1Registering;
+}
+
+export interface MeilingV1Registering {
+  webAuthn?: MeilingV1RegisteringWebAuthn;
+}
+
+export interface MeilingV1RegisteringWebAuthn {
+  challenge: string;
 }
 
 export interface MeilingLoggedInUser {

@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { getUserFromActionRequest } from '..';
-import { User } from '../../../../../../common';
+import { getUserFromActionRequest } from '../..';
+import { User } from '../../../../../../../common';
 
 export async function userPasswordGetHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;

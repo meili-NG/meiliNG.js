@@ -2,8 +2,15 @@
 
 const dotenv = require('dotenv');
 const path = require('path');
+const os = require('os');
 
 dotenv.config({ path: path.join(__dirname, '.env') });
+
+let keyFile = process.env.DEPLOY_PRODUCTION_KEY_PATH || undefined;
+if (keyFile) keyFile = keyFile.replace(/^~/g, os.homedir());
+
+let keyOption = '';
+if (keyOption) keyOption += '-i "' + keyFile + '"';
 
 module.exports = {
   apps: [
@@ -28,8 +35,13 @@ module.exports = {
       ref: 'origin/main',
       repo: 'https://github.com/meiling-gatekeeper/meiling',
       path: process.env.DEPLOY_PRODUCTION_PATH,
-      'pre-deploy-local': `scp -Cr ./.env ${process.env.DEPLOY_PRODUCTION_USER}@${process.env.DEPLOY_PRODUCTION_HOST}:${process.env.DEPLOY_PRODUCTION_PATH}/current`,
-      'post-deploy': `yarn && yarn build && pm2 startOrRestart ecosystem.config.js`,
+      'pre-deploy-local': `node deploy-env.production.js`,
+      'post-deploy': `yarn && yarn build && yarn generate && yarn prisma migrate deploy && pm2 startOrRestart ecosystem.config.js`,
+      key: keyFile,
+      ssh_options: [
+        process.env.DEPLOY_PRODUCTION_BYPASS_KEY_CHECK ? 'StrictHostKeyChecking=no' : undefined,
+        process.env.DEPLOY_PRODUCTION_SUPPRESS_SSH_LOG ? 'LogLevel=QUIET' : undefined,
+      ].filter((n) => n !== undefined),
     },
   },
 };

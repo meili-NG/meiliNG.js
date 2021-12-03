@@ -99,7 +99,7 @@ export function getCryptoSafeInteger(bound?: number): number {
 
 export function checkBase64(string: string) {
   let convertedString = string;
-  if (string.includes('-') || string.includes('/')) {
+  if (string.includes('-') || string.includes('_')) {
     convertedString = convertedString.replace(/\-/g, '+').replace(/\_/g, '/');
     convertedString = convertedString.padEnd(Math.ceil(convertedString.length / 4) * 4, '=');
     console.log(convertedString);

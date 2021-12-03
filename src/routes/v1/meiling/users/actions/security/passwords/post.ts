@@ -1,9 +1,9 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { PasswordBody } from '.';
-import { getUserFromActionRequest } from '..';
-import { User, Utils } from '../../../../../../common';
-import { sendMeilingError } from '../../../error';
-import { MeilingV1ErrorType } from '../../../interfaces';
+import { getUserFromActionRequest } from '../..';
+import { User, Utils } from '../../../../../../../common';
+import { sendMeilingError } from '../../../../error';
+import { MeilingV1ErrorType } from '../../../../interfaces';
 
 export async function userPasswordCreateHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;

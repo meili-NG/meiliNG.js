@@ -1,11 +1,11 @@
 import bcrypt from 'bcryptjs';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { PasswordChangeBody } from '.';
-import { getUserFromActionRequest } from '..';
-import { User, Utils } from '../../../../../../common';
-import { getPrismaClient } from '../../../../../../resources/prisma';
-import { sendMeilingError } from '../../../error';
-import { MeilingV1ErrorType } from '../../../interfaces';
+import { getUserFromActionRequest } from '../..';
+import { User, Utils } from '../../../../../../../common';
+import { getPrismaClient } from '../../../../../../../resources/prisma';
+import { sendMeilingError } from '../../../../error';
+import { MeilingV1ErrorType } from '../../../../interfaces';
 
 export async function userPasswordUpdateHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;

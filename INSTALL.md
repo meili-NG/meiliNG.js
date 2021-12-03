@@ -1,6 +1,6 @@
 <h1 align="center">Install</h1>
 <p align="center">This Guide will help you install Meiling Gatekeeper in no time.</p>
-<p align="right"><b>Last Update:</b> v.0.3.1</p>
+<p align="right"><b>Last Update:</b> v.0.4.5</p>
 
 ## Getting Started
 Hello, Welcome to Meiling Gatekeeper, an oAuth2 based authentication engine to build your customized login in no time.
@@ -17,19 +17,16 @@ Meiling engine uses [yarn](https://yarnpkg.com) for managing dependencies of app
 
 ### Installing node_modules
 Meiling engine does depend on lots of packages on npmjs.org which does not come out of box.  
-Please install `node_modules` with `yarn` command.  
+Please install node dependencies with `yarn` command.  
 
 ### (Optional) Generate Prisma Definition Files
-On postinstall of node_modules or any updates, `yarn` should automatically generate prisma definition files. you can generate prisma definition files via `node_modules`.  
+On postinstall of node_modules or any updates, `yarn` should automatically generate prisma definition files. you can generate prisma definition files via `prisma`'s internal commands.  
 
 Please run `yarn generate` if the prisma definition files are not properly generated.  
 
 ## Configuring Environment Variables
 Meiling engine comes with various config methods.  
-If you are using [config.env.js](/config.env.js) based configuration for Docker deployment or etc., It will be handy for you if you use [sample .env file (.env.example)](/.env.example) shipped with this repository. In order to use it, just copy `.env.example` to `.env`
-
-### Make Meiling use configs from environment variables (e.g. Docker Deployment)
-Copy [config.env.js](/config.env.js) to `config.js`.  
+You can use [sample .env file (.env.example)](/.env.example) shipped with this repository. In order to use it, just copy `.env.example` to `.env`
 
 ## Setting up Database
 
@@ -42,12 +39,18 @@ Meiling uses [prisma](https://prisma.io), a next-generation ORM for Node.JS. The
 > Currently unsupported Database: *SQLite*.  
 > Please refer to [Prisma Docs](https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference/#json) to get up-to-date information.
 
-Meiling is designed with MariaDB in mind, but MySQL, PostgreSQL is also supported.
+Meiling is designed with MariaDB in mind, but MySQL, PostgreSQL and mongoDB is also supported.
 
 To change the database provider,  
 1. go to [./prisma/schema.prisma](./prisma/schema.prisma)
 2. go to datasource db -> provider
-3. change it to your preferences.
+3. change it to match your preferences.
+
+> 💡 **Note**  
+> Since meiling gatekeeper is focused on developing for MariaDB, using different DB will cause conflict when there is any changes on upstream schema.
+> 
+> Please make a note that when you update, Please backup your initial schema file.
+
 
 ### Setting Database URL
 Prisma by default uses environment variables to get URL for connecting database. In order to configure database, you should configure database credentials into URL form.  
@@ -55,32 +58,76 @@ Prisma by default uses environment variables to get URL for connecting database.
 You should set environment variable `DATABASE_URL` or edit [`.env` file](/.env) to following:
 * MySQL/MariaDB: `mysql://username:password@host:port/database`
 * PostgreSQL: `postgresql://username:password@host:port/database?schema=public`
-* Microsoft SQL Server: Please refer to [Prisma: Getting Started with Microsoft SQL Server](https://www.prisma.io/docs/concepts/components/preview-features/sql-server/sql-server-start-from-scratch-typescript#connect-your-database)
+* Microsoft SQL Server, mongoDB: Please refer to [Prisma: Getting Started with Microsoft SQL Server](https://www.prisma.io/docs/concepts/components/preview-features/sql-server/sql-server-start-from-scratch-typescript#connect-your-database)
 
 ### Deploy Migration to Production
 In order to deploy database migrations, run `yarn prisma migrate deploy`.  
 
+If you are using custom structure, Using `prisma db push` can be an alternative option for you.
+
 ## Configurations
-Configruation of Meiling differs by configuration method  
-(1. using environment variables, 2. using `config.js`)  
+From v0.4.0, Usage of `.env` is recommended than using `config.js`.  
 
-Please check your configuration method beforehand.
+The following is a example .env files.
 
-### Registering frontends
-Meiling allows developers to serve multiple frontends.  
+### Things to configure on `.env` file
+```env
+### ==== CONFIGURATIONS FOR PRISMA ====
 
-* env: `FRONTEND_URLS`
-* config.js: `frontend.url` (Array)
+## Database
 
-### Configuring OpenID Issuing Authority and JWT SecretKey
-These are the basic minimum for using OpenID.
+# This is a database URL for setting up database for meiling.
+DATABASE_URL="mysql://username:password@host:port/database?schema=public"
 
-#### Configuring OpenID Issuing Authority
-Normally, OpenID Issuing Authority should be meiling engine's public root endpoint.  
-e.g. `https://meiling.stella-api.dev`  
+### ==== CONFIGURATIONS FOR MEILING ==== 
 
-* env: `OPENID_ISSUING_AUTHORITY`
-* config.js: `openid.issuingAuthority`
+## Meiling API configs
+
+# Hostname of Meiling (where this api will be served)
+MEILING_HOSTNAME="https://demo.meili.ng"
+
+# Allowed Frontend URLs (comma separated)
+# > These are the frontend URLs (the app user faces when using meiling)
+# > These configurations are used for CORS setting of /v1/meiling endpoints
+# > Therefore, preventing others webpages pretend being legitimate account webpage
+FRONTEND_URLS="https://frontend-1.meili.ng,https://frontend-2.meili.ng,http://also.with.ports:3000"
+
+# The frontend URL for device code verification
+MEILING_DEVICE_CODE_VERIFICATION_URL="https://frontend.meili.ng/device"
+
+# The listening port/socket for meiling (UNIX Sockets are supported)
+FASTIFY_LISTEN=8080
+
+# Is meiling behind a reverse proxy? (1: yes, 0: no)
+FASTIFY_USE_PROXY=1
+
+
+
+## OpenID Configuration
+
+# The "issuer" on OpenID Connect id_token
+OPENID_ISSUING_AUTHORITY="https://demo.meili.ng"
+
+# Deprecated: use "yarn genkey" will automatically generate certificates for creating JWTs
+OPENID_SECRET_KEY=""
+
+NOTIFICATION_API_HOST="http://notification.meili.ng"
+NOTIFICATION_API_KEY="notificationAPIMeilingSecret"
+
+
+
+## Meiling Admin Configuration
+
+# The tokens (comma separated) for accessing Administrator endpoints: /v1/admin
+# > These can also be used for Basic Authorization by putting base64-ed username:password format
+ADMIN_TOKENS="HakureiShrine,HongMeiling"
+
+# Allowed Admin Frontend URLs (comma separated)
+# > These are the frontend URLs for administration (the app admin faces when using meiling)
+# > These configurations are used for CORS setting of /v1/admin endpoints
+ADMIN_FRONTEND_URLS="https://frontend-1.meili.ng,https://frontend-2.meili.ng,http://also.with.ports:3000"
+
+```
 
 #### Configuring OpenID JWT SecretKey
 These are the secret key to sign your OpenID Token. Please make sure this is long enough and random enough.
@@ -90,17 +137,6 @@ These are the secret key to sign your OpenID Token. Please make sure this is lon
 yarn genkey
 ```
 
-### Configuring Port to Listen
-* env: `FASTIFY_LISTEN`
-* config.js: `fastify.listen`
-
-### Configuring Meiling Public Hostname
-These are the public hostname when you call meiling server.  
-
-* env: `MEILING_HOSTNAME`
-* config.js: `meiling.hostname`
-
-### 
 
 ### Configuring Notification API
 TODO

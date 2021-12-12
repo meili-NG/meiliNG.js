@@ -1,6 +1,6 @@
 {
   "name": "meiling",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "An easy-to-use, open-source, flexible oAuth2 Authentication Provider and OpenID Connect Server",
   "main": "dist/",
   "repository": "https://github.com/meiling-gatekeeper/meiling",

@@ -1,5 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { ClientAuthorization, Token } from '../../../../common';
+import { Client, ClientAuthorization, Token, User } from '../../../../common';
+import { getByClientId } from '../../../../common/client';
+import { getPrismaClient } from '../../../../resources/prisma';
 import { MeilingV1Session } from '../../meiling/common';
 import { sendMeilingError } from '../../meiling/error';
 import { MeilingV1ErrorType } from '../../meiling/interfaces';
@@ -24,9 +26,28 @@ const internalAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
   });
 
   app.get('/export', async (req, rep) => {
-    rep.send({
-      export: 'placeholder',
-    });
+    const clientsRaw = await getPrismaClient().oAuthClient.findMany({});
+
+    const exportData = {
+      _alert: "export feature is experimental and doesn't follow semver and might have breaking changes at the moment.",
+      version: 0,
+      data: {
+        clients: await Promise.all(
+          clientsRaw.map(async (n) => ({
+            ...Client.getInfoForOwners(n),
+          })),
+        ),
+        users: await Promise.all(
+          (
+            await getPrismaClient().user.findMany({})
+          ).map(async (n) => ({
+            ...User.getDetailedInfo(n),
+          })),
+        ),
+      },
+    };
+
+    rep.send(exportData);
   });
 
   done();

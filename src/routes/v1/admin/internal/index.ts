@@ -23,6 +23,12 @@ const internalAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
     }
   });
 
+  app.get('/export', async (req, rep) => {
+    rep.send({
+      export: 'placeholder',
+    });
+  });
+
   done();
 };
 

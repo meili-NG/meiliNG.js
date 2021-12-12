@@ -34,14 +34,14 @@ const internalAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
       data: {
         clients: await Promise.all(
           clientsRaw.map(async (n) => ({
-            ...Client.getInfoForOwners(n),
+            ...(await Client.getInfoForOwners(n)),
           })),
         ),
         users: await Promise.all(
           (
             await getPrismaClient().user.findMany({})
           ).map(async (n) => ({
-            ...User.getDetailedInfo(n),
+            ...(await User.getDetailedInfo(n)),
           })),
         ),
       },

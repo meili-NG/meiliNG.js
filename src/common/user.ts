@@ -222,6 +222,65 @@ export async function addPassword(user: UserModel | string, password: string) {
   return passwordData ? true : false;
 }
 
+type MeilingMetadataObjectConfig = MeilingMetadataObjectV1Config;
+
+interface MeilingMetadataObjectBaseConfig {
+  version: number;
+}
+
+interface MeilingMetadataObjectV1Config extends MeilingMetadataObjectBaseConfig {
+  version: 1;
+  sanitize?: boolean;
+  scopes?: string[];
+}
+
+// TODO: make a proper interface
+export function sanitizeMetadata(metadata?: any, _scopes: string[] = []) {
+  if (!metadata) return metadata;
+  if (typeof metadata !== 'object') return metadata;
+
+  // object._meiling for permission controls for accessing metadata
+  if (metadata['_meiling']) {
+    const metadataConfig = metadata['_meiling'] as MeilingMetadataObjectConfig;
+    if (metadataConfig.version === 1) {
+      if (metadataConfig.sanitize) {
+        return;
+      }
+
+      if (metadataConfig.scopes) {
+        let isAuthorized = false;
+        for (const scopes of metadata.scopes) {
+          const scopeArray = scopes.split(' ') as string[];
+          const authorizedArray = scopeArray.map((n) => _scopes.indexOf(n) >= 0);
+
+          let isPrivileged = true;
+          for (const authorized of authorizedArray) {
+            if (!authorized) {
+              isPrivileged = false;
+              break;
+            }
+          }
+
+          if (isPrivileged) {
+            isAuthorized = true;
+            break;
+          }
+        }
+
+        if (!isAuthorized) {
+          return;
+        }
+      }
+    }
+  }
+
+  for (const key in metadata) {
+    metadata[key] = sanitizeMetadata(metadata[key]);
+  }
+
+  return metadata;
+}
+
 export async function checkPassword(user: UserModel | string, password: string) {
   const passwords = await getPasswords(user);
 
@@ -564,6 +623,7 @@ export async function createIDToken(
     email_verified: emailPerm && email ? email.verified : undefined,
     phone: phonePerm && phone ? phone.phone : undefined,
     phone_verified: phonePerm && phone ? true : undefined,
+    metadata: sanitizeMetadata(data.metadata, permissions),
   };
 
   if (config.openid.jwt.privateKey?.key !== undefined) {

@@ -54,6 +54,7 @@
   "scripts": {
     "debug": "ts-node ./src/",
     "build": "swc src --out-dir dist/ --sync",
+    "build:types": "tsc",
     "build:docker": "docker build .",
     "start:dev": "nodemon",
     "start:prod": "swc src --out-dir dist/ --sync && NODE_ENV=production node ./dist/",

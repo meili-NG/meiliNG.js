@@ -87,13 +87,13 @@ export async function getInfo(user: UserModel | string): Promise<UserInfoObject 
 
   const emailsPromise = getPrismaClient().email.findMany({
     where: {
-      user: userDatabase,
+      userId: userDatabase.id,
     },
   });
 
   const phonesPromise = getPrismaClient().phone.findMany({
     where: {
-      user: userDatabase,
+      userId: userDatabase.id,
     },
   });
 

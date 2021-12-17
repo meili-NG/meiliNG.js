@@ -87,13 +87,13 @@ export async function getInfo(user: UserModel | string): Promise<UserInfoObject 
 
   const emailsPromise = getPrismaClient().email.findMany({
     where: {
-      user: userDatabase,
+      userId: userDatabase.id,
     },
   });
 
   const phonesPromise = getPrismaClient().phone.findMany({
     where: {
-      user: userDatabase,
+      userId: userDatabase.id,
     },
   });
 
@@ -220,6 +220,70 @@ export async function addPassword(user: UserModel | string, password: string) {
   });
 
   return passwordData ? true : false;
+}
+
+type MeilingMetadataObjectConfig = MeilingMetadataObjectV1Config;
+
+interface MeilingMetadataObjectBaseConfig {
+  version: number;
+}
+
+interface MeilingMetadataObjectV1Config extends MeilingMetadataObjectBaseConfig {
+  version: 1;
+  sanitize?: boolean;
+  scopes?: string[];
+}
+
+// TODO: make a proper interface
+export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = []) {
+  if (!metadata) return metadata;
+  if (typeof metadata !== 'object') return metadata;
+
+  // object._meiling for permission controls for accessing metadata
+  if (metadata['_meiling']) {
+    const metadataConfig = metadata['_meiling'] as MeilingMetadataObjectConfig;
+    if (metadataConfig.version === 1) {
+      if (metadataConfig.sanitize) {
+        return;
+      }
+
+      if (metadataConfig.scopes) {
+        let isAuthorized = false;
+
+        if (typeof _scopes === 'boolean') {
+          isAuthorized = _scopes;
+        } else {
+          for (const scopes of metadata.scopes) {
+            const scopeArray = scopes.split(' ') as string[];
+            const authorizedArray = scopeArray.map((n) => _scopes.indexOf(n) >= 0);
+
+            let isPrivileged = true;
+            for (const authorized of authorizedArray) {
+              if (!authorized) {
+                isPrivileged = false;
+                break;
+              }
+            }
+
+            if (isPrivileged) {
+              isAuthorized = true;
+              break;
+            }
+          }
+
+          if (!isAuthorized) {
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  for (const key in metadata) {
+    metadata[key] = sanitizeMetadata(metadata[key], _scopes);
+  }
+
+  return metadata;
 }
 
 export async function checkPassword(user: UserModel | string, password: string) {
@@ -564,6 +628,7 @@ export async function createIDToken(
     email_verified: emailPerm && email ? email.verified : undefined,
     phone: phonePerm && phone ? phone.phone : undefined,
     phone_verified: phonePerm && phone ? true : undefined,
+    metadata: data.metadata ? sanitizeMetadata(data.metadata, permissions) : undefined,
   };
 
   if (config.openid.jwt.privateKey?.key !== undefined) {

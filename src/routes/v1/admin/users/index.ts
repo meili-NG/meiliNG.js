@@ -111,6 +111,30 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
     rep.send(user);
   });
 
+  app.put('/', async (req, rep) => {
+    const uuid = (req.params as { uuid: string }).uuid;
+    const body = req.body as any;
+
+    const user = await User.getInfo(uuid);
+    if (!user) {
+      sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
+      throw new Error('user not found');
+    }
+
+    if (body.metadata !== undefined) {
+      await getPrismaClient().user.update({
+        where: {
+          id: uuid,
+        },
+        data: {
+          metadata: body.metadata,
+        },
+      });
+    }
+
+    rep.send({ success: true });
+  });
+
   app.register(userEmailsAdminHandler, { prefix: '/emails' });
   app.register(userPhonesAdminHandler, { prefix: '/phones' });
 

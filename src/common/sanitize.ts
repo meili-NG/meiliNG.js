@@ -17,5 +17,9 @@ export async function getSanitizedUser(user: string): Promise<User.UserDetailedO
     }
   }
 
+  if (userData?.metadata) {
+    userData.metadata = User.sanitizeMetadata(userData.metadata);
+  }
+
   return userData;
 }

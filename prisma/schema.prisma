@@ -44,6 +44,8 @@ model User {
   lastSignIn         DateTime             @default(now())
   lastAuthenticated  DateTime             @default(now())
   ownedClientSecrets OAuthClientSecrets[]
+
+  metadata Json?
 }
 
 model Email {

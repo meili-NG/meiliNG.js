@@ -235,7 +235,7 @@ interface MeilingMetadataObjectV1Config extends MeilingMetadataObjectBaseConfig 
 }
 
 // TODO: make a proper interface
-export function sanitizeMetadata(metadata?: any, _scopes: string[] = []) {
+export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = []) {
   if (!metadata) return metadata;
   if (typeof metadata !== 'object') return metadata;
 
@@ -249,33 +249,38 @@ export function sanitizeMetadata(metadata?: any, _scopes: string[] = []) {
 
       if (metadataConfig.scopes) {
         let isAuthorized = false;
-        for (const scopes of metadata.scopes) {
-          const scopeArray = scopes.split(' ') as string[];
-          const authorizedArray = scopeArray.map((n) => _scopes.indexOf(n) >= 0);
 
-          let isPrivileged = true;
-          for (const authorized of authorizedArray) {
-            if (!authorized) {
-              isPrivileged = false;
+        if (typeof _scopes === 'boolean') {
+          isAuthorized = _scopes;
+        } else {
+          for (const scopes of metadata.scopes) {
+            const scopeArray = scopes.split(' ') as string[];
+            const authorizedArray = scopeArray.map((n) => _scopes.indexOf(n) >= 0);
+
+            let isPrivileged = true;
+            for (const authorized of authorizedArray) {
+              if (!authorized) {
+                isPrivileged = false;
+                break;
+              }
+            }
+
+            if (isPrivileged) {
+              isAuthorized = true;
               break;
             }
           }
 
-          if (isPrivileged) {
-            isAuthorized = true;
-            break;
+          if (!isAuthorized) {
+            return;
           }
-        }
-
-        if (!isAuthorized) {
-          return;
         }
       }
     }
   }
 
   for (const key in metadata) {
-    metadata[key] = sanitizeMetadata(metadata[key]);
+    metadata[key] = sanitizeMetadata(metadata[key], _scopes);
   }
 
   return metadata;
@@ -623,7 +628,7 @@ export async function createIDToken(
     email_verified: emailPerm && email ? email.verified : undefined,
     phone: phonePerm && phone ? phone.phone : undefined,
     phone_verified: phonePerm && phone ? true : undefined,
-    metadata: sanitizeMetadata(data.metadata, permissions),
+    metadata: data.metadata ? sanitizeMetadata(data.metadata, permissions) : undefined,
   };
 
   if (config.openid.jwt.privateKey?.key !== undefined) {

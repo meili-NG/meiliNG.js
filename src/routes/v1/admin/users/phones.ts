@@ -2,9 +2,10 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { getPrismaClient } from '../../../../resources/prisma';
 import { sendMeilingError } from '../../meiling/error';
 import { MeilingV1ErrorType } from '../../meiling/interfaces';
+import libPhoneNumberJs from 'libphonenumber-js';
 
-interface UserEmailRegisterInterface {
-  email?: string;
+interface UserPhoneRegisterInterface {
+  phone?: string;
   isVerified?: boolean | string;
   isPrimary?: boolean | string;
 }
@@ -26,9 +27,9 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
 
   app.post('/', async (req, rep) => {
     const uuid = (req.params as { uuid: string }).uuid;
-    const body = req.body as UserEmailRegisterInterface | undefined;
+    const body = req.body as UserPhoneRegisterInterface | undefined;
 
-    if (!body?.email) {
+    if (!body?.phone || typeof body.phone !== 'string') {
       sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
       return;
     }
@@ -41,21 +42,50 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       body.isPrimary = /^true$/gi.test(body.isPrimary);
     }
 
-    if (body.isPrimary) {
-      // check if there is existing primary emails.
-      const primaryEmails = await getPrismaClient().email.findMany({
+    const phone = libPhoneNumberJs(body.phone);
+
+    if (!phone) {
+      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'invalid phone number');
+      return;
+    }
+
+    const matchingPhones = (
+      await getPrismaClient().phone.findMany({
         where: {
-          user: {
-            id: uuid,
-          },
+          userId: uuid,
+        },
+      })
+    ).filter((n) => n.phone === phone.formatInternational());
+
+    if (matchingPhones.length > 0) {
+      sendMeilingError(rep, MeilingV1ErrorType.CONFLICT, 'phone number already exists');
+      return;
+    }
+
+    if (body.isPrimary) {
+      // check if there is existing primary phones.
+      const primaryPhones = await getPrismaClient().phone.findMany({
+        where: {
           isPrimary: true,
         },
       });
 
-      for (const primaryEmail of primaryEmails) {
-        await getPrismaClient().email.update({
+      const myPrimaryPhones = primaryPhones.filter((n) => n.userId === uuid);
+      const othersPrimaryPhones = primaryPhones.filter((n) => n.userId !== uuid && n.isPrimary);
+
+      if (othersPrimaryPhones.length > 0) {
+        sendMeilingError(
+          rep,
+          MeilingV1ErrorType.CONFLICT,
+          'there is other user who is using this phone as primary phone',
+        );
+        return;
+      }
+
+      for (const primaryPhone of myPrimaryPhones) {
+        await getPrismaClient().phone.update({
           where: {
-            id: primaryEmail.id,
+            id: primaryPhone.id,
           },
           data: {
             isPrimary: false,
@@ -64,20 +94,19 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       }
     }
 
-    const email = await getPrismaClient().email.create({
+    const phoneModel = await getPrismaClient().phone.create({
       data: {
         user: {
           connect: {
             id: uuid,
           },
         },
-        email: body.email,
-        verified: body.isVerified || false,
+        phone: phone.formatInternational(),
         isPrimary: body.isPrimary || false,
       },
     });
 
-    rep.send(email);
+    rep.send(phoneModel);
   });
 
   app.register(userPhoneAdminHandler, { prefix: '/:phoneId' });
@@ -88,27 +117,129 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
 const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) => {
   app.get('/', async (req, rep) => {
     const uuid = (req.params as { uuid: string }).uuid;
-    const emailId = (req.params as { emailId: string }).emailId;
+    const phoneId = (req.params as { phoneId: string }).phoneId;
 
-    const email = await getPrismaClient().email.findFirst({
+    const phone = await getPrismaClient().phone.findFirst({
       where: {
         user: {
           id: uuid,
         },
-        id: emailId,
+        id: phoneId,
       },
     });
 
-    if (email === null) {
+    if (phone === null) {
       sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
       return;
     }
 
-    rep.send(email);
+    rep.send(phone);
   });
 
   app.put('/', async (req, rep) => {
-    sendMeilingError(rep, MeilingV1ErrorType.NOT_IMPLEMENTED);
+    const uuid = (req.params as { uuid: string }).uuid;
+    const phoneId = (req.params as { phoneId: string }).phoneId;
+    const body = req.body as {
+      phone?: string;
+      isPrimary?: boolean;
+    };
+
+    const phone = await getPrismaClient().phone.findFirst({
+      where: {
+        user: {
+          id: uuid,
+        },
+        id: phoneId,
+      },
+    });
+
+    if (phone === null) {
+      sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
+      return;
+    }
+
+    let phoneNumber: string | undefined = undefined;
+
+    if (typeof body.phone === 'string') {
+      const phoneNumberObj = libPhoneNumberJs(body.phone);
+      if (!phoneNumberObj) {
+        sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'invalid phone number');
+        return;
+      }
+
+      phoneNumber = phoneNumberObj.formatInternational();
+    }
+
+    if (body.isPrimary) {
+      // check if there is existing primary phones.
+      const primaryPhones = await getPrismaClient().phone.findMany({
+        where: {
+          isPrimary: true,
+        },
+      });
+
+      const myPrimaryPhones = primaryPhones.filter((n) => n.userId === uuid);
+      const othersPrimaryPhones = primaryPhones.filter((n) => n.userId !== uuid && n.isPrimary);
+
+      if (othersPrimaryPhones.length > 0) {
+        sendMeilingError(
+          rep,
+          MeilingV1ErrorType.CONFLICT,
+          'there is other user who is using this phone as primary phone',
+        );
+        return;
+      }
+
+      for (const primaryPhone of myPrimaryPhones) {
+        await getPrismaClient().phone.update({
+          where: {
+            id: primaryPhone.id,
+          },
+          data: {
+            isPrimary: false,
+          },
+        });
+      }
+    }
+
+    await getPrismaClient().phone.update({
+      where: {
+        id: phoneId,
+      },
+      data: {
+        phone: phoneNumber,
+        isPrimary: typeof body.isPrimary === 'boolean' ? body.isPrimary : undefined,
+      },
+    });
+
+    app.delete('/', async (req, rep) => {
+      const phoneId = (req.params as { phoneId: string }).phoneId;
+
+      const phone = await getPrismaClient().phone.findFirst({
+        where: {
+          user: {
+            id: uuid,
+          },
+          id: phoneId,
+        },
+      });
+
+      if (phone === null) {
+        sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
+        return;
+      }
+
+      if (phone.isPrimary) {
+        sendMeilingError(rep, MeilingV1ErrorType.CONFLICT, 'you should assign new primary number before deleting it');
+        return;
+      }
+
+      await getPrismaClient().phone.delete({
+        where: {
+          id: phoneId,
+        },
+      });
+    });
   });
 
   done();

@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { User } from '../../../../common';
+import { User, Utils } from '../../../../common';
 import { getPrismaClient } from '../../../../resources/prisma';
 import { sendMeilingError } from '../../meiling/error';
 import { MeilingV1ErrorType } from '../../meiling/interfaces';
@@ -121,16 +121,19 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
       throw new Error('user not found');
     }
 
-    if (body.metadata !== undefined) {
-      await getPrismaClient().user.update({
-        where: {
-          id: uuid,
-        },
-        data: {
-          metadata: body.metadata,
-        },
-      });
-    }
+    await getPrismaClient().user.update({
+      where: {
+        id: uuid,
+      },
+      data: {
+        birthday: body.birthday ? new Date(body.birthday) : undefined,
+        familyName: Utils.isNotBlank(body.familyName) ? body.familyName : undefined,
+        givenName: Utils.isNotBlank(body.givenName) ? body.givenName : undefined,
+        middleName: Utils.isNotBlank(body.middleName) ? body.middleName?.normalize('NFC') : undefined,
+        name: Utils.isNotBlank(body.name) ? body.name : undefined,
+        metadata: body.metadata !== undefined ? body.metadata : undefined,
+      },
+    });
 
     rep.send({ success: true });
   });

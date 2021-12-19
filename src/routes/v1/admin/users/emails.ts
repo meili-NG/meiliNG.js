@@ -28,7 +28,7 @@ const userEmailsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     const uuid = (req.params as { uuid: string }).uuid;
     const body = req.body as UserEmailRegisterInterface | undefined;
 
-    if (!body?.email) {
+    if (!body?.email || typeof body.email !== 'string') {
       sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
       return;
     }
@@ -41,18 +41,42 @@ const userEmailsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       body.isPrimary = /^true$/gi.test(body.isPrimary);
     }
 
+    const email = body.email.trim();
+
+    const matchingEmails = (
+      await getPrismaClient().email.findMany({
+        where: {
+          userId: uuid,
+        },
+      })
+    ).filter((n) => n.email === email);
+
+    if (matchingEmails.length > 0) {
+      sendMeilingError(rep, MeilingV1ErrorType.CONFLICT, 'email already exists');
+      return;
+    }
+
     if (body.isPrimary) {
       // check if there is existing primary emails.
       const primaryEmails = await getPrismaClient().email.findMany({
         where: {
-          user: {
-            id: uuid,
-          },
           isPrimary: true,
         },
       });
 
-      for (const primaryEmail of primaryEmails) {
+      const myPrimaryEmails = primaryEmails.filter((n) => n.userId === uuid);
+      const othersPrimaryEmails = primaryEmails.filter((n) => n.userId !== uuid && n.isPrimary);
+
+      if (othersPrimaryEmails.length > 0) {
+        sendMeilingError(
+          rep,
+          MeilingV1ErrorType.CONFLICT,
+          'there is other user who is using this email as primary email',
+        );
+        return;
+      }
+
+      for (const primaryEmail of myPrimaryEmails) {
         await getPrismaClient().email.update({
           where: {
             id: primaryEmail.id,
@@ -64,20 +88,20 @@ const userEmailsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       }
     }
 
-    const email = await getPrismaClient().email.create({
+    const emailModel = await getPrismaClient().email.create({
       data: {
         user: {
           connect: {
             id: uuid,
           },
         },
-        email: body.email,
+        email,
         verified: body.isVerified || false,
         isPrimary: body.isPrimary || false,
       },
     });
 
-    rep.send(email);
+    rep.send(emailModel);
   });
 
   app.register(userEmailAdminHandler, { prefix: '/:emailId' });
@@ -108,7 +132,99 @@ const userEmailAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
   });
 
   app.put('/', async (req, rep) => {
-    sendMeilingError(rep, MeilingV1ErrorType.NOT_IMPLEMENTED);
+    const uuid = (req.params as { uuid: string }).uuid;
+    const emailId = (req.params as { emailId: string }).emailId;
+    const body = req.body as {
+      email?: string;
+      isPrimary?: boolean;
+      isVerified?: boolean;
+    };
+
+    const email = await getPrismaClient().email.findFirst({
+      where: {
+        user: {
+          id: uuid,
+        },
+        id: emailId,
+      },
+    });
+
+    if (email === null) {
+      sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
+      return;
+    }
+
+    if (body.isPrimary) {
+      // check if there is existing primary emails.
+      const primaryEmails = await getPrismaClient().email.findMany({
+        where: {
+          isPrimary: true,
+        },
+      });
+
+      const myPrimaryEmails = primaryEmails.filter((n) => n.userId === uuid);
+      const othersPrimaryEmails = primaryEmails.filter((n) => n.userId !== uuid && n.isPrimary);
+
+      if (othersPrimaryEmails.length > 0) {
+        sendMeilingError(
+          rep,
+          MeilingV1ErrorType.CONFLICT,
+          'there is other user who is using this email as primary email',
+        );
+        return;
+      }
+
+      for (const primaryEmail of myPrimaryEmails) {
+        await getPrismaClient().email.update({
+          where: {
+            id: primaryEmail.id,
+          },
+          data: {
+            isPrimary: false,
+          },
+        });
+      }
+    }
+
+    await getPrismaClient().email.update({
+      where: {
+        id: emailId,
+      },
+      data: {
+        email: typeof body.email === 'string' ? body.email.trim() : undefined,
+        isPrimary: typeof body.isPrimary === 'boolean' ? body.isPrimary : undefined,
+        verified: typeof body.isVerified === 'boolean' ? body.isVerified : undefined,
+      },
+    });
+
+    app.delete('/', async (req, rep) => {
+      const emailId = (req.params as { emailId: string }).emailId;
+
+      const email = await getPrismaClient().email.findFirst({
+        where: {
+          user: {
+            id: uuid,
+          },
+          id: emailId,
+        },
+      });
+
+      if (email === null) {
+        sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
+        return;
+      }
+
+      if (email.isPrimary) {
+        sendMeilingError(rep, MeilingV1ErrorType.CONFLICT, 'you should assign new primary email before deleting it');
+        return;
+      }
+
+      await getPrismaClient().email.delete({
+        where: {
+          id: emailId,
+        },
+      });
+    });
   });
 
   done();

@@ -247,13 +247,13 @@ export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = [
         return;
       }
 
-      if (metadataConfig.scopes) {
+      if (metadataConfig.scopes && typeof metadataConfig.scopes.length === 'number') {
         let isAuthorized = false;
 
         if (typeof _scopes === 'boolean') {
           isAuthorized = _scopes;
         } else {
-          for (const scopes of metadata.scopes) {
+          for (const scopes of metadataConfig.scopes) {
             const scopeArray = scopes.split(' ') as string[];
             const authorizedArray = scopeArray.map((n) => _scopes.indexOf(n) >= 0);
 

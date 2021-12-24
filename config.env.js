@@ -85,7 +85,7 @@ module.exports = {
       oauth: {
         AUTHORIZATION_CODE: Number(process.env.TOKEN_INVALIDATE_OAUTH_AUTHORIZATION_CODE) || 300,
         ACCESS_TOKEN: Number(process.env.TOKEN_INVALIDATE_OAUTH_ACCESS_TOKEN) || 7200,
-        REFRESH_TOKEN: Number(process.env.TOKEN_INVALIDATE_OAUTH_REFRESH_TOKEN) || 604800,
+        REFRESH_TOKEN: Number(process.env.TOKEN_INVALIDATE_OAUTH_REFRESH_TOKEN) || 2592000,
         ACCOUNT_TOKEN: Number(process.env.TOKEN_INVALIDATE_OAUTH_ACCOUNT_TOKEN) || -1,
         DEVICE_CODE: Number(process.env.TOKEN_INVALIDATE_OAUTH_DEVICE_CODE) || 300,
       },

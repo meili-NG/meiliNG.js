@@ -7,6 +7,7 @@ export async function testDatabase(): Promise<boolean> {
     await getPrismaClient().$executeRaw('SHOW TABLES');
     return true;
   } catch (e) {
+    console.error('[Startup] Database connection test failed...', e);
     return false;
   }
 }

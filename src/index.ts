@@ -7,29 +7,29 @@ import config from './resources/config';
 import meilingPlugin from './routes';
 import { MeilingV1Session } from './routes/v1/meiling/common';
 
-// some banner stuff
-Banner.showBanner();
-Banner.devModeCheck();
+const main = (async () => {
+  // some banner stuff
+  Banner.showBanner();
+  Banner.devModeCheck();
 
-console.log('[Startup] Loading Session Files...');
-MeilingV1Session.loadSessionSaveFiles();
+  console.log('[Startup] Loading Session Files...');
+  MeilingV1Session.loadSessionSaveFiles();
 
-console.log('[Startup] Starting up Fastify...');
-const app = fastify({
-  logger: {
-    prettyPrint: true,
-  },
-  trustProxy: config.fastify.proxy
-    ? config.fastify.proxy.allowedHosts
+  console.log('[Startup] Starting up Fastify...');
+  const app = fastify({
+    logger: {
+      prettyPrint: true,
+    },
+    trustProxy: config.fastify.proxy
       ? config.fastify.proxy.allowedHosts
-      : true
-    : false,
-});
+        ? config.fastify.proxy.allowedHosts
+        : true
+      : false,
+  });
 
-console.log('[Startup] Registering for Fastify Handler');
-app.register(fastifyFormbody);
+  console.log('[Startup] Registering for Fastify Handler');
+  app.register(fastifyFormbody);
 
-(async () => {
   if (!(await Database.testDatabase())) {
     console.error(
       chalk.bgRedBright(
@@ -72,4 +72,8 @@ app.register(fastifyFormbody);
       fs.chmodSync(config.fastify.listen, config.fastify.unixSocket.chmod);
     }
   }
-})();
+});
+
+if (require.main === module) {
+  main();
+}

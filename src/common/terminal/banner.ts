@@ -20,7 +20,7 @@ export const showBanner = (): void => {
   console.log();
   console.log(
     'Distributed under ' +
-      (process.env.MEILING_FORCE_HRPL ? chalk.bold('MIT License') : chalk.bold('Hakurei Reimu Public License')),
+      (process.env.MEILING_FORCE_HRPL !== '1' ? chalk.bold('MIT License') : chalk.bold('Hakurei Reimu Public License')),
   );
   console.log();
 };

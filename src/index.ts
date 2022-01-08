@@ -12,10 +12,10 @@ const main = async () => {
   Terminal.Banner.showBanner();
   Terminal.Banner.devModeCheck();
 
-  console.log('[Startup] Loading Session Files...');
+  Terminal.Log.info('Loading Session Files...');
   MeilingV1Session.loadSessionSaveFiles();
 
-  console.log('[Startup] Starting up Fastify...');
+  Terminal.Log.info('Starting up Fastify...');
   const app = fastify({
     logger: {
       prettyPrint: true,
@@ -27,26 +27,21 @@ const main = async () => {
       : false,
   });
 
-  console.log('[Startup] Registering for Fastify Handler');
+  Terminal.Log.info('Registering for Fastify Handler');
   app.register(fastifyFormbody);
 
   if (!(await Meiling.Database.testDatabase())) {
-    console.error(
-      chalk.bgRedBright(
-        chalk.whiteBright(chalk.bold('[Database] Failed to connect! Please check MySQL/MariaDB is online.')),
-      ),
-    );
-    console.log();
+    Terminal.Log.error('Failed to connect! Please check if database is online.');
     process.exit(1);
   }
 
-  console.log('[Startup] Running Startup Userinfo Check...');
+  Terminal.Log.info('Running check for JWT certificate configuration for ID Token generation...');
   await Startup.checkIDTokenIssueCredentials();
 
-  console.log('[Startup] Running Startup Garbage Collection...');
+  Terminal.Log.info('Running Startup Garbage Collection...');
   await Startup.runStartupGarbageCollection();
 
-  console.log('[Startup] Registering Root Endpoints...');
+  Terminal.Log.info('Registering Root Endpoints...');
   app.register(meilingPlugin);
 
   if (typeof config.fastify.listen === 'string') {
@@ -55,12 +50,12 @@ const main = async () => {
     }
   }
 
-  console.log('[Startup] Starting up fastify...');
+  Terminal.Log.info('Starting up fastify...');
   await app.listen(config.fastify.listen, config.fastify.address);
 
   if (typeof config.fastify.listen === 'string') {
     if (config.fastify.unixSocket?.chown?.uid !== undefined && config.fastify.unixSocket?.chown?.gid !== undefined) {
-      console.log('[Startup] Setting up Owner Permissions of Socket...');
+      Terminal.Log.info('Setting up Owner Permissions of Socket...');
       fs.chownSync(
         config.fastify.listen,
         config.fastify.unixSocket?.chown?.uid as number,
@@ -68,10 +63,12 @@ const main = async () => {
       );
     }
     if (config.fastify.unixSocket?.chmod) {
-      console.log('[Startup] Setting up Access Permissions of Socket...');
+      Terminal.Log.info('Setting up Access Permissions of Socket...');
       fs.chmodSync(config.fastify.listen, config.fastify.unixSocket.chmod);
     }
   }
+
+  Terminal.Log.ok('Meiling Gatekeeper has started up.');
 };
 
 if (require.main === module) {

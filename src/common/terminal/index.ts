@@ -1,2 +1,4 @@
+import Log from './log';
+
 export * as Banner from './banner';
-export * as Log from './log';
+export { Log };

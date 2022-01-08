@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { Meiling } from '../../../../common';
+import { Meiling, Terminal } from '../../../../common';
 import { getByClientId } from '../../../../common/meiling/oauth2/client';
 import { getPrismaClient } from '../../../../resources/prisma';
 import { MeilingV1Session } from '../../meiling/common';
@@ -9,13 +9,13 @@ import { MeilingV1ErrorType } from '../../meiling/interfaces';
 const internalAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.get('/sakuya', async (req, rep) => {
     try {
-      console.log('[Sakuya] Running Garbage Collect for Meiling Sessions...');
+      Terminal.Log.info('Running Garbage Collect for Meiling Sessions...');
       await MeilingV1Session.garbageCollect();
 
-      console.log('[Sakuya] Running Garbage Collect for OAuth2 Tokens...');
+      Terminal.Log.info('Running Garbage Collect for OAuth2 Tokens...');
       await Meiling.Authorization.Token.garbageCollect();
 
-      console.log('[Sakuya] Running Garbage Collect for OAuth2 ACL Data...');
+      Terminal.Log.info('Running Garbage Collect for OAuth2 ACL Data...');
       await Meiling.OAuth2.ClientAuthorization.garbageCollect();
 
       rep.send({ success: true });

@@ -6,7 +6,7 @@ import chalk from 'chalk';
 import { NodeEnvironment } from '../../interface';
 
 export const showBanner = (): void => {
-  console.log(Figlet.textSync('Meiling'));
+  console.log(Figlet.textSync('Meiling', 'Small Slant'));
   console.log();
   console.log(`${chalk.bold('Meiling Gatekeeper')} - ${chalk.italic(`ver. ${packageJson.version}`)}`);
   console.log(chalk.cyan(chalk.underline(packageJson.repository)));

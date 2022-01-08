@@ -1,13 +1,6 @@
-export * as Banner from './banner';
-export * as Client from './client';
-export * as ClientAccessControls from './clientAccessControls';
-export * as ClientAuthorization from './clientAuthorization';
-export * as Database from './database';
-export * as MeilingCommonError from './error';
-export * as Group from './group';
-export * as MeilingCommonOAuth2 from './oauth2';
+export * as Meiling from './meiling';
+export * as Event from './event';
+export * as Terminal from './terminal';
 export * as Startup from './startup';
-export * as Token from './token';
-export * as User from './user';
 export * as Utils from './utils';
-export * as Validate from './validate';
+export * as Notification from './notification';

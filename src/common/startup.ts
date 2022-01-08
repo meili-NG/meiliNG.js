@@ -1,9 +1,10 @@
 import chalk from 'chalk';
 import crypto from 'crypto';
-import { ClientAuthorization, Token } from '.';
+import { Meiling } from '.';
 import config from '../resources/config';
 import { MeilingV1Session } from '../routes/v1/meiling/common';
-import { generateToken } from './token';
+import Log from './terminal/log';
+import { generateToken } from './meiling/authorization/token';
 
 export function checkIDTokenIssueCredentials(): true | string {
   if (!config.openid.jwt.algorithm) {
@@ -48,8 +49,10 @@ export function checkIDTokenIssueCredentials(): true | string {
       chalk.redBright(chalk.bold('!IMPORTANT!')),
       'By current setting, Meiling gatekeeper is generating signing key for OpenID ID Token on runtime.',
     );
-    console.warn('This is bad for APP STARTUP SPEED and BAD PRACTICE.');
-    console.warn('Please generate one via', chalk.bold('yarn genkeys'), 'and apply it to your configuration.');
+    Log.warn(
+      'This is a BAD PRACTICE and due to how JWT verifications work, All id_tokens issued on this session will be invalidated after restart.',
+    );
+    Log.warn('Please generate one via', chalk.bold('yarn genkeys'), 'and apply it to your configuration.');
     console.log();
 
     if (config.openid.jwt.algorithm.startsWith('HS')) {
@@ -82,13 +85,13 @@ export function checkIDTokenIssueCredentials(): true | string {
 
 export async function runStartupGarbageCollection(force?: boolean): Promise<void> {
   if (process.argv.includes('--run-cleanup') || force) {
-    console.log('[Startup] Running Garbage Collect for Meiling Sessions...');
+    Log.info('Garbage Collecting for Meiling Sessions...');
     await MeilingV1Session.garbageCollect();
 
-    console.log('[Startup] Running Garbage Collect for OAuth2 Tokens...');
-    await Token.garbageCollect();
+    Log.info('Garbage Collecting for OAuth2 Tokens...');
+    await Meiling.Authorization.Token.garbageCollect();
 
-    console.log('[Startup] Running Garbage Collect for OAuth2 ACL Data... This may take awhile...');
-    await ClientAuthorization.garbageCollect();
+    console.log('Garbage Collecting for OAuth2 ACL Data... This may take awhile...');
+    await Meiling.OAuth2.ClientAuthorization.garbageCollect();
   }
 }

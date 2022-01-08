@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { User, Utils } from '../../../../common';
+import { Meiling, Utils } from '../../../../common';
 import { getPrismaClient } from '../../../../resources/prisma';
 import { sendMeilingError } from '../../meiling/error';
 import { MeilingV1ErrorType } from '../../meiling/interfaces';
@@ -77,7 +77,7 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
     rep.send(
       await Promise.all(
         users.map(async (user) => {
-          return await User.getDetailedInfo(user);
+          return await Meiling.Identity.User.getDetailedInfo(user);
         }),
       ),
     );
@@ -92,7 +92,7 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
   app.addHook('onRequest', async (req, rep) => {
     const uuid = (req.params as { uuid: string }).uuid;
 
-    const user = await User.getDetailedInfo(uuid);
+    const user = await Meiling.Identity.User.getDetailedInfo(uuid);
     if (!user) {
       sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
       throw new Error('user not found');
@@ -102,7 +102,7 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
   app.get('/', async (req, rep) => {
     const uuid = (req.params as { uuid: string }).uuid;
 
-    const user = await User.getDetailedInfo(uuid);
+    const user = await Meiling.Identity.User.getDetailedInfo(uuid);
     if (!user) {
       sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
       throw new Error('user not found');
@@ -115,7 +115,7 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
     const uuid = (req.params as { uuid: string }).uuid;
     const body = req.body as any;
 
-    const user = await User.getInfo(uuid);
+    const user = await Meiling.Identity.User.getInfo(uuid);
     if (!user) {
       sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
       throw new Error('user not found');

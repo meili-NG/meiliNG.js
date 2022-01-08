@@ -1,7 +1,7 @@
 import { OAuthClient } from '@prisma/client';
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '..';
-import { Client, User } from '../../../../../../common';
+import { Meiling } from '../../../../../../common';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 import { appActionsPlugin } from './actions';
@@ -33,10 +33,10 @@ export interface MeilingV1ClientRequest extends FastifyRequest {
 
 export function userAppsActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.addHook('onRequest', async (req, rep) => {
-    const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
+    const user = (await getUserFromActionRequest(req)) as Meiling.Identity.User.UserInfoObject;
     const clientId = (req.params as MeilingV1ClientIDParams).clientId;
 
-    const userDetail = (await User.getDetailedInfo(user)) as User.UserDetailedObject;
+    const userDetail = (await Meiling.Identity.User.getDetailedInfo(user)) as Meiling.Identity.User.UserDetailedObject;
 
     const owned = userDetail.ownedApps.filter((n) => n.id === clientId).length > 0;
     const authorized = userDetail.authorizedApps.filter((n) => n.id === clientId).length > 0;
@@ -46,7 +46,7 @@ export function userAppsActionsPlugin(app: FastifyInstance, opts: FastifyPluginO
       throw new Error('You do not own/authorized this');
     }
 
-    const client = (await Client.getByClientId(clientId)) as OAuthClient;
+    const client = (await Meiling.OAuth2.Client.getByClientId(clientId)) as OAuthClient;
 
     (req as MeilingV1ClientRequest).status = {
       owned,

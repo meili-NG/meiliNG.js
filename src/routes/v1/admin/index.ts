@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fastifyCors from 'fastify-cors';
 import { Utils } from '../../../common';
-import { getTokenFromRequest } from '../../../common/token';
+import { getTokenFromRequest } from '../../../common/meiling/authorization/token';
 import { NodeEnvironment } from '../../../interface';
 import config from '../../../resources/config';
 import { info as packageJson } from '../../../resources/package';

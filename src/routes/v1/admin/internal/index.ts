@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { Client, ClientAuthorization, Token, User } from '../../../../common';
-import { getByClientId } from '../../../../common/client';
+import { Meiling } from '../../../../common';
+import { getByClientId } from '../../../../common/meiling/oauth2/client';
 import { getPrismaClient } from '../../../../resources/prisma';
 import { MeilingV1Session } from '../../meiling/common';
 import { sendMeilingError } from '../../meiling/error';
@@ -13,10 +13,10 @@ const internalAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
       await MeilingV1Session.garbageCollect();
 
       console.log('[Sakuya] Running Garbage Collect for OAuth2 Tokens...');
-      await Token.garbageCollect();
+      await Meiling.Authorization.Token.garbageCollect();
 
       console.log('[Sakuya] Running Garbage Collect for OAuth2 ACL Data...');
-      await ClientAuthorization.garbageCollect();
+      await Meiling.OAuth2.ClientAuthorization.garbageCollect();
 
       rep.send({ success: true });
     } catch (e) {
@@ -34,14 +34,14 @@ const internalAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
       data: {
         clients: await Promise.all(
           clientsRaw.map(async (n) => ({
-            ...(await Client.getInfoForOwners(n)),
+            ...(await Meiling.OAuth2.Client.getInfoForOwners(n)),
           })),
         ),
         users: await Promise.all(
           (
             await getPrismaClient().user.findMany({})
           ).map(async (n) => ({
-            ...(await User.getDetailedInfo(n)),
+            ...(await Meiling.Identity.User.getDetailedInfo(n)),
           })),
         ),
       },

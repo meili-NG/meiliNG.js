@@ -1,6 +1,6 @@
 import { OAuthTokenType } from '@prisma/client';
 import { Algorithm } from 'jsonwebtoken';
-import { TokenGenerator } from './common/token';
+import { TokenGenerator } from './common/meiling/authorization/token';
 
 export enum NodeEnvironment {
   Production = 'production',

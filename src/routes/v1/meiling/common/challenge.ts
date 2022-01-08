@@ -1,8 +1,12 @@
 import { Authorization } from '@prisma/client';
 import { MeilingV1Challenge, MeilingV1Database } from '.';
-import { Token } from '../../../../common';
-import { AuthorizationJSONObject, AuthorizationOTPObject, AuthorizationPGPSSHKeyObject } from '../../../../common/user';
-import { validateOTP, validatePGPSign } from '../../../../common/validate';
+import { Meiling } from '../../../../common';
+import {
+  AuthorizationJSONObject,
+  AuthorizationOTPObject,
+  AuthorizationPGPSSHKeyObject,
+} from '../../../../common/meiling/identity/user';
+import { validateOTP, validatePGPSign } from '../../../../common/meiling/authorization/validate';
 import config from '../../../../resources/config';
 import {
   MeilingV1ExtendedAuthMethods,
@@ -58,10 +62,10 @@ export function generateChallenge(signinMethod: MeilingV1ExtendedAuthMethods): s
   switch (signinMethod) {
     case MeilingV1ExtendedAuthMethods.PGP_SIGNATURE:
     case MeilingV1ExtendedAuthMethods.SECURITY_KEY:
-      return Token.generateToken();
+      return Meiling.Authorization.Token.generateToken();
     case MeilingV1ExtendedAuthMethods.SMS:
     case MeilingV1ExtendedAuthMethods.EMAIL:
-      return Token.generateToken(6, '0123456789');
+      return Meiling.Authorization.Token.generateToken(6, '0123456789');
     case MeilingV1ExtendedAuthMethods.OTP:
     default:
       return undefined;

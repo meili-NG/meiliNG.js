@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { Client, User } from '../../../../common';
+import { Meiling } from '../../../../common';
 import { MeilingV1Session } from '../common';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
@@ -16,12 +16,12 @@ async function appListHandler(req: FastifyRequest, rep: FastifyReply): Promise<v
 
   const clients = [];
   for (const user of users) {
-    const userClient = await User.getDetailedInfo(user);
+    const userClient = await Meiling.Identity.User.getDetailedInfo(user);
 
     if (userClient?.authorizedApps) {
       for (const myApp of userClient.authorizedApps) {
         if (clients.filter((client) => client.id === myApp.id).length === 0) {
-          clients.push(Client.sanitize(myApp));
+          clients.push(Meiling.OAuth2.Client.sanitize(myApp));
         }
       }
     }

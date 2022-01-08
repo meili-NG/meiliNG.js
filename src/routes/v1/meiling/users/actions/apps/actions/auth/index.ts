@@ -1,12 +1,12 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
 import { getUserFromActionRequest } from '../../..';
-import { User } from '../../../../../../../../common';
+import { Meiling } from '../../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
 
 function appAuthPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', async (_req, rep) => {
-    const user = (await getUserFromActionRequest(_req)) as User.UserInfoObject;
+    const user = (await getUserFromActionRequest(_req)) as Meiling.Identity.User.UserInfoObject;
     const req = _req as MeilingV1ClientRequest;
 
     const firstAuthorization = await getPrismaClient().oAuthClientAuthorization.findFirst({
@@ -44,7 +44,7 @@ function appAuthPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: (
   });
 
   app.delete('/', async (_req, rep) => {
-    const user = (await getUserFromActionRequest(_req)) as User.UserInfoObject;
+    const user = (await getUserFromActionRequest(_req)) as Meiling.Identity.User.UserInfoObject;
     const req = _req as MeilingV1ClientRequest;
 
     await getPrismaClient().oAuthToken.deleteMany({

@@ -1,6 +1,6 @@
 import { OAuthClient, OAuthClientAuthorization, OAuthToken, OAuthTokenType, Permission, User } from '@prisma/client';
-import { Token } from '.';
-import { getPrismaClient } from '../resources/prisma';
+import { Authorization } from '..';
+import { getPrismaClient } from '../../../resources/prisma';
 
 export async function garbageCollect(): Promise<void> {
   const [clients, users, authorizations] = await Promise.all([
@@ -99,11 +99,13 @@ export async function garbageCollect(): Promise<void> {
           await Promise.all(
             realKillList.map(async (n) => {
               if (n !== undefined) {
-                await getPrismaClient().oAuthClientAuthorization.delete({
-                  where: {
-                    id: n,
-                  },
-                });
+                try {
+                  await getPrismaClient().oAuthClientAuthorization.delete({
+                    where: {
+                      id: n,
+                    },
+                  });
+                } catch (e) {}
               }
             }),
           );
@@ -171,10 +173,10 @@ export async function getUser(authorization: OAuthClientAuthorization | string):
 export async function createToken(
   authorization: OAuthClientAuthorization,
   type: OAuthTokenType,
-  metadata?: Token.TokenMetadata,
+  metadata?: Authorization.Token.TokenMetadata,
 ): Promise<OAuthToken> {
   // TODO: allow custom generator for token
-  const tokenKey = Token.generateToken();
+  const tokenKey = Authorization.Token.generateToken();
 
   const token = await getPrismaClient().oAuthToken.create({
     data: {
@@ -211,8 +213,11 @@ export async function getToken(authorization: OAuthClientAuthorization, type: OA
     },
   });
 
-  if (!token || Token.getExpiresInByType(type, token.issuedAt) < Token.getValidTimeByType(type) * 0.1) {
-    token = await createToken(authorization, type, token?.metadata as Token.TokenMetadata);
+  if (
+    !token ||
+    Authorization.Token.getExpiresInByType(type, token.issuedAt) < Authorization.Token.getValidTimeByType(type) * 0.1
+  ) {
+    token = await createToken(authorization, type, token?.metadata as Authorization.Token.TokenMetadata);
   }
 
   updateLastUpdated(authorization);

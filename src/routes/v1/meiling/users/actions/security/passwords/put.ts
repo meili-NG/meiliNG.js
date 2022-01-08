@@ -2,13 +2,13 @@ import bcrypt from 'bcryptjs';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { PasswordChangeBody } from '.';
 import { getUserFromActionRequest } from '../..';
-import { User, Utils } from '../../../../../../../common';
+import { Meiling, Utils } from '../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../resources/prisma';
 import { sendMeilingError } from '../../../../error';
 import { MeilingV1ErrorType } from '../../../../interfaces';
 
 export async function userPasswordUpdateHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
-  const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
+  const user = (await getUserFromActionRequest(req)) as Meiling.Identity.User.UserInfoObject;
 
   const body = req.body as PasswordChangeBody;
   if (!Utils.isValidValue(body, body?.password, body?.newPassword)) {
@@ -17,14 +17,14 @@ export async function userPasswordUpdateHandler(req: FastifyRequest, rep: Fastif
   }
 
   const password = body.password;
-  const passwordRowsToChange = await User.checkPassword(user, password);
+  const passwordRowsToChange = await Meiling.Identity.User.checkPassword(user, password);
   if (passwordRowsToChange.length === 0) {
     sendMeilingError(rep, MeilingV1ErrorType.WRONG_PASSWORD, 'wrong password.');
     return;
   }
 
   const newPassword = body.newPassword;
-  if ((await User.checkPassword(user, newPassword)).length > 0) {
+  if ((await Meiling.Identity.User.checkPassword(user, newPassword)).length > 0) {
     sendMeilingError(rep, MeilingV1ErrorType.EXISTING_PASSWORD, 'existing password is used as new password.');
     return;
   }

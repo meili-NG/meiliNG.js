@@ -1,9 +1,9 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import libphonenumberJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '..';
-import { BaridegiLogType, sendBaridegiLog } from '../../../../common/baridegi';
+import { BaridegiLogType, sendBaridegiLog } from '../../../../common/event/baridegi';
 import * as Notification from '../../../../common/notification';
-import { generateToken } from '../../../../common/token';
+import { generateToken } from '../../../../common/meiling/authorization/token';
 import * as Utils from '../../../../common/utils';
 import config from '../../../../resources/config';
 import { MeilingV1Challenge } from '../common';

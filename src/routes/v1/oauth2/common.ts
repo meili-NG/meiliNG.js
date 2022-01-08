@@ -1,5 +1,5 @@
 import { FastifyRequest } from 'fastify';
-import { Client, Token, Utils } from '../../../common';
+import { Meiling, Utils } from '../../../common';
 import { OAuth2ErrorResponseType, OAuth2QueryBodyParameters } from './interfaces';
 
 export async function validateCommonRequest(
@@ -17,13 +17,13 @@ export async function validateCommonRequest(
     return OAuth2ErrorResponseType.INVALID_GRANT;
   }
 
-  const client = await Client.getByClientId(clientId);
+  const client = await Meiling.OAuth2.Client.getByClientId(clientId);
 
   if (client === null) {
     return OAuth2ErrorResponseType.INVALID_CLIENT;
   }
 
-  if (!Client.verifySecret(clientId, clientSecret)) {
+  if (!Meiling.OAuth2.Client.verifySecret(clientId, clientSecret)) {
     return OAuth2ErrorResponseType.INVALID_CLIENT;
   }
 
@@ -36,7 +36,7 @@ export function parseClientInfo(req: FastifyRequest):
       clientSecret?: string;
     }
   | undefined {
-  const token = Token.getTokenFromRequest(req);
+  const token = Meiling.Authorization.Token.getTokenFromRequest(req);
 
   let clientId: string | undefined = undefined;
   let clientSecret: string | undefined = undefined;

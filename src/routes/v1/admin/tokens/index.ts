@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { Token } from '../../../../common';
+import { Meiling } from '../../../../common';
 import { getPrismaClient } from '../../../../resources/prisma';
 import { sendMeilingError } from '../../meiling/error';
 import { MeilingV1ErrorType } from '../../meiling/interfaces';
@@ -38,15 +38,16 @@ const tokensAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, do
       throw new Error('session not found');
     }
 
-    const data = await Token.serialize(tokenData.token, tokenData.type);
+    const data = await Meiling.Authorization.Token.serialize(tokenData.token, tokenData.type);
 
     rep.send({
       ...tokenData,
       ...data,
       expires_at: new Date(
-        Token.getExpiresInByType(tokenData.type, new Date()) * 1000 + new Date(tokenData.issuedAt).getTime(),
+        Meiling.Authorization.Token.getExpiresInByType(tokenData.type, new Date()) * 1000 +
+          new Date(tokenData.issuedAt).getTime(),
       ),
-      is_valid: await Token.isValid(token, tokenData.type),
+      is_valid: await Meiling.Authorization.Token.isValid(token, tokenData.type),
       issued_at: tokenData.issuedAt,
       issuedAt: undefined,
     });

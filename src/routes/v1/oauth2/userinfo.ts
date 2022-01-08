@@ -1,13 +1,13 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import JWT from 'jsonwebtoken';
-import { Token, User } from '../../../common';
+import { Meiling } from '../../../common';
 import { sendOAuth2Error } from './error';
 import { OAuth2ErrorResponseType } from './interfaces';
 
 export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const type = 'ACCESS_TOKEN';
 
-  let token = Token.getTokenFromRequest(req);
+  let token = Meiling.Authorization.Token.getTokenFromRequest(req);
   if (!token) {
     if (req.body) {
       const accessToken = (req.body as any).access_token;
@@ -25,15 +25,15 @@ export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyRep
     return;
   }
 
-  const perms = await Token.getAuthorizedPermissions(token.token, type);
-  const clientId = await Token.getClient(token.token, type);
-  const user = await Token.getUser(token.token, type);
+  const perms = await Meiling.Authorization.Token.getAuthorizedPermissions(token.token, type);
+  const clientId = await Meiling.Authorization.Token.getClient(token.token, type);
+  const user = await Meiling.Authorization.Token.getUser(token.token, type);
   if (!user || !perms || !clientId) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'provided access_token is invalid');
     return;
   }
 
-  const isValid = await Token.isValid(token.token, type);
+  const isValid = await Meiling.Authorization.Token.isValid(token.token, type);
   if (!isValid) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'provided access_token is expired');
     return;
@@ -49,7 +49,7 @@ export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyRep
     return;
   }
 
-  const userData = await User.createIDToken(user, clientId.id, scopes);
+  const userData = await Meiling.Identity.User.createIDToken(user, clientId.id, scopes);
   if (!userData) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'user matching access_token is missing');
     return;

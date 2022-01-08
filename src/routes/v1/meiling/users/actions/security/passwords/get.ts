@@ -1,10 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '../..';
-import { User } from '../../../../../../../common';
+import { Meiling } from '../../../../../../../common';
 
 export async function userPasswordGetHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
-  const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
-  const passwordsRaw = (await User.getPasswords(user)).filter((n) => n !== undefined);
+  const user = (await getUserFromActionRequest(req)) as Meiling.Identity.User.UserInfoObject;
+  const passwordsRaw = (await Meiling.Identity.User.getPasswords(user)).filter((n) => n !== undefined);
 
   const passwords = passwordsRaw.map((n) => {
     return { id: n?.id, createdAt: n?.createdAt };

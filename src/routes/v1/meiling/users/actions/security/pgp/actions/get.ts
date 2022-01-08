@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '../../..';
 import { Utils } from '../../../../../../../../common';
-import { AuthorizationPGPSSHKeyObject } from '../../../../../../../../common/user';
+import { AuthorizationPGPSSHKeyObject } from '../../../../../../../../common/meiling/identity/user';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
 import { convertAuthentication } from '../../../../../common/database';
 import { sendMeilingError } from '../../../../../error';

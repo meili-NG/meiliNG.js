@@ -2,15 +2,15 @@ import chalk from 'chalk';
 import fastify from 'fastify';
 import fastifyFormbody from 'fastify-formbody';
 import fs from 'fs';
-import { Banner, Database, Startup } from './common';
+import { Meiling, Startup, Terminal } from './common';
 import config from './resources/config';
 import meilingPlugin from './routes';
 import { MeilingV1Session } from './routes/v1/meiling/common';
 
-const main = (async () => {
+const main = async () => {
   // some banner stuff
-  Banner.showBanner();
-  Banner.devModeCheck();
+  Terminal.Banner.showBanner();
+  Terminal.Banner.devModeCheck();
 
   console.log('[Startup] Loading Session Files...');
   MeilingV1Session.loadSessionSaveFiles();
@@ -30,7 +30,7 @@ const main = (async () => {
   console.log('[Startup] Registering for Fastify Handler');
   app.register(fastifyFormbody);
 
-  if (!(await Database.testDatabase())) {
+  if (!(await Meiling.Database.testDatabase())) {
     console.error(
       chalk.bgRedBright(
         chalk.whiteBright(chalk.bold('[Database] Failed to connect! Please check MySQL/MariaDB is online.')),
@@ -72,7 +72,7 @@ const main = (async () => {
       fs.chmodSync(config.fastify.listen, config.fastify.unixSocket.chmod);
     }
   }
-});
+};
 
 if (require.main === module) {
   main();

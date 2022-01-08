@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { Client, ClientAccessControls } from '../../../../common';
+import { Meiling } from '../../../../common';
 import { MeilingV1Session } from '../common';
 import { sendMeilingError } from '../error';
 import { MeilingV1ErrorType } from '../interfaces';
@@ -10,8 +10,8 @@ async function appInfoHandler(req: FastifyRequest, rep: FastifyReply) {
   const clientId = params.clientId;
 
   if (clientId) {
-    const client = await Client.getByClientId(clientId);
-    const acl = await Client.getAccessControl(clientId);
+    const client = await Meiling.OAuth2.Client.getByClientId(clientId);
+    const acl = await Meiling.OAuth2.Client.getAccessControl(clientId);
     if (!client || !acl) {
       sendMeilingError(rep, MeilingV1ErrorType.APPLICATION_NOT_FOUND);
       return;
@@ -20,7 +20,7 @@ async function appInfoHandler(req: FastifyRequest, rep: FastifyReply) {
     const users = await MeilingV1Session.getLoggedIn(req);
     if (users.length === 0) {
       // If no user access controls, returning client info.
-      if (!acl.userAclId) rep.send(Client.sanitize(client));
+      if (!acl.userAclId) rep.send(Meiling.OAuth2.Client.sanitize(client));
       // If not, returning unauthorized error.
       else sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
       return;
@@ -28,7 +28,7 @@ async function appInfoHandler(req: FastifyRequest, rep: FastifyReply) {
 
     let shouldShow = false;
     for (const user of users) {
-      shouldShow = shouldShow || (await ClientAccessControls.checkUsers(acl, user.id));
+      shouldShow = shouldShow || (await Meiling.OAuth2.ClientAccessControls.checkUsers(acl, user.id));
     }
 
     if (!shouldShow) {
@@ -36,7 +36,7 @@ async function appInfoHandler(req: FastifyRequest, rep: FastifyReply) {
       return;
     }
 
-    rep.send(Client.sanitize(client));
+    rep.send(Meiling.OAuth2.Client.sanitize(client));
     return;
   } else {
     sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);

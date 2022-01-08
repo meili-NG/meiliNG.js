@@ -1,7 +1,7 @@
 import { Permission } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { Client, ClientAccessControls, Token, Utils } from '../../../../common';
-import { generateToken } from '../../../../common/token';
+import { Meiling, Utils } from '../../../../common';
+import { generateToken } from '../../../../common/meiling/authorization/token';
 import config from '../../../../resources/config';
 import { getPrismaClient } from '../../../../resources/prisma';
 import { parseClientInfo } from '../common';
@@ -30,7 +30,7 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
     return;
   }
 
-  const client = await Client.getByClientId(clientId);
+  const client = await Meiling.OAuth2.Client.getByClientId(clientId);
   if (!client) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST, 'no client found');
     return;
@@ -38,7 +38,7 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
 
   const device_code = generateToken();
   const user_code = generateToken(8, '0123456789QWERTYUIOPASDFGHJKLZXCVBNM');
-  const metadata: Token.TokenMetadata = {
+  const metadata: Meiling.Authorization.Token.TokenMetadata = {
     version: 1,
     data: {
       deviceCode: {
@@ -64,7 +64,7 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
   );
 
   // load access control
-  const acl = await Client.getAccessControl(client.id);
+  const acl = await Meiling.OAuth2.Client.getAccessControl(client.id);
   if (!acl) {
     sendOAuth2Error(rep, OAuth2ErrorResponseType.INTERNAL_SERVER_ERROR, 'Failed to get Access Control from Server.');
     return;
@@ -87,7 +87,7 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
     return;
   }
 
-  const areScopesAllowed = await ClientAccessControls.checkPermissions(acl, requestedPermissions);
+  const areScopesAllowed = await Meiling.OAuth2.ClientAccessControls.checkPermissions(acl, requestedPermissions);
   if (areScopesAllowed !== true) {
     if (areScopesAllowed === false) {
       sendOAuth2Error(rep, OAuth2ErrorResponseType.INTERNAL_SERVER_ERROR, 'Failed to get Access Control from Server.');
@@ -129,7 +129,7 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
 
   rep.send({
     device_code,
-    expires_in: Token.getExpiresInByType(type, new Date()),
+    expires_in: Meiling.Authorization.Token.getExpiresInByType(type, new Date()),
     // TODO: Make this configurable
     interval: config.meiling.deviceCode.interval,
     user_code: user_code,

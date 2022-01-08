@@ -1,6 +1,7 @@
 import { Group, OAuthClientAccessControls, Permission, User as UserModel } from '@prisma/client';
-import { Client, User } from '.';
-import { getPrismaClient } from '../resources/prisma';
+import { Client } from '.';
+import { Identity } from '..';
+import { getPrismaClient } from '../../../resources/prisma';
 
 export async function getByClientId(clientId: string): Promise<OAuthClientAccessControls | null | undefined> {
   return await Client.getAccessControl(clientId);
@@ -32,7 +33,7 @@ export async function checkUsers(acl: OAuthClientAccessControls, user: UserModel
   // If no user access controls, it is free.
   if (!acl.userAclId) return true;
 
-  const userObject = await User.getInfo(user);
+  const userObject = await Identity.User.getInfo(user);
   if (!userObject) return false;
 
   const [users, groups] = await Promise.all([

@@ -1,14 +1,14 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '..';
-import { Client, User } from '../../../../../../common';
+import { Meiling } from '../../../../../../common';
 import { getPrismaClient } from '../../../../../../resources/prisma';
 
 async function userAppsHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
-  const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
-  const userData = await User.getDetailedInfo(user);
+  const user = (await getUserFromActionRequest(req)) as Meiling.Identity.User.UserInfoObject;
+  const userData = await Meiling.Identity.User.getDetailedInfo(user);
 
   const ownedApps = await Promise.all(
-    userData?.ownedApps ? userData.ownedApps.map((n) => Client.getInfoForOwners(n)) : [],
+    userData?.ownedApps ? userData.ownedApps.map((n) => Meiling.OAuth2.Client.getInfoForOwners(n)) : [],
   );
 
   const authorizedApps = await Promise.all(
@@ -43,7 +43,7 @@ async function userAppsHandler(req: FastifyRequest, rep: FastifyReply): Promise<
           });
 
           return {
-            ...(await Client.sanitize(n)),
+            ...(await Meiling.OAuth2.Client.sanitize(n)),
             authorizedAt: firstAuthorization?.authorizedAt,
             lastAuthAt: lastAuthorization?.authorizedAt,
           };

@@ -1,7 +1,7 @@
 import { PhoneNumber } from 'libphonenumber-js';
 import * as OpenPGP from 'openpgp';
 import * as SpeakEasy from 'speakeasy';
-import * as Notification from './notification';
+import * as Notification from '../../notification';
 
 export async function validatePGPSign(
   challenge: string,

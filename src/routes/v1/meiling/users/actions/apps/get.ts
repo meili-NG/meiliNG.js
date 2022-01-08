@@ -1,14 +1,14 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1ClientRequest } from '.';
 import { getUserFromActionRequest } from '..';
-import { Client, User } from '../../../../../../common';
+import { Meiling } from '../../../../../../common';
 import { getPrismaClient } from '../../../../../../resources/prisma';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 
 async function appGetHandler(req_: FastifyRequest, rep: FastifyReply): Promise<void> {
   const req = req_ as MeilingV1ClientRequest;
-  const user = (await getUserFromActionRequest(req)) as User.UserInfoObject;
+  const user = (await getUserFromActionRequest(req)) as Meiling.Identity.User.UserInfoObject;
 
   let response: any = {
     status: req.status,
@@ -49,17 +49,17 @@ async function appGetHandler(req_: FastifyRequest, rep: FastifyReply): Promise<v
 
     response = {
       ...response,
-      ...Client.sanitize(req.client),
+      ...Meiling.OAuth2.Client.sanitize(req.client),
       authorizedAt: firstAuthorization?.authorizedAt,
       lastAuthAt: lastAuthorization?.authorizedAt,
-      permissions: (await User.getClientAuthorizedPermissions(user, req.client.id)).map((n) => n.name),
+      permissions: (await Meiling.Identity.User.getClientAuthorizedPermissions(user, req.client.id)).map((n) => n.name),
     };
   }
 
   if (req.status.owned) {
     response = {
       ...response,
-      ...(await Client.getInfoForOwners(req.client)),
+      ...(await Meiling.OAuth2.Client.getInfoForOwners(req.client)),
     };
   }
 

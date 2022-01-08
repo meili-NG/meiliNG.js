@@ -1,10 +1,11 @@
 import { Email, Group, OAuthTokenType, Phone, prisma, User as UserModel } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import JWT from 'jsonwebtoken';
-import { ClientAuthorization, User, Utils } from '.';
-import config from '../resources/config';
-import { getPrismaClient } from '../resources/prisma';
-import { SanitizedClientModel } from './client';
+import { OAuth2 } from '..';
+import { Utils } from '../..';
+import config from '../../../resources/config';
+import { getPrismaClient } from '../../../resources/prisma';
+import { SanitizedClientModel } from '../oauth2/client';
 
 export interface UserInfoObject extends UserModel {
   emails: Email[];
@@ -144,7 +145,7 @@ export async function getDetailedInfo(user: UserModel | string): Promise<UserDet
   const authorizedAppPromises: Promise<any>[] = [];
   const createdAppPromises: Promise<any>[] = [];
 
-  authorizedAppsDatabase.map((n) => authorizedAppPromises.push(ClientAuthorization.getClient(n)));
+  authorizedAppsDatabase.map((n) => authorizedAppPromises.push(OAuth2.ClientAuthorization.getClient(n)));
 
   // TODO: remove this totally unnecessary async.
   ownedAppsDatabase.map((n) => createdAppPromises.push((async () => n)()));
@@ -366,7 +367,7 @@ export async function getClientAuthorizedPermissions(user: UserModel | string, c
   }
 
   for (const authorization of authorizations) {
-    const authPermissions = await ClientAuthorization.getAuthorizedPermissions(authorization);
+    const authPermissions = await OAuth2.ClientAuthorization.getAuthorizedPermissions(authorization);
     permissions.push(...authPermissions);
   }
 
@@ -607,10 +608,10 @@ export async function createIDToken(
   };
 
   const emailPerm = permissions && permissions.includes('email');
-  const email = await User.getPrimaryEmail(getUserId(user));
+  const email = await getPrimaryEmail(getUserId(user));
 
   const phonePerm = permissions && permissions.includes('phone');
-  const phone = await User.getPrimaryPhone(getUserId(user));
+  const phone = await getPrimaryPhone(getUserId(user));
 
   const jwtData = {
     sub: data.id,

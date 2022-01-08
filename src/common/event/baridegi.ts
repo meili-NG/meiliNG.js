@@ -1,5 +1,5 @@
 import axios from 'axios';
-import config from '../resources/config';
+import config from '../../resources/config';
 
 export enum BaridegiLogType {
   NEW_SESSION = 'new_session',

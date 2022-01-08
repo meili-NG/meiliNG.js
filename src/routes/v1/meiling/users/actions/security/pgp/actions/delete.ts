@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '../../..';
-import { User, Utils } from '../../../../../../../../common';
+import { Meiling, Utils } from '../../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
 import { convertAuthentication } from '../../../../../common/database';
 import { sendMeilingError } from '../../../../../error';
@@ -43,7 +43,7 @@ async function userPGPActionDeleteKey(req: FastifyRequest, rep: FastifyReply): P
     },
   });
 
-  await User.prevent2FALockout(user.id);
+  await Meiling.Identity.User.prevent2FALockout(user.id);
 
   rep.send({ success: true });
 }

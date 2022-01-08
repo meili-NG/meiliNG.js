@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { FastifyRequestWithSession } from '../../..';
-import { getSanitizedUser } from '../../../../../../common/sanitize';
+import { getSanitizedUser } from '../../../../../../common/meiling/authorization/sanitize';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';
 

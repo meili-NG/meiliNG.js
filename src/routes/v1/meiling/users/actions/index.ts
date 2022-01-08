@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
-import { User } from '../../../../../common';
+import { Meiling } from '../../../../../common';
 import { MeilingV1Session } from '../../common';
 import { sendMeilingError } from '../../error';
 import { MeilingV1ErrorType } from '../../interfaces';
@@ -43,7 +43,9 @@ export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOpti
   done();
 }
 
-export async function getUserFromActionRequest(req: FastifyRequest): Promise<User.UserInfoObject | undefined | null> {
+export async function getUserFromActionRequest(
+  req: FastifyRequest,
+): Promise<Meiling.Identity.User.UserInfoObject | undefined | null> {
   const users = await MeilingV1Session.getLoggedIn(req);
   const userId = (req.params as { userId: string }).userId;
 

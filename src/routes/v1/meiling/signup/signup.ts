@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import libmobilephoneJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '..';
-import { User, Utils } from '../../../../common';
+import { Meiling, Utils } from '../../../../common';
 import config from '../../../../resources/config';
 import { getPrismaClient } from '../../../../resources/prisma';
 import { getAuthorizationStatus, setAuthorizationStatus } from '../common/session';
@@ -104,13 +104,13 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
     return;
   }
 
-  const user = await User.findByUsername(username);
+  const user = await Meiling.Identity.User.findByUsername(username);
   if (user.length > 0) {
     sendMeilingError(rep, MeilingV1ErrorType.EXISTING_USERNAME);
     return;
   }
 
-  const userByEmail = await User.findByUsername(email);
+  const userByEmail = await Meiling.Identity.User.findByUsername(email);
   if (userByEmail.length > 0) {
     sendMeilingError(rep, MeilingV1ErrorType.EXISTING_USERNAME, 'there is already a user using same email');
     return;

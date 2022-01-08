@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { BaridegiLogType, sendBaridegiLog } from '../../../common/baridegi';
+import { BaridegiLogType, sendBaridegiLog } from '../../../common/event/baridegi';
 import { MeilingV1Session } from './common';
 
 export function sessionPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {

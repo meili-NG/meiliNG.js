@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { FastifyRequestWithSession } from '../../..';
 import { Utils } from '../../../../../../common';
-import { getSanitizedUser } from '../../../../../../common/sanitize';
+import { getSanitizedUser } from '../../../../../../common/meiling/authorization/sanitize';
 import { getPrismaClient } from '../../../../../../resources/prisma';
 import { sendMeilingError } from '../../../error';
 import { MeilingV1ErrorType } from '../../../interfaces';

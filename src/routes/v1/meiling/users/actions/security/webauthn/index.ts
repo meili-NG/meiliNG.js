@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { getUserFromActionRequest } from '../..';
-import { Token, Utils } from '../../../../../../../common';
+import { Meiling, Utils } from '../../../../../../../common';
 import config from '../../../../../../../resources/config';
 import { getPrismaClient } from '../../../../../../../resources/prisma';
 import { MeilingV1Session } from '../../../../common';
@@ -51,7 +51,7 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
     if (Utils.isNotBlank(body.id, body.response, body.response?.attenationObject, body)) {
       // TODO: Implement registration procedure
     } else {
-      const challenge = Token.generateToken(64);
+      const challenge = Meiling.Authorization.Token.generateToken(64);
 
       await MeilingV1Session.setSession(req, {
         ...session,

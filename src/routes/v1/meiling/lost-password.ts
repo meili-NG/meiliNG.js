@@ -2,8 +2,8 @@ import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import libphonenumberJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '.';
-import { User, Utils } from '../../../common';
-import { BaridegiLogType, sendBaridegiLog } from '../../../common/baridegi';
+import { Meiling, Utils } from '../../../common';
+import { BaridegiLogType, sendBaridegiLog } from '../../../common/event/baridegi';
 import {
   convertToNotificationMethod,
   sendNotification,
@@ -51,7 +51,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
       },
     });
 
-    await User.addPassword(uuid, body.password);
+    await Meiling.Identity.User.addPassword(uuid, body.password);
     await setAuthorizationStatus(req, undefined);
     await setPasswordResetSession(req, undefined);
 
@@ -71,10 +71,10 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     return;
   }
 
-  const users = await User.findByUsername(username);
+  const users = await Meiling.Identity.User.findByUsername(username);
 
   if (Utils.isValidEmail(username)) {
-    users.push(...(await User.findByEmail(username)));
+    users.push(...(await Meiling.Identity.User.findByEmail(username)));
   }
 
   if (users.length > 1) {
@@ -123,14 +123,14 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     let to: string | undefined = undefined;
 
     if (currentMethod === MeilingV1ExtendedAuthMethods.EMAIL) {
-      const to = (await User.getPrimaryEmail(user.id))?.email;
+      const to = (await Meiling.Identity.User.getPrimaryEmail(user.id))?.email;
 
       if (!to || !Utils.isValidEmail(to)) {
         sendMeilingError(rep, MeilingV1ErrorType.AUTHORIZATION_REQUEST_INVALID, 'email does not exist on this user');
         return;
       }
     } else if (currentMethod === MeilingV1ExtendedAuthMethods.SMS) {
-      const toRaw = (await User.getPrimaryPhone(user.id))?.phone;
+      const toRaw = (await Meiling.Identity.User.getPrimaryPhone(user.id))?.phone;
 
       if (toRaw) {
         const phoneParsed = libphonenumberJs(toRaw);

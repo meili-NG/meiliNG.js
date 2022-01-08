@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { FastifyReply } from 'fastify/types/reply';
-import { MeilingCommonError } from '../../../common';
+import { Meiling } from '../../../common';
 import { NodeEnvironment } from '../../../interface';
 import config from '../../../resources/config';
 import { MeilingV1ErrorResponse, MeilingV1ErrorType } from './interfaces';
@@ -95,6 +95,6 @@ export function sendMeilingError(
     type,
     description,
     code,
-    url: MeilingCommonError.buildErrorCodeURL(code),
+    url: Meiling.Error.buildErrorCodeURL(code),
   } as MeilingV1ErrorResponse);
 }

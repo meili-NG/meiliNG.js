@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { FastifyRequestWithSession } from '..';
-import { BaridegiLogType, sendBaridegiLog } from '../../../../common/baridegi';
+import { BaridegiLogType, sendBaridegiLog } from '../../../../common/event/baridegi';
 import config from '../../../../resources/config';
 import { getPrismaClient } from '../../../../resources/prisma';
 import { setAuthorizationStatus } from '../common/session';

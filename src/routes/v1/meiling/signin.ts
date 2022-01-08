@@ -2,9 +2,9 @@ import { User as UserModel } from '@prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { FastifyRequestWithSession } from '.';
-import { User, Utils } from '../../../common';
+import { Meiling, Utils } from '../../../common';
 import * as Notification from '../../../common/notification';
-import { AuthorizationJSONObject } from '../../../common/user';
+import { AuthorizationJSONObject } from '../../../common/meiling/identity/user';
 import config from '../../../resources/config';
 import { MeilingV1Challenge, MeilingV1Database, MeilingV1Session, MeilingV1User } from './common';
 import { getMeilingAvailableAuthMethods } from './common/challenge';
@@ -12,8 +12,8 @@ import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
 import { MeilingV1ExtendedAuthMethods, MeilingV1SignInBody, MeilingV1SigninType } from './interfaces/query';
 import libmobilephoneJs from 'libphonenumber-js';
-import { BaridegiLogType, sendBaridegiLog } from '../../../common/baridegi';
-import { getTokenFromRequest } from '../../../common/token';
+import { BaridegiLogType, sendBaridegiLog } from '../../../common/event/baridegi';
+import { getTokenFromRequest } from '../../../common/meiling/authorization/token';
 
 export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
@@ -35,10 +35,10 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       return;
     }
 
-    const users = await User.findByCommonUsername(username);
+    const users = await Meiling.Identity.User.findByCommonUsername(username);
 
     if (users.length === 1 && (await MeilingV1Session.getPreviouslyLoggedIn(req, users[0]))) {
-      const user = await User.getInfo(users[0]);
+      const user = await Meiling.Identity.User.getInfo(users[0]);
 
       if (user) {
         rep.send({
@@ -71,7 +71,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       return;
     }
 
-    const authenticatedUsers = await User.findByPasswordLogin(username, password);
+    const authenticatedUsers = await Meiling.Identity.User.findByPasswordLogin(username, password);
 
     if (authenticatedUsers.length === 1) {
       userToLogin = authenticatedUsers[0];
@@ -83,7 +83,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       );
       return;
     } else {
-      const users = await User.findByCommonUsername(username);
+      const users = await Meiling.Identity.User.findByCommonUsername(username);
 
       if (users.length > 0) {
         sendMeilingError(rep, MeilingV1ErrorType.WRONG_PASSWORD, 'Wrong password.');
@@ -138,7 +138,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
         return;
       }
 
-      const user = await User.getBasicInfo(userId);
+      const user = await Meiling.Identity.User.getBasicInfo(userId);
 
       if (user === null) {
         sendMeilingError(
@@ -156,7 +156,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       const username = body?.context?.username;
 
       if (username !== undefined) {
-        const users = await User.findByCommonUsername(username);
+        const users = await Meiling.Identity.User.findByCommonUsername(username);
 
         if (users.length === 0) {
           sendMeilingError(rep, MeilingV1ErrorType.WRONG_USERNAME, 'Wrong username.');
@@ -359,7 +359,7 @@ please request this endpoint without challengeResponse field to request challeng
 
       if (userId !== null) {
         if (authorizedUsers.filter((n) => n.id === userId).length === 0) {
-          const user = await User.getBasicInfo(userId);
+          const user = await Meiling.Identity.User.getBasicInfo(userId);
           if (user !== null && user !== undefined) {
             authorizedUsers.push(user);
           }
@@ -388,10 +388,10 @@ please request this endpoint without challengeResponse field to request challeng
   await MeilingV1Session.login(req, userToLogin);
   await MeilingV1Session.setExtendedAuthenticationSession(req, undefined);
 
-  User.updateLastAuthenticated(userToLogin);
-  User.updateLastSignIn(userToLogin);
+  Meiling.Identity.User.updateLastAuthenticated(userToLogin);
+  Meiling.Identity.User.updateLastSignIn(userToLogin);
 
-  const user = await User.getDetailedInfo(userToLogin);
+  const user = await Meiling.Identity.User.getDetailedInfo(userToLogin);
 
   sendBaridegiLog(BaridegiLogType.USER_SIGNIN, {
     ip: req.ip,

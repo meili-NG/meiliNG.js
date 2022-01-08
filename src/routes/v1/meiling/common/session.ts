@@ -1,8 +1,8 @@
 import { MeilingSessionV1Token, User as UserModel } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 import fs from 'fs';
-import { Token, User } from '../../../../common';
-import { UserInfoObject } from '../../../../common/user';
+import { Meiling } from '../../../../common';
+import { UserInfoObject } from '../../../../common/meiling/identity/user';
 import config from '../../../../resources/config';
 import { getPrismaClient } from '../../../../resources/prisma';
 import {
@@ -129,12 +129,12 @@ export async function isToken(token?: string): Promise<boolean> {
 }
 
 export function getTokenFromRequest(req: FastifyRequest): string | undefined {
-  const token = Token.getTokenFromRequest(req);
+  const token = Meiling.Authorization.Token.getTokenFromRequest(req);
   return token ? token.token : undefined;
 }
 
 export async function createToken(req: FastifyRequest): Promise<string | undefined> {
-  const token = Token.generateToken();
+  const token = Meiling.Authorization.Token.generateToken();
   const expiration = new Date(new Date().getTime() + config.session.v1.maxAge * 1000);
   const userTimeFieldMinimum = new Date().getTime() - config.session.v1.rateLimit.timeframe * 1000;
 
@@ -229,7 +229,7 @@ export async function getSessionFromRequest(req: FastifyRequest): Promise<Meilin
     if (data.user) {
       for (const user of data.user) {
         // not async function since we don't need to wait it to complete.
-        User.updateLastAuthenticated(user.id);
+        Meiling.Identity.User.updateLastAuthenticated(user.id);
       }
     }
   }
@@ -300,7 +300,7 @@ export async function setSession(req: FastifyRequest, data?: MeilingV1Session): 
               if (user.id) {
                 try {
                   // not async function since we don't need to wait it to complete.
-                  User.updateLastAuthenticated(user.id);
+                  Meiling.Identity.User.updateLastAuthenticated(user.id);
                 } catch (e) {}
               }
             }
@@ -407,7 +407,7 @@ export async function getPreviouslyLoggedIn(req: FastifyRequest, user: UserModel
       session.previouslyLoggedIn = [];
     }
 
-    const userData = await User.getBasicInfo(user);
+    const userData = await Meiling.Identity.User.getBasicInfo(user);
     if (userData === null || userData === undefined) {
       return false;
     }
@@ -434,7 +434,7 @@ export async function login(req: FastifyRequest, user: UserModel | string): Prom
       session.previouslyLoggedIn = [];
     }
 
-    const userData = await User.getBasicInfo(user);
+    const userData = await Meiling.Identity.User.getBasicInfo(user);
     if (userData === null || userData === undefined) {
       return;
     }
@@ -465,7 +465,7 @@ export async function logout(req: FastifyRequest, user?: UserModel | string): Pr
       if (session.user === undefined) {
         session.user = [];
       } else {
-        const userData = await User.getBasicInfo(user);
+        const userData = await Meiling.Identity.User.getBasicInfo(user);
 
         if (userData === null || userData === undefined) {
           return;
@@ -498,10 +498,10 @@ export async function getLoggedIn(req: FastifyRequest): Promise<UserInfoObject[]
     const users = [];
 
     for (const user of session.user) {
-      const thisUser = await User.getInfo(user.id);
+      const thisUser = await Meiling.Identity.User.getInfo(user.id);
       if (thisUser !== null && thisUser !== undefined) {
         users.push(thisUser);
-        User.updateLastAuthenticated(thisUser);
+        Meiling.Identity.User.updateLastAuthenticated(thisUser);
       }
     }
 

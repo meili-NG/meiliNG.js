@@ -2,7 +2,7 @@ import { prisma } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
 import { getUserFromActionRequest } from '../../..';
-import { generateToken } from '../../../../../../../../common/token';
+import { generateToken } from '../../../../../../../../common/meiling/authorization/token';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
 import { sendMeilingError } from '../../../../../error';
 import { MeilingV1ErrorType } from '../../../../../interfaces';

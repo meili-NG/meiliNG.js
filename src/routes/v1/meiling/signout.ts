@@ -2,9 +2,9 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { FastifyRequestWithSession } from '.';
-import { User } from '../../../common';
-import { BaridegiLogType, sendBaridegiLog } from '../../../common/baridegi';
-import { getTokenFromRequest } from '../../../common/token';
+import { Meiling } from '../../../common';
+import { BaridegiLogType, sendBaridegiLog } from '../../../common/event/baridegi';
+import { getTokenFromRequest } from '../../../common/meiling/authorization/token';
 import { MeilingV1Session } from './common';
 import { sendMeilingError } from './error';
 import { MeilingV1ErrorType } from './interfaces';
@@ -37,7 +37,7 @@ export async function signoutHandler(req: FastifyRequest, rep: FastifyReply): Pr
 
         sendBaridegiLog(BaridegiLogType.USER_SIGNOUT, {
           ip: req.ip,
-          user: await User.getDetailedInfo(userId),
+          user: await Meiling.Identity.User.getDetailedInfo(userId),
           token: getTokenFromRequest(req)?.token,
         });
       } else {

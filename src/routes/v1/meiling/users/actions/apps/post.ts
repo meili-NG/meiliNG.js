@@ -1,7 +1,7 @@
 import { Group as GroupModel, Permission } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '..';
-import { Client, Group, User, Utils } from '../../../../../../common';
+import { Meiling, Utils } from '../../../../../../common';
 import { getPrismaClient } from '../../../../../../resources/prisma';
 import { MeilingV1Session } from '../../../common';
 import { sendMeilingError } from '../../../error';
@@ -79,15 +79,15 @@ async function appCreateHandler(req: FastifyRequest, rep: FastifyReply): Promise
     | undefined = undefined;
 
   if (userList && userList.length > 0) {
-    const authUsers: User.UserInfoObject[] = [];
+    const authUsers: Meiling.Identity.User.UserInfoObject[] = [];
     const userPromises = [];
 
     for (const user of userList) {
-      userPromises.push(User.getInfo(user));
+      userPromises.push(Meiling.Identity.User.getInfo(user));
     }
 
     const usersTmp = await Promise.all(userPromises);
-    authUsers.push(...(usersTmp.filter((n) => n !== undefined) as User.UserInfoObject[]));
+    authUsers.push(...(usersTmp.filter((n) => n !== undefined) as Meiling.Identity.User.UserInfoObject[]));
 
     authUserDB = [];
     authUsers.forEach((n) => {
@@ -102,7 +102,7 @@ async function appCreateHandler(req: FastifyRequest, rep: FastifyReply): Promise
     const groupPromises = [];
 
     for (const group of groupList) {
-      groupPromises.push(Group.getInfo(group));
+      groupPromises.push(Meiling.Identity.Group.getInfo(group));
     }
 
     const groups = await Promise.all(groupPromises);
@@ -160,7 +160,7 @@ async function appCreateHandler(req: FastifyRequest, rep: FastifyReply): Promise
     return;
   }
 
-  rep.send(Client.sanitize(client));
+  rep.send(Meiling.OAuth2.Client.sanitize(client));
 }
 
 export default appCreateHandler;

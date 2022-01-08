@@ -6,9 +6,11 @@ import {
   Permission,
   User as UserModel,
 } from '@prisma/client';
-import { ClientAuthorization, MeilingCommonOAuth2, User, Utils } from '.';
-import config from '../resources/config';
-import { getPrismaClient } from '../resources/prisma';
+import { Utils } from '../..';
+import { Identity } from '..';
+import { Utils as OAuth2Utils, ClientAuthorization } from '.';
+import config from '../../../resources/config';
+import { getPrismaClient } from '../../../resources/prisma';
 import { ClientACLRules, getAccessControlRules } from './clientAccessControls';
 
 export async function getByClientId(clientId: string): Promise<ClientModel | null> {
@@ -61,7 +63,7 @@ export async function verifySecret(clientId: string, clientSecret?: string): Pro
 
 export async function isValidRedirectURI(clientId: string, redirectUri: string): Promise<boolean> {
   const redirectUris = await getRedirectUris(clientId);
-  return MeilingCommonOAuth2.getMatchingRedirectURIs(redirectUri, redirectUris).length > 0;
+  return OAuth2Utils.getMatchingRedirectURIs(redirectUri, redirectUris).length > 0;
 }
 
 export async function getAccessControl(clientId: string): Promise<OAuthClientAccessControls | null | undefined> {
@@ -136,7 +138,7 @@ export async function hasUserPermissions(
   clientId: string,
   permissions: Permission[],
 ): Promise<boolean> {
-  const authorizedPermissions = await User.getClientAuthorizedPermissions(user, clientId);
+  const authorizedPermissions = await Identity.User.getClientAuthorizedPermissions(user, clientId);
 
   if (authorizedPermissions) {
     const unauthorizedPermissions = permissions.filter(
@@ -230,7 +232,7 @@ export async function createAuthorization(
   user: string | UserModel,
   permissions: Permission[],
 ): Promise<OAuthClientAuthorization> {
-  const userId = User.getUserId(user);
+  const userId = Identity.User.getUserId(user);
   const permissionsConnect: {
     name: string;
   }[] = Utils.getUnique(
@@ -266,7 +268,7 @@ export async function getUnauthorizedPermissions(
   clientId: string,
   permissions: (Permission | string)[],
 ): Promise<false | string[]> {
-  const authorizations = await User.getClientAuthorizations(user, clientId);
+  const authorizations = await Identity.User.getClientAuthorizations(user, clientId);
 
   if (authorizations) {
     const authPromises = [];

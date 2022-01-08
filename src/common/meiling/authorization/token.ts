@@ -7,10 +7,12 @@ import {
   User as UserModel,
 } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
-import { Client, ClientAuthorization, Token, User, Utils } from '.';
-import config from '../resources/config';
-import { getPrismaClient } from '../resources/prisma';
-import { OAuth2QueryCodeChallengeMethod } from '../routes/v1/oauth2/interfaces';
+import { Identity, OAuth2 } from '..';
+import { Token } from '.';
+import { Utils } from '../..';
+import config from '../../../resources/config';
+import { getPrismaClient } from '../../../resources/prisma';
+import { OAuth2QueryCodeChallengeMethod } from '../../../routes/v1/oauth2/interfaces';
 
 export type TokenMetadata = null | TokenMetadataV1;
 
@@ -113,7 +115,7 @@ export async function getAuthorization(
       },
     });
 
-    if (authorization) await ClientAuthorization.updateLastUpdated(authorization);
+    if (authorization) await OAuth2.ClientAuthorization.updateLastUpdated(authorization);
 
     return authorization;
   }
@@ -128,7 +130,7 @@ export async function getAuthorizedPermissions(
   const authorization = await getAuthorization(token, type);
   if (!authorization) return;
 
-  const permissions = await ClientAuthorization.getAuthorizedPermissions(authorization);
+  const permissions = await OAuth2.ClientAuthorization.getAuthorizedPermissions(authorization);
   return permissions;
 }
 
@@ -145,7 +147,7 @@ export async function getData(token: string, type?: OAuthTokenType): Promise<OAu
     }
 
     if (tokenData.authorizationId) {
-      await ClientAuthorization.updateLastUpdated(tokenData.authorizationId);
+      await OAuth2.ClientAuthorization.updateLastUpdated(tokenData.authorizationId);
     }
   }
 
@@ -158,15 +160,15 @@ export async function getUser(token: string, type?: OAuthTokenType): Promise<Use
 
   if (!tokenData.authorizationId) return undefined;
 
-  const clientAuthorization = await ClientAuthorization.getById(tokenData.authorizationId);
+  const clientAuthorization = await OAuth2.ClientAuthorization.getById(tokenData.authorizationId);
   if (!clientAuthorization) return undefined;
 
   if (!clientAuthorization?.userId) return undefined;
-  const user = await User.getBasicInfo(clientAuthorization?.userId);
+  const user = await Identity.User.getBasicInfo(clientAuthorization?.userId);
   if (!user) return undefined;
 
   if (user) {
-    await User.updateLastAuthenticated(user);
+    await Identity.User.updateLastAuthenticated(user);
   }
 
   return user && user !== null ? user : undefined;
@@ -178,10 +180,10 @@ export async function getClient(token: string, type?: OAuthTokenType): Promise<O
 
   if (!tokenData.authorizationId) return undefined;
 
-  const clientAuthorization = await ClientAuthorization.getById(tokenData.authorizationId);
+  const clientAuthorization = await OAuth2.ClientAuthorization.getById(tokenData.authorizationId);
   if (!clientAuthorization) return undefined;
 
-  const client = await Client.getByClientId(clientAuthorization.clientId);
+  const client = await OAuth2.Client.getByClientId(clientAuthorization.clientId);
   if (!client) return undefined;
 
   return client && client !== null ? client : undefined;

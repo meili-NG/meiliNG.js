@@ -1,4 +1,5 @@
-import { User, Client } from '.';
+import { User } from '../identity';
+import { Client } from '../oauth2';
 
 export async function getSanitizedUser(user: string): Promise<User.UserDetailedObject | undefined> {
   const userId = User.getUserId(user);

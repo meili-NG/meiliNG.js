@@ -6,10 +6,9 @@ import * as Notification from '../../../../common/notification';
 import { generateToken } from '../../../../common/meiling/authorization/token';
 import * as Utils from '../../../../common/utils';
 import config from '../../../../resources/config';
-import { MeilingV1Challenge } from '../common';
-import { appendAuthorizationStatus } from '../common/session';
-import { sendMeilingError } from '../error';
-import { MeilingV1ErrorType, MeilingV1ExtendedAuthMethods } from '../interfaces';
+import { appendAuthorizationStatus } from '../../../../common/meiling/v1/session';
+import { sendMeilingError } from '../../../../common/meiling/v1/error/error';
+import { Meiling } from '../../../../common';
 
 type MeilingV1AuthorizationIssueQuery = MeilingV1AuthorizationIssueEmailQuery | MeilingV1AuthorizationIssuePhoneQuery;
 
@@ -38,7 +37,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
     if (body.type === 'email') {
       const email = body.to;
       if (!Utils.isValidEmail(email)) {
-        sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'email is not valid');
+        sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'email is not valid');
         return;
       }
 
@@ -48,10 +47,15 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         if (to === email) {
           const prevCreatedAt = new Date(session.authorizationStatus?.email?.challenge.challengeCreatedAt);
 
-          if (MeilingV1Challenge.isChallengeRateLimited(MeilingV1ExtendedAuthMethods.EMAIL, prevCreatedAt)) {
+          if (
+            Meiling.V1.Challenge.isChallengeRateLimited(
+              Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.EMAIL,
+              prevCreatedAt,
+            )
+          ) {
             sendMeilingError(
               rep,
-              MeilingV1ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
+              Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
               'old token is still valid for email verification. rate_limited',
             );
             return;
@@ -97,7 +101,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
       const phone = libphonenumberJs(body.to);
 
       if (!phone) {
-        sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'phone number is not valid');
+        sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'phone number is not valid');
         return;
       }
 
@@ -107,10 +111,15 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         if (to && to.formatInternational() === phone.formatInternational()) {
           const prevCreatedAt = new Date(session.authorizationStatus?.phone?.challenge.challengeCreatedAt);
 
-          if (MeilingV1Challenge.isChallengeRateLimited(MeilingV1ExtendedAuthMethods.SMS, prevCreatedAt)) {
+          if (
+            Meiling.V1.Challenge.isChallengeRateLimited(
+              Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.SMS,
+              prevCreatedAt,
+            )
+          ) {
             sendMeilingError(
               rep,
-              MeilingV1ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
+              Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
               'old token is still valid for phone authorization. rate_limited',
             );
             return;
@@ -159,11 +168,11 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         },
       });
     } else {
-      sendMeilingError(rep, MeilingV1ErrorType.UNSUPPORTED_AUTHORIZATION_TYPE);
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNSUPPORTED_AUTHORIZATION_TYPE);
       return;
     }
   } catch (e) {
-    sendMeilingError(rep, MeilingV1ErrorType.INTERNAL_SERVER_ERROR, 'Failed to communicate with Server');
+    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR, 'Failed to communicate with Server');
     console.error(e);
     return;
   }

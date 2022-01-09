@@ -1,8 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { Meiling, Utils } from '../../../../common';
 import { getPrismaClient } from '../../../../resources/prisma';
-import { sendMeilingError } from '../../meiling/error';
-import { MeilingV1ErrorType } from '../../meiling/interfaces';
+import { sendMeilingError } from '../../../../common/meiling/v1/error/error';
 import userEmailsAdminHandler from './emails';
 import userPhonesAdminHandler from './phones';
 
@@ -154,7 +153,7 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
 
     const user = await Meiling.Identity.User.getDetailedInfo(uuid);
     if (!user) {
-      sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
       throw new Error('user not found');
     }
   });
@@ -164,7 +163,7 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
 
     const user = await Meiling.Identity.User.getDetailedInfo(uuid);
     if (!user) {
-      sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
       throw new Error('user not found');
     }
 
@@ -177,7 +176,7 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
 
     const user = await Meiling.Identity.User.getInfo(uuid);
     if (!user) {
-      sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
       throw new Error('user not found');
     }
 

@@ -1,4 +1,4 @@
-export enum MeilingV1ErrorType {
+export enum ErrorType {
   UNAUTHORIZED = 'unauthorized',
   ALREADY_SIGNED_IN = 'already_signed_in',
   ALREADY_SIGNED_OUT = 'already_signed_out',
@@ -39,11 +39,4 @@ export enum MeilingV1ErrorType {
   PHONE_NOT_ALLOWED = 'phone_not_allowed',
   EXISTING_USERNAME = 'existing_username',
   EXISTING_PASSWORD = 'existing_password',
-}
-
-export interface MeilingV1ErrorResponse {
-  type: MeilingV1ErrorType;
-  description: string;
-  code: string;
-  url: string;
 }

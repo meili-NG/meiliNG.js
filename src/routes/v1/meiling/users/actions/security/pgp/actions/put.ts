@@ -3,27 +3,26 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '../../..';
 import { Meiling, Utils } from '../../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
-import { convertAuthentication } from '../../../../../common/database';
-import { sendMeilingError } from '../../../../../error';
-import { MeilingV1ExtendedAuthMethods, MeilingV1ErrorType } from '../../../../../interfaces';
+import { convertAuthentication } from '../../../../../../../../common/meiling/v1/database';
+import { sendMeilingError } from '../../../../../../../../common/meiling/v1/error/error';
 
-const dbType = convertAuthentication(MeilingV1ExtendedAuthMethods.PGP_SIGNATURE);
+const dbType = convertAuthentication(Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.PGP_SIGNATURE);
 
 async function userPGPActionPutKey(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = await getUserFromActionRequest(req);
   if (!user) {
-    sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
+    sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
     return;
   }
 
   const pgpId = (req.params as any).pgpId;
   if (!Utils.isNotBlank(pgpId)) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
+    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 
   if (!req.body) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
+    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 
@@ -40,7 +39,7 @@ async function userPGPActionPutKey(req: FastifyRequest, rep: FastifyReply): Prom
   });
 
   if (!keyData) {
-    sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
+    sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
     return;
   }
 

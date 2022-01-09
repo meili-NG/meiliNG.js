@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { getPrismaClient } from '../../../../resources/prisma';
-import { sendMeilingError } from '../../meiling/error';
-import { MeilingV1ErrorType } from '../../meiling/interfaces';
+import { sendMeilingError } from '../../../../common/meiling/v1/error/error';
 import libPhoneNumberJs from 'libphonenumber-js';
+import { Meiling } from '../../../../common';
 
 interface UserPhoneRegisterInterface {
   phone?: string;
@@ -30,7 +30,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     const body = req.body as UserPhoneRegisterInterface | undefined;
 
     if (!body?.phone || typeof body.phone !== 'string') {
-      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
       return;
     }
 
@@ -45,7 +45,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     const phone = libPhoneNumberJs(body.phone);
 
     if (!phone) {
-      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'invalid phone number');
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
       return;
     }
 
@@ -58,7 +58,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     ).filter((n) => n.phone === phone.formatInternational());
 
     if (matchingPhones.length > 0) {
-      sendMeilingError(rep, MeilingV1ErrorType.CONFLICT, 'phone number already exists');
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.CONFLICT, 'phone number already exists');
       return;
     }
 
@@ -76,7 +76,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       if (othersPrimaryPhones.length > 0) {
         sendMeilingError(
           rep,
-          MeilingV1ErrorType.CONFLICT,
+          Meiling.V1.Error.ErrorType.CONFLICT,
           'there is other user who is using this phone as primary phone',
         );
         return;
@@ -129,7 +129,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     });
 
     if (phone === null) {
-      sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 
@@ -154,7 +154,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     });
 
     if (phone === null) {
-      sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 
@@ -163,7 +163,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     if (typeof body.phone === 'string') {
       const phoneNumberObj = libPhoneNumberJs(body.phone);
       if (!phoneNumberObj) {
-        sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'invalid phone number');
+        sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
         return;
       }
 
@@ -184,7 +184,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       if (othersPrimaryPhones.length > 0) {
         sendMeilingError(
           rep,
-          MeilingV1ErrorType.CONFLICT,
+          Meiling.V1.Error.ErrorType.CONFLICT,
           'there is other user who is using this phone as primary phone',
         );
         return;
@@ -225,12 +225,16 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       });
 
       if (phone === null) {
-        sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND);
+        sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
         return;
       }
 
       if (phone.isPrimary) {
-        sendMeilingError(rep, MeilingV1ErrorType.CONFLICT, 'you should assign new primary number before deleting it');
+        sendMeilingError(
+          rep,
+          Meiling.V1.Error.ErrorType.CONFLICT,
+          'you should assign new primary number before deleting it',
+        );
         return;
       }
 

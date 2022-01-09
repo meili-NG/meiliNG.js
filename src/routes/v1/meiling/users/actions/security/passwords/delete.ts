@@ -3,15 +3,14 @@ import { PasswordBody } from '.';
 import { getUserFromActionRequest } from '../..';
 import { Meiling } from '../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../resources/prisma';
-import { sendMeilingError } from '../../../../error';
-import { MeilingV1ErrorType } from '../../../../interfaces';
+import { sendMeilingError } from '../../../../../../../common/meiling/v1/error/error';
 
 export async function userPasswordDeleteHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = (await getUserFromActionRequest(req)) as Meiling.Identity.User.UserInfoObject;
   const body = req.body as PasswordBody;
 
   if (!body?.password) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'invalid request.');
+    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid request.');
     return;
   }
 

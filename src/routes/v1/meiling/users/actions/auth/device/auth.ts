@@ -3,8 +3,7 @@ import { getUserFromActionRequest } from '../..';
 import { Meiling, Utils } from '../../../../../../../common';
 import { TokenMetadata } from '../../../../../../../common/meiling/authorization/token';
 import { getPrismaClient } from '../../../../../../../resources/prisma';
-import { sendMeilingError } from '../../../../error';
-import { MeilingV1ErrorType } from '../../../../interfaces';
+import { sendMeilingError } from '../../../../../../../common/meiling/v1/error/error';
 
 interface DeviceCode {
   user_code: string;
@@ -21,7 +20,7 @@ export async function deviceCodeAuthorizeHandler(req: FastifyRequest, rep: Fasti
   // validate
   if (!Utils.isValidValue(query, query.user_code)) {
     if (!Utils.isValidValue(body, body.user_code)) {
-      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'missing user_code.');
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'missing user_code.');
       return;
     }
 
@@ -31,7 +30,7 @@ export async function deviceCodeAuthorizeHandler(req: FastifyRequest, rep: Fasti
   // get userData of selected user
   const userData = await Meiling.Identity.User.getDetailedInfo(userBase);
   if (!userData) {
-    sendMeilingError(rep, MeilingV1ErrorType.INTERNAL_SERVER_ERROR, 'unable to fetch user from DB.');
+    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR, 'unable to fetch user from DB.');
     return;
   }
 
@@ -52,7 +51,7 @@ export async function deviceCodeAuthorizeHandler(req: FastifyRequest, rep: Fasti
       query.user_code,
   );
   if (matchingUserCodes.length === 0) {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'no matching user_code found');
+    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'no matching user_code found');
     return;
   }
 
@@ -60,21 +59,25 @@ export async function deviceCodeAuthorizeHandler(req: FastifyRequest, rep: Fasti
 
   const client = await Meiling.OAuth2.ClientAuthorization.getClient(userCode.authorizationId);
   if (!client) {
-    sendMeilingError(rep, MeilingV1ErrorType.APPLICATION_NOT_FOUND, 'unable to find proper client');
+    sendMeilingError(rep, Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND, 'unable to find proper client');
     return;
   }
 
   // load access control
   const acl = await Meiling.OAuth2.Client.getAccessControl(client.id);
   if (!acl) {
-    sendMeilingError(rep, MeilingV1ErrorType.INTERNAL_SERVER_ERROR, 'Failed to get Access Control from Server.');
+    sendMeilingError(
+      rep,
+      Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR,
+      'Failed to get Access Control from Server.',
+    );
     return;
   }
 
   // is this user able to pass client check
   const clientPrivateCheck = await Meiling.OAuth2.ClientAccessControls.checkUsers(acl, userBase);
   if (!clientPrivateCheck) {
-    sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'specified oAuth2 application is inaccessible');
+    sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'specified oAuth2 application is inaccessible');
     return;
   }
 
@@ -82,7 +85,7 @@ export async function deviceCodeAuthorizeHandler(req: FastifyRequest, rep: Fasti
   if (!authorization) {
     sendMeilingError(
       rep,
-      MeilingV1ErrorType.UNAUTHORIZED,
+      Meiling.V1.Error.ErrorType.UNAUTHORIZED,
       "specified oAuth2 application doesn't have proper authorization",
     );
     return;
@@ -103,7 +106,11 @@ export async function deviceCodeAuthorizeHandler(req: FastifyRequest, rep: Fasti
 
   const metadata = userCode.metadata as unknown as TokenMetadata;
   if (!metadata?.data?.deviceCode) {
-    sendMeilingError(rep, MeilingV1ErrorType.INTERNAL_SERVER_ERROR, "token doesn't seems to be have proper metadata");
+    sendMeilingError(
+      rep,
+      Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR,
+      "token doesn't seems to be have proper metadata",
+    );
     return;
   }
 

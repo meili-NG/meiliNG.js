@@ -2,16 +2,16 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '../..';
 import { AuthorizationPGPSSHKeyObject } from '../../../../../../../common/meiling/identity/user';
 import { getPrismaClient } from '../../../../../../../resources/prisma';
-import { convertAuthentication } from '../../../../common/database';
-import { sendMeilingError } from '../../../../error';
-import { MeilingV1ErrorType, MeilingV1ExtendedAuthMethods } from '../../../../interfaces';
+import { convertAuthentication } from '../../../../../../../common/meiling/v1/database';
+import { sendMeilingError } from '../../../../../../../common/meiling/v1/error/error';
+import { Meiling } from '../../../../../../../common';
 
-const dbType = convertAuthentication(MeilingV1ExtendedAuthMethods.PGP_SIGNATURE);
+const dbType = convertAuthentication(Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.PGP_SIGNATURE);
 
 async function userPGPGetKeys(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = await getUserFromActionRequest(req);
   if (!user) {
-    sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
+    sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
     return;
   }
 

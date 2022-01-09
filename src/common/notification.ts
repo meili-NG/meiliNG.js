@@ -1,6 +1,6 @@
 import axios from 'axios';
 import config from '../resources/config';
-import { MeilingV1ExtendedAuthMethods } from '../routes/v1/meiling/interfaces';
+import { Meiling } from '.';
 import { BaridegiLogType, sendBaridegiLog } from './event/baridegi';
 
 export type TemplateLanguage = 'ko' | 'en';
@@ -13,19 +13,6 @@ export enum NotificationMethod {
   SMS = 'sms',
   ALIMTALK = 'alimtalk',
   EMAIL = 'email',
-}
-
-export function convertToNotificationMethod(method: MeilingV1ExtendedAuthMethods): NotificationMethod | undefined {
-  switch (method) {
-    case MeilingV1ExtendedAuthMethods.EMAIL:
-      return NotificationMethod.EMAIL;
-    case MeilingV1ExtendedAuthMethods.SMS:
-      return NotificationMethod.SMS;
-    default:
-      return undefined;
-  }
-
-  return undefined;
 }
 
 type NotificationPayload = SMSPayload | AlimtalkPayload | CallPayload;

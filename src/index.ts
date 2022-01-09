@@ -5,7 +5,6 @@ import fs from 'fs';
 import { Meiling, Startup, Terminal } from './common';
 import config from './resources/config';
 import meilingPlugin from './routes';
-import { MeilingV1Session } from './routes/v1/meiling/common';
 
 const main = async () => {
   // some banner stuff
@@ -13,7 +12,7 @@ const main = async () => {
   Terminal.Banner.devModeCheck();
 
   Terminal.Log.info('Loading Session Files...');
-  MeilingV1Session.loadSessionSaveFiles();
+  Meiling.V1.Session.loadSessionSaveFiles();
 
   Terminal.Log.info('Starting up Fastify...');
   const app = fastify({

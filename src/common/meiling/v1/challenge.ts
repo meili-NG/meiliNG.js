@@ -1,18 +1,9 @@
 import { Authorization } from '@prisma/client';
-import { MeilingV1Challenge, MeilingV1Database } from '.';
-import { Meiling } from '../../../../common';
-import {
-  AuthorizationJSONObject,
-  AuthorizationOTPObject,
-  AuthorizationPGPSSHKeyObject,
-} from '../../../../common/meiling/identity/user';
-import { validateOTP, validatePGPSign } from '../../../../common/meiling/authorization/validate';
-import config from '../../../../resources/config';
-import {
-  MeilingV1ExtendedAuthMethods,
-  MeilingV1SignInExtendedAuthentication,
-  MeilingV1SigninType,
-} from '../interfaces/query';
+import { Meiling } from '../..';
+import { MeilingV1ExtendedAuthMethods, MeilingV1SigninType, MeilingV1SignInExtendedAuthentication } from './interfaces';
+import { AuthorizationJSONObject, AuthorizationOTPObject, AuthorizationPGPSSHKeyObject } from '../identity/user';
+import { validateOTP, validatePGPSign } from '../authorization/validate';
+import config from '../../../resources/config';
 
 export function getMeilingAvailableAuthMethods(
   authMethods: Authorization[],
@@ -21,12 +12,12 @@ export function getMeilingAvailableAuthMethods(
   const methods: MeilingV1ExtendedAuthMethods[] = [];
 
   for (const thisMethod of authMethods) {
-    const methodMeilingV1 = MeilingV1Database.convertAuthenticationMethod(thisMethod.method);
+    const methodMeilingV1 = Meiling.V1.Database.convertAuthenticationMethod(thisMethod.method);
     if (methodMeilingV1 !== null) {
       let methodAllowed = true;
 
       if (body) {
-        methodAllowed = MeilingV1Challenge.isChallengeMethodAdequate(body, methodMeilingV1);
+        methodAllowed = Meiling.V1.Challenge.isChallengeMethodAdequate(body, methodMeilingV1);
       }
 
       if (methodAllowed) {

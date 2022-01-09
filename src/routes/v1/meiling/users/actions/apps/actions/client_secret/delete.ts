@@ -1,9 +1,9 @@
 import { prisma } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
+import { Meiling } from '../../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
-import { sendMeilingError } from '../../../../../error';
-import { MeilingV1ErrorType } from '../../../../../interfaces';
+import { sendMeilingError } from '../../../../../../../../common/meiling/v1/error/error';
 
 async function clientSecretDeleteHandler(_req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const req = _req as MeilingV1ClientRequest;
@@ -23,7 +23,7 @@ async function clientSecretDeleteHandler(_req: FastifyRequest, rep: FastifyReply
     })) === 1;
 
   if (!res) {
-    return sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND, 'secret not found');
+    return sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND, 'secret not found');
   }
 
   await getPrismaClient().oAuthClientSecrets.delete({

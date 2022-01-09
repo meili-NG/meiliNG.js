@@ -1,9 +1,9 @@
 import { prisma } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
+import { Meiling } from '../../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
-import { sendMeilingError } from '../../../../../error';
-import { MeilingV1ErrorType } from '../../../../../interfaces';
+import { sendMeilingError } from '../../../../../../../../common/meiling/v1/error/error';
 
 async function permissionsPostHandler(_req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const req = _req as MeilingV1ClientRequest;
@@ -16,7 +16,7 @@ async function permissionsPostHandler(_req: FastifyRequest, rep: FastifyReply): 
   } else if (permissionsRaw instanceof Array) {
     permissionsToAdd = permissionsRaw;
   } else {
-    sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST);
+    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 
@@ -46,7 +46,7 @@ async function permissionsPostHandler(_req: FastifyRequest, rep: FastifyReply): 
   if (toAdd.length === 0) {
     sendMeilingError(
       rep,
-      MeilingV1ErrorType.NOT_IMPLEMENTED,
+      Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED,
       'provided permissions array does not provide available permissions',
     );
   }

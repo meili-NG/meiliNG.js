@@ -3,22 +3,20 @@ import { getUserFromActionRequest } from '../..';
 import { Meiling, Utils } from '../../../../../../../common';
 import config from '../../../../../../../resources/config';
 import { getPrismaClient } from '../../../../../../../resources/prisma';
-import { MeilingV1Session } from '../../../../common';
-import { convertAuthentication } from '../../../../common/database';
-import { getSessionFromRequest } from '../../../../common/session';
-import { sendMeilingError } from '../../../../error';
-import { MeilingV1ErrorType, MeilingV1ExtendedAuthMethods } from '../../../../interfaces';
+import { convertAuthentication } from '../../../../../../../common/meiling/v1/database';
+import { getSessionFromRequest } from '../../../../../../../common/meiling/v1/session';
+import { sendMeilingError } from '../../../../../../../common/meiling/v1/error/error';
 import userWebAuthnActionsPlugin from './actions';
 
 function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', async (req, rep) => {
     const user = await getUserFromActionRequest(req);
     if (!user) {
-      sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
       return;
     }
 
-    const dbType = convertAuthentication(MeilingV1ExtendedAuthMethods.SECURITY_KEY);
+    const dbType = convertAuthentication(Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.SECURITY_KEY);
 
     const securityKeys = await getPrismaClient().authorization.findMany({
       where: {
@@ -44,7 +42,7 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
     const user = await getUserFromActionRequest(req);
 
     if (!user || !session) {
-      sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED);
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
       return;
     }
 
@@ -53,7 +51,7 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
     } else {
       const challenge = Meiling.Authorization.Token.generateToken(64);
 
-      await MeilingV1Session.setSession(req, {
+      await Meiling.V1.Session.setSession(req, {
         ...session,
         registering: {
           webAuthn: {

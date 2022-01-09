@@ -2,15 +2,13 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { Meiling, Terminal } from '../../../../common';
 import { getByClientId } from '../../../../common/meiling/oauth2/client';
 import { getPrismaClient } from '../../../../resources/prisma';
-import { MeilingV1Session } from '../../meiling/common';
-import { sendMeilingError } from '../../meiling/error';
-import { MeilingV1ErrorType } from '../../meiling/interfaces';
+import { sendMeilingError } from '../../../../common/meiling/v1/error/error';
 
 const internalAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.get('/sakuya', async (req, rep) => {
     try {
       Terminal.Log.info('Running Garbage Collect for Meiling Sessions...');
-      await MeilingV1Session.garbageCollect();
+      await Meiling.V1.Session.garbageCollect();
 
       Terminal.Log.info('Running Garbage Collect for OAuth2 Tokens...');
       await Meiling.Authorization.Token.garbageCollect();
@@ -21,7 +19,7 @@ const internalAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
       rep.send({ success: true });
     } catch (e) {
       console.error(e);
-      sendMeilingError(rep, MeilingV1ErrorType.INTERNAL_SERVER_ERROR);
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR);
     }
   });
 

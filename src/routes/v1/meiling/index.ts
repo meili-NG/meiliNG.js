@@ -4,9 +4,8 @@ import { NodeEnvironment } from '../../../interface';
 import config from '../../../resources/config';
 import { appsPlugin } from './apps';
 import { meilingV1AuthorizationPlugin } from './authorization';
-import { MeilingV1Session } from './common';
-import { sendMeilingError } from './error';
-import { MeilingV1ErrorType, MeilingV1Session as SessionObject } from './interfaces';
+import { Meiling } from '../../../common';
+import { sendMeilingError } from '../../../common/meiling/v1/error/error';
 import { lostPasswordHandler } from './lost-password';
 import { sessionPlugin } from './session';
 import { signinHandler } from './signin';
@@ -15,7 +14,7 @@ import { signupPlugin } from './signup/';
 import { userPlugin } from './users';
 
 export interface FastifyRequestWithSession extends FastifyRequest {
-  session: SessionObject;
+  session: Meiling.V1.Interfaces.MeilingV1Session;
 }
 
 function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
@@ -38,9 +37,9 @@ function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done:
 
 function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.addHook('onRequest', async (req, rep) => {
-    const session = await MeilingV1Session.getSessionFromRequest(req);
+    const session = await Meiling.V1.Session.getSessionFromRequest(req);
     if (!session) {
-      sendMeilingError(rep, MeilingV1ErrorType.INVALID_SESSION);
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_SESSION);
       throw new Error();
     }
 

@@ -2,7 +2,6 @@ import chalk from 'chalk';
 import crypto from 'crypto';
 import { Meiling } from '.';
 import config from '../resources/config';
-import { MeilingV1Session } from '../routes/v1/meiling/common';
 import Log from './terminal/log';
 import { generateToken } from './meiling/authorization/token';
 
@@ -86,7 +85,7 @@ export function checkIDTokenIssueCredentials(): true | string {
 export async function runStartupGarbageCollection(force?: boolean): Promise<void> {
   if (process.argv.includes('--run-cleanup') || force) {
     Log.info('Garbage Collecting for Meiling Sessions...');
-    await MeilingV1Session.garbageCollect();
+    await Meiling.V1.Session.garbageCollect();
 
     Log.info('Garbage Collecting for OAuth2 Tokens...');
     await Meiling.Authorization.Token.garbageCollect();

@@ -1,10 +1,9 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { FastifyRequestWithSession } from '../../..';
-import { Utils } from '../../../../../../common';
-import { getSanitizedUser } from '../../../../../../common/meiling/authorization/sanitize';
+import { Meiling, Utils } from '../../../../../../common';
+import { getSanitizedUser } from '../../../../../../common/meiling/sanitize';
 import { getPrismaClient } from '../../../../../../resources/prisma';
-import { sendMeilingError } from '../../../error';
-import { MeilingV1ErrorType } from '../../../interfaces';
+import { sendMeilingError } from '../../../../../../common/meiling/v1/error/error';
 
 interface UserUpdateRequestBody {
   birthday?: string | number;
@@ -43,12 +42,12 @@ export async function userUpdateInfo(req: FastifyRequest, rep: FastifyReply) {
         rep.send(user);
         return;
       } else {
-        sendMeilingError(rep, MeilingV1ErrorType.NOT_FOUND, 'specified user uuid was not available.');
+        sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND, 'specified user uuid was not available.');
       }
     } else {
-      sendMeilingError(rep, MeilingV1ErrorType.INVALID_REQUEST, 'required field (user uuid) is missing');
+      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'required field (user uuid) is missing');
     }
   } else {
-    sendMeilingError(rep, MeilingV1ErrorType.UNAUTHORIZED, 'You are not logged in.');
+    sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'You are not logged in.');
   }
 }

@@ -1,6 +1,6 @@
 import { AuthorizationMethod, OAuthTokenType } from '@prisma/client';
-import { OAuth2QueryGrantType } from '../../oauth2/interfaces';
-import { MeilingV1ExtendedAuthMethods } from '../interfaces/query';
+import { OAuth2QueryGrantType } from '../../../routes/v1/oauth2/interfaces';
+import { MeilingV1ExtendedAuthMethods } from './interfaces';
 
 export function convertAuthentication(method?: MeilingV1ExtendedAuthMethods): AuthorizationMethod | undefined {
   switch (method) {

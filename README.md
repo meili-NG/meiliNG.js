@@ -78,4 +78,4 @@ These are the documentations for helping you try Meiling Gatekeeper on your hand
 
 ## License
 Distributed under [MIT License](LICENSE).  
-If the [MIT License](LICENSE) does not cover you, You can use [Hakurei Reimu Public License](https://github.com/Alex4386/HRPL) instead. An Open-Source License considering all-beings (such as AI, like GitHub Copilot)  
+If the [MIT License](LICENSE) does not cover you, You can use [Hakurei Reimu Public License](https://github.com/Alex4386/HRPL) instead. [(LICENSE_HRPL)](LICENSE_HRPL) An Open-Source License considering all-beings (such as AI, like GitHub Copilot)  

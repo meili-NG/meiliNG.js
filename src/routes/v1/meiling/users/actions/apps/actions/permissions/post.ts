@@ -1,4 +1,3 @@
-import { prisma } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
 import { Meiling } from '../../../../../../../../common';

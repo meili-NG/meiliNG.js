@@ -3,7 +3,6 @@ import { FastifyRequestWithSession } from '..';
 import { BaridegiLogType, sendBaridegiLog } from '../../../../common/event/baridegi';
 import config from '../../../../resources/config';
 import { getPrismaClient } from '../../../../resources/prisma';
-import { setAuthorizationStatus } from '../../../../common/meiling/v1/session';
 import { Meiling } from '../../../../common';
 
 type MeilingV1VerificationQuery = MeilingV1PhoneVerificationQuery | MeilingV1EmailVerificationQuery;
@@ -120,7 +119,7 @@ export async function meilingV1AuthorizationVerifyHandler(req: FastifyRequest, r
     return;
   }
 
-  await setAuthorizationStatus(req, session.authorizationStatus);
+  await Meiling.V1.Session.setAuthorizationStatus(req, session.authorizationStatus);
   rep.send({
     success: true,
   });

@@ -7,10 +7,6 @@ import { userUpdateInfo } from './info/put';
 import userSecurityPlugin from './security';
 import userPasswordsPlugin from './security/passwords';
 
-export interface MeilingV1UserActionsParams {
-  userId: string;
-}
-
 export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
   // /v1/meiling/user/:userId/action
   // TODO: Implement authentication

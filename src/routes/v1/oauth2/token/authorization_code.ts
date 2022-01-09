@@ -2,67 +2,81 @@ import crypto from 'crypto';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { Meiling, Utils } from '../../../../common';
 import { parseClientInfo } from '../common';
-import { sendOAuth2Error } from '../error';
-import { OAuth2ErrorResponseType, OAuth2QueryTokenAuthorizationCodeParameters } from '../interfaces';
 
 export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const result = parseClientInfo(req);
 
   if (!result) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client id');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_CLIENT, 'invalid client id');
     return;
   }
 
   const { clientId, clientSecret } = result;
-  const body = req.body as OAuth2QueryTokenAuthorizationCodeParameters;
+  const body = req.body as Meiling.OAuth2.Interfaces.OAuth2QueryTokenAuthorizationCodeParameters;
 
   const token = body.code;
   const type = 'AUTHORIZATION_CODE';
 
   if (!(await Meiling.OAuth2.Client.getByClientId(clientId))) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client id');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_CLIENT, 'invalid client id');
     return;
   }
 
   if (!(await Meiling.OAuth2.Client.verifySecret(clientId, clientSecret))) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client secret');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_CLIENT, 'invalid client secret');
     return;
   }
 
   // check token is valid
   if (!Utils.isValidValue(token)) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST, 'invalid token');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST, 'invalid token');
     return;
   }
 
   const data = await Meiling.Authorization.Token.getData(token);
   if (data?.type !== type) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'invalid token type');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_GRANT, 'invalid token type');
     return;
   }
 
   if (!(await Meiling.Authorization.Token.isValid(token, type))) {
     const expiresIn = await Meiling.Authorization.Token.getExpiresIn(token, type);
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'expired token, expired seconds: ' + expiresIn);
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+      'expired token, expired seconds: ' + expiresIn,
+    );
     return;
   }
 
   // get user
   const user = await Meiling.Authorization.Token.getUser(token, type);
   if (!user) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'unable to find user to authenticate');
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+      'unable to find user to authenticate',
+    );
     return;
   }
 
   const authorization = await Meiling.Authorization.Token.getAuthorization(token, type);
   if (!authorization) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'unable to find proper authorization session');
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+      'unable to find proper authorization session',
+    );
     return;
   }
 
   const permissions = await Meiling.Authorization.Token.getAuthorizedPermissions(token, type);
   if (!permissions) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST, 'unable to find permissions to authenticate');
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST,
+      'unable to find permissions to authenticate',
+    );
     return;
   }
 
@@ -87,7 +101,11 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
         const code_verifier = body.code_verifier;
         if (challenge.method === 'plain') {
           if (challenge.challenge !== code_verifier) {
-            sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'invalid code_verifier');
+            Meiling.OAuth2.Error.sendOAuth2Error(
+              rep,
+              Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+              'invalid code_verifier',
+            );
             return;
           }
         } else if (challenge.method === 'S256') {
@@ -95,15 +113,27 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
           const codeVerifierBase64 = Buffer.from(challenge.challenge, 'base64').toString('base64');
 
           if (codeVerifierBase64 !== verifierHashed) {
-            sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'invalid code_verifier');
+            Meiling.OAuth2.Error.sendOAuth2Error(
+              rep,
+              Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+              'invalid code_verifier',
+            );
             return;
           }
         } else {
-          sendOAuth2Error(rep, OAuth2ErrorResponseType.UNSUPPORTED_GRANT_TYPE, 'unsupported PKCE method');
+          Meiling.OAuth2.Error.sendOAuth2Error(
+            rep,
+            Meiling.OAuth2.Error.ErrorType.UNSUPPORTED_GRANT_TYPE,
+            'unsupported PKCE method',
+          );
           return;
         }
       } else {
-        sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'code_verifier is missing');
+        Meiling.OAuth2.Error.sendOAuth2Error(
+          rep,
+          Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+          'code_verifier is missing',
+        );
         return;
       }
     }

@@ -1,12 +1,9 @@
 import { Permission } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { Meiling, Utils } from '../../../../common';
-import { generateToken } from '../../../../common/meiling/authorization/token';
 import config from '../../../../resources/config';
 import { getPrismaClient } from '../../../../resources/prisma';
 import { parseClientInfo } from '../common';
-import { sendOAuth2Error } from '../error';
-import { OAuth2ErrorResponseType } from '../interfaces';
 
 interface DeviceCodeRequestBody {
   client_id: string;
@@ -17,7 +14,7 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
   const result = parseClientInfo(req);
 
   if (!result) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client id');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_CLIENT, 'invalid client id');
     return;
   }
 
@@ -26,18 +23,18 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
   const type = 'DEVICE_CODE';
 
   if (!Utils.isValidValue(body, clientId, body.scope)) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST);
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 
   const client = await Meiling.OAuth2.Client.getByClientId(clientId);
   if (!client) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST, 'no client found');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST, 'no client found');
     return;
   }
 
-  const device_code = generateToken();
-  const user_code = generateToken(8, '0123456789QWERTYUIOPASDFGHJKLZXCVBNM');
+  const device_code = Meiling.Authorization.Token.generateToken();
+  const user_code = Meiling.Authorization.Token.generateToken(8, '0123456789QWERTYUIOPASDFGHJKLZXCVBNM');
   const metadata: Meiling.Authorization.Token.TokenMetadata = {
     version: 1,
     data: {
@@ -66,7 +63,11 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
   // load access control
   const acl = await Meiling.OAuth2.Client.getAccessControl(client.id);
   if (!acl) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INTERNAL_SERVER_ERROR, 'Failed to get Access Control from Server.');
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INTERNAL_SERVER_ERROR,
+      'Failed to get Access Control from Server.',
+    );
     return;
   }
 
@@ -79,9 +80,9 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
     .filter((j) => j !== undefined);
   if (unsupportedScopes.length > 0) {
     // invalid permissions found!
-    sendOAuth2Error(
+    Meiling.OAuth2.Error.sendOAuth2Error(
       rep,
-      OAuth2ErrorResponseType.INVALID_REQUEST,
+      Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST,
       `the scope: (${unsupportedScopes.join(' ')}) is not supported`,
     );
     return;
@@ -90,13 +91,17 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
   const areScopesAllowed = await Meiling.OAuth2.ClientAccessControls.checkPermissions(acl, requestedPermissions);
   if (areScopesAllowed !== true) {
     if (areScopesAllowed === false) {
-      sendOAuth2Error(rep, OAuth2ErrorResponseType.INTERNAL_SERVER_ERROR, 'Failed to get Access Control from Server.');
+      Meiling.OAuth2.Error.sendOAuth2Error(
+        rep,
+        Meiling.OAuth2.Error.ErrorType.INTERNAL_SERVER_ERROR,
+        'Failed to get Access Control from Server.',
+      );
       return;
     } else {
       const deniedScopes = areScopesAllowed.map((n) => n.name);
-      sendOAuth2Error(
+      Meiling.OAuth2.Error.sendOAuth2Error(
         rep,
-        OAuth2ErrorResponseType.INVALID_GRANT,
+        Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
         `the scope (${deniedScopes.join(' ')}) is not authorized`,
       );
       return;

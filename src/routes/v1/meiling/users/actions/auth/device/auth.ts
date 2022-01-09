@@ -1,7 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '../..';
 import { Meiling, Utils } from '../../../../../../../common';
-import { TokenMetadata } from '../../../../../../../common/meiling/authorization/token';
 import { getPrismaClient } from '../../../../../../../resources/prisma';
 
 interface DeviceCode {
@@ -115,7 +114,7 @@ export async function deviceCodeAuthorizeHandler(req: FastifyRequest, rep: Fasti
     },
   });
 
-  const metadata = userCode.metadata as unknown as TokenMetadata;
+  const metadata = userCode.metadata as unknown as Meiling.Authorization.Token.TokenMetadata;
   if (!metadata?.data?.deviceCode) {
     Meiling.V1.Error.sendMeilingError(
       rep,

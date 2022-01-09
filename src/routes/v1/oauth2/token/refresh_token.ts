@@ -1,60 +1,70 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { Meiling, Utils } from '../../../../common';
 import { parseClientInfo } from '../common';
-import { sendOAuth2Error } from '../error';
-import { OAuth2ErrorResponseType, OAuth2QueryTokenRefreshTokenParameters } from '../interfaces';
 
 export async function oAuth2RefreshTokenHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const result = parseClientInfo(req);
 
   if (!result) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client id');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_CLIENT, 'invalid client id');
     return;
   }
 
   const { clientId, clientSecret } = result;
-  const body = req.body as OAuth2QueryTokenRefreshTokenParameters;
+  const body = req.body as Meiling.OAuth2.Interfaces.OAuth2QueryTokenRefreshTokenParameters;
 
   const token = body.refresh_token;
   const type = 'REFRESH_TOKEN';
 
   if (!(await Meiling.OAuth2.Client.getByClientId(clientId))) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client id');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_CLIENT, 'invalid client id');
     return;
   }
 
   if (!(await Meiling.OAuth2.Client.verifySecret(clientId, clientSecret))) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_CLIENT, 'invalid client secret');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_CLIENT, 'invalid client secret');
     return;
   }
 
   // check token is valid
   if (!Utils.isValidValue(token)) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST, 'invalid token');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST, 'invalid token');
     return;
   }
 
   if (!(await Meiling.Authorization.Token.isValid(token, type))) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'expired token');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_GRANT, 'expired token');
     return;
   }
 
   // get user
   const user = await Meiling.Authorization.Token.getUser(token, type);
   if (!user) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'unable to find user to authenticate');
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+      'unable to find user to authenticate',
+    );
     return;
   }
 
   const authorization = await Meiling.Authorization.Token.getAuthorization(token, type);
   if (!authorization) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'unable to find proper authorization session');
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+      'unable to find proper authorization session',
+    );
     return;
   }
 
   const permissions = await Meiling.Authorization.Token.getAuthorizedPermissions(token, type);
   if (!permissions) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST, 'unable to find permissions to authenticate');
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST,
+      'unable to find permissions to authenticate',
+    );
     return;
   }
 

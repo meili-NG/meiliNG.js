@@ -1,8 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import JWT from 'jsonwebtoken';
 import { Meiling } from '../../../common';
-import { sendOAuth2Error } from './error';
-import { OAuth2ErrorResponseType } from './interfaces';
 
 export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const type = 'ACCESS_TOKEN';
@@ -21,7 +19,11 @@ export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyRep
   }
 
   if (!token) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'provided access_token is invalid');
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+      'provided access_token is invalid',
+    );
     return;
   }
 
@@ -29,21 +31,29 @@ export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyRep
   const clientId = await Meiling.Authorization.Token.getClient(token.token, type);
   const user = await Meiling.Authorization.Token.getUser(token.token, type);
   if (!user || !perms || !clientId) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'provided access_token is invalid');
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+      'provided access_token is invalid',
+    );
     return;
   }
 
   const isValid = await Meiling.Authorization.Token.isValid(token.token, type);
   if (!isValid) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'provided access_token is expired');
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+      'provided access_token is expired',
+    );
     return;
   }
 
   const scopes = perms.map((n) => n.name);
   if (!scopes.includes('openid')) {
-    sendOAuth2Error(
+    Meiling.OAuth2.Error.sendOAuth2Error(
       rep,
-      OAuth2ErrorResponseType.INVALID_GRANT,
+      Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
       'provided access_token does NOT have openid permission',
     );
     return;
@@ -51,7 +61,11 @@ export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyRep
 
   const userData = await Meiling.Identity.User.createIDToken(user, clientId.id, scopes);
   if (!userData) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'user matching access_token is missing');
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+      'user matching access_token is missing',
+    );
     return;
   }
 
@@ -59,7 +73,11 @@ export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyRep
     const result = JWT.decode(userData) as any;
     rep.send(result);
   } catch (e) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'invalid id_token has generated');
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+      'invalid id_token has generated',
+    );
     return;
   }
 }

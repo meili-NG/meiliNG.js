@@ -1,11 +1,8 @@
 import { Permission } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { MeilingV1UserOAuthAuthQuery } from '.';
 import { getUserFromActionRequest } from '..';
-import { Meiling, Utils } from '../../../../../../common';
-import { BaridegiLogType, sendBaridegiLog } from '../../../../../../common/event/baridegi';
+import { Meiling, Utils, Event } from '../../../../../../common';
 import { getPrismaClient } from '../../../../../../resources/prisma';
-import { OAuth2QueryCodeChallengeMethod, OAuth2QueryResponseType } from '../../../../oauth2/interfaces';
 
 export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const userBase = (await getUserFromActionRequest(req)) as Meiling.Identity.User.UserInfoObject;
@@ -13,7 +10,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
   const query = {
     ...(req.body ? (req.body as any) : {}),
     ...(req.query ? (req.query as any) : {}),
-  } as MeilingV1UserOAuthAuthQuery;
+  } as Meiling.V1.Interfaces.MeilingV1UserOAuthAuthQuery;
 
   // validations
   if (!query.client_id) {
@@ -189,7 +186,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
     code_challenge = true;
   }
 
-  sendBaridegiLog(BaridegiLogType.AUTHORIZE_APP, {
+  Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.AUTHORIZE_APP, {
     response_type: query.response_type,
     ip: req.ip,
     client,
@@ -197,14 +194,15 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
   });
 
   // TODO: make it capable to support multiple response_types at once. [refactor required]
-  if (query.response_type === OAuth2QueryResponseType.CODE) {
+  if (query.response_type === Meiling.OAuth2.Interfaces.OAuth2QueryResponseType.CODE) {
     const code = await Meiling.OAuth2.ClientAuthorization.createToken(authorization, 'AUTHORIZATION_CODE', {
       version: 1,
       options: {
         offline: query.access_type !== 'online',
         code_challenge: code_challenge
           ? {
-              method: query.code_challenge_method as unknown as OAuth2QueryCodeChallengeMethod,
+              method:
+                query.code_challenge_method as unknown as Meiling.OAuth2.Interfaces.OAuth2QueryCodeChallengeMethod,
               challenge: query.code_challenge as string,
             }
           : undefined,
@@ -218,7 +216,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
       state: query.state,
     });
     return;
-  } else if (query.response_type === OAuth2QueryResponseType.TOKEN) {
+  } else if (query.response_type === Meiling.OAuth2.Interfaces.OAuth2QueryResponseType.TOKEN) {
     const token = await Meiling.OAuth2.ClientAuthorization.createToken(authorization, 'ACCESS_TOKEN');
 
     rep.send({

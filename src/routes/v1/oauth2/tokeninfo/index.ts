@@ -1,10 +1,9 @@
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
-import { sendOAuth2Error } from '../error';
-import { OAuth2ErrorResponseType } from '../interfaces';
 import { accessTokenInfoHandler } from './access_token';
 import { idTokenInfoHandler } from './id_token';
 import { refreshTokenInfoHandler } from './refresh_token';
+import { Meiling } from '../../../../common';
 
 interface OAuth2QueryTokenInfoBody {
   id_token?: string;
@@ -22,7 +21,7 @@ export async function oAuth2TokenInfoHandler(req: FastifyRequest, rep: FastifyRe
   } else if (body?.refresh_token) {
     await refreshTokenInfoHandler(body.refresh_token, rep);
   } else {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST, 'missing proper query');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST, 'missing proper query');
   }
   return;
 }

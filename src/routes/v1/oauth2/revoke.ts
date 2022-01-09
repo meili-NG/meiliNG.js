@@ -1,7 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { getPrismaClient } from '../../../resources/prisma';
-import { sendOAuth2Error } from './error';
-import { OAuth2ErrorResponseType } from './interfaces';
+import { Meiling } from '../../../common';
 
 interface OAuth2QueryRevokeParameters {
   token: string;
@@ -11,7 +10,7 @@ export async function oAuth2RevokeTokenHandler(req: FastifyRequest, rep: Fastify
   const query = req.query as OAuth2QueryRevokeParameters;
 
   if (!query?.token) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_REQUEST, 'token field is missing');
+    Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST, 'token field is missing');
     return;
   }
 
@@ -22,7 +21,11 @@ export async function oAuth2RevokeTokenHandler(req: FastifyRequest, rep: Fastify
   });
 
   if (delTarget === null) {
-    sendOAuth2Error(rep, OAuth2ErrorResponseType.INVALID_GRANT, 'token does not exist, check if it is valid token');
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
+      'token does not exist, check if it is valid token',
+    );
     return;
   }
 

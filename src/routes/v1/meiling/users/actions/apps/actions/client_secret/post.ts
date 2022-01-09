@@ -1,9 +1,7 @@
-import { prisma } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
 import { getUserFromActionRequest } from '../../..';
 import { Meiling } from '../../../../../../../../common';
-import { generateToken } from '../../../../../../../../common/meiling/authorization/token';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
 
 async function clientSecretPostHandler(_req: FastifyRequest, rep: FastifyReply): Promise<void> {
@@ -11,7 +9,7 @@ async function clientSecretPostHandler(_req: FastifyRequest, rep: FastifyReply):
   const body = _req.body as any;
   const user = await getUserFromActionRequest(req);
 
-  const secret = generateToken(64);
+  const secret = Meiling.Authorization.Token.generateToken(64);
 
   if (!user) {
     Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);

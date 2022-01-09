@@ -5,7 +5,6 @@ import { FastifyRequestWithSession } from '..';
 import { Meiling, Utils } from '../../../../common';
 import config from '../../../../resources/config';
 import { getPrismaClient } from '../../../../resources/prisma';
-import { getAuthorizationStatus, setAuthorizationStatus } from '../../../../common/meiling/v1/session';
 
 interface MeilingV1Signup {
   username: string;
@@ -36,7 +35,7 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
     return;
   }
 
-  const signupChallenge = await getAuthorizationStatus(req);
+  const signupChallenge = await Meiling.V1.Session.getAuthorizationStatus(req);
 
   if (signupChallenge === undefined) {
     Meiling.V1.Error.sendMeilingError(
@@ -202,7 +201,7 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
     },
   });
 
-  await setAuthorizationStatus(req, undefined);
+  await Meiling.V1.Session.setAuthorizationStatus(req, undefined);
 
   rep.send({
     success: true,

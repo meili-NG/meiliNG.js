@@ -1,5 +1,5 @@
 import { AuthorizationMethod, OAuthTokenType } from '@prisma/client';
-import { OAuth2QueryGrantType } from '../../../routes/v1/oauth2/interfaces';
+import { OAuth2 } from '..';
 import { ExtendedAuthMethods } from './interfaces';
 
 export function convertAuthentication(method?: ExtendedAuthMethods): AuthorizationMethod | undefined {
@@ -36,13 +36,13 @@ export function convertAuthenticationMethod(method: AuthorizationMethod): Extend
   }
 }
 
-export function convertTokenType(type?: OAuth2QueryGrantType): OAuthTokenType | undefined {
+export function convertTokenType(type?: OAuth2.Interfaces.OAuth2QueryGrantType): OAuthTokenType | undefined {
   switch (type?.toLowerCase()) {
-    case OAuth2QueryGrantType.ACCESS_TOKEN:
+    case OAuth2.Interfaces.OAuth2QueryGrantType.ACCESS_TOKEN:
       return 'ACCESS_TOKEN';
-    case OAuth2QueryGrantType.REFRESH_TOKEN:
+    case OAuth2.Interfaces.OAuth2QueryGrantType.REFRESH_TOKEN:
       return 'REFRESH_TOKEN';
-    case OAuth2QueryGrantType.AUTHORIZATION_CODE:
+    case OAuth2.Interfaces.OAuth2QueryGrantType.AUTHORIZATION_CODE:
       return 'AUTHORIZATION_CODE';
     default:
       return undefined;

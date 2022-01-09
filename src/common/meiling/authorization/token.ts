@@ -12,7 +12,6 @@ import { Token } from '.';
 import { Utils } from '../..';
 import config from '../../../resources/config';
 import { getPrismaClient } from '../../../resources/prisma';
-import { OAuth2QueryCodeChallengeMethod } from '../../../routes/v1/oauth2/interfaces';
 
 export type TokenMetadata = null | TokenMetadataV1;
 
@@ -21,7 +20,7 @@ export interface TokenMetadataV1 {
   options?: {
     offline: boolean;
     code_challenge?: {
-      method: OAuth2QueryCodeChallengeMethod;
+      method: OAuth2.Interfaces.OAuth2QueryCodeChallengeMethod;
       challenge: string;
     };
     openid?: {

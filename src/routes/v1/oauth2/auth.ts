@@ -1,16 +1,16 @@
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
+import { Meiling } from '../../../common';
 import config from '../../../resources/config';
-import { OAuth2QueryAuthParameters } from './interfaces';
 
 export function oAuth2AuthHandler(req: FastifyRequest, rep: FastifyReply): void {
-  const query = req.query as OAuth2QueryAuthParameters;
+  const query = req.query as Meiling.OAuth2.Interfaces.OAuth2QueryAuthParameters;
 
   let queryCount = 0;
   let str = '';
 
   for (const id in query) {
-    const name = id as keyof OAuth2QueryAuthParameters;
+    const name = id as keyof Meiling.OAuth2.Interfaces.OAuth2QueryAuthParameters;
     const value = (query as any)[id];
 
     str += encodeURIComponent(name) + '=' + encodeURIComponent(value) + '&';

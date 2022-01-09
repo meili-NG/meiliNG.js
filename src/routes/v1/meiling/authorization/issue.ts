@@ -1,13 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import libphonenumberJs from 'libphonenumber-js';
 import { FastifyRequestWithSession } from '..';
-import { BaridegiLogType, sendBaridegiLog } from '../../../../common/event/baridegi';
-import * as Notification from '../../../../common/notification';
-import { generateToken } from '../../../../common/meiling/authorization/token';
-import * as Utils from '../../../../common/utils';
 import config from '../../../../resources/config';
-import { appendAuthorizationStatus } from '../../../../common/meiling/v1/session';
-import { Meiling } from '../../../../common';
+import { Meiling, Event, Notification, Utils } from '../../../../common';
 
 type MeilingV1AuthorizationIssueQuery = MeilingV1AuthorizationIssueEmailQuery | MeilingV1AuthorizationIssuePhoneQuery;
 
@@ -28,7 +23,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
   const body = req.body as MeilingV1AuthorizationIssueQuery;
 
   const createdAt = new Date();
-  const challenge = generateToken(6, '0123456789');
+  const challenge = Meiling.Authorization.Token.generateToken(6, '0123456789');
 
   const lang = body.lang ? body.lang : 'ko';
 
@@ -74,7 +69,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         ],
       });
 
-      sendBaridegiLog(BaridegiLogType.CREATE_AUTHORIZATION_REQUEST, {
+      Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.CREATE_AUTHORIZATION_REQUEST, {
         type: body.type,
         notificationApi: {
           rawType: Notification.NotificationMethod.EMAIL,
@@ -83,7 +78,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         to: email,
       });
 
-      await appendAuthorizationStatus(req, {
+      await Meiling.V1.Session.appendAuthorizationStatus(req, {
         email: {
           to: email,
           challenge: {
@@ -141,7 +136,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         ],
       });
 
-      sendBaridegiLog(BaridegiLogType.CREATE_AUTHORIZATION_REQUEST, {
+      Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.CREATE_AUTHORIZATION_REQUEST, {
         type: body.type,
         notificationApi: {
           rawType: Notification.NotificationMethod.EMAIL,
@@ -150,7 +145,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         to: phone.formatInternational(),
       });
 
-      await appendAuthorizationStatus(req, {
+      await Meiling.V1.Session.appendAuthorizationStatus(req, {
         phone: {
           to: phone.formatInternational(),
           challenge: {

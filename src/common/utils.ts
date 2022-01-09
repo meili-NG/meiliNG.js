@@ -1,5 +1,17 @@
 import crypto from 'crypto';
 
+type AvailableLicense = 'HRPL' | 'MIT';
+
+export function detectLicense(): AvailableLicense {
+  const HRPLFlag = process.env.MEILING_FORCE_HRPL;
+
+  if (HRPLFlag && (/true/gi.test(HRPLFlag) || Number(HRPLFlag) === 1)) {
+    return 'HRPL';
+  }
+
+  return 'MIT';
+}
+
 export function isValidValue(...values: unknown[]): boolean {
   let isValid = true;
   for (const value of values) {

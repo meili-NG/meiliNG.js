@@ -8,7 +8,7 @@ import userPhonesAdminHandler from './phones';
 
 const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.get('/', async (req, rep) => {
-    const { query, pageSize, page } = (req.query as any) || {};
+    const { query, pageSize = 20, page = 1 } = (req.query as any) || {};
 
     const paginationDetails: {
       skip?: number;
@@ -81,6 +81,66 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
         }),
       ),
     );
+  });
+
+  app.get('/count', async (req, rep) => {
+    const { query } = (req.query as any) || {};
+
+    const count = await getPrismaClient().user.count({
+      where: query
+        ? {
+            OR: [
+              {
+                username: {
+                  contains: query,
+                },
+              },
+              {
+                name: {
+                  contains: query,
+                },
+              },
+              {
+                familyName: {
+                  contains: query,
+                },
+              },
+              {
+                givenName: {
+                  contains: query,
+                },
+              },
+              {
+                middleName: {
+                  contains: query,
+                },
+              },
+              {
+                emails: {
+                  some: {
+                    email: {
+                      contains: query,
+                    },
+                  },
+                },
+              },
+              {
+                phones: {
+                  some: {
+                    phone: {
+                      contains: query,
+                    },
+                  },
+                },
+              },
+            ],
+          }
+        : undefined,
+    });
+
+    rep.send({
+      count,
+    });
   });
 
   app.register(userAdminHandler, { prefix: '/:uuid' });

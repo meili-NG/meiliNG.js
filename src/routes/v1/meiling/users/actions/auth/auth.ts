@@ -194,15 +194,14 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
   });
 
   // TODO: make it capable to support multiple response_types at once. [refactor required]
-  if (query.response_type === Meiling.OAuth2.Interfaces.OAuth2QueryResponseType.CODE) {
+  if (query.response_type === Meiling.OAuth2.Interfaces.ResponseType.CODE) {
     const code = await Meiling.OAuth2.ClientAuthorization.createToken(authorization, 'AUTHORIZATION_CODE', {
       version: 1,
       options: {
         offline: query.access_type !== 'online',
         code_challenge: code_challenge
           ? {
-              method:
-                query.code_challenge_method as unknown as Meiling.OAuth2.Interfaces.OAuth2QueryCodeChallengeMethod,
+              method: query.code_challenge_method as unknown as Meiling.OAuth2.Interfaces.CodeChallengeMethod,
               challenge: query.code_challenge as string,
             }
           : undefined,
@@ -216,7 +215,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
       state: query.state,
     });
     return;
-  } else if (query.response_type === Meiling.OAuth2.Interfaces.OAuth2QueryResponseType.TOKEN) {
+  } else if (query.response_type === Meiling.OAuth2.Interfaces.ResponseType.TOKEN) {
     const token = await Meiling.OAuth2.ClientAuthorization.createToken(authorization, 'ACCESS_TOKEN');
 
     rep.send({

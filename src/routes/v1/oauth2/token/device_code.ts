@@ -11,7 +11,7 @@ export async function oAuth2DeviceCodeHandler(req: FastifyRequest, rep: FastifyR
   }
 
   const { clientId } = result;
-  const body = req.body as Meiling.OAuth2.Interfaces.OAuth2QueryTokenDeviceCodeParameters;
+  const body = req.body as Meiling.OAuth2.Interfaces.TokenViaDeviceCodeParameters;
 
   const token = body.device_code;
   const type = 'DEVICE_CODE';

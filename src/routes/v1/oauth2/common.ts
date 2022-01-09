@@ -51,7 +51,7 @@ export function parseClientInfo(req: FastifyRequest):
     clientId = tokenString.slice(0, firstSeperator);
     clientSecret = tokenString.slice(firstSeperator + 1);
   } else {
-    const body = req.body as Meiling.OAuth2.Interfaces.OAuth2QueryBodyParameters;
+    const body = req.body as Meiling.OAuth2.Interfaces.QueryBodyParameters;
 
     // validate query
     if (!Utils.isValidValue(body, body?.client_id, body?.grant_type)) {

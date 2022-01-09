@@ -36,13 +36,13 @@ export function convertAuthenticationMethod(method: AuthorizationMethod): Extend
   }
 }
 
-export function convertTokenType(type?: OAuth2.Interfaces.OAuth2QueryGrantType): OAuthTokenType | undefined {
+export function convertTokenType(type?: OAuth2.Interfaces.GrantType): OAuthTokenType | undefined {
   switch (type?.toLowerCase()) {
-    case OAuth2.Interfaces.OAuth2QueryGrantType.ACCESS_TOKEN:
+    case OAuth2.Interfaces.GrantType.ACCESS_TOKEN:
       return 'ACCESS_TOKEN';
-    case OAuth2.Interfaces.OAuth2QueryGrantType.REFRESH_TOKEN:
+    case OAuth2.Interfaces.GrantType.REFRESH_TOKEN:
       return 'REFRESH_TOKEN';
-    case OAuth2.Interfaces.OAuth2QueryGrantType.AUTHORIZATION_CODE:
+    case OAuth2.Interfaces.GrantType.AUTHORIZATION_CODE:
       return 'AUTHORIZATION_CODE';
     default:
       return undefined;

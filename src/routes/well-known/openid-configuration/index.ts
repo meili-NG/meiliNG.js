@@ -34,13 +34,13 @@ async function openIdConfigurationHandler(req: FastifyRequest, rep: FastifyReply
     //registration_endpoint: buildMeilingURL("/v1/oauth2/register"),
     code_challenge_methods_supported: ['plain', 'S256'],
     grant_types_supported: [
-      Meiling.OAuth2.Interfaces.OAuth2QueryGrantType.AUTHORIZATION_CODE,
-      Meiling.OAuth2.Interfaces.OAuth2QueryGrantType.REFRESH_TOKEN,
-      Meiling.OAuth2.Interfaces.OAuth2QueryGrantType.DEVICE_CODE,
+      Meiling.OAuth2.Interfaces.GrantType.AUTHORIZATION_CODE,
+      Meiling.OAuth2.Interfaces.GrantType.REFRESH_TOKEN,
+      Meiling.OAuth2.Interfaces.GrantType.DEVICE_CODE,
     ],
     response_types_supported: [
-      Meiling.OAuth2.Interfaces.OAuth2QueryResponseType.CODE,
-      Meiling.OAuth2.Interfaces.OAuth2QueryResponseType.TOKEN,
+      Meiling.OAuth2.Interfaces.ResponseType.CODE,
+      Meiling.OAuth2.Interfaces.ResponseType.TOKEN,
     ],
 
     scopes_supported: (

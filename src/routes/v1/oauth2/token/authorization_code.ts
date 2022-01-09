@@ -12,7 +12,7 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
   }
 
   const { clientId, clientSecret } = result;
-  const body = req.body as Meiling.OAuth2.Interfaces.OAuth2QueryTokenAuthorizationCodeParameters;
+  const body = req.body as Meiling.OAuth2.Interfaces.TokenViaAuthorizationCodeParameters;
 
   const token = body.code;
   const type = 'AUTHORIZATION_CODE';

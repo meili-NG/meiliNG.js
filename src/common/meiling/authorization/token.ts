@@ -20,7 +20,7 @@ export interface TokenMetadataV1 {
   options?: {
     offline: boolean;
     code_challenge?: {
-      method: OAuth2.Interfaces.OAuth2QueryCodeChallengeMethod;
+      method: OAuth2.Interfaces.CodeChallengeMethod;
       challenge: string;
     };
     openid?: {

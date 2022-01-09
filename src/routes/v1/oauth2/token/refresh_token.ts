@@ -11,7 +11,7 @@ export async function oAuth2RefreshTokenHandler(req: FastifyRequest, rep: Fastif
   }
 
   const { clientId, clientSecret } = result;
-  const body = req.body as Meiling.OAuth2.Interfaces.OAuth2QueryTokenRefreshTokenParameters;
+  const body = req.body as Meiling.OAuth2.Interfaces.TokenViaRefreshTokenParameters;
 
   const token = body.refresh_token;
   const type = 'REFRESH_TOKEN';

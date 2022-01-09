@@ -1,9 +1,9 @@
-export enum OAuth2QueryResponseType {
+export enum ResponseType {
   CODE = 'code',
   TOKEN = 'token',
 }
-export type OAuth2QueryAccessType = 'online' | 'offline';
-export enum OAuth2QueryGrantType {
+export type AccessType = 'online' | 'offline';
+export enum GrantType {
   ACCESS_TOKEN = 'access_token',
   REFRESH_TOKEN = 'refresh_token',
   AUTHORIZATION_CODE = 'authorization_code',
@@ -11,7 +11,6 @@ export enum OAuth2QueryGrantType {
   // SAML_BEARER = 'urn:ietf:params:oauth:grant-type:saml2-bearer',
 }
 
-export type OAuth2QueryBoolean = 'true' | 'false';
-export type OAuth2QueryPrompt = 'none' | 'consent' | 'select_account';
+export type Prompt = 'none' | 'consent' | 'select_account';
 
-export type OAuth2QueryCodeChallengeMethod = 'S256' | 'plain';
+export type CodeChallengeMethod = 'S256' | 'plain';

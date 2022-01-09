@@ -10,7 +10,7 @@ import { oAuth2RefreshTokenHandler } from './refresh_token';
 // TODO: https://developers.google.com/identity/protocols/oauth2/native-app#exchange-authorization-code
 
 export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
-  const body = req.body as Meiling.OAuth2.Interfaces.OAuth2QueryBodyParameters;
+  const body = req.body as Meiling.OAuth2.Interfaces.QueryBodyParameters;
   const validationResult = await validateCommonRequest(req, false);
 
   if (validationResult !== true) {
@@ -18,11 +18,11 @@ export async function oAuth2TokenHandler(req: FastifyRequest, rep: FastifyReply)
     return;
   }
 
-  if (body.grant_type === Meiling.OAuth2.Interfaces.OAuth2QueryGrantType.AUTHORIZATION_CODE) {
+  if (body.grant_type === Meiling.OAuth2.Interfaces.GrantType.AUTHORIZATION_CODE) {
     await oAuth2AuthorizationCodeHandler(req, rep);
-  } else if (body.grant_type === Meiling.OAuth2.Interfaces.OAuth2QueryGrantType.REFRESH_TOKEN) {
+  } else if (body.grant_type === Meiling.OAuth2.Interfaces.GrantType.REFRESH_TOKEN) {
     await oAuth2RefreshTokenHandler(req, rep);
-  } else if (body.grant_type === Meiling.OAuth2.Interfaces.OAuth2QueryGrantType.DEVICE_CODE) {
+  } else if (body.grant_type === Meiling.OAuth2.Interfaces.GrantType.DEVICE_CODE) {
     await oAuth2DeviceCodeHandler(req, rep);
   } else {
     Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.UNSUPPORTED_GRANT_TYPE);

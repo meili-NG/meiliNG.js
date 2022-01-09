@@ -1,59 +1,55 @@
-import {
-  OAuth2QueryAccessType,
-  OAuth2QueryBoolean,
-  OAuth2QueryGrantType,
-  OAuth2QueryPrompt,
-  OAuth2QueryResponseType,
-} from './type';
+import { AccessType, GrantType, Prompt, ResponseType } from './type';
 
-export interface OAuth2QueryBaseParameters {
+export type QueryBoolean = 'true' | 'false';
+
+export interface QueryBaseParameters {
   client_id: string;
 }
 
-export interface OAuth2QueryAuthClientParameters extends OAuth2QueryAuthParameters {
+export interface QueryClientSecretParameters extends QueryAuthParameters {
   client_secret?: string;
 }
 
-export interface OAuth2QueryAuthParameters extends OAuth2QueryBaseParameters {
+export interface QueryAuthParameters extends QueryBaseParameters {
   redirect_uri: string;
-  response_type: OAuth2QueryResponseType;
+  response_type: ResponseType;
   scope: string;
-  access_type?: OAuth2QueryAccessType;
+  access_type?: AccessType;
   state?: string;
-  include_granted_scopes?: OAuth2QueryBoolean;
+  include_granted_scopes?: QueryBoolean;
   login_hint?: string;
-  prompt?: OAuth2QueryPrompt;
+  prompt?: Prompt;
 }
 
-export type OAuth2QueryBodyParameters =
-  | OAuth2QueryTokenAuthorizationCodeParameters
-  | OAuth2QueryTokenRefreshTokenParameters
-  | OAuth2QueryTokenDeviceCodeParameters;
-//  | OAuth2QueryTokenSAMLParameters;
+export type QueryBodyParameters =
+  | TokenViaAuthorizationCodeParameters
+  | TokenViaRefreshTokenParameters
+  | TokenViaDeviceCodeParameters;
+//  | TokenViaSAMLParameters;
 
-export interface OAuth2QueryTokenBaseParameters extends OAuth2QueryAuthClientParameters {
-  grant_type: OAuth2QueryGrantType;
+export interface QueryTokenBaseparameters extends QueryClientSecretParameters {
+  grant_type: GrantType;
 }
 
-export interface OAuth2QueryTokenAuthorizationCodeParameters extends OAuth2QueryTokenBaseParameters {
-  grant_type: OAuth2QueryGrantType.AUTHORIZATION_CODE;
+export interface TokenViaAuthorizationCodeParameters extends QueryTokenBaseparameters {
+  grant_type: GrantType.AUTHORIZATION_CODE;
   code: string;
   code_verifier?: string;
   redirect_uri: string;
 }
 
-export interface OAuth2QueryTokenRefreshTokenParameters extends OAuth2QueryTokenBaseParameters {
-  grant_type: OAuth2QueryGrantType.REFRESH_TOKEN;
+export interface TokenViaRefreshTokenParameters extends QueryTokenBaseparameters {
+  grant_type: GrantType.REFRESH_TOKEN;
   refresh_token: string;
 }
 
-export interface OAuth2QueryTokenDeviceCodeParameters extends OAuth2QueryTokenBaseParameters {
-  grant_type: OAuth2QueryGrantType.DEVICE_CODE;
+export interface TokenViaDeviceCodeParameters extends QueryTokenBaseparameters {
+  grant_type: GrantType.DEVICE_CODE;
   device_code: string;
 }
 
 /*
-export interface OAuth2QueryTokenSAMLParameters extends OAuth2QueryTokenBaseParameters {
+export interface TokenViaSAMLParameters extends OAuth2QueryTokenBaseParameters {
   grant_type: 'urn:ietf:params:oauth:grant-type:saml2-bearer';
   scope: string;
 }

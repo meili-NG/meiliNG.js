@@ -2,14 +2,13 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { getUserFromActionRequest } from '../../..';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
 import { convertAuthentication } from '../../../../../../../../common/meiling/v1/database';
-import { sendMeilingError } from '../../../../../../../../common/meiling/v1/error/error';
 import { Meiling } from '../../../../../../../../common';
 
 function user2FAEnablePlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', async (req, rep) => {
     const user = await getUserFromActionRequest(req);
     if (!user) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
       return;
     }
 
@@ -21,7 +20,7 @@ function user2FAEnablePlugin(app: FastifyInstance, opts: FastifyPluginOptions, d
   app.post('/', async (req, rep) => {
     const user = await getUserFromActionRequest(req);
     if (!user) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
       return;
     }
 
@@ -88,7 +87,7 @@ function user2FAEnablePlugin(app: FastifyInstance, opts: FastifyPluginOptions, d
     const twoFactorReadyMethods = currentAvailables.filter((n) => n.available && n.enabled['2fa']);
 
     if (twoFactorReadyMethods.length === 0) {
-      sendMeilingError(
+      Meiling.V1.Error.sendMeilingError(
         rep,
         Meiling.V1.Error.ErrorType.UNSUPPORTED_SIGNIN_METHOD,
         'there is no 2fa supported method to login',
@@ -111,7 +110,7 @@ function user2FAEnablePlugin(app: FastifyInstance, opts: FastifyPluginOptions, d
   app.delete('/', async (req, rep) => {
     const user = await getUserFromActionRequest(req);
     if (!user) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
       return;
     }
 

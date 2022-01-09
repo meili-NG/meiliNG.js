@@ -1,6 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
 import { Meiling } from '../../../../../common';
-import { sendMeilingError } from '../../../../../common/meiling/v1/error/error';
 import { userAppPlugin } from './apps';
 import { clientAuthPlugin } from './auth';
 import { userGetInfo } from './info/get';
@@ -18,10 +17,14 @@ export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOpti
   app.addHook('onRequest', async (req, rep) => {
     const userBase = await getUserFromActionRequest(req);
     if (userBase === undefined) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid request.');
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid request.');
       throw new Error('User is not privileged to run this command');
     } else if (userBase === null) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'you are not logged in as specified user.');
+      Meiling.V1.Error.sendMeilingError(
+        rep,
+        Meiling.V1.Error.ErrorType.UNAUTHORIZED,
+        'you are not logged in as specified user.',
+      );
       throw new Error('User is not privileged to run this command');
     }
   });

@@ -3,7 +3,6 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '..';
 import { Meiling, Utils } from '../../../../../../common';
 import { getPrismaClient } from '../../../../../../resources/prisma';
-import { sendMeilingError } from '../../../../../../common/meiling/v1/error/error';
 
 interface MeilingV1AppPostBody {
   name: string;
@@ -22,23 +21,27 @@ async function appCreateHandler(req: FastifyRequest, rep: FastifyReply): Promise
 
   const users = await Meiling.V1.Session.getLoggedIn(req);
   if (users.length === 0) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
     return;
   }
 
   if (!Utils.isValidValue(body?.name, body?.image, body?.privacy, body?.terms, body?.accessControl?.permissions)) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 
   const owner = await getUserFromActionRequest(req);
   if (!owner) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid ownerId');
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid ownerId');
     return;
   }
 
   if (users.filter((n) => n.id === owner.id).length === 0) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'you are not logged In for ownerId');
+    Meiling.V1.Error.sendMeilingError(
+      rep,
+      Meiling.V1.Error.ErrorType.UNAUTHORIZED,
+      'you are not logged In for ownerId',
+    );
     return;
   }
 
@@ -57,7 +60,7 @@ async function appCreateHandler(req: FastifyRequest, rep: FastifyReply): Promise
 
   const permissionCheck = await Promise.all(permissionsPromises);
   if (permissionCheck.indexOf(null) >= 0) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid permissions');
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid permissions');
     return;
   }
 
@@ -154,7 +157,7 @@ async function appCreateHandler(req: FastifyRequest, rep: FastifyReply): Promise
   });
 
   if (!client) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR);
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR);
     return;
   }
 

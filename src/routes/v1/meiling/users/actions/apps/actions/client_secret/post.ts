@@ -5,7 +5,6 @@ import { getUserFromActionRequest } from '../../..';
 import { Meiling } from '../../../../../../../../common';
 import { generateToken } from '../../../../../../../../common/meiling/authorization/token';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
-import { sendMeilingError } from '../../../../../../../../common/meiling/v1/error/error';
 
 async function clientSecretPostHandler(_req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const req = _req as MeilingV1ClientRequest;
@@ -15,7 +14,7 @@ async function clientSecretPostHandler(_req: FastifyRequest, rep: FastifyReply):
   const secret = generateToken(64);
 
   if (!user) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
     return;
   }
 

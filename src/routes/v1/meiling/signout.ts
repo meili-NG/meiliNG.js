@@ -2,10 +2,7 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { FastifyRequestWithSession } from '.';
-import { Meiling } from '../../../common';
-import { BaridegiLogType, sendBaridegiLog } from '../../../common/event/baridegi';
-import { getTokenFromRequest } from '../../../common/meiling/authorization/token';
-import { sendMeilingError } from '../../../common/meiling/v1/error/error';
+import { Meiling, Event } from '../../../common';
 
 interface MeilingV1SignOutQuery {
   userId?: string;
@@ -33,18 +30,26 @@ export async function signoutHandler(req: FastifyRequest, rep: FastifyReply): Pr
       if (userId && user.filter((n) => n.id === userId).length > 0) {
         await Meiling.V1.Session.logout(req, userId);
 
-        sendBaridegiLog(BaridegiLogType.USER_SIGNOUT, {
+        Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.USER_SIGNOUT, {
           ip: req.ip,
           user: await Meiling.Identity.User.getDetailedInfo(userId),
-          token: getTokenFromRequest(req)?.token,
+          token: Meiling.Authorization.Token.getTokenFromRequest(req)?.token,
         });
       } else {
-        sendMeilingError(rep, Meiling.V1.Error.ErrorType.ALREADY_SIGNED_OUT, 'you are already signed out.');
+        Meiling.V1.Error.sendMeilingError(
+          rep,
+          Meiling.V1.Error.ErrorType.ALREADY_SIGNED_OUT,
+          'you are already signed out.',
+        );
         return;
       }
     }
   } else {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.ALREADY_SIGNED_OUT, 'you are already signed out.');
+    Meiling.V1.Error.sendMeilingError(
+      rep,
+      Meiling.V1.Error.ErrorType.ALREADY_SIGNED_OUT,
+      'you are already signed out.',
+    );
     return;
   }
 

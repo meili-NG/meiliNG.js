@@ -2,13 +2,16 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1ClientRequest } from '.';
 import { Meiling } from '../../../../../../common';
 import { getPrismaClient } from '../../../../../../resources/prisma';
-import { sendMeilingError } from '../../../../../../common/meiling/v1/error/error';
 
 async function appDeleteHandler(req_: FastifyRequest, rep: FastifyReply): Promise<void> {
   const req = req_ as MeilingV1ClientRequest;
 
   if (!req.status.owned) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED, "you don't have permission to do this.");
+    Meiling.V1.Error.sendMeilingError(
+      rep,
+      Meiling.V1.Error.ErrorType.UNAUTHORIZED,
+      "you don't have permission to do this.",
+    );
     return;
   }
 

@@ -1,13 +1,12 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { Meiling } from '../../../../common';
 import { getPrismaClient } from '../../../../resources/prisma';
-import { sendMeilingError } from '../../../../common/meiling/v1/error/error';
 
 const tokensAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.addHook('onRequest', async (req, rep) => {
     const token = (req.query as { token: string }).token;
     if (!token || token.trim() === '') {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
       throw new Error('invalid query');
     }
 
@@ -18,7 +17,7 @@ const tokensAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, do
     });
 
     if (!tokenData) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
       throw new Error('session not found');
     }
   });
@@ -33,7 +32,7 @@ const tokensAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, do
     });
 
     if (!tokenData) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
       throw new Error('session not found');
     }
 
@@ -63,7 +62,7 @@ const tokensAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, do
     });
 
     if (!tokenDataOld) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
       throw new Error('session not found');
     }
 

@@ -3,7 +3,6 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
 import { Meiling } from '../../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
-import { sendMeilingError } from '../../../../../../../../common/meiling/v1/error/error';
 
 async function permissionsPostHandler(_req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const req = _req as MeilingV1ClientRequest;
@@ -16,7 +15,7 @@ async function permissionsPostHandler(_req: FastifyRequest, rep: FastifyReply): 
   } else if (permissionsRaw instanceof Array) {
     permissionsToAdd = permissionsRaw;
   } else {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 
@@ -44,7 +43,7 @@ async function permissionsPostHandler(_req: FastifyRequest, rep: FastifyReply): 
 
   const toAdd = permissionsToAdd.filter((n) => availables.includes(n));
   if (toAdd.length === 0) {
-    sendMeilingError(
+    Meiling.V1.Error.sendMeilingError(
       rep,
       Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED,
       'provided permissions array does not provide available permissions',

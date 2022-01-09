@@ -2,7 +2,6 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '../..';
 import { Meiling, Utils } from '../../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
-import { sendMeilingError } from '../../../../../../../../common/meiling/v1/error/error';
 
 interface MeilingRedirectUriPostRequest {
   redirect_uri: string;
@@ -34,7 +33,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
     let redirect_uri = (req.body as MeilingRedirectUriPostRequest).redirect_uri;
 
     if (!Utils.isNotBlank(redirect_uri) || !Utils.isValidUri(redirect_uri)) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
       return;
     }
 
@@ -45,7 +44,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
 
       redirect_uri = tmp_redirect_uri.toString();
     } catch (e) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid URI');
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid URI');
       return;
     }
 
@@ -61,7 +60,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
     });
 
     if (conflicts > 0) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.CONFLICT, 'Redirect URI already exists');
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.CONFLICT, 'Redirect URI already exists');
       return;
     }
 
@@ -86,7 +85,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
     let redirect_uri = (req.body as MeilingRedirectUriPostRequest).redirect_uri;
 
     if (!Utils.isNotBlank(redirect_uri) || !Utils.isValidUri(redirect_uri)) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
       return;
     }
 
@@ -97,7 +96,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
 
       redirect_uri = tmp_redirect_uri.toString();
     } catch (e) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid URI');
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid URI');
       return;
     }
 
@@ -113,7 +112,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
     });
 
     if (deleteCount == 0) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND, 'Redirect URI not found');
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND, 'Redirect URI not found');
       return;
     }
 
@@ -134,7 +133,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
   app.get('/:uuid', async (req_, rep) => {
     const req = req_ as MeilingV1ClientRequest;
     if (!Utils.isNotBlank((req.params as any).uuid)) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
       return;
     }
 
@@ -148,7 +147,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
     });
 
     if (match == null) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 
@@ -161,7 +160,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
   app.delete('/:uuid', async (req_, rep) => {
     const req = req_ as MeilingV1ClientRequest;
     if (!Utils.isNotBlank((req.params as any).uuid)) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
       return;
     }
 
@@ -175,7 +174,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
     });
 
     if (matches == 0) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 
@@ -196,7 +195,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
     let redirect_uri = (req.body as MeilingRedirectUriPostRequest).redirect_uri;
 
     if (!Utils.isNotBlank(redirect_uri) || !Utils.isValidUri(redirect_uri)) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
       return;
     }
 
@@ -207,7 +206,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
 
       redirect_uri = tmp_redirect_uri.toString();
     } catch (e) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid URI');
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid URI');
       return;
     }
 
@@ -223,7 +222,7 @@ export function appRedirectURIPlugin(app: FastifyInstance, opts: FastifyPluginOp
     });
 
     if (matchingCount > 0) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.CONFLICT, 'Redirect URI already exists');
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.CONFLICT, 'Redirect URI already exists');
       return;
     }
 

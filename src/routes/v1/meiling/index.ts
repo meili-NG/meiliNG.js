@@ -5,7 +5,6 @@ import config from '../../../resources/config';
 import { appsPlugin } from './apps';
 import { meilingV1AuthorizationPlugin } from './authorization';
 import { Meiling } from '../../../common';
-import { sendMeilingError } from '../../../common/meiling/v1/error/error';
 import { lostPasswordHandler } from './lost-password';
 import { sessionPlugin } from './session';
 import { signinHandler } from './signin';
@@ -39,7 +38,7 @@ function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
   app.addHook('onRequest', async (req, rep) => {
     const session = await Meiling.V1.Session.getSessionFromRequest(req);
     if (!session) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_SESSION);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_SESSION);
       throw new Error();
     }
 

@@ -1,6 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { Meiling } from '../../../../common';
-import { sendMeilingError } from '../../../../common/meiling/v1/error/error';
 import { MeilingV1AppParams } from './interface';
 
 async function appListHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
@@ -8,7 +7,7 @@ async function appListHandler(req: FastifyRequest, rep: FastifyReply): Promise<v
 
   const users = await Meiling.V1.Session.getLoggedIn(req);
   if (users.length === 0) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
     return;
   }
 

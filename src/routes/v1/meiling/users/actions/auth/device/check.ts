@@ -2,7 +2,6 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '../..';
 import { Meiling, Utils } from '../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../resources/prisma';
-import { sendMeilingError } from '../../../../../../../common/meiling/v1/error/error';
 
 interface DeviceCode {
   user_code: string;
@@ -19,7 +18,7 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
   // validate
   if (!Utils.isValidValue(query, query.user_code)) {
     if (!Utils.isValidValue(body, body.user_code)) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'missing user_code.');
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'missing user_code.');
       return;
     }
 
@@ -29,7 +28,11 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
   // get userData of selected user
   const userData = await Meiling.Identity.User.getDetailedInfo(userBase);
   if (!userData) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR, 'unable to fetch user from DB.');
+    Meiling.V1.Error.sendMeilingError(
+      rep,
+      Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR,
+      'unable to fetch user from DB.',
+    );
     return;
   }
 
@@ -50,7 +53,7 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
       query.user_code,
   );
   if (matchingUserCodes.length === 0) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'no matching user_code found');
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'no matching user_code found');
     return;
   }
 
@@ -58,13 +61,17 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
 
   const client = await Meiling.OAuth2.ClientAuthorization.getClient(userCode.authorizationId);
   if (!client) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND, 'unable to find proper client');
+    Meiling.V1.Error.sendMeilingError(
+      rep,
+      Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND,
+      'unable to find proper client',
+    );
     return;
   }
 
   const authorization = await Meiling.OAuth2.ClientAuthorization.getById(userCode.authorizationId);
   if (!authorization) {
-    sendMeilingError(
+    Meiling.V1.Error.sendMeilingError(
       rep,
       Meiling.V1.Error.ErrorType.UNAUTHORIZED,
       "specified oAuth2 application doesn't have proper authorization",

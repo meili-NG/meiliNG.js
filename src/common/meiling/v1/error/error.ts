@@ -1,10 +1,10 @@
 import chalk from 'chalk';
 import { FastifyReply } from 'fastify/types/reply';
-import { Meiling } from '../../..';
 import { NodeEnvironment } from '../../../../interface';
 import config from '../../../../resources/config';
 import { ErrorResponse } from './interface';
 import { ErrorType } from './type';
+import { Error } from '../..';
 
 function getMeilingErrorStatusCode(type: ErrorType) {
   switch (type) {
@@ -78,7 +78,7 @@ function getMeilingErrorStatusCode(type: ErrorType) {
 
   // the function for checking all cases are handled.
   // eslint-disable-next-line
-  ((n: never) => {})(type);
+  ((n: never) => { })(type);
 }
 
 export function sendMeilingError(rep: FastifyReply, type: ErrorType, description?: string, code?: string): void {
@@ -91,6 +91,6 @@ export function sendMeilingError(rep: FastifyReply, type: ErrorType, description
     type,
     description,
     code,
-    url: Meiling.Error.buildErrorCodeURL(code),
+    url: Error.buildErrorCodeURL(code),
   } as ErrorResponse);
 }

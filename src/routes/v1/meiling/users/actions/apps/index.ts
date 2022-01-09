@@ -2,7 +2,6 @@ import { OAuthClient } from '@prisma/client';
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '..';
 import { Meiling } from '../../../../../../common';
-import { sendMeilingError } from '../../../../../../common/meiling/v1/error/error';
 import { appActionsPlugin } from './actions';
 import appDeleteHandler from './delete';
 import appGetHandler from './get';
@@ -41,7 +40,7 @@ export function userAppsActionsPlugin(app: FastifyInstance, opts: FastifyPluginO
     const authorized = userDetail.authorizedApps.filter((n) => n.id === clientId).length > 0;
 
     if (!owned && !authorized) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND);
       throw new Error('You do not own/authorized this');
     }
 

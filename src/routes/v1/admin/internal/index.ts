@@ -1,8 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { Meiling, Terminal } from '../../../../common';
-import { getByClientId } from '../../../../common/meiling/oauth2/client';
 import { getPrismaClient } from '../../../../resources/prisma';
-import { sendMeilingError } from '../../../../common/meiling/v1/error/error';
 
 const internalAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.get('/sakuya', async (req, rep) => {
@@ -19,7 +17,7 @@ const internalAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
       rep.send({ success: true });
     } catch (e) {
       console.error(e);
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR);
     }
   });
 

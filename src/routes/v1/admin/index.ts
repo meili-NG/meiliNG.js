@@ -1,11 +1,9 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fastifyCors from 'fastify-cors';
 import { Meiling, Utils } from '../../../common';
-import { getTokenFromRequest } from '../../../common/meiling/authorization/token';
 import { NodeEnvironment } from '../../../interface';
 import config from '../../../resources/config';
 import { info as packageJson } from '../../../resources/package';
-import { sendMeilingError } from '../../../common/meiling/v1/error/error';
 import appsAdminHandler from './apps';
 import internalAdminHandler from './internal';
 import sessionsAdminHandler from './sessions';
@@ -24,11 +22,11 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
 
   app.addHook('onRequest', (req, rep, next) => {
     if (!config.admin || !config.admin.tokens) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.FORBIDDEN);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.FORBIDDEN);
       throw new Error('User is not providing proper login credentials for admin');
     }
 
-    const token = getTokenFromRequest(req);
+    const token = Meiling.Authorization.Token.getTokenFromRequest(req);
     if (!token) {
       rep
         .status(401)
@@ -43,7 +41,7 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
       // ID and Password flow
       const isValidBasic = Utils.checkBase64(token.token);
       if (!isValidBasic) {
-        sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_TOKEN);
+        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_TOKEN);
         throw new Error('Invalid Admin Token');
       }
 
@@ -54,17 +52,17 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
 
       const matchedTokens = basicTokens.filter((n) => n === tokenString);
       if (matchedTokens.length === 0) {
-        sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_TOKEN);
+        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_TOKEN);
         throw new Error('Invalid Admin Token');
       }
     } else if (token.method.toLowerCase() === 'bearer') {
       const matchedTokens = config.admin.tokens.filter((n) => n === token.token);
       if (matchedTokens.length === 0) {
-        sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_TOKEN);
+        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_TOKEN);
         throw new Error('Invalid Admin Token');
       }
     } else {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED);
     }
 
     next();

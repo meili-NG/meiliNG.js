@@ -3,7 +3,6 @@ import { MeilingV1ClientRequest } from '.';
 import { getUserFromActionRequest } from '..';
 import { Meiling } from '../../../../../../common';
 import { getPrismaClient } from '../../../../../../resources/prisma';
-import { sendMeilingError } from '../../../../../../common/meiling/v1/error/error';
 
 async function appGetHandler(req_: FastifyRequest, rep: FastifyReply): Promise<void> {
   const req = req_ as MeilingV1ClientRequest;
@@ -14,7 +13,7 @@ async function appGetHandler(req_: FastifyRequest, rep: FastifyReply): Promise<v
   };
 
   if (!req.status.authorized && !req.status.owned) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND);
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND);
   }
 
   if (req.status.authorized) {

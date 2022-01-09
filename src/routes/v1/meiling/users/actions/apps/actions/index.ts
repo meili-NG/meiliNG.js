@@ -1,6 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { MeilingV1ClientRequest } from '..';
-import { sendMeilingError } from '../../../../../../../common/meiling/v1/error/error';
 import { appPermissionsPlugin } from './permissions';
 import appAuthPlugin from './auth';
 import { appRedirectURIPlugin } from './redirect_uri';
@@ -20,7 +19,7 @@ function authorizedAppsActionsPlugin(app: FastifyInstance, opts: FastifyPluginOp
     const req = _req as MeilingV1ClientRequest;
 
     if (!req.status.authorized) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
       throw new Error('Unauthorized!');
     }
 
@@ -38,7 +37,7 @@ function appOwnerActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
     const req = _req as MeilingV1ClientRequest;
 
     if (!req.status.owned) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
       throw new Error('Unauthorized!');
     }
 

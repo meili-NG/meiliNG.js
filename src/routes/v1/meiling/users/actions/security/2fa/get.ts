@@ -1,14 +1,12 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { getUserFromActionRequest } from '../..';
 import { getPrismaClient } from '../../../../../../../resources/prisma';
-import { convertAuthentication } from '../../../../../../../common/meiling/v1/database';
-import { sendMeilingError } from '../../../../../../../common/meiling/v1/error/error';
 import { Meiling } from '../../../../../../../common';
 
 async function get2FAInfo(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = await getUserFromActionRequest(req);
   if (!user) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
     return;
   }
 
@@ -18,7 +16,7 @@ async function get2FAInfo(req: FastifyRequest, rep: FastifyReply): Promise<void>
     enabled: user.useTwoFactor,
     methods: await Promise.all(
       methods.map(async (n) => {
-        const dbType = convertAuthentication(n);
+        const dbType = Meiling.V1.Database.convertAuthentication(n);
         const isAvailable =
           (await getPrismaClient().authorization.count({
             where: {

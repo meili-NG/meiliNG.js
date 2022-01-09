@@ -1,6 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { getPrismaClient } from '../../../../resources/prisma';
-import { sendMeilingError } from '../../../../common/meiling/v1/error/error';
 import libPhoneNumberJs from 'libphonenumber-js';
 import { Meiling } from '../../../../common';
 
@@ -30,7 +29,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     const body = req.body as UserPhoneRegisterInterface | undefined;
 
     if (!body?.phone || typeof body.phone !== 'string') {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
       return;
     }
 
@@ -45,7 +44,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     const phone = libPhoneNumberJs(body.phone);
 
     if (!phone) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
       return;
     }
 
@@ -58,7 +57,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     ).filter((n) => n.phone === phone.formatInternational());
 
     if (matchingPhones.length > 0) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.CONFLICT, 'phone number already exists');
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.CONFLICT, 'phone number already exists');
       return;
     }
 
@@ -74,7 +73,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       const othersPrimaryPhones = primaryPhones.filter((n) => n.userId !== uuid && n.isPrimary);
 
       if (othersPrimaryPhones.length > 0) {
-        sendMeilingError(
+        Meiling.V1.Error.sendMeilingError(
           rep,
           Meiling.V1.Error.ErrorType.CONFLICT,
           'there is other user who is using this phone as primary phone',
@@ -129,7 +128,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     });
 
     if (phone === null) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 
@@ -154,7 +153,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     });
 
     if (phone === null) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 
@@ -163,7 +162,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     if (typeof body.phone === 'string') {
       const phoneNumberObj = libPhoneNumberJs(body.phone);
       if (!phoneNumberObj) {
-        sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
+        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
         return;
       }
 
@@ -182,7 +181,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       const othersPrimaryPhones = primaryPhones.filter((n) => n.userId !== uuid && n.isPrimary);
 
       if (othersPrimaryPhones.length > 0) {
-        sendMeilingError(
+        Meiling.V1.Error.sendMeilingError(
           rep,
           Meiling.V1.Error.ErrorType.CONFLICT,
           'there is other user who is using this phone as primary phone',
@@ -225,12 +224,12 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       });
 
       if (phone === null) {
-        sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
         return;
       }
 
       if (phone.isPrimary) {
-        sendMeilingError(
+        Meiling.V1.Error.sendMeilingError(
           rep,
           Meiling.V1.Error.ErrorType.CONFLICT,
           'you should assign new primary number before deleting it',

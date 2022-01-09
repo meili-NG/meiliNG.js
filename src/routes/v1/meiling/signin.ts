@@ -2,15 +2,9 @@ import { User as UserModel } from '@prisma/client';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { FastifyRequestWithSession } from '.';
-import { Meiling, Utils } from '../../../common';
-import * as Notification from '../../../common/notification';
-import { AuthorizationJSONObject } from '../../../common/meiling/identity/user';
+import { Meiling, Utils, Event, Notification } from '../../../common';
 import config from '../../../resources/config';
-import { getMeilingAvailableAuthMethods } from '../../../common/meiling/v1/challenge';
-import { sendMeilingError } from '../../../common/meiling/v1/error/error';
 import libmobilephoneJs from 'libphonenumber-js';
-import { BaridegiLogType, sendBaridegiLog } from '../../../common/event/baridegi';
-import { getTokenFromRequest } from '../../../common/meiling/authorization/token';
 
 export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
@@ -19,7 +13,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
   try {
     body = Utils.convertJsonIfNot<Meiling.V1.Interfaces.SigninBody>(req.body);
   } catch (e) {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'body is not a valid JSON.');
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'body is not a valid JSON.');
     return;
   }
 
@@ -28,7 +22,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
     const username = body?.data?.username;
 
     if (username === undefined) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'body is missing username.');
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'body is missing username.');
       return;
     }
 
@@ -56,7 +50,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       return;
     }
 
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.WRONG_USERNAME);
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.WRONG_USERNAME);
 
     return;
   } else if (body.type === Meiling.V1.Interfaces.SigninType.USERNAME_AND_PASSWORD) {
@@ -64,7 +58,11 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
     const password = body?.data?.password;
 
     if (username === undefined || password === undefined) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'body is missing username and password.');
+      Meiling.V1.Error.sendMeilingError(
+        rep,
+        Meiling.V1.Error.ErrorType.INVALID_REQUEST,
+        'body is missing username and password.',
+      );
       return;
     }
 
@@ -73,7 +71,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
     if (authenticatedUsers.length === 1) {
       userToLogin = authenticatedUsers[0];
     } else if (authenticatedUsers.length > 1) {
-      sendMeilingError(
+      Meiling.V1.Error.sendMeilingError(
         rep,
         Meiling.V1.Error.ErrorType.MORE_THAN_ONE_USER_MATCHED,
         'more than one user was matched, use username instead.',
@@ -83,9 +81,9 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       const users = await Meiling.Identity.User.findByCommonUsername(username);
 
       if (users.length > 0) {
-        sendMeilingError(rep, Meiling.V1.Error.ErrorType.WRONG_PASSWORD, 'Wrong password.');
+        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.WRONG_PASSWORD, 'Wrong password.');
       } else {
-        sendMeilingError(rep, Meiling.V1.Error.ErrorType.WRONG_USERNAME, 'Wrong username.');
+        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.WRONG_USERNAME, 'Wrong username.');
       }
       return;
     }
@@ -102,7 +100,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
           type: Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH,
         });
 
-        sendMeilingError(
+        Meiling.V1.Error.sendMeilingError(
           rep,
           Meiling.V1.Error.ErrorType.TWO_FACTOR_AUTHENTICATION_REQUIRED,
           'two factor authentication is required.',
@@ -119,7 +117,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
 
     if (body.type === Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH) {
       if (session.extendedAuthentication?.type !== Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH) {
-        sendMeilingError(
+        Meiling.V1.Error.sendMeilingError(
           rep,
           Meiling.V1.Error.ErrorType.TWO_FACTOR_AUTHENTICATION_REQUEST_NOT_GENERATED,
           'two factor authentication request is not generated yet or overrided by passwordless login. please check your login request.',
@@ -130,7 +128,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       const userId = session.extendedAuthentication.id;
 
       if (userId === undefined) {
-        sendMeilingError(
+        Meiling.V1.Error.sendMeilingError(
           rep,
           Meiling.V1.Error.ErrorType.TWO_FACTOR_AUTHENTICATION_REQUEST_NOT_GENERATED,
           'two factor authentication request session does not contain user session. please redo your login.',
@@ -141,7 +139,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       const user = await Meiling.Identity.User.getBasicInfo(userId);
 
       if (user === null) {
-        sendMeilingError(
+        Meiling.V1.Error.sendMeilingError(
           rep,
           Meiling.V1.Error.ErrorType.TWO_FACTOR_AUTHENTICATION_REQUEST_NOT_GENERATED,
           'two factor authentication request session does not valid userId session. please redo your login.',
@@ -159,7 +157,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
         const users = await Meiling.Identity.User.findByCommonUsername(username);
 
         if (users.length === 0) {
-          sendMeilingError(rep, Meiling.V1.Error.ErrorType.WRONG_USERNAME, 'Wrong username.');
+          Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.WRONG_USERNAME, 'Wrong username.');
           return;
         }
 
@@ -178,7 +176,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       });
     }
 
-    const availableMethods = await getMeilingAvailableAuthMethods(authMethods);
+    const availableMethods = await Meiling.V1.Challenge.getMeilingAvailableAuthMethods(authMethods);
 
     // which passwordless-login methods are available for this user?
     if (signinMethod === undefined) {
@@ -190,12 +188,16 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
 
     // check signinMethod is valid
     if (Meiling.V1.Database.convertAuthentication(signinMethod) === undefined) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_SIGNIN_METHOD, 'invalid signin method: ' + signinMethod);
+      Meiling.V1.Error.sendMeilingError(
+        rep,
+        Meiling.V1.Error.ErrorType.INVALID_SIGNIN_METHOD,
+        'invalid signin method: ' + signinMethod,
+      );
       return;
     }
 
     if (!availableMethods.includes(signinMethod)) {
-      sendMeilingError(
+      Meiling.V1.Error.sendMeilingError(
         rep,
         Meiling.V1.Error.ErrorType.INVALID_SIGNIN_METHOD,
         'unsupported signin method: ' + signinMethod,
@@ -211,7 +213,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       if (
         Meiling.V1.Challenge.isChallengeRateLimited(signinMethod, session.extendedAuthentication?.challengeCreatedAt)
       ) {
-        sendMeilingError(
+        Meiling.V1.Error.sendMeilingError(
           rep,
           Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
           'you have been rate limited. please try again later.',
@@ -292,7 +294,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
 
     // challenge was already set. therefore, check for session.
     if (session?.extendedAuthentication === undefined || session?.extendedAuthentication?.type !== body.type) {
-      sendMeilingError(
+      Meiling.V1.Error.sendMeilingError(
         rep,
         Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED,
         'authentication request was not generated yet or had been invalidated.',
@@ -303,7 +305,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
     // validate current method is same with session's extendedAuthentication
     const extendedAuthSession = session.extendedAuthentication;
     if (extendedAuthSession.method !== body.data?.method) {
-      sendMeilingError(
+      Meiling.V1.Error.sendMeilingError(
         rep,
         Meiling.V1.Error.ErrorType.AUTHENTICATION_NOT_CURRENT_CHALLENGE_METHOD,
         `authentication request is using different challenge method.
@@ -318,7 +320,7 @@ please request this endpoint without challengeResponse field to request challeng
         new Date().getTime() >
         extendedAuthSession.challengeCreatedAt.getTime() + config.token.invalidate.meiling.CHALLENGE_TOKEN * 1000
       ) {
-        sendMeilingError(
+        Meiling.V1.Error.sendMeilingError(
           rep,
           Meiling.V1.Error.ErrorType.AUTHENTICATION_TIMEOUT,
           'authentication request timed out, please recreate the challenge.',
@@ -332,7 +334,7 @@ please request this endpoint without challengeResponse field to request challeng
     const authorizedUsers: UserModel[] = [];
 
     if (challenge === undefined) {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, `challenge is missing.`);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, `challenge is missing.`);
       return;
     }
 
@@ -345,7 +347,7 @@ please request this endpoint without challengeResponse field to request challeng
       if (Meiling.V1.Database.convertAuthenticationMethod(authMethod.method) === signinMethod) {
         // check database is not corrupted.
         if (authMethod.data !== null) {
-          const data = Utils.convertJsonIfNot<AuthorizationJSONObject>(authMethod.data);
+          const data = Utils.convertJsonIfNot<Meiling.Identity.User.AuthorizationJSONObject>(authMethod.data);
 
           if (authMethod.userId !== null) {
             // add promise to array
@@ -379,18 +381,18 @@ please request this endpoint without challengeResponse field to request challeng
     if (authorizedUsers.length === 1) {
       userToLogin = authorizedUsers[0];
     } else if (authorizedUsers.length > 1) {
-      sendMeilingError(
+      Meiling.V1.Error.sendMeilingError(
         rep,
         Meiling.V1.Error.ErrorType.MORE_THAN_ONE_USER_MATCHED,
         'more than one user was matched, login using username instead.',
       );
       return;
     } else {
-      sendMeilingError(rep, Meiling.V1.Error.ErrorType.SIGNIN_FAILED, 'No matching users');
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.SIGNIN_FAILED, 'No matching users');
       return;
     }
   } else {
-    sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_SIGNIN_TYPE, 'invalid signin type.');
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_SIGNIN_TYPE, 'invalid signin type.');
     return;
   }
 
@@ -402,10 +404,10 @@ please request this endpoint without challengeResponse field to request challeng
 
   const user = await Meiling.Identity.User.getDetailedInfo(userToLogin);
 
-  sendBaridegiLog(BaridegiLogType.USER_SIGNIN, {
+  Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.USER_SIGNIN, {
     ip: req.ip,
     user,
-    token: getTokenFromRequest(req)?.token,
+    token: Meiling.Authorization.Token.getTokenFromRequest(req)?.token,
   });
 
   rep.status(200).send({

@@ -17,14 +17,14 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
   let body;
 
   try {
-    body = Utils.convertJsonIfNot<Meiling.V1.Interfaces.MeilingV1SignInBody>(req.body);
+    body = Utils.convertJsonIfNot<Meiling.V1.Interfaces.SigninBody>(req.body);
   } catch (e) {
     sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'body is not a valid JSON.');
     return;
   }
 
   let userToLogin: UserModel;
-  if (body.type === Meiling.V1.Interfaces.MeilingV1SigninType.USERNAME_CHECK) {
+  if (body.type === Meiling.V1.Interfaces.SigninType.USERNAME_CHECK) {
     const username = body?.data?.username;
 
     if (username === undefined) {
@@ -59,7 +59,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
     sendMeilingError(rep, Meiling.V1.Error.ErrorType.WRONG_USERNAME);
 
     return;
-  } else if (body.type === Meiling.V1.Interfaces.MeilingV1SigninType.USERNAME_AND_PASSWORD) {
+  } else if (body.type === Meiling.V1.Interfaces.SigninType.USERNAME_AND_PASSWORD) {
     const username = body?.data?.username;
     const password = body?.data?.password;
 
@@ -99,7 +99,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
 
         await Meiling.V1.Session.setExtendedAuthenticationSession(req, {
           id: user.id,
-          type: Meiling.V1.Interfaces.MeilingV1SigninType.TWO_FACTOR_AUTH,
+          type: Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH,
         });
 
         sendMeilingError(
@@ -111,14 +111,14 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       }
     }
   } else if (
-    body.type === Meiling.V1.Interfaces.MeilingV1SigninType.TWO_FACTOR_AUTH ||
-    body.type === Meiling.V1.Interfaces.MeilingV1SigninType.PASSWORDLESS
+    body.type === Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH ||
+    body.type === Meiling.V1.Interfaces.SigninType.PASSWORDLESS
   ) {
     const signinMethod = body?.data?.method;
     const authMethods = [];
 
-    if (body.type === Meiling.V1.Interfaces.MeilingV1SigninType.TWO_FACTOR_AUTH) {
-      if (session.extendedAuthentication?.type !== Meiling.V1.Interfaces.MeilingV1SigninType.TWO_FACTOR_AUTH) {
+    if (body.type === Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH) {
+      if (session.extendedAuthentication?.type !== Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH) {
         sendMeilingError(
           rep,
           Meiling.V1.Error.ErrorType.TWO_FACTOR_AUTHENTICATION_REQUEST_NOT_GENERATED,
@@ -152,7 +152,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       authMethods.push(
         ...(await Meiling.V1.User.getAvailableExtendedAuthenticationMethods(user, body.type, signinMethod)),
       );
-    } else if (body.type === Meiling.V1.Interfaces.MeilingV1SigninType.PASSWORDLESS) {
+    } else if (body.type === Meiling.V1.Interfaces.SigninType.PASSWORDLESS) {
       const username = body?.context?.username;
 
       if (username !== undefined) {
@@ -174,7 +174,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       }
 
       await Meiling.V1.Session.setExtendedAuthenticationSession(req, {
-        type: Meiling.V1.Interfaces.MeilingV1SigninType.PASSWORDLESS,
+        type: Meiling.V1.Interfaces.SigninType.PASSWORDLESS,
       });
     }
 
@@ -226,11 +226,11 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
 
       if (challenge) {
         if (
-          signinMethod === Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.EMAIL ||
-          signinMethod === Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.SMS
+          signinMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.EMAIL ||
+          signinMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.SMS
         ) {
           if (to) {
-            if (signinMethod === Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.SMS) {
+            if (signinMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.SMS) {
               const phone = libmobilephoneJs(to);
               if (phone) {
                 if (phone.country === 'KR') {
@@ -263,7 +263,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
                   });
                 }
               }
-            } else if (signinMethod === Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.EMAIL) {
+            } else if (signinMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.EMAIL) {
               await Notification.sendNotification(Notification.NotificationMethod.EMAIL, {
                 type: 'template',
                 templateId: Notification.TemplateId.AUTHORIZATION_CODE,

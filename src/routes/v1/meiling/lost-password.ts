@@ -16,7 +16,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
   let body;
 
   try {
-    body = Utils.convertJsonIfNot<Meiling.V1.Interfaces.MeilingV1PasswordReset>(req.body);
+    body = Utils.convertJsonIfNot<Meiling.V1.Interfaces.PasswordResetBody>(req.body);
   } catch (e) {
     sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'body is not a valid JSON.');
     return;
@@ -96,8 +96,8 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     // TODO: get lang from body
 
     // TODO: make it configurable
-    const currentMethod: Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods =
-      body.method.toLowerCase() as Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods;
+    const currentMethod: Meiling.V1.Interfaces.ExtendedAuthMethods =
+      body.method.toLowerCase() as Meiling.V1.Interfaces.ExtendedAuthMethods;
 
     const challenge = generateChallenge(currentMethod);
     if (!challenge) {
@@ -114,7 +114,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
 
     let to: string | undefined = undefined;
 
-    if (currentMethod === Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.EMAIL) {
+    if (currentMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.EMAIL) {
       const to = (await Meiling.Identity.User.getPrimaryEmail(user.id))?.email;
 
       if (!to || !Utils.isValidEmail(to)) {
@@ -125,7 +125,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
         );
         return;
       }
-    } else if (currentMethod === Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.SMS) {
+    } else if (currentMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.SMS) {
       const toRaw = (await Meiling.Identity.User.getPrimaryPhone(user.id))?.phone;
 
       if (toRaw) {
@@ -214,7 +214,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     return;
   }
 
-  const passwordReset = session.passwordReset as Meiling.V1.Interfaces.MeilingV1PasswordResetSession;
+  const passwordReset = session.passwordReset as Meiling.V1.Interfaces.SessionPasswordReset;
   if (
     !passwordReset.method ||
     passwordReset.method.toLowerCase() !== body.method.toLowerCase() ||

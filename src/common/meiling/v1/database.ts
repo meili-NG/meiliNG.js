@@ -1,36 +1,36 @@
 import { AuthorizationMethod, OAuthTokenType } from '@prisma/client';
 import { OAuth2QueryGrantType } from '../../../routes/v1/oauth2/interfaces';
-import { MeilingV1ExtendedAuthMethods } from './interfaces';
+import { ExtendedAuthMethods } from './interfaces';
 
-export function convertAuthentication(method?: MeilingV1ExtendedAuthMethods): AuthorizationMethod | undefined {
+export function convertAuthentication(method?: ExtendedAuthMethods): AuthorizationMethod | undefined {
   switch (method) {
-    case MeilingV1ExtendedAuthMethods.SMS:
+    case ExtendedAuthMethods.SMS:
       return 'SMS';
-    case MeilingV1ExtendedAuthMethods.SECURITY_KEY:
+    case ExtendedAuthMethods.SECURITY_KEY:
       return 'SECURITY_KEY';
-    case MeilingV1ExtendedAuthMethods.PGP_SIGNATURE:
+    case ExtendedAuthMethods.PGP_SIGNATURE:
       return 'PGP_KEY';
-    case MeilingV1ExtendedAuthMethods.OTP:
+    case ExtendedAuthMethods.OTP:
       return 'OTP';
-    case MeilingV1ExtendedAuthMethods.EMAIL:
+    case ExtendedAuthMethods.EMAIL:
       return 'EMAIL';
     default:
       return undefined;
   }
 }
 
-export function convertAuthenticationMethod(method: AuthorizationMethod): MeilingV1ExtendedAuthMethods | null {
+export function convertAuthenticationMethod(method: AuthorizationMethod): ExtendedAuthMethods | null {
   switch (method) {
     case 'EMAIL':
-      return MeilingV1ExtendedAuthMethods.EMAIL;
+      return ExtendedAuthMethods.EMAIL;
     case 'OTP':
-      return MeilingV1ExtendedAuthMethods.OTP;
+      return ExtendedAuthMethods.OTP;
     case 'PGP_KEY':
-      return MeilingV1ExtendedAuthMethods.PGP_SIGNATURE;
+      return ExtendedAuthMethods.PGP_SIGNATURE;
     case 'SECURITY_KEY':
-      return MeilingV1ExtendedAuthMethods.SECURITY_KEY;
+      return ExtendedAuthMethods.SECURITY_KEY;
     case 'SMS':
-      return MeilingV1ExtendedAuthMethods.SMS;
+      return ExtendedAuthMethods.SMS;
     default:
       return null;
   }

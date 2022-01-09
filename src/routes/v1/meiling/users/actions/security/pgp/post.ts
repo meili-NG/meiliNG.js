@@ -7,7 +7,7 @@ import * as OpenPGP from 'openpgp';
 import { Meiling, Utils } from '../../../../../../../common';
 import { AuthorizationMethod } from '@prisma/client';
 
-const dbType = convertAuthentication(Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.PGP_SIGNATURE);
+const dbType = convertAuthentication(Meiling.V1.Interfaces.ExtendedAuthMethods.PGP_SIGNATURE);
 
 async function userPGPPostKeys(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = await getUserFromActionRequest(req);

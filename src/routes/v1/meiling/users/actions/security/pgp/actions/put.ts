@@ -6,7 +6,7 @@ import { getPrismaClient } from '../../../../../../../../resources/prisma';
 import { convertAuthentication } from '../../../../../../../../common/meiling/v1/database';
 import { sendMeilingError } from '../../../../../../../../common/meiling/v1/error/error';
 
-const dbType = convertAuthentication(Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.PGP_SIGNATURE);
+const dbType = convertAuthentication(Meiling.V1.Interfaces.ExtendedAuthMethods.PGP_SIGNATURE);
 
 async function userPGPActionPutKey(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = await getUserFromActionRequest(req);

@@ -25,7 +25,7 @@ function user2FAEnablePlugin(app: FastifyInstance, opts: FastifyPluginOptions, d
       return;
     }
 
-    const methods = Object.values(Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods);
+    const methods = Object.values(Meiling.V1.Interfaces.ExtendedAuthMethods);
 
     const currentAvailables = await Promise.all(
       methods.map(async (n) => {

@@ -14,7 +14,7 @@ import { signupPlugin } from './signup/';
 import { userPlugin } from './users';
 
 export interface FastifyRequestWithSession extends FastifyRequest {
-  session: Meiling.V1.Interfaces.MeilingV1Session;
+  session: Meiling.V1.Interfaces.MeilingSession;
 }
 
 function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {

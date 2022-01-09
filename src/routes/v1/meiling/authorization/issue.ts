@@ -48,10 +48,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
           const prevCreatedAt = new Date(session.authorizationStatus?.email?.challenge.challengeCreatedAt);
 
           if (
-            Meiling.V1.Challenge.isChallengeRateLimited(
-              Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.EMAIL,
-              prevCreatedAt,
-            )
+            Meiling.V1.Challenge.isChallengeRateLimited(Meiling.V1.Interfaces.ExtendedAuthMethods.EMAIL, prevCreatedAt)
           ) {
             sendMeilingError(
               rep,
@@ -112,10 +109,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
           const prevCreatedAt = new Date(session.authorizationStatus?.phone?.challenge.challengeCreatedAt);
 
           if (
-            Meiling.V1.Challenge.isChallengeRateLimited(
-              Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.SMS,
-              prevCreatedAt,
-            )
+            Meiling.V1.Challenge.isChallengeRateLimited(Meiling.V1.Interfaces.ExtendedAuthMethods.SMS, prevCreatedAt)
           ) {
             sendMeilingError(
               rep,

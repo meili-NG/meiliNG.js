@@ -6,11 +6,11 @@ import { UserInfoObject } from '../identity/user';
 import config from '../../../resources/config';
 import { getPrismaClient } from '../../../resources/prisma';
 import {
-  MeilingV1PasswordResetSession,
-  MeilingV1Session,
-  MeilingV1SessionAuthorizationStatus,
-  MeilingV1SessionExtendedAuthentication,
-  MeilingV1ExtendedAuthMethods,
+  SessionPasswordReset,
+  MeilingSession,
+  SessionAuthorizationStatus,
+  ExtendedAuthentication,
+  ExtendedAuthMethods,
 } from './interfaces';
 
 interface MeilingV1TokenDataFile {
@@ -23,7 +23,7 @@ type MeilingV1TokenData = {
   issuedAt: Date;
   lastUsed: Date;
   expiresAt: Date;
-  session: MeilingV1Session;
+  session: MeilingSession;
 };
 
 let tokenSessions: MeilingV1TokenDataFile = {
@@ -187,8 +187,8 @@ export async function createToken(req: FastifyRequest): Promise<string | undefin
   return token;
 }
 
-export async function getSessionFromRequest(req: FastifyRequest): Promise<MeilingV1Session | undefined> {
-  let data: MeilingV1Session | undefined = undefined;
+export async function getSessionFromRequest(req: FastifyRequest): Promise<MeilingSession | undefined> {
+  let data: MeilingSession | undefined = undefined;
   let token: string | undefined = undefined;
 
   if (req.headers.authorization && req.headers.authorization.includes('Bearer')) {
@@ -214,7 +214,7 @@ export async function getSessionFromRequest(req: FastifyRequest): Promise<Meilin
         });
 
         if (tokenData && new Date().getTime() < tokenData.expiresAt.getTime()) {
-          data = tokenData.session as MeilingV1Session;
+          data = tokenData.session as MeilingSession;
         }
       }
     }
@@ -276,7 +276,7 @@ export async function extendTokenExpiration(token: string): Promise<void> {
   }
 }
 
-export async function setSession(req: FastifyRequest, data?: MeilingV1Session): Promise<void> {
+export async function setSession(req: FastifyRequest, data?: MeilingSession): Promise<void> {
   if (req.headers.authorization && req.headers.authorization.includes('Bearer')) {
     const token = await getTokenFromRequest(req);
 
@@ -315,19 +315,17 @@ export async function setSession(req: FastifyRequest, data?: MeilingV1Session): 
   saveSession();
 }
 
-export async function getAuthorizationStatus(
-  req: FastifyRequest,
-): Promise<MeilingV1SessionAuthorizationStatus | undefined> {
+export async function getAuthorizationStatus(req: FastifyRequest): Promise<SessionAuthorizationStatus | undefined> {
   const session = await getSessionFromRequest(req);
   return session?.authorizationStatus;
 }
 
 export async function appendAuthorizationStatus(
   req: FastifyRequest,
-  signupChallenge: MeilingV1SessionAuthorizationStatus,
+  signupChallenge: SessionAuthorizationStatus,
 ): Promise<void> {
   const prevSession = await getSessionFromRequest(req);
-  const session: MeilingV1Session = {
+  const session: MeilingSession = {
     ...prevSession,
     authorizationStatus: {
       ...prevSession?.authorizationStatus,
@@ -340,7 +338,7 @@ export async function appendAuthorizationStatus(
 
 export async function setAuthorizationStatus(
   req: FastifyRequest,
-  signupChallenge?: MeilingV1SessionAuthorizationStatus,
+  signupChallenge?: SessionAuthorizationStatus,
 ): Promise<void> {
   const session = await getSessionFromRequest(req);
   await setSession(req, {
@@ -351,33 +349,33 @@ export async function setAuthorizationStatus(
 
 export async function setExtendedAuthenticationSession(
   req: FastifyRequest,
-  extAuth: MeilingV1SessionExtendedAuthentication | undefined,
+  extAuth: ExtendedAuthentication | undefined,
 ): Promise<void> {
   const prevSession = await getSessionFromRequest(req);
   const session = {
     ...prevSession,
     extendedAuthentication: extAuth,
-  } as MeilingV1Session;
+  } as MeilingSession;
 
   await setSession(req, session);
 }
 
 export async function setPasswordResetSession(
   req: FastifyRequest,
-  passwordReset: MeilingV1PasswordResetSession | undefined,
+  passwordReset: SessionPasswordReset | undefined,
 ): Promise<void> {
   const prevSession = await getSessionFromRequest(req);
   const session = {
     ...prevSession,
     passwordReset,
-  } as MeilingV1Session;
+  } as MeilingSession;
 
   await setSession(req, session);
 }
 
 export async function setExtendedAuthenticationSessionMethodAndChallenge(
   req: FastifyRequest,
-  method?: MeilingV1ExtendedAuthMethods,
+  method?: ExtendedAuthMethods,
   challenge?: string | undefined,
   challengeCreatedAt?: Date,
 ): Promise<void> {
@@ -511,16 +509,14 @@ export async function getLoggedIn(req: FastifyRequest): Promise<UserInfoObject[]
   return [];
 }
 
-export function isUserLoggedIn(session: MeilingV1Session): boolean {
+export function isUserLoggedIn(session: MeilingSession): boolean {
   return session.user !== undefined && session.user.length > 0;
 }
 
-export function isInExtendedAuthenticationSession(session: MeilingV1Session): boolean {
+export function isInExtendedAuthenticationSession(session: MeilingSession): boolean {
   return session.extendedAuthentication !== undefined;
 }
 
-export function getExtendedAuthenticationSession(
-  session: MeilingV1Session,
-): MeilingV1SessionExtendedAuthentication | undefined {
+export function getExtendedAuthenticationSession(session: MeilingSession): ExtendedAuthentication | undefined {
   return session.extendedAuthentication;
 }

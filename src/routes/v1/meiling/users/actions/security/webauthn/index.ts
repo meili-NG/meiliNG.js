@@ -16,7 +16,7 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
       return;
     }
 
-    const dbType = convertAuthentication(Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods.SECURITY_KEY);
+    const dbType = convertAuthentication(Meiling.V1.Interfaces.ExtendedAuthMethods.SECURITY_KEY);
 
     const securityKeys = await getPrismaClient().authorization.findMany({
       where: {

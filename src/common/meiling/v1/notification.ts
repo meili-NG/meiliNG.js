@@ -1,13 +1,11 @@
 import { Notification } from '../../';
-import { MeilingV1ExtendedAuthMethods } from './interfaces';
+import { ExtendedAuthMethods } from './interfaces';
 
-export function convertToNotificationMethod(
-  method: MeilingV1ExtendedAuthMethods,
-): Notification.NotificationMethod | undefined {
+export function convertToNotificationMethod(method: ExtendedAuthMethods): Notification.NotificationMethod | undefined {
   switch (method) {
-    case MeilingV1ExtendedAuthMethods.EMAIL:
+    case ExtendedAuthMethods.EMAIL:
       return Notification.NotificationMethod.EMAIL;
-    case MeilingV1ExtendedAuthMethods.SMS:
+    case ExtendedAuthMethods.SMS:
       return Notification.NotificationMethod.SMS;
     default:
       return undefined;

@@ -1,57 +1,57 @@
-import { MeilingV1ExtendedAuthMethods, MeilingV1SigninType } from './query';
+import { ExtendedAuthMethods, SigninType } from './query';
 
-export interface MeilingV1Session {
-  user?: MeilingLoggedInUser[];
-  extendedAuthentication?: MeilingV1SessionExtendedAuthentication;
-  previouslyLoggedIn?: MeilingLoggedInUser[];
-  authorizationStatus?: MeilingV1SessionAuthorizationStatus;
-  passwordReset?: MeilingV1PasswordResetSession;
-  registering?: MeilingV1Registering;
+export interface MeilingSession {
+  user?: LoggedInUser[];
+  extendedAuthentication?: ExtendedAuthentication;
+  previouslyLoggedIn?: LoggedInUser[];
+  authorizationStatus?: SessionAuthorizationStatus;
+  passwordReset?: SessionPasswordReset;
+  registering?: SessionRegistering;
 }
 
-export interface MeilingV1Registering {
-  webAuthn?: MeilingV1RegisteringWebAuthn;
+export interface SessionRegistering {
+  webAuthn?: RegisteringWebAuthn;
 }
 
-export interface MeilingV1RegisteringWebAuthn {
+export interface RegisteringWebAuthn {
   challenge: string;
 }
 
-export interface MeilingLoggedInUser {
+export interface LoggedInUser {
   id: string;
 }
 
-export interface MeilingV1PasswordResetSession extends MeilingV1ChallengeData {
-  method?: MeilingV1ExtendedAuthMethods;
+export interface SessionPasswordReset extends SessionChallengeBody {
+  method?: ExtendedAuthMethods;
   passwordResetUser?: string;
   isVerified?: boolean;
 }
 
-interface MeilingV1SignInTwoFactorAuth extends MeilingV1ChallengeData {
+interface SessionTwoFactor extends SessionChallengeBody {
   id: string;
-  type: MeilingV1SigninType.TWO_FACTOR_AUTH;
-  method?: MeilingV1ExtendedAuthMethods;
+  type: SigninType.TWO_FACTOR_AUTH;
+  method?: ExtendedAuthMethods;
 }
 
-interface MeilingV1SignInPasswordLess extends MeilingV1ChallengeData {
-  type: MeilingV1SigninType.PASSWORDLESS;
-  method?: MeilingV1ExtendedAuthMethods;
+interface SessionPasswordLess extends SessionChallengeBody {
+  type: SigninType.PASSWORDLESS;
+  method?: ExtendedAuthMethods;
 }
 
-interface MeilingV1ChallengeData {
+interface SessionChallengeBody {
   challenge?: string;
   challengeCreatedAt?: Date;
 }
 
-interface MeilingV1ChallengeStatusInfo<T> {
+interface SessionChallengeStatus<T> {
   to: T;
-  challenge: MeilingV1ChallengeData;
+  challenge: SessionChallengeBody;
   isVerified: boolean;
 }
 
-export interface MeilingV1SessionAuthorizationStatus {
-  email?: MeilingV1ChallengeStatusInfo<string>;
-  phone?: MeilingV1ChallengeStatusInfo<string>;
+export interface SessionAuthorizationStatus {
+  email?: SessionChallengeStatus<string>;
+  phone?: SessionChallengeStatus<string>;
 }
 
-export type MeilingV1SessionExtendedAuthentication = MeilingV1SignInPasswordLess | MeilingV1SignInTwoFactorAuth;
+export type ExtendedAuthentication = SessionPasswordLess | SessionTwoFactor;

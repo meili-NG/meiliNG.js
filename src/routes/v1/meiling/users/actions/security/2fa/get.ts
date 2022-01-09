@@ -12,7 +12,7 @@ async function get2FAInfo(req: FastifyRequest, rep: FastifyReply): Promise<void>
     return;
   }
 
-  const methods = Object.values(Meiling.V1.Interfaces.MeilingV1ExtendedAuthMethods);
+  const methods = Object.values(Meiling.V1.Interfaces.ExtendedAuthMethods);
 
   rep.send({
     enabled: user.useTwoFactor,

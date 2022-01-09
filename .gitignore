@@ -124,3 +124,6 @@ src/.legacy
 
 # config.js
 config.js
+
+# use prisma db push
+prisma/migrations

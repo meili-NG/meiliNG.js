@@ -1,6 +1,6 @@
 <h1 align="center">Install</h1>
 <p align="center">This Guide will help you install Meiling Gatekeeper in no time.</p>
-<p align="right"><b>Last Update:</b> v.0.4.5</p>
+<p align="right"><b>Last Update:</b> v.0.6.1</p>
 
 ## Getting Started
 Hello, Welcome to Meiling Gatekeeper, an oAuth2 based authentication engine to build your customized login in no time.
@@ -60,10 +60,8 @@ You should set environment variable `DATABASE_URL` or edit [`.env` file](/.env) 
 * PostgreSQL: `postgresql://username:password@host:port/database?schema=public`
 * Microsoft SQL Server, mongoDB: Please refer to [Prisma: Getting Started with Microsoft SQL Server](https://www.prisma.io/docs/concepts/components/preview-features/sql-server/sql-server-start-from-scratch-typescript#connect-your-database)
 
-### Deploy Migration to Production
-In order to deploy database migrations, run `yarn prisma migrate deploy`.  
-
-If you are using custom structure, Using `prisma db push` can be an alternative option for you.
+### Deploy Database
+Use `prisma db push` to deploy database to specified database you declared above.
 
 ## Configurations
 From v0.4.0, Usage of `.env` is recommended than using `config.js`.  

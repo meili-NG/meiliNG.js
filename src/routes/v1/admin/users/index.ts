@@ -14,8 +14,8 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
     } =
       pageSize && page
         ? {
-            skip: (pageSize * (page - 1)) as number,
-            take: pageSize as number,
+            skip: (Number(pageSize) * (Number(page) - 1)) as number,
+            take: Number(pageSize) as number,
           }
         : {};
 

@@ -1,7 +1,7 @@
 import { Authorization } from '@prisma/client';
 import { Meiling } from '../..';
 import { ExtendedAuthMethods, SigninType, SigninExtendedAuthentication } from './interfaces';
-import { AuthorizationJSONObject, AuthorizationOTPObject, AuthorizationPGPSSHKeyObject } from '../identity/user';
+import { AuthenticationJSONObject, AuthenticationOTPObject, AuthenticationPGPSSHKeyObject } from '../identity/user';
 import { validateOTP, validatePGPSign } from '../authorization/validate';
 import config from '../../../resources/config';
 
@@ -112,7 +112,7 @@ export async function verifyChallenge(
   signinMethod: ExtendedAuthMethods,
   challenge: string | undefined,
   challengeResponse: any,
-  data?: AuthorizationJSONObject,
+  data?: AuthenticationJSONObject,
 ): Promise<boolean> {
   try {
     switch (signinMethod) {
@@ -120,7 +120,7 @@ export async function verifyChallenge(
         return await validatePGPSign(
           challenge as string,
           challengeResponse,
-          (data as AuthorizationPGPSSHKeyObject).data.key,
+          (data as AuthenticationPGPSSHKeyObject).data.key,
         );
       case ExtendedAuthMethods.SECURITY_KEY:
         return false;
@@ -128,7 +128,7 @@ export async function verifyChallenge(
       case ExtendedAuthMethods.EMAIL:
         return (challenge as string).trim() === challengeResponse.trim();
       case ExtendedAuthMethods.OTP:
-        return validateOTP(challengeResponse, (data as AuthorizationOTPObject).data.secret);
+        return validateOTP(challengeResponse, (data as AuthenticationOTPObject).data.secret);
     }
   } catch (e) {
     return false;

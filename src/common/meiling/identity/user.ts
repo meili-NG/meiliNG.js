@@ -18,34 +18,34 @@ export interface UserDetailedObject extends UserInfoObject {
   ownedApps: SanitizedClientModel[];
 }
 
-export type AuthorizationJSONObject =
-  | AuthorizationPasswordObject
-  | AuthorizationPGPSSHKeyObject
-  | AuthorizationOTPObject
-  | AuthorizationEmailSMSObject;
+export type AuthenticationJSONObject =
+  | AuthenticationPasswordObject
+  | AuthenticationPGPSSHKeyObject
+  | AuthenticationOTPObject
+  | AuthenticationEmailSMSObject;
 
-interface AuthorizationPasswordObject {
+interface AuthenticationPasswordObject {
   type: 'PASSWORD';
   data: {
     hash: string;
   };
 }
 
-export interface AuthorizationPGPSSHKeyObject {
+export interface AuthenticationPGPSSHKeyObject {
   type: 'PGP_KEY' | 'SSH_KEY';
   data: {
     key: string;
   };
 }
 
-export interface AuthorizationOTPObject {
+export interface AuthenticationOTPObject {
   type: 'OTP';
   data: {
     secret: string;
   };
 }
 
-interface AuthorizationEmailSMSObject {
+interface AuthenticationEmailSMSObject {
   type: 'EMAIL' | 'SMS';
 }
 
@@ -198,7 +198,7 @@ export async function addPassword(user: UserModel | string, password: string) {
   const salt = await bcrypt.genSalt(Utils.getCryptoSafeInteger(10) + 5);
   const hash = await bcrypt.hash(password, salt);
 
-  const data: AuthorizationPasswordObject = {
+  const data: AuthenticationPasswordObject = {
     type: 'PASSWORD',
     data: {
       hash,
@@ -291,7 +291,7 @@ export async function checkPassword(user: UserModel | string, password: string) 
   const passwords = await getPasswords(user);
 
   const passwordCheckPromise = passwords.map(async (passwordDB) => {
-    const passwordData = Utils.convertJsonIfNot<AuthorizationPasswordObject>(passwordDB.data);
+    const passwordData = Utils.convertJsonIfNot<AuthenticationPasswordObject>(passwordDB.data);
 
     const hash = passwordData.data.hash;
     const result = await bcrypt.compare(password, hash);

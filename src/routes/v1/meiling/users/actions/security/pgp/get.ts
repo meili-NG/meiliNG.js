@@ -26,7 +26,7 @@ async function userPGPGetKeys(req: FastifyRequest, rep: FastifyReply): Promise<v
       id: n.id,
       createdAt: n.createdAt,
       name: (n.data as any).data.name,
-      key: (n.data as unknown as Meiling.Identity.User.AuthorizationPGPSSHKeyObject).data.key,
+      key: (n.data as unknown as Meiling.Identity.User.AuthenticationPGPSSHKeyObject).data.key,
 
       allowSingleFactor: n.allowSingleFactor,
       allowTwoFactor: n.allowTwoFactor,

@@ -347,7 +347,7 @@ please request this endpoint without challengeResponse field to request challeng
       if (Meiling.V1.Database.convertAuthenticationMethod(authMethod.method) === signinMethod) {
         // check database is not corrupted.
         if (authMethod.data !== null) {
-          const data = Utils.convertJsonIfNot<Meiling.Identity.User.AuthorizationJSONObject>(authMethod.data);
+          const data = Utils.convertJsonIfNot<Meiling.Identity.User.AuthenticationJSONObject>(authMethod.data);
 
           if (authMethod.userId !== null) {
             // add promise to array

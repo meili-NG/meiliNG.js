@@ -37,7 +37,7 @@ async function userPGPActionGetKey(req: FastifyRequest, rep: FastifyReply): Prom
     id: keyData.id,
     createdAt: keyData.createdAt,
     name: (keyData.data as any).data.name,
-    key: (keyData.data as unknown as Meiling.Identity.User.AuthorizationPGPSSHKeyObject).data.key,
+    key: (keyData.data as unknown as Meiling.Identity.User.AuthenticationPGPSSHKeyObject).data.key,
 
     allowSingleFactor: keyData.allowSingleFactor,
     allowTwoFactor: keyData.allowTwoFactor,

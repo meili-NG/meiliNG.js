@@ -1,6 +1,6 @@
 <h1 align="center">Install</h1>
 <p align="center">This Guide will help you install Meiling Gatekeeper in no time.</p>
-<p align="right"><b>Last Update:</b> v.0.6.2</p>
+<p align="right"><b>Last Update:</b> v.0.7.0-SNAPSHOT</p>
 
 ## Getting Started
 Hello, Welcome to Meiling Gatekeeper, an oAuth2 based authentication engine to build your customized login in no time.
@@ -30,27 +30,12 @@ You can use [sample .env file (.env.example)](/.env.example) shipped with this r
 
 ## Setting up Database
 
-### Setting Database Provider
-Meiling uses [prisma](https://prisma.io), a next-generation ORM for Node.JS. Therefore, you can use multiple database provider for meiling by your taste.
+### Setting up MariaDB (or mySQL)
+Meiling uses [prisma](https://prisma.io), a next-generation ORM for Node.JS with JsonFiltering that does NOT provide universal way to querying JSON filtering at the moment.  
   
-> 💡 **Note**  
-> Prisma level of Json type support is required for meiling to function correctly.
-> 
-> Currently unsupported Database: *SQLite*.  
-> Please refer to [Prisma Docs](https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference/#json) to get up-to-date information.
+Therefore, support for DBMS other than MariaDB/MySQL was dropped due to recent changes for supporting Json filtering. Sorry!  
 
-Meiling is designed with MariaDB in mind, but MySQL, PostgreSQL and mongoDB is also supported.
-
-To change the database provider,  
-1. go to [./prisma/schema.prisma](./prisma/schema.prisma)
-2. go to datasource db -> provider
-3. change it to match your preferences.
-
-> 💡 **Note**  
-> Since meiling gatekeeper is focused on developing for MariaDB, using different DB will cause conflict when there is any changes on upstream schema.
-> 
-> Please make a note that when you update, Please backup your initial schema file.
-
+Install MariaDB or mySQL depending on your platform.
 
 ### Setting Database URL
 Prisma by default uses environment variables to get URL for connecting database. In order to configure database, you should configure database credentials into URL form.  

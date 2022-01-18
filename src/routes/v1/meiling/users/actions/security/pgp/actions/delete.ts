@@ -19,7 +19,7 @@ async function userPGPActionDeleteKey(req: FastifyRequest, rep: FastifyReply): P
   }
 
   const checkExist =
-    (await getPrismaClient().authorization.count({
+    (await getPrismaClient().authentication.count({
       where: {
         user: {
           id: user.id,
@@ -34,7 +34,7 @@ async function userPGPActionDeleteKey(req: FastifyRequest, rep: FastifyReply): P
     return;
   }
 
-  await getPrismaClient().authorization.delete({
+  await getPrismaClient().authentication.delete({
     where: {
       id: pgpId,
     },

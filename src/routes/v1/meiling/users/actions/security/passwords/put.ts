@@ -43,7 +43,7 @@ export async function userPasswordUpdateHandler(req: FastifyRequest, rep: Fastif
 
   for (const passwordRowToChange of passwordRowsToChange) {
     if (passwordRowToChange) {
-      await getPrismaClient().authorization.update({
+      await getPrismaClient().authentication.update({
         where: {
           id: passwordRowToChange.id,
         },

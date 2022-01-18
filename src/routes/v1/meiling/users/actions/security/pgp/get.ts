@@ -12,7 +12,7 @@ async function userPGPGetKeys(req: FastifyRequest, rep: FastifyReply): Promise<v
     return;
   }
 
-  const pgpKeys = await getPrismaClient().authorization.findMany({
+  const pgpKeys = await getPrismaClient().authentication.findMany({
     where: {
       user: {
         id: user.id,

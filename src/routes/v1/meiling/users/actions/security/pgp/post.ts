@@ -3,7 +3,7 @@ import { getUserFromActionRequest } from '../..';
 import { getPrismaClient } from '../../../../../../../resources/prisma';
 import * as OpenPGP from 'openpgp';
 import { Meiling, Utils } from '../../../../../../../common';
-import { AuthorizationMethod } from '@prisma/client';
+import { AuthenticationMethod } from '@prisma/client';
 
 const dbType = Meiling.V1.Database.convertAuthentication(Meiling.V1.Interfaces.ExtendedAuthMethods.PGP_SIGNATURE);
 
@@ -27,14 +27,14 @@ async function userPGPPostKeys(req: FastifyRequest, rep: FastifyReply): Promise<
       throw new Error();
     }
 
-    await getPrismaClient().authorization.create({
+    await getPrismaClient().authentication.create({
       data: {
         user: {
           connect: {
             id: user.id,
           },
         },
-        method: dbType as AuthorizationMethod,
+        method: dbType as AuthenticationMethod,
         data: {
           type: dbType,
           data: {

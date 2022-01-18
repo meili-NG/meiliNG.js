@@ -29,7 +29,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     }
 
     const uuid = session.passwordReset.passwordResetUser;
-    await getPrismaClient().authorization.deleteMany({
+    await getPrismaClient().authentication.deleteMany({
       where: {
         method: 'PASSWORD',
         user: {

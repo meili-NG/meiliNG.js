@@ -35,7 +35,7 @@ model User {
 
   oAuthAccessControls OAuthUserAccessControls[]
 
-  auths              Authorization[]
+  auths              Authentication[]
   constentedPolicies PolicyConsent[]
 
   isActive     Boolean @default(true)
@@ -69,7 +69,7 @@ model Phone {
   userId    String?
 }
 
-enum AuthorizationMethod {
+enum AuthenticationMethod {
   PGP_KEY
   OTP
   PASSWORD
@@ -79,9 +79,9 @@ enum AuthorizationMethod {
   SECURITY_KEY
 }
 
-model Authorization {
+model Authentication {
   id                 String              @id @default(uuid())
-  method             AuthorizationMethod
+  method             AuthenticationMethod
   data               Json?
   allowSingleFactor  Boolean             @default(false)
   allowTwoFactor     Boolean             @default(false)

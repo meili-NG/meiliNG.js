@@ -178,7 +178,7 @@ export async function getDetailedInfo(user: UserModel | string): Promise<UserDet
 }
 
 export async function getAuthorizations(user: UserModel | string) {
-  return await getPrismaClient().authorization.findMany({
+  return await getPrismaClient().authentication.findMany({
     where: {
       userId: getUserId(user),
     },
@@ -186,7 +186,7 @@ export async function getAuthorizations(user: UserModel | string) {
 }
 
 export async function getPasswords(user: UserModel | string) {
-  return await getPrismaClient().authorization.findMany({
+  return await getPrismaClient().authentication.findMany({
     where: {
       userId: getUserId(user),
       method: 'PASSWORD',
@@ -205,7 +205,7 @@ export async function addPassword(user: UserModel | string, password: string) {
     },
   };
 
-  const passwordData = await getPrismaClient().authorization.create({
+  const passwordData = await getPrismaClient().authentication.create({
     data: {
       user: {
         connect: {
@@ -660,7 +660,7 @@ export async function prevent2FALockout(user: UserModel | string): Promise<void>
   const data = await getInfo(user);
   if (!data) return undefined;
 
-  const authorizations = await getPrismaClient().authorization.count({
+  const authorizations = await getPrismaClient().authentication.count({
     where: {
       AND: [
         {

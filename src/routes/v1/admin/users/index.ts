@@ -4,9 +4,57 @@ import { getPrismaClient } from '../../../../resources/prisma';
 import userEmailsAdminHandler from './emails';
 import userPhonesAdminHandler from './phones';
 
+const queryBuilder = (query: string) => ({
+  OR: [
+    {
+      username: {
+        contains: query,
+      },
+    },
+    {
+      name: {
+        contains: query,
+      },
+    },
+    {
+      familyName: {
+        contains: query,
+      },
+    },
+    {
+      givenName: {
+        contains: query,
+      },
+    },
+    {
+      middleName: {
+        contains: query,
+      },
+    },
+    {
+      emails: {
+        some: {
+          email: {
+            contains: query,
+          },
+        },
+      },
+    },
+    {
+      phones: {
+        some: {
+          phone: {
+            contains: query,
+          },
+        },
+      },
+    },
+  ],
+});
+
 const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.get('/', async (req, rep) => {
-    const { query, pageSize = 20, page = 1 } = (req.query as any) || {};
+    const { query, pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
 
     const paginationDetails: {
       skip?: number;
@@ -19,56 +67,23 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
           }
         : {};
 
+    let prismaQuery = undefined;
+
+    if (query !== undefined) {
+      try {
+        prismaQuery = JSON.parse(query);
+      } catch (e) {
+        if (rawQuery) {
+          Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
+          return;
+        } else if (typeof query === 'string') {
+          prismaQuery = queryBuilder(query);
+        }
+      }
+    }
+
     const users = await getPrismaClient().user.findMany({
-      where: query
-        ? {
-            OR: [
-              {
-                username: {
-                  contains: query,
-                },
-              },
-              {
-                name: {
-                  contains: query,
-                },
-              },
-              {
-                familyName: {
-                  contains: query,
-                },
-              },
-              {
-                givenName: {
-                  contains: query,
-                },
-              },
-              {
-                middleName: {
-                  contains: query,
-                },
-              },
-              {
-                emails: {
-                  some: {
-                    email: {
-                      contains: query,
-                    },
-                  },
-                },
-              },
-              {
-                phones: {
-                  some: {
-                    phone: {
-                      contains: query,
-                    },
-                  },
-                },
-              },
-            ],
-          }
-        : undefined,
+      where: prismaQuery,
       ...paginationDetails,
     });
 
@@ -82,58 +97,25 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
   });
 
   app.get('/count', async (req, rep) => {
-    const { query } = (req.query as any) || {};
+    const { query, rawQuery = false } = (req.query as any) || {};
+
+    let prismaQuery = undefined;
+
+    if (query !== undefined) {
+      try {
+        prismaQuery = JSON.parse(query);
+      } catch (e) {
+        if (rawQuery) {
+          Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
+          return;
+        } else if (typeof query === 'string') {
+          prismaQuery = queryBuilder(query);
+        }
+      }
+    }
 
     const count = await getPrismaClient().user.count({
-      where: query
-        ? {
-            OR: [
-              {
-                username: {
-                  contains: query,
-                },
-              },
-              {
-                name: {
-                  contains: query,
-                },
-              },
-              {
-                familyName: {
-                  contains: query,
-                },
-              },
-              {
-                givenName: {
-                  contains: query,
-                },
-              },
-              {
-                middleName: {
-                  contains: query,
-                },
-              },
-              {
-                emails: {
-                  some: {
-                    email: {
-                      contains: query,
-                    },
-                  },
-                },
-              },
-              {
-                phones: {
-                  some: {
-                    phone: {
-                      contains: query,
-                    },
-                  },
-                },
-              },
-            ],
-          }
-        : undefined,
+      where: prismaQuery,
     });
 
     rep.send({

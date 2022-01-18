@@ -41,6 +41,8 @@ model User {
   isActive     Boolean @default(true)
   useTwoFactor Boolean @default(false)
 
+  lockedProps  Json?
+
   createdAt          DateTime             @default(now())
   lastSignIn         DateTime             @default(now())
   lastAuthenticated  DateTime             @default(now())

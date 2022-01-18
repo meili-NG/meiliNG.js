@@ -151,6 +151,8 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
     rep.send(user);
   });
 
+  // add user post
+
   app.put('/', async (req, rep) => {
     const uuid = (req.params as { uuid: string }).uuid;
     const body = req.body as any;

@@ -235,6 +235,26 @@ interface MeilingMetadataObjectV1Config extends MeilingMetadataObjectBaseConfig 
   scopes?: string[];
 }
 
+export async function checkLockedProps(userId: string, content?: any) {
+  const user = await getPrismaClient().user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) return;
+  const props = content ? Utils.getObjectRecursiveKeys(content) : [];
+
+  if (user.lockedProps && (user.lockedProps as string[]).length) {
+    const lockedProps = user.lockedProps as string[];
+    if (lockedProps.filter((n) => props.includes(n)).length > 0) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // TODO: make a proper interface
 export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = []) {
   if (!metadata) return metadata;

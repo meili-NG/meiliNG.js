@@ -24,9 +24,34 @@ export async function userUpdateInfo(req: FastifyRequest, rep: FastifyReply) {
       const users = userRawSession.filter((n) => n.id === userId);
 
       if (users.length === 1) {
-        await getPrismaClient().user.update({
+        const user = await getPrismaClient().user.findUnique({
           where: {
             id: users[0].id,
+          },
+        });
+
+        if (!user) {
+          Meiling.V1.Error.sendMeilingError(
+            rep,
+            Meiling.V1.Error.ErrorType.NOT_FOUND,
+            'specified user uuid was not available.',
+          );
+          return;
+        }
+
+        const isLockOK = await Meiling.Identity.User.checkLockedProps(user.id, body);
+        if (!isLockOK) {
+          Meiling.V1.Error.sendMeilingError(
+            rep,
+            Meiling.V1.Error.ErrorType.FORBIDDEN,
+            'you can not update locked prop fields',
+          );
+          return;
+        }
+
+        await getPrismaClient().user.update({
+          where: {
+            id: user.id,
           },
           data: {
             birthday: body.birthday ? new Date(body.birthday) : undefined,
@@ -37,8 +62,7 @@ export async function userUpdateInfo(req: FastifyRequest, rep: FastifyReply) {
           },
         });
 
-        const user = await getSanitizedUser(users[0].id);
-        rep.send(user);
+        rep.send(await getSanitizedUser(user.id));
         return;
       } else {
         Meiling.V1.Error.sendMeilingError(

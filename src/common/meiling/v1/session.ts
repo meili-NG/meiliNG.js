@@ -49,6 +49,8 @@ export function loadSessionSaveFiles(): void {
   }
 }
 
+// TODO: OPTIMIZE
+
 export async function garbageCollect(): Promise<void> {
   if (config.session.v1.storage) {
     if (config.session.v1.storage.type === 'file') {

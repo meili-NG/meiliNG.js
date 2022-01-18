@@ -2,6 +2,8 @@ import { OAuthClient, OAuthClientAuthorization, OAuthToken, OAuthTokenType, Perm
 import { Authorization } from '..';
 import { getPrismaClient } from '../../../resources/prisma';
 
+// TODO: OPTIMIZE
+
 export async function garbageCollect(): Promise<void> {
   const [clients, users, authorizations] = await Promise.all([
     getPrismaClient().oAuthClient.findMany(),

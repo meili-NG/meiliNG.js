@@ -336,21 +336,14 @@ export async function hasAuthorizedClient(user: UserModel | string, clientId: st
 }
 
 export async function getClientAuthorizations(user: UserModel | string, clientId?: string) {
-  let returnData;
-
   const authorizations = await getPrismaClient().oAuthClientAuthorization.findMany({
     where: {
       userId: getUserId(user),
+      clientId,
     },
   });
 
-  if (clientId) {
-    returnData = authorizations.filter((n) => n.clientId === clientId);
-  } else {
-    returnData = authorizations;
-  }
-
-  return returnData.length > 0 ? returnData : undefined;
+  return authorizations.length > 0 ? authorizations : undefined;
 }
 
 export async function getClientAuthorizedPermissions(user: UserModel | string, clientId?: string) {
@@ -425,9 +418,7 @@ export async function findByCommonUsername(username: string): Promise<UserModel[
 export async function getPrimaryEmail(userId: string) {
   const email = await getPrismaClient().email.findFirst({
     where: {
-      user: {
-        id: userId,
-      },
+      userId,
       isPrimary: true,
     },
   });
@@ -436,12 +427,11 @@ export async function getPrimaryEmail(userId: string) {
   return email;
 }
 
-export async function getEmails(userId: string) {
+export async function getEmails(userId: string, isPrimary?: boolean) {
   const emails = await getPrismaClient().email.findMany({
     where: {
-      user: {
-        id: userId,
-      },
+      userId,
+      isPrimary,
     },
   });
 
@@ -497,9 +487,7 @@ export async function removeEmail(userId: string, email: string) {
 export async function getPrimaryPhone(userId: string) {
   const phone = await getPrismaClient().phone.findFirst({
     where: {
-      user: {
-        id: userId,
-      },
+      userId,
       isPrimary: true,
     },
   });
@@ -508,10 +496,11 @@ export async function getPrimaryPhone(userId: string) {
   return phone;
 }
 
-export async function getPhones(userId: string) {
+export async function getPhones(userId: string, isPrimary?: boolean) {
   const emails = await getPrismaClient().phone.findMany({
     where: {
       userId,
+      isPrimary,
     },
   });
 
@@ -519,7 +508,7 @@ export async function getPhones(userId: string) {
 }
 
 export async function addPhone(userId: string, phone: string, isPrimary = false) {
-  const prevPrimaries = (await getPhones(userId)).filter((n) => n.isPrimary);
+  const prevPrimaries = await getPhones(userId, true);
 
   await getPrismaClient().phone.create({
     data: {

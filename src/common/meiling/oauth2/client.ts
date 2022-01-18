@@ -162,16 +162,13 @@ export function shouldSkipAuthentication(clientId: string): boolean {
 }
 
 export async function getRedirectUris(clientId: string): Promise<string[]> {
-  const redirectUris = [];
-  const data = await getPrismaClient().oAuthClientRedirectUris.findMany({
-    where: {
-      clientId,
-    },
-  });
-
-  for (const datum of data) {
-    redirectUris.push(datum.redirectUri);
-  }
+  const redirectUris = (
+    await getPrismaClient().oAuthClientRedirectUris.findMany({
+      where: {
+        clientId,
+      },
+    })
+  ).map((n) => n.redirectUri);
 
   return redirectUris;
 }

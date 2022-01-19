@@ -174,6 +174,7 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
         middleName: Utils.isNotBlank(body.middleName) ? body.middleName?.normalize('NFC') : undefined,
         name: Utils.isNotBlank(body.name) ? body.name : undefined,
         metadata: body.metadata !== undefined ? body.metadata : undefined,
+        lockedProps: body.lockedProps !== undefined ? body.lockedProps : undefined,
       },
     });
 

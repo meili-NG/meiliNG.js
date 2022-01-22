@@ -49,6 +49,8 @@ const userSessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptio
 
     rep.send(userSessions);
   });
+
+  done();
 };
 
 export default userSessionsAdminHandler;

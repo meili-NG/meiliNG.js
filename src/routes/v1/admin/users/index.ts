@@ -3,6 +3,7 @@ import { Meiling, Utils } from '../../../../common';
 import { getPrismaClient } from '../../../../resources/prisma';
 import userEmailsAdminHandler from './emails';
 import userPhonesAdminHandler from './phones';
+import userSessionsAdminHandler from './sessions';
 
 const queryBuilder = (query: string) => ({
   OR: [
@@ -183,6 +184,7 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
 
   app.register(userEmailsAdminHandler, { prefix: '/emails' });
   app.register(userPhonesAdminHandler, { prefix: '/phones' });
+  app.register(userSessionsAdminHandler, { prefix: '/sessions' });
 
   done();
 };

@@ -6,7 +6,7 @@ import {
   Permission,
   User as UserModel,
 } from '@prisma/client';
-import { Utils } from '../..';
+import { Meiling, Utils } from '../..';
 import { Identity } from '..';
 import { Utils as OAuth2Utils, ClientAuthorization } from '.';
 import config from '../../../resources/config';
@@ -85,6 +85,7 @@ export interface SanitizedClientModel {
   name: string;
   privacy: string;
   terms: string;
+  metadata: any;
 }
 
 export function sanitize(client: OAuthClient | SanitizedClientModel): SanitizedClientModel {
@@ -94,6 +95,9 @@ export function sanitize(client: OAuthClient | SanitizedClientModel): SanitizedC
     name: client.name,
     privacy: client.privacy,
     terms: client.terms,
+
+    // TODO: implement proper meiling common metadata sanitizer
+    metadata: Meiling.Identity.User.sanitizeMetadata(client.metadata, false),
   };
 }
 

@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { getPrismaClient } from '../../../../resources/prisma';
 import appAdminInfoHandler from './get';
+import appAdminPutHandler from './put';
 
 const appsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.get('/', async (req, rep) => {
@@ -16,6 +17,7 @@ const appsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
 
 const appAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.get('/', appAdminInfoHandler);
+  app.put('/', appAdminPutHandler);
 
   done();
 };

@@ -110,6 +110,7 @@ model OAuthClient {
   accessControls              OAuthClientAccessControls  @relation(fields: [aclId], references: [id])
   redirectUris                OAuthClientRedirectUris[]
   authorizations              OAuthClientAuthorization[]
+  metadata                    Json?
   privacy                     String
   terms                       String
   createdAt                   DateTime                   @default(now())

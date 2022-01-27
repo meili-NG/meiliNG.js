@@ -61,6 +61,9 @@ module.exports = {
       email: /^true$/gi.test(process.env.MEILING_PREVENT_DUPLICATES_EMAIL) || false,
       phone: /^true$/gi.test(process.env.MEILING_PREVENT_DUPLICATES_PHONE) || false,
     },
+    signup: {
+      enabled: /^true$/gi.test(process.env.MEILING_SIGNUP_ENABLED) || true,
+    },
   },
   session: {
     v1: {

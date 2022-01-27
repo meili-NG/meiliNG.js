@@ -98,7 +98,35 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
   });
 
   app.post('/', async (req, rep) => {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED);
+    // create user without any authentication and phone, emails.
+    // just a user.
+
+    // TODO: add endpoints to allow CRUD operations on user's authentication method by admin
+
+    const data = req.body as any;
+    const hasRequirementsMet = Utils.isNotBlank(data, data.username);
+
+    if (!hasRequirementsMet)
+      return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Username');
+    if (Utils.isValidName(data.name))
+      return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Name');
+
+    const name = data.name;
+
+    // TODO: implement optional method to add email, phone, authentication methods
+    // refer: ../../meiling/signup/signup.ts#L155
+
+    await getPrismaClient().user.create({
+      data: {
+        username: data.username,
+        name: name.name,
+        familyName: name.familyName,
+        middleName: name.middleName,
+        givenName: name.givenName,
+      },
+    });
+
+    rep.send({ success: true });
   });
 
   app.get('/count', async (req, rep) => {

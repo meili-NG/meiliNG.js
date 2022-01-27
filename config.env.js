@@ -119,7 +119,7 @@ module.exports = {
     token: process.env.BARIDEGI_API_TOKEN || 'baridegi_token',
   },
   admin: {
-    tokens: process.env.ADMIN_TOKENS.split(',') || [],
+    tokens: process.env.ADMIN_TOKENS?.split(',') || [],
     frontend: {
       url: process.env.ADMIN_FRONTEND_URLS ? process.env.ADMIN_FRONTEND_URLS.split(',') : ['http://frontend.meili.ng'],
     },

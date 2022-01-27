@@ -97,6 +97,10 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
     );
   });
 
+  app.post('/', async (req, rep) => {
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED);
+  });
+
   app.get('/count', async (req, rep) => {
     const { query, rawQuery = false } = (req.query as any) || {};
 

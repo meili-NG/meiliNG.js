@@ -101,6 +101,13 @@ export function sanitize(client: OAuthClient | SanitizedClientModel): SanitizedC
   };
 }
 
+export function sanitizeForOwner(client: OAuthClient | SanitizedClientModel): SanitizedClientModel {
+  return {
+    ...client,
+    metadata: Meiling.Identity.User.sanitizeMetadata(client.metadata, false),
+  };
+}
+
 interface SanitizedClientOwnerModel extends SanitizedClientModel {
   createdAt: Date;
   accessControls: ClientACLRules;

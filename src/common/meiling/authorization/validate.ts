@@ -43,13 +43,13 @@ export function validateOTP(challengeResponse: string, secret: string) {
   });
 }
 
-export async function sendOTPSMS(phone: PhoneNumber, challenge: string) {
+// TODO: get Language
+export async function sendOTPSMS(phone: PhoneNumber, challenge: string, lang: Notification.TemplateLanguage = 'ko') {
   await Notification.sendNotification(Notification.NotificationMethod.SMS, {
     type: 'template',
     templateId: Notification.TemplateId.AUTHORIZATION_CODE,
 
-    // TODO: get Language
-    lang: 'ko',
+    lang,
     messages: [
       {
         to: phone.formatInternational(),

@@ -1,4 +1,4 @@
-import { Email, Group, OAuthTokenType, Phone, prisma, User as UserModel } from '@prisma/client';
+import { Email, Group, OAuthTokenType, Phone, prisma, User as UserModel, OAuthClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import JWT from 'jsonwebtoken';
 import { OAuth2 } from '..';
@@ -120,53 +120,51 @@ export async function getInfo(user: UserModel | string): Promise<UserInfoObject 
   return userObj;
 }
 
+export async function getAuthorizedApps(user: UserModel | string): Promise<OAuthClient[] | undefined> {
+  const baseUser = await getInfo(user);
+  if (!baseUser) return;
+
+  const authRaw = await getPrismaClient().oAuthClientAuthorization.findMany({
+    where: {
+      userId: baseUser.id,
+    },
+  });
+
+  const rawNotFiltered = await Promise.all(
+    authRaw.map((n) => getPrismaClient().oAuthClient.findUnique({ where: { id: n.id } })),
+  );
+  const raw = rawNotFiltered.filter((n) => n !== null) as OAuthClient[];
+
+  return Utils.getUnique(raw, (m, n) => m.id === n.id);
+}
+
+export async function getOwnedApps(user: UserModel | string): Promise<OAuthClient[] | undefined> {
+  const baseUser = await getInfo(user);
+  if (!baseUser) return;
+
+  const raw = await getPrismaClient().oAuthClient.findMany({
+    where: {
+      owners: {
+        some: {
+          id: baseUser.id,
+        },
+      },
+    },
+  });
+
+  return Utils.getUnique(raw, (m, n) => m.id === n.id);
+}
+
 export async function getDetailedInfo(user: UserModel | string): Promise<UserDetailedObject | undefined> {
   const baseUser = await getInfo(user);
   if (!baseUser) return;
 
-  const [authorizedAppsDatabase, ownedAppsDatabase] = await Promise.all([
-    getPrismaClient().oAuthClientAuthorization.findMany({
-      where: {
-        userId: baseUser.id,
-      },
-    }),
+  const [authorizedAppsRaw, ownedAppsRaw] = await Promise.all([getAuthorizedApps(user), getOwnedApps(user)]);
 
-    getPrismaClient().oAuthClient.findMany({
-      where: {
-        owners: {
-          some: {
-            id: baseUser.id,
-          },
-        },
-      },
-    }),
-  ]);
+  if (!authorizedAppsRaw || !ownedAppsRaw) return;
 
-  const authorizedAppPromises: Promise<any>[] = [];
-  const createdAppPromises: Promise<any>[] = [];
-
-  authorizedAppsDatabase.map((n) => authorizedAppPromises.push(OAuth2.ClientAuthorization.getClient(n)));
-
-  // TODO: remove this totally unnecessary async.
-  ownedAppsDatabase.map((n) => createdAppPromises.push((async () => n)()));
-
-  const [authorizedAppsPromisesPromise, ownedAppsPromisesPromise] = await Promise.all([
-    Promise.all(authorizedAppPromises),
-    Promise.all(createdAppPromises),
-  ]);
-
-  let authorizedApps = [];
-  let ownedApps = [];
-
-  for (const authorizedApp of await authorizedAppsPromisesPromise) {
-    authorizedApps.push(authorizedApp);
-  }
-  for (const cratedApp of await ownedAppsPromisesPromise) {
-    ownedApps.push(cratedApp);
-  }
-
-  authorizedApps = Utils.getUnique(authorizedApps, (m, n) => m.id === n.id);
-  ownedApps = Utils.getUnique(ownedApps, (m, n) => m.id === n.id);
+  const authorizedApps = authorizedAppsRaw.map((n) => OAuth2.Client.sanitize(n));
+  const ownedApps = ownedAppsRaw.map((n) => OAuth2.Client.sanitize(n));
 
   const userObj: UserDetailedObject = {
     ...baseUser,
@@ -255,7 +253,7 @@ export async function checkLockedProps(userId: string, content?: any) {
   return true;
 }
 
-// TODO: make a proper interface
+// TODO: make a proper interface and migrate to common.
 export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = []) {
   if (!metadata) return metadata;
   if (typeof metadata !== 'object') return metadata;

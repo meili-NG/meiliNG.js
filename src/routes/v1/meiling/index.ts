@@ -3,7 +3,7 @@ import fastifyCors from 'fastify-cors';
 import { NodeEnvironment } from '../../../interface';
 import config from '../../../resources/config';
 import { appsPlugin } from './apps';
-import { meilingV1AuthorizationPlugin } from './authorization';
+import { meilingV1SessionAuthnPlugin } from './authentication';
 import { Meiling } from '../../../common';
 import { lostPasswordHandler } from './lost-password';
 import { sessionPlugin } from './session';
@@ -54,7 +54,10 @@ function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
 
   app.register(userPlugin, { prefix: '/users' });
   app.register(appsPlugin, { prefix: '/apps' });
-  app.register(meilingV1AuthorizationPlugin, { prefix: '/authorization' });
+
+  // TODO: deprecate authorization -> authn
+  app.register(meilingV1SessionAuthnPlugin, { prefix: '/authorization' });
+  app.register(meilingV1SessionAuthnPlugin, { prefix: '/authn' });
 
   done();
 }

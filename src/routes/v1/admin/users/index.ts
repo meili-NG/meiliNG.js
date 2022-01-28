@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { Meiling, Utils } from '../../../../common';
 import { getPrismaClient } from '../../../../resources/prisma';
+import userAuthnsAdminHandler from './authentications';
 import userEmailsAdminHandler from './emails';
 import userPhonesAdminHandler from './phones';
 import userSessionsAdminHandler from './sessions';
@@ -217,6 +218,7 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
   app.register(userEmailsAdminHandler, { prefix: '/emails' });
   app.register(userPhonesAdminHandler, { prefix: '/phones' });
   app.register(userSessionsAdminHandler, { prefix: '/sessions' });
+  app.register(userAuthnsAdminHandler, { prefix: '/authns' });
 
   done();
 };

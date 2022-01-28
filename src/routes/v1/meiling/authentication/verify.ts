@@ -26,7 +26,7 @@ interface MeilingV1EmailVerificationTokenQuery {
   token: string;
 }
 
-export async function meilingV1AuthorizationVerifyHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
   const body = req.body as MeilingV1VerificationQuery;
 

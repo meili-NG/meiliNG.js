@@ -177,7 +177,7 @@ export async function getDetailedInfo(user: UserModel | string): Promise<UserDet
   return userObj;
 }
 
-export async function getAuthorizations(user: UserModel | string) {
+export async function getAuthentications(user: UserModel | string) {
   return await getPrismaClient().authentication.findMany({
     where: {
       userId: getUserId(user),

@@ -8,7 +8,7 @@ import { getPrismaClient } from '../../../resources/prisma';
 import {
   SessionPasswordReset,
   MeilingSession,
-  SessionAuthorizationStatus,
+  SessionAuthenticationStatus,
   ExtendedAuthentication,
   ExtendedAuthMethods,
 } from './interfaces';
@@ -317,20 +317,20 @@ export async function setSession(req: FastifyRequest, data?: MeilingSession): Pr
   saveSession();
 }
 
-export async function getAuthorizationStatus(req: FastifyRequest): Promise<SessionAuthorizationStatus | undefined> {
+export async function getAuthenticationStatus(req: FastifyRequest): Promise<SessionAuthenticationStatus | undefined> {
   const session = await getSessionFromRequest(req);
-  return session?.authorizationStatus;
+  return session?.authenticationStatus;
 }
 
-export async function appendAuthorizationStatus(
+export async function appendAuthenticationStatus(
   req: FastifyRequest,
-  signupChallenge: SessionAuthorizationStatus,
+  signupChallenge: SessionAuthenticationStatus,
 ): Promise<void> {
   const prevSession = await getSessionFromRequest(req);
   const session: MeilingSession = {
     ...prevSession,
-    authorizationStatus: {
-      ...prevSession?.authorizationStatus,
+    authenticationStatus: {
+      ...prevSession?.authenticationStatus,
       ...signupChallenge,
     },
   };
@@ -338,14 +338,14 @@ export async function appendAuthorizationStatus(
   await setSession(req, session);
 }
 
-export async function setAuthorizationStatus(
+export async function setAuthenticationStatus(
   req: FastifyRequest,
-  signupChallenge?: SessionAuthorizationStatus,
+  signupChallenge?: SessionAuthenticationStatus,
 ): Promise<void> {
   const session = await getSessionFromRequest(req);
   await setSession(req, {
     ...session,
-    authorizationStatus: signupChallenge,
+    authenticationStatus: signupChallenge,
   });
 }
 

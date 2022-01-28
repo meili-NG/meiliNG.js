@@ -35,7 +35,7 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
     return;
   }
 
-  const signupChallenge = await Meiling.V1.Session.getAuthorizationStatus(req);
+  const signupChallenge = await Meiling.V1.Session.getAuthenticationStatus(req);
 
   if (signupChallenge === undefined) {
     Meiling.V1.Error.sendMeilingError(
@@ -201,7 +201,7 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
     },
   });
 
-  await Meiling.V1.Session.setAuthorizationStatus(req, undefined);
+  await Meiling.V1.Session.setAuthenticationStatus(req, undefined);
 
   rep.send({
     success: true,

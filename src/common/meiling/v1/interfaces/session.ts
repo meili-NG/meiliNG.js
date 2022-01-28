@@ -4,7 +4,7 @@ export interface MeilingSession {
   user?: LoggedInUser[];
   extendedAuthentication?: ExtendedAuthentication;
   previouslyLoggedIn?: LoggedInUser[];
-  authorizationStatus?: SessionAuthorizationStatus;
+  authenticationStatus?: SessionAuthenticationStatus;
   passwordReset?: SessionPasswordReset;
   registering?: SessionRegistering;
 }
@@ -49,7 +49,7 @@ interface SessionChallengeStatus<T> {
   isVerified: boolean;
 }
 
-export interface SessionAuthorizationStatus {
+export interface SessionAuthenticationStatus {
   email?: SessionChallengeStatus<string>;
   phone?: SessionChallengeStatus<string>;
 }

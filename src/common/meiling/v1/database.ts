@@ -36,6 +36,23 @@ export function convertAuthenticationMethod(method: AuthenticationMethod): Exten
   }
 }
 
+export function checkAuthenticationMethod(method: AuthenticationMethod): boolean {
+  switch (method) {
+    case 'EMAIL':
+    case 'OTP':
+    case 'PGP_KEY':
+    case 'SECURITY_KEY':
+    case 'SMS':
+    case 'PASSWORD':
+    case 'SSH_KEY':
+      return true;
+    default:
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      ((n: never) => {})(method);
+      return false;
+  }
+}
+
 export function convertTokenType(type?: OAuth2.Interfaces.GrantType): OAuthTokenType | undefined {
   switch (type?.toLowerCase()) {
     case OAuth2.Interfaces.GrantType.ACCESS_TOKEN:

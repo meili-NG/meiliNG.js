@@ -114,7 +114,7 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
 
     const name = data.name;
 
-    await getPrismaClient().user.create({
+    const user = await getPrismaClient().user.create({
       data: {
         username: data.username,
         name: name.name,
@@ -124,7 +124,7 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
       },
     });
 
-    rep.send({ success: true });
+    rep.send(await Meiling.Identity.User.getDetailedInfo(user));
   });
 
   app.get('/count', async (req, rep) => {

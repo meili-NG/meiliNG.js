@@ -114,9 +114,6 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
 
     const name = data.name;
 
-    // TODO: implement optional method to add email, phone, authentication methods
-    // refer: ../../meiling/signup/signup.ts#L155
-
     await getPrismaClient().user.create({
       data: {
         username: data.username,

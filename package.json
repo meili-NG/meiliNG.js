@@ -8,6 +8,7 @@
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "^3.7.0",
+    "@xmldom/xmldom": "^0.8.0",
     "ansi-regex": "^6.0.1",
     "axios": "^0.21.2",
     "bcryptjs": "^2.4.3",
@@ -28,8 +29,7 @@
     "pino-pretty": "^4.3.0",
     "prompts": "^2.4.1",
     "speakeasy": "^2.0.0",
-    "typescript": "^4.0.5",
-    "xmldom": "^0.6.0"
+    "typescript": "^4.0.5"
   },
   "devDependencies": {
     "@swc/cli": "^0.1.51",
@@ -41,7 +41,6 @@
     "@types/node": "^14.14.7",
     "@types/openpgp": "^4.4.14",
     "@types/speakeasy": "^2.0.5",
-    "@types/xmldom": "^0.1.31",
     "@typescript-eslint/eslint-plugin": "^4.7.0",
     "@typescript-eslint/parser": "^4.7.0",
     "eslint": "^7.13.0",

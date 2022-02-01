@@ -7,7 +7,7 @@ const sessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
   app.get('/', async (req, rep) => {
     const token = (req.query as { token: string }).token;
 
-    const isTokenQuery = !token || token.trim() === '';
+    const isTokenQuery = token && token.trim() !== '';
 
     if (isTokenQuery) {
       const tokenData = await getPrismaClient().meilingSessionV1Token.findFirst({
@@ -29,9 +29,9 @@ const sessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
     } =
       pageSize && page
         ? {
-            skip: (Number(pageSize) * (Number(page) - 1)) as number,
-            take: Number(pageSize) as number,
-          }
+          skip: (Number(pageSize) * (Number(page) - 1)) as number,
+          take: Number(pageSize) as number,
+        }
         : {};
 
     let prismaQuery = undefined;

@@ -1,4 +1,4 @@
-import { Authorization } from '@prisma/client';
+import { Authentication } from '@prisma/client';
 import { Meiling } from '../..';
 import { ExtendedAuthMethods, SigninType, SigninExtendedAuthentication } from './interfaces';
 import { AuthenticationJSONObject, AuthenticationOTPObject, AuthenticationPGPSSHKeyObject } from '../identity/user';
@@ -6,7 +6,7 @@ import { validateOTP, validatePGPSign } from '../authorization/validate';
 import config from '../../../resources/config';
 
 export function getMeilingAvailableAuthMethods(
-  authMethods: Authorization[],
+  authMethods: Authentication[],
   body?: SigninExtendedAuthentication,
 ): ExtendedAuthMethods[] {
   const methods: ExtendedAuthMethods[] = [];

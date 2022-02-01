@@ -18,7 +18,7 @@ async function userPGPActionGetKey(req: FastifyRequest, rep: FastifyReply): Prom
     return;
   }
 
-  const keyData = await getPrismaClient().authorization.findFirst({
+  const keyData = await getPrismaClient().authentication.findFirst({
     where: {
       user: {
         id: user.id,

@@ -19,7 +19,7 @@ async function userWebAuthnActionDeleteKey(req: FastifyRequest, rep: FastifyRepl
   }
 
   const checkExist =
-    (await getPrismaClient().authorization.count({
+    (await getPrismaClient().authentication.count({
       where: {
         user: {
           id: user.id,
@@ -34,7 +34,7 @@ async function userWebAuthnActionDeleteKey(req: FastifyRequest, rep: FastifyRepl
     return;
   }
 
-  await getPrismaClient().authorization.delete({
+  await getPrismaClient().authentication.delete({
     where: {
       id: tokenId,
     },

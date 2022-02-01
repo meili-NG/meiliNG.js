@@ -64,6 +64,18 @@ export function getUnique<T>(array: T[], equals: (m: T, n: T) => boolean) {
   return uniqueArray;
 }
 
+export function getObjectRecursiveKeys(a: any): string[] {
+  if (typeof a !== 'object') return [];
+  const keys: string[] = [];
+
+  for (const i in a) {
+    keys.push(i);
+    keys.push(...getObjectRecursiveKeys((a as any)[i] as any).map((n) => i + '.' + n));
+  }
+
+  return keys;
+}
+
 const emailRegex =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/g;
 

@@ -16,7 +16,7 @@ export async function userPasswordDeleteHandler(req: FastifyRequest, rep: Fastif
   const passwordsRaw = (await Meiling.Identity.User.checkPassword(user, body.password)).filter((n) => n !== undefined);
   for (const passwordRaw of passwordsRaw) {
     if (passwordRaw) {
-      await getPrismaClient().authorization.delete({
+      await getPrismaClient().authentication.delete({
         where: {
           id: passwordRaw?.id,
         },

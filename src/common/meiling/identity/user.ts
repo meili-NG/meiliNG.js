@@ -1,4 +1,4 @@
-import { Email, Group, OAuthTokenType, Phone, prisma, User as UserModel } from '@prisma/client';
+import { Email, Group, OAuthTokenType, Phone, prisma, User as UserModel, OAuthClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import JWT from 'jsonwebtoken';
 import { OAuth2 } from '..';
@@ -120,53 +120,51 @@ export async function getInfo(user: UserModel | string): Promise<UserInfoObject 
   return userObj;
 }
 
+export async function getAuthorizedApps(user: UserModel | string): Promise<OAuthClient[] | undefined> {
+  const baseUser = await getInfo(user);
+  if (!baseUser) return;
+
+  const authRaw = await getPrismaClient().oAuthClientAuthorization.findMany({
+    where: {
+      userId: baseUser.id,
+    },
+  });
+
+  const rawNotFiltered = await Promise.all(
+    authRaw.map((n) => getPrismaClient().oAuthClient.findUnique({ where: { id: n.id } })),
+  );
+  const raw = rawNotFiltered.filter((n) => n !== null) as OAuthClient[];
+
+  return Utils.getUnique(raw, (m, n) => m.id === n.id);
+}
+
+export async function getOwnedApps(user: UserModel | string): Promise<OAuthClient[] | undefined> {
+  const baseUser = await getInfo(user);
+  if (!baseUser) return;
+
+  const raw = await getPrismaClient().oAuthClient.findMany({
+    where: {
+      owners: {
+        some: {
+          id: baseUser.id,
+        },
+      },
+    },
+  });
+
+  return Utils.getUnique(raw, (m, n) => m.id === n.id);
+}
+
 export async function getDetailedInfo(user: UserModel | string): Promise<UserDetailedObject | undefined> {
   const baseUser = await getInfo(user);
   if (!baseUser) return;
 
-  const [authorizedAppsDatabase, ownedAppsDatabase] = await Promise.all([
-    getPrismaClient().oAuthClientAuthorization.findMany({
-      where: {
-        userId: baseUser.id,
-      },
-    }),
+  const [authorizedAppsRaw, ownedAppsRaw] = await Promise.all([getAuthorizedApps(user), getOwnedApps(user)]);
 
-    getPrismaClient().oAuthClient.findMany({
-      where: {
-        owners: {
-          some: {
-            id: baseUser.id,
-          },
-        },
-      },
-    }),
-  ]);
+  if (!authorizedAppsRaw || !ownedAppsRaw) return;
 
-  const authorizedAppPromises: Promise<any>[] = [];
-  const createdAppPromises: Promise<any>[] = [];
-
-  authorizedAppsDatabase.map((n) => authorizedAppPromises.push(OAuth2.ClientAuthorization.getClient(n)));
-
-  // TODO: remove this totally unnecessary async.
-  ownedAppsDatabase.map((n) => createdAppPromises.push((async () => n)()));
-
-  const [authorizedAppsPromisesPromise, ownedAppsPromisesPromise] = await Promise.all([
-    Promise.all(authorizedAppPromises),
-    Promise.all(createdAppPromises),
-  ]);
-
-  let authorizedApps = [];
-  let ownedApps = [];
-
-  for (const authorizedApp of await authorizedAppsPromisesPromise) {
-    authorizedApps.push(authorizedApp);
-  }
-  for (const cratedApp of await ownedAppsPromisesPromise) {
-    ownedApps.push(cratedApp);
-  }
-
-  authorizedApps = Utils.getUnique(authorizedApps, (m, n) => m.id === n.id);
-  ownedApps = Utils.getUnique(ownedApps, (m, n) => m.id === n.id);
+  const authorizedApps = authorizedAppsRaw.map((n) => OAuth2.Client.sanitize(n));
+  const ownedApps = ownedAppsRaw.map((n) => OAuth2.Client.sanitize(n));
 
   const userObj: UserDetailedObject = {
     ...baseUser,
@@ -177,8 +175,8 @@ export async function getDetailedInfo(user: UserModel | string): Promise<UserDet
   return userObj;
 }
 
-export async function getAuthorizations(user: UserModel | string) {
-  return await getPrismaClient().authorization.findMany({
+export async function getAuthentications(user: UserModel | string) {
+  return await getPrismaClient().authentication.findMany({
     where: {
       userId: getUserId(user),
     },
@@ -186,7 +184,7 @@ export async function getAuthorizations(user: UserModel | string) {
 }
 
 export async function getPasswords(user: UserModel | string) {
-  return await getPrismaClient().authorization.findMany({
+  return await getPrismaClient().authentication.findMany({
     where: {
       userId: getUserId(user),
       method: 'PASSWORD',
@@ -205,7 +203,7 @@ export async function addPassword(user: UserModel | string, password: string) {
     },
   };
 
-  const passwordData = await getPrismaClient().authorization.create({
+  const passwordData = await getPrismaClient().authentication.create({
     data: {
       user: {
         connect: {
@@ -235,7 +233,27 @@ interface MeilingMetadataObjectV1Config extends MeilingMetadataObjectBaseConfig 
   scopes?: string[];
 }
 
-// TODO: make a proper interface
+export async function checkLockedProps(userId: string, content?: any) {
+  const user = await getPrismaClient().user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) return;
+  const props = content ? Utils.getObjectRecursiveKeys(content) : [];
+
+  if (user.lockedProps && (user.lockedProps as string[]).length) {
+    const lockedProps = user.lockedProps as string[];
+    if (lockedProps.filter((n) => props.includes(n)).length > 0) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// TODO: make a proper interface and migrate to common.
 export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = []) {
   if (!metadata) return metadata;
   if (typeof metadata !== 'object') return metadata;
@@ -336,21 +354,14 @@ export async function hasAuthorizedClient(user: UserModel | string, clientId: st
 }
 
 export async function getClientAuthorizations(user: UserModel | string, clientId?: string) {
-  let returnData;
-
   const authorizations = await getPrismaClient().oAuthClientAuthorization.findMany({
     where: {
       userId: getUserId(user),
+      clientId,
     },
   });
 
-  if (clientId) {
-    returnData = authorizations.filter((n) => n.clientId === clientId);
-  } else {
-    returnData = authorizations;
-  }
-
-  return returnData.length > 0 ? returnData : undefined;
+  return authorizations.length > 0 ? authorizations : undefined;
 }
 
 export async function getClientAuthorizedPermissions(user: UserModel | string, clientId?: string) {
@@ -425,9 +436,7 @@ export async function findByCommonUsername(username: string): Promise<UserModel[
 export async function getPrimaryEmail(userId: string) {
   const email = await getPrismaClient().email.findFirst({
     where: {
-      user: {
-        id: userId,
-      },
+      userId,
       isPrimary: true,
     },
   });
@@ -436,12 +445,11 @@ export async function getPrimaryEmail(userId: string) {
   return email;
 }
 
-export async function getEmails(userId: string) {
+export async function getEmails(userId: string, isPrimary?: boolean) {
   const emails = await getPrismaClient().email.findMany({
     where: {
-      user: {
-        id: userId,
-      },
+      userId,
+      isPrimary,
     },
   });
 
@@ -497,9 +505,7 @@ export async function removeEmail(userId: string, email: string) {
 export async function getPrimaryPhone(userId: string) {
   const phone = await getPrismaClient().phone.findFirst({
     where: {
-      user: {
-        id: userId,
-      },
+      userId,
       isPrimary: true,
     },
   });
@@ -508,10 +514,11 @@ export async function getPrimaryPhone(userId: string) {
   return phone;
 }
 
-export async function getPhones(userId: string) {
+export async function getPhones(userId: string, isPrimary?: boolean) {
   const emails = await getPrismaClient().phone.findMany({
     where: {
       userId,
+      isPrimary,
     },
   });
 
@@ -519,7 +526,7 @@ export async function getPhones(userId: string) {
 }
 
 export async function addPhone(userId: string, phone: string, isPrimary = false) {
-  const prevPrimaries = (await getPhones(userId)).filter((n) => n.isPrimary);
+  const prevPrimaries = await getPhones(userId, true);
 
   await getPrismaClient().phone.create({
     data: {
@@ -660,7 +667,7 @@ export async function prevent2FALockout(user: UserModel | string): Promise<void>
   const data = await getInfo(user);
   if (!data) return undefined;
 
-  const authorizations = await getPrismaClient().authorization.count({
+  const authorizations = await getPrismaClient().authentication.count({
     where: {
       AND: [
         {

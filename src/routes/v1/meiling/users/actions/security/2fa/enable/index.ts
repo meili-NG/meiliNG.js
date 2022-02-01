@@ -30,7 +30,7 @@ function user2FAEnablePlugin(app: FastifyInstance, opts: FastifyPluginOptions, d
       methods.map(async (n) => {
         const dbType = convertAuthentication(n);
         const isAvailable =
-          (await getPrismaClient().authorization.count({
+          (await getPrismaClient().authentication.count({
             where: {
               user: {
                 id: user.id,
@@ -40,7 +40,7 @@ function user2FAEnablePlugin(app: FastifyInstance, opts: FastifyPluginOptions, d
           })) > 0;
 
         const is2FAEnabled =
-          (await getPrismaClient().authorization.count({
+          (await getPrismaClient().authentication.count({
             where: {
               user: {
                 id: user.id,
@@ -51,7 +51,7 @@ function user2FAEnablePlugin(app: FastifyInstance, opts: FastifyPluginOptions, d
           })) > 0;
 
         const isPasswordlessEnabled =
-          (await getPrismaClient().authorization.count({
+          (await getPrismaClient().authentication.count({
             where: {
               user: {
                 id: user.id,
@@ -62,7 +62,7 @@ function user2FAEnablePlugin(app: FastifyInstance, opts: FastifyPluginOptions, d
           })) > 0;
 
         const isPasswordResetEnabled =
-          (await getPrismaClient().authorization.count({
+          (await getPrismaClient().authentication.count({
             where: {
               user: {
                 id: user.id,

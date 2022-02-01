@@ -6,7 +6,7 @@ import {
   Permission,
   User as UserModel,
 } from '@prisma/client';
-import { Utils } from '../..';
+import { Meiling, Utils } from '../..';
 import { Identity } from '..';
 import { Utils as OAuth2Utils, ClientAuthorization } from '.';
 import config from '../../../resources/config';
@@ -85,6 +85,7 @@ export interface SanitizedClientModel {
   name: string;
   privacy: string;
   terms: string;
+  metadata: any;
 }
 
 export function sanitize(client: OAuthClient | SanitizedClientModel): SanitizedClientModel {
@@ -94,6 +95,16 @@ export function sanitize(client: OAuthClient | SanitizedClientModel): SanitizedC
     name: client.name,
     privacy: client.privacy,
     terms: client.terms,
+
+    // TODO: implement proper meiling common metadata sanitizer
+    metadata: Meiling.Identity.User.sanitizeMetadata(client.metadata, false),
+  };
+}
+
+export function sanitizeForOwner(client: OAuthClient | SanitizedClientModel): SanitizedClientModel {
+  return {
+    ...client,
+    metadata: Meiling.Identity.User.sanitizeMetadata(client.metadata, false),
   };
 }
 
@@ -162,16 +173,13 @@ export function shouldSkipAuthentication(clientId: string): boolean {
 }
 
 export async function getRedirectUris(clientId: string): Promise<string[]> {
-  const redirectUris = [];
-  const data = await getPrismaClient().oAuthClientRedirectUris.findMany({
-    where: {
-      clientId,
-    },
-  });
-
-  for (const datum of data) {
-    redirectUris.push(datum.redirectUri);
-  }
+  const redirectUris = (
+    await getPrismaClient().oAuthClientRedirectUris.findMany({
+      where: {
+        clientId,
+      },
+    })
+  ).map((n) => n.redirectUri);
 
   return redirectUris;
 }

@@ -25,7 +25,7 @@ async function userWebAuthnActionPutKey(req: FastifyRequest, rep: FastifyReply):
 
   const body = (req.body as any) || {};
 
-  const keyData = await getPrismaClient().authorization.findFirst({
+  const keyData = await getPrismaClient().authentication.findFirst({
     where: {
       user: {
         id: user.id,
@@ -40,7 +40,7 @@ async function userWebAuthnActionPutKey(req: FastifyRequest, rep: FastifyReply):
     return;
   }
 
-  await getPrismaClient().authorization.update({
+  await getPrismaClient().authentication.update({
     where: {
       id: tokenId,
     },

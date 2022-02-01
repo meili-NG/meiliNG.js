@@ -18,7 +18,7 @@ async function userWebAuthnActionGetKey(req: FastifyRequest, rep: FastifyReply):
     return;
   }
 
-  const keyData = await getPrismaClient().authorization.findFirst({
+  const keyData = await getPrismaClient().authentication.findFirst({
     where: {
       user: {
         id: user.id,

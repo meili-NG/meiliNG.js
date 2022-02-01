@@ -87,6 +87,8 @@ export async function garbageCollect(): Promise<void> {
 
 export function generateTokenViaType(type?: OAuthTokenType): string {
   if (!type) return generateToken();
+
+  // TODO: use default if some of the properties are undefined
   const generator = config.token.generators?.tokens[type]
     ? config.token.generators?.tokens[type]
     : config.token.generators.default;

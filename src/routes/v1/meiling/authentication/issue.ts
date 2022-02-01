@@ -18,7 +18,7 @@ interface MeilingV1AuthorizationIssuePhoneQuery {
   to: string;
 }
 
-export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
+export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
   const body = req.body as MeilingV1AuthorizationIssueQuery;
 
@@ -35,11 +35,11 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         return;
       }
 
-      if (session.authorizationStatus?.email?.challenge.challengeCreatedAt) {
-        const to = session.authorizationStatus.email.to;
+      if (session.authenticationStatus?.email?.challenge.challengeCreatedAt) {
+        const to = session.authenticationStatus.email.to;
 
         if (to === email) {
-          const prevCreatedAt = new Date(session.authorizationStatus?.email?.challenge.challengeCreatedAt);
+          const prevCreatedAt = new Date(session.authenticationStatus?.email?.challenge.challengeCreatedAt);
 
           if (
             Meiling.V1.Challenge.isChallengeRateLimited(Meiling.V1.Interfaces.ExtendedAuthMethods.EMAIL, prevCreatedAt)
@@ -78,7 +78,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         to: email,
       });
 
-      await Meiling.V1.Session.appendAuthorizationStatus(req, {
+      await Meiling.V1.Session.appendAuthenticationStatus(req, {
         email: {
           to: email,
           challenge: {
@@ -96,11 +96,11 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         return;
       }
 
-      if (session.authorizationStatus?.phone?.challenge.challengeCreatedAt) {
-        const to = libphonenumberJs(session.authorizationStatus.phone.to);
+      if (session.authenticationStatus?.phone?.challenge.challengeCreatedAt) {
+        const to = libphonenumberJs(session.authenticationStatus.phone.to);
 
         if (to && to.formatInternational() === phone.formatInternational()) {
-          const prevCreatedAt = new Date(session.authorizationStatus?.phone?.challenge.challengeCreatedAt);
+          const prevCreatedAt = new Date(session.authenticationStatus?.phone?.challenge.challengeCreatedAt);
 
           if (
             Meiling.V1.Challenge.isChallengeRateLimited(Meiling.V1.Interfaces.ExtendedAuthMethods.SMS, prevCreatedAt)
@@ -145,7 +145,7 @@ export async function meilingV1AuthorizationIssueHandler(req: FastifyRequest, re
         to: phone.formatInternational(),
       });
 
-      await Meiling.V1.Session.appendAuthorizationStatus(req, {
+      await Meiling.V1.Session.appendAuthenticationStatus(req, {
         phone: {
           to: phone.formatInternational(),
           challenge: {

@@ -1,4 +1,4 @@
-import { Authorization, User } from '@prisma/client';
+import { Authentication, User } from '@prisma/client';
 import { getPrismaClient } from '../../../resources/prisma';
 import { ExtendedAuthMethods, SigninType } from './interfaces';
 import { convertAuthentication } from './database';
@@ -7,7 +7,7 @@ export async function getAvailableExtendedAuthenticationMethods(
   user?: User | string,
   signinType?: SigninType | 'password_reset',
   signinMethod?: ExtendedAuthMethods,
-): Promise<Authorization[]> {
+): Promise<Authentication[]> {
   let uuid;
   if (user !== undefined) {
     if (typeof user === 'string') {
@@ -22,7 +22,7 @@ export async function getAvailableExtendedAuthenticationMethods(
   let auths;
 
   if (signinType !== undefined) {
-    auths = await getPrismaClient().authorization.findMany({
+    auths = await getPrismaClient().authentication.findMany({
       where: {
         userId: uuid,
         allowSingleFactor: signinType === SigninType.PASSWORDLESS ? true : undefined,
@@ -32,7 +32,7 @@ export async function getAvailableExtendedAuthenticationMethods(
       },
     });
   } else {
-    auths = await getPrismaClient().authorization.findMany({
+    auths = await getPrismaClient().authentication.findMany({
       where: {
         userId: uuid,
         method: signinMethod !== undefined ? convertAuthentication(signinMethod) : undefined,

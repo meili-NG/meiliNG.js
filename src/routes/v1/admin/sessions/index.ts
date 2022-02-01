@@ -1,112 +1,62 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { getPrismaClient } from '../../../../resources/prisma';
 import { Meiling } from '../../../../common';
+import sessionAdminHandler from './crud';
 
 const sessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
-  app.addHook('onRequest', async (req, rep) => {
-    const token = (req.query as { token: string }).token;
-    if (!token || token.trim() === '') {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
-      throw new Error('invalid query');
-    }
-
-    const tokenData = await getPrismaClient().meilingSessionV1Token.findFirst({
-      where: {
-        token,
-      },
-    });
-
-    if (!tokenData) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-      throw new Error('session not found');
-    }
-  });
-
   app.get('/', async (req, rep) => {
     const token = (req.query as { token: string }).token;
 
-    const tokenData = await getPrismaClient().meilingSessionV1Token.findFirst({
-      where: {
-        token,
-      },
-    });
+    const isTokenQuery = token && token.trim() !== '';
 
-    if (!tokenData) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-      throw new Error('session not found');
-    }
-
-    rep.send(tokenData);
-  });
-
-  app.put('/', async (req, rep) => {
-    const token = (req.query as { token: string }).token;
-    const body = req.body as any | undefined;
-
-    const tokenDataOld = await getPrismaClient().meilingSessionV1Token.findFirst({
-      where: {
-        token,
-      },
-    });
-
-    if (!tokenDataOld) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-      throw new Error('session not found');
-    }
-
-    if (body?.ip) {
-      await getPrismaClient().meilingSessionV1Token.update({
+    if (isTokenQuery) {
+      const tokenData = await getPrismaClient().meilingSessionV1Token.findFirst({
         where: {
           token,
         },
-        data: {
-          ip: body.ip,
-        },
       });
+
+      if (!tokenData) return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      rep.send(tokenData);
+      return;
     }
 
-    if (body?.lastUsed) {
-      await getPrismaClient().meilingSessionV1Token.update({
-        where: {
-          token,
-        },
-        data: {
-          lastUsed: body.lastUsed,
-        },
-      });
+    const { query, pageSize = 20, page = 1 } = (req.query as any) || {};
+
+    const paginationDetails: {
+      skip?: number;
+      take?: number;
+    } =
+      pageSize && page
+        ? {
+            skip: (Number(pageSize) * (Number(page) - 1)) as number,
+            take: Number(pageSize) as number,
+          }
+        : {};
+
+    let prismaQuery = undefined;
+
+    if (query !== undefined) {
+      try {
+        prismaQuery = JSON.parse(query);
+      } catch (e) {
+        return Meiling.V1.Error.sendMeilingError(
+          rep,
+          Meiling.V1.Error.ErrorType.INVALID_REQUEST,
+          'invalid prisma query',
+        );
+      }
     }
 
-    if (body?.session) {
-      await getPrismaClient().meilingSessionV1Token.update({
-        where: {
-          token,
-        },
-        data: {
-          session: body.session,
-        },
-      });
-    }
-
-    const tokenData = await getPrismaClient().meilingSessionV1Token.findFirst({
-      where: {
-        token,
-      },
+    const sessions = await getPrismaClient().meilingSessionV1Token.findMany({
+      where: prismaQuery,
+      ...paginationDetails,
     });
 
-    rep.send(tokenData);
+    rep.send(sessions);
   });
 
-  app.delete('/', async (req, rep) => {
-    const token = (req.query as { token: string }).token;
-
-    await getPrismaClient().meilingSessionV1Token.delete({
-      where: {
-        token,
-      },
-    });
-
-    rep.send({ success: true });
-  });
+  app.register(sessionAdminHandler);
 
   done();
 };

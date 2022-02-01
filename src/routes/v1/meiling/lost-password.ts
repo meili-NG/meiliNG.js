@@ -29,7 +29,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     }
 
     const uuid = session.passwordReset.passwordResetUser;
-    await getPrismaClient().authorization.deleteMany({
+    await getPrismaClient().authentication.deleteMany({
       where: {
         method: 'PASSWORD',
         user: {
@@ -39,7 +39,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     });
 
     await Meiling.Identity.User.addPassword(uuid, body.password);
-    await Meiling.V1.Session.setAuthorizationStatus(req, undefined);
+    await Meiling.V1.Session.setAuthenticationStatus(req, undefined);
     await Meiling.V1.Session.setPasswordResetSession(req, undefined);
 
     rep.send({ success: true });

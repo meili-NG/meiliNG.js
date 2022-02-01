@@ -8,6 +8,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["filterJson"]
 }
 
 model User {
@@ -34,11 +35,13 @@ model User {
 
   oAuthAccessControls OAuthUserAccessControls[]
 
-  auths              Authorization[]
+  auths              Authentication[]
   constentedPolicies PolicyConsent[]
 
   isActive     Boolean @default(true)
   useTwoFactor Boolean @default(false)
+
+  lockedProps  Json?
 
   createdAt          DateTime             @default(now())
   lastSignIn         DateTime             @default(now())
@@ -68,7 +71,7 @@ model Phone {
   userId    String?
 }
 
-enum AuthorizationMethod {
+enum AuthenticationMethod {
   PGP_KEY
   OTP
   PASSWORD
@@ -78,9 +81,9 @@ enum AuthorizationMethod {
   SECURITY_KEY
 }
 
-model Authorization {
+model Authentication {
   id                 String              @id @default(uuid())
-  method             AuthorizationMethod
+  method             AuthenticationMethod
   data               Json?
   allowSingleFactor  Boolean             @default(false)
   allowTwoFactor     Boolean             @default(false)
@@ -107,6 +110,7 @@ model OAuthClient {
   accessControls              OAuthClientAccessControls  @relation(fields: [aclId], references: [id])
   redirectUris                OAuthClientRedirectUris[]
   authorizations              OAuthClientAuthorization[]
+  metadata                    Json?
   privacy                     String
   terms                       String
   createdAt                   DateTime                   @default(now())

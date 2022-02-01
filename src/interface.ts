@@ -71,6 +71,9 @@ export interface ConfigInterface {
       email: boolean;
       phone: boolean;
     };
+    signup: {
+      enabled: boolean;
+    };
   };
   session: {
     v1: {

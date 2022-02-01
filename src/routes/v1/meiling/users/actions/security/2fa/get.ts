@@ -18,7 +18,7 @@ async function get2FAInfo(req: FastifyRequest, rep: FastifyReply): Promise<void>
       methods.map(async (n) => {
         const dbType = Meiling.V1.Database.convertAuthentication(n);
         const isAvailable =
-          (await getPrismaClient().authorization.count({
+          (await getPrismaClient().authentication.count({
             where: {
               user: {
                 id: user.id,
@@ -28,7 +28,7 @@ async function get2FAInfo(req: FastifyRequest, rep: FastifyReply): Promise<void>
           })) > 0;
 
         const is2FAEnabled =
-          (await getPrismaClient().authorization.count({
+          (await getPrismaClient().authentication.count({
             where: {
               user: {
                 id: user.id,
@@ -39,7 +39,7 @@ async function get2FAInfo(req: FastifyRequest, rep: FastifyReply): Promise<void>
           })) > 0;
 
         const isPasswordlessEnabled =
-          (await getPrismaClient().authorization.count({
+          (await getPrismaClient().authentication.count({
             where: {
               user: {
                 id: user.id,
@@ -50,7 +50,7 @@ async function get2FAInfo(req: FastifyRequest, rep: FastifyReply): Promise<void>
           })) > 0;
 
         const isPasswordResetEnabled =
-          (await getPrismaClient().authorization.count({
+          (await getPrismaClient().authentication.count({
             where: {
               user: {
                 id: user.id,

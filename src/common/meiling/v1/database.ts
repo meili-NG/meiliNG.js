@@ -1,8 +1,8 @@
-import { AuthorizationMethod, OAuthTokenType } from '@prisma/client';
+import { AuthenticationMethod, OAuthTokenType } from '@prisma/client';
 import { OAuth2 } from '..';
 import { ExtendedAuthMethods } from './interfaces';
 
-export function convertAuthentication(method?: ExtendedAuthMethods): AuthorizationMethod | undefined {
+export function convertAuthentication(method?: ExtendedAuthMethods): AuthenticationMethod | undefined {
   switch (method) {
     case ExtendedAuthMethods.SMS:
       return 'SMS';
@@ -19,7 +19,7 @@ export function convertAuthentication(method?: ExtendedAuthMethods): Authorizati
   }
 }
 
-export function convertAuthenticationMethod(method: AuthorizationMethod): ExtendedAuthMethods | null {
+export function convertAuthenticationMethod(method: AuthenticationMethod): ExtendedAuthMethods | null {
   switch (method) {
     case 'EMAIL':
       return ExtendedAuthMethods.EMAIL;
@@ -33,6 +33,23 @@ export function convertAuthenticationMethod(method: AuthorizationMethod): Extend
       return ExtendedAuthMethods.SMS;
     default:
       return null;
+  }
+}
+
+export function checkAuthenticationMethod(method: AuthenticationMethod): boolean {
+  switch (method) {
+    case 'EMAIL':
+    case 'OTP':
+    case 'PGP_KEY':
+    case 'SECURITY_KEY':
+    case 'SMS':
+    case 'PASSWORD':
+    case 'SSH_KEY':
+      return true;
+    default:
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      ((n: never) => {})(method);
+      return false;
   }
 }
 

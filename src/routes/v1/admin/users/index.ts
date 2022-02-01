@@ -1,12 +1,62 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { Meiling, Utils } from '../../../../common';
 import { getPrismaClient } from '../../../../resources/prisma';
+import userAuthnsAdminHandler from './authentications';
 import userEmailsAdminHandler from './emails';
 import userPhonesAdminHandler from './phones';
+import userSessionsAdminHandler from './sessions';
+
+const queryBuilder = (query: string) => ({
+  OR: [
+    {
+      username: {
+        contains: query,
+      },
+    },
+    {
+      name: {
+        contains: query,
+      },
+    },
+    {
+      familyName: {
+        contains: query,
+      },
+    },
+    {
+      givenName: {
+        contains: query,
+      },
+    },
+    {
+      middleName: {
+        contains: query,
+      },
+    },
+    {
+      emails: {
+        some: {
+          email: {
+            contains: query,
+          },
+        },
+      },
+    },
+    {
+      phones: {
+        some: {
+          phone: {
+            contains: query,
+          },
+        },
+      },
+    },
+  ],
+});
 
 const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.get('/', async (req, rep) => {
-    const { query, pageSize = 20, page = 1 } = (req.query as any) || {};
+    const { query, pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
 
     const paginationDetails: {
       skip?: number;
@@ -19,56 +69,23 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
           }
         : {};
 
+    let prismaQuery = undefined;
+
+    if (query !== undefined) {
+      try {
+        prismaQuery = JSON.parse(query);
+      } catch (e) {
+        if (rawQuery) {
+          Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
+          return;
+        } else if (typeof query === 'string') {
+          prismaQuery = queryBuilder(query);
+        }
+      }
+    }
+
     const users = await getPrismaClient().user.findMany({
-      where: query
-        ? {
-            OR: [
-              {
-                username: {
-                  contains: query,
-                },
-              },
-              {
-                name: {
-                  contains: query,
-                },
-              },
-              {
-                familyName: {
-                  contains: query,
-                },
-              },
-              {
-                givenName: {
-                  contains: query,
-                },
-              },
-              {
-                middleName: {
-                  contains: query,
-                },
-              },
-              {
-                emails: {
-                  some: {
-                    email: {
-                      contains: query,
-                    },
-                  },
-                },
-              },
-              {
-                phones: {
-                  some: {
-                    phone: {
-                      contains: query,
-                    },
-                  },
-                },
-              },
-            ],
-          }
-        : undefined,
+      where: prismaQuery,
       ...paginationDetails,
     });
 
@@ -81,59 +98,55 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
     );
   });
 
+  app.post('/', async (req, rep) => {
+    // create user without any authentication and phone, emails.
+    // just a user.
+
+    // TODO: add endpoints to allow CRUD operations on user's authentication method by admin
+
+    const data = req.body as any;
+    const hasRequirementsMet = Utils.isNotBlank(data, data.username);
+
+    if (!hasRequirementsMet)
+      return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Username');
+    if (Utils.isValidName(data.name))
+      return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Name');
+
+    const name = data.name;
+
+    const user = await getPrismaClient().user.create({
+      data: {
+        username: data.username,
+        name: name.name,
+        familyName: name.familyName,
+        middleName: name.middleName,
+        givenName: name.givenName,
+      },
+    });
+
+    rep.send(await Meiling.Identity.User.getDetailedInfo(user));
+  });
+
   app.get('/count', async (req, rep) => {
-    const { query } = (req.query as any) || {};
+    const { query, rawQuery = false } = (req.query as any) || {};
+
+    let prismaQuery = undefined;
+
+    if (query !== undefined) {
+      try {
+        prismaQuery = JSON.parse(query);
+      } catch (e) {
+        if (rawQuery) {
+          Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
+          return;
+        } else if (typeof query === 'string') {
+          prismaQuery = queryBuilder(query);
+        }
+      }
+    }
 
     const count = await getPrismaClient().user.count({
-      where: query
-        ? {
-            OR: [
-              {
-                username: {
-                  contains: query,
-                },
-              },
-              {
-                name: {
-                  contains: query,
-                },
-              },
-              {
-                familyName: {
-                  contains: query,
-                },
-              },
-              {
-                givenName: {
-                  contains: query,
-                },
-              },
-              {
-                middleName: {
-                  contains: query,
-                },
-              },
-              {
-                emails: {
-                  some: {
-                    email: {
-                      contains: query,
-                    },
-                  },
-                },
-              },
-              {
-                phones: {
-                  some: {
-                    phone: {
-                      contains: query,
-                    },
-                  },
-                },
-              },
-            ],
-          }
-        : undefined,
+      where: prismaQuery,
     });
 
     rep.send({
@@ -169,6 +182,8 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
     rep.send(user);
   });
 
+  // add user post
+
   app.put('/', async (req, rep) => {
     const uuid = (req.params as { uuid: string }).uuid;
     const body = req.body as any;
@@ -190,6 +205,7 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
         middleName: Utils.isNotBlank(body.middleName) ? body.middleName?.normalize('NFC') : undefined,
         name: Utils.isNotBlank(body.name) ? body.name : undefined,
         metadata: body.metadata !== undefined ? body.metadata : undefined,
+        lockedProps: body.lockedProps !== undefined ? body.lockedProps : undefined,
       },
     });
 
@@ -198,6 +214,8 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
 
   app.register(userEmailsAdminHandler, { prefix: '/emails' });
   app.register(userPhonesAdminHandler, { prefix: '/phones' });
+  app.register(userSessionsAdminHandler, { prefix: '/sessions' });
+  app.register(userAuthnsAdminHandler, { prefix: '/authns' });
 
   done();
 };

@@ -273,7 +273,7 @@ export async function checkLockedProps(userId: string, content?: any) {
 }
 
 // TODO: make a proper interface and migrate to common.
-export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = []) {
+export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = []): any | undefined {
   if (!metadata) return metadata;
   if (typeof metadata !== 'object') return metadata;
 
@@ -316,7 +316,7 @@ export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = [
       }
 
       if (metadataConfig.value && typeof metadataConfig.value !== 'object') {
-        return sanitizeMetadata(metadataConfig.value);
+        return sanitizeMetadata(metadataConfig.value, _scopes);
       }
     }
 

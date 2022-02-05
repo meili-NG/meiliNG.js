@@ -662,7 +662,7 @@ export async function createIDToken(
     phone: phonePerm && phone ? phone.phone : undefined,
     phone_verified: phonePerm && phone ? true : undefined,
     metadata: data.metadata ? sanitizeMetadata(data.metadata, permissions) : undefined,
-    birthday: data.birthday ? Utils.convertDateToISO8601Date(data.birthday) : undefined,
+    birthdate: data.birthday ? Utils.convertDateToISO8601Date(data.birthday) : undefined,
   };
 
   if (config.openid.jwt.privateKey?.key !== undefined) {

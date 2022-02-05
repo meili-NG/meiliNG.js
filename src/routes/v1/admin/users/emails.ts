@@ -65,9 +65,9 @@ const userEmailsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       });
 
       const myPrimaryEmails = primaryEmails.filter((n) => n.userId === uuid);
-      const othersPrimaryEmails = primaryEmails.filter((n) => n.userId !== uuid && n.isPrimary);
+      const othersPrimaryEmails = primaryEmails.filter((n) => n.userId !== uuid && n.isPrimary && n.email === email);
 
-      if (othersPrimaryEmails.length > 0 && body.force !== true) {
+      if (othersPrimaryEmails.length > 0) {
         Meiling.V1.Error.sendMeilingError(
           rep,
           Meiling.V1.Error.ErrorType.CONFLICT,
@@ -154,6 +154,11 @@ const userEmailAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       return;
     }
 
+    if (!body.email) {
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+      return;
+    }
+
     if (body.isPrimary) {
       // check if there is existing primary emails.
       const primaryEmails = await getPrismaClient().email.findMany({
@@ -163,7 +168,9 @@ const userEmailAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       });
 
       const myPrimaryEmails = primaryEmails.filter((n) => n.userId === uuid);
-      const othersPrimaryEmails = primaryEmails.filter((n) => n.userId !== uuid && n.isPrimary);
+      const othersPrimaryEmails = primaryEmails.filter(
+        (n) => n.userId !== uuid && n.isPrimary && n.email === body.email?.trim(),
+      );
 
       if (othersPrimaryEmails.length > 0) {
         Meiling.V1.Error.sendMeilingError(

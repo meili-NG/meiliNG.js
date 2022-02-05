@@ -71,7 +71,9 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       });
 
       const myPrimaryPhones = primaryPhones.filter((n) => n.userId === uuid);
-      const othersPrimaryPhones = primaryPhones.filter((n) => n.userId !== uuid && n.isPrimary);
+      const othersPrimaryPhones = primaryPhones.filter(
+        (n) => n.userId !== uuid && n.isPrimary && n.phone === phone.formatInternational(),
+      );
 
       if (othersPrimaryPhones.length > 0 && body.force !== true) {
         Meiling.V1.Error.sendMeilingError(
@@ -179,7 +181,9 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       });
 
       const myPrimaryPhones = primaryPhones.filter((n) => n.userId === uuid);
-      const othersPrimaryPhones = primaryPhones.filter((n) => n.userId !== uuid && n.isPrimary);
+      const othersPrimaryPhones = primaryPhones.filter(
+        (n) => n.userId !== uuid && n.isPrimary && n.phone === phoneNumber,
+      );
 
       if (othersPrimaryPhones.length > 0) {
         Meiling.V1.Error.sendMeilingError(

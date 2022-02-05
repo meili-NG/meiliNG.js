@@ -49,6 +49,10 @@ interface AuthenticationEmailSMSObject {
   type: 'EMAIL' | 'SMS';
 }
 
+interface UserQueryOptions {
+  includeDeleted?: boolean;
+}
+
 export function getUserId(user: UserModel | string) {
   return typeof user === 'string' ? user : user.id;
 }
@@ -72,18 +76,29 @@ export async function updateLastSignIn(user: UserModel | string) {
     },
   });
 }
-export async function getBasicInfo(user: UserModel | string): Promise<UserModel | undefined> {
+export async function getBasicInfo(
+  user: UserModel | string,
+  queryOptions?: UserQueryOptions,
+): Promise<UserModel | undefined> {
+  const prismaQuery = {
+    isDeleted: queryOptions?.includeDeleted ? undefined : false,
+  };
+
   const userDatabase = await getPrismaClient().user.findFirst({
     where: {
       id: getUserId(user),
+      ...prismaQuery,
     },
   });
   if (!userDatabase) return;
 
   return userDatabase;
 }
-export async function getInfo(user: UserModel | string): Promise<UserInfoObject | undefined> {
-  const userDatabase = await getBasicInfo(user);
+export async function getInfo(
+  user: UserModel | string,
+  queryOptions?: UserQueryOptions,
+): Promise<UserInfoObject | undefined> {
+  const userDatabase = await getBasicInfo(user, queryOptions);
   if (!userDatabase) return;
 
   const emailsPromise = getPrismaClient().email.findMany({
@@ -115,6 +130,29 @@ export async function getInfo(user: UserModel | string): Promise<UserInfoObject 
     emails,
     phones,
     groups,
+  };
+
+  return userObj;
+}
+
+export async function getDetailedInfo(
+  user: UserModel | string,
+  queryOptions?: UserQueryOptions,
+): Promise<UserDetailedObject | undefined> {
+  const baseUser = await getInfo(user, queryOptions);
+  if (!baseUser) return;
+
+  const [authorizedAppsRaw, ownedAppsRaw] = await Promise.all([getAuthorizedApps(user), getOwnedApps(user)]);
+
+  if (!authorizedAppsRaw || !ownedAppsRaw) return;
+
+  const authorizedApps = authorizedAppsRaw.map((n) => OAuth2.Client.sanitize(n));
+  const ownedApps = ownedAppsRaw.map((n) => OAuth2.Client.sanitize(n));
+
+  const userObj: UserDetailedObject = {
+    ...baseUser,
+    authorizedApps,
+    ownedApps,
   };
 
   return userObj;
@@ -153,26 +191,6 @@ export async function getOwnedApps(user: UserModel | string): Promise<OAuthClien
   });
 
   return Utils.getUnique(raw, (m, n) => m.id === n.id);
-}
-
-export async function getDetailedInfo(user: UserModel | string): Promise<UserDetailedObject | undefined> {
-  const baseUser = await getInfo(user);
-  if (!baseUser) return;
-
-  const [authorizedAppsRaw, ownedAppsRaw] = await Promise.all([getAuthorizedApps(user), getOwnedApps(user)]);
-
-  if (!authorizedAppsRaw || !ownedAppsRaw) return;
-
-  const authorizedApps = authorizedAppsRaw.map((n) => OAuth2.Client.sanitize(n));
-  const ownedApps = ownedAppsRaw.map((n) => OAuth2.Client.sanitize(n));
-
-  const userObj: UserDetailedObject = {
-    ...baseUser,
-    authorizedApps,
-    ownedApps,
-  };
-
-  return userObj;
 }
 
 export async function getAuthentications(user: UserModel | string) {

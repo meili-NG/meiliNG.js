@@ -249,6 +249,7 @@ interface MeilingMetadataObjectV1Config extends MeilingMetadataObjectBaseConfig 
   version: 1;
   sanitize?: boolean;
   scopes?: string[];
+  value?: any;
 }
 
 export async function checkLockedProps(userId: string, content?: any) {
@@ -312,6 +313,10 @@ export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = [
             return;
           }
         }
+      }
+
+      if (metadataConfig.value && typeof metadataConfig.value !== 'object') {
+        return sanitizeMetadata(metadataConfig.value);
       }
     }
 

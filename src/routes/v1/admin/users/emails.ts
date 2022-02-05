@@ -6,6 +6,7 @@ interface UserEmailRegisterInterface {
   email?: string;
   isVerified?: boolean | string;
   isPrimary?: boolean | string;
+  force?: boolean;
 }
 
 const userEmailsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) => {
@@ -66,7 +67,7 @@ const userEmailsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       const myPrimaryEmails = primaryEmails.filter((n) => n.userId === uuid);
       const othersPrimaryEmails = primaryEmails.filter((n) => n.userId !== uuid && n.isPrimary);
 
-      if (othersPrimaryEmails.length > 0) {
+      if (othersPrimaryEmails.length > 0 && body.force !== true) {
         Meiling.V1.Error.sendMeilingError(
           rep,
           Meiling.V1.Error.ErrorType.CONFLICT,

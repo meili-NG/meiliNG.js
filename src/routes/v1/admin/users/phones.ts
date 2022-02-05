@@ -7,6 +7,7 @@ interface UserPhoneRegisterInterface {
   phone?: string;
   isVerified?: boolean | string;
   isPrimary?: boolean | string;
+  force?: boolean;
 }
 
 const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) => {
@@ -72,7 +73,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       const myPrimaryPhones = primaryPhones.filter((n) => n.userId === uuid);
       const othersPrimaryPhones = primaryPhones.filter((n) => n.userId !== uuid && n.isPrimary);
 
-      if (othersPrimaryPhones.length > 0) {
+      if (othersPrimaryPhones.length > 0 && body.force !== true) {
         Meiling.V1.Error.sendMeilingError(
           rep,
           Meiling.V1.Error.ErrorType.CONFLICT,

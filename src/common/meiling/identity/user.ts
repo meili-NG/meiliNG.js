@@ -314,6 +314,8 @@ export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = [
         }
       }
     }
+
+    metadata['_meiling'] = undefined;
   }
 
   for (const key in metadata) {
@@ -655,6 +657,7 @@ export async function createIDToken(
     phone: phonePerm && phone ? phone.phone : undefined,
     phone_verified: phonePerm && phone ? true : undefined,
     metadata: data.metadata ? sanitizeMetadata(data.metadata, permissions) : undefined,
+    birthday: data.birthday ?? null,
   };
 
   if (config.openid.jwt.privateKey?.key !== undefined) {

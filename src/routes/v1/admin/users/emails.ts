@@ -64,7 +64,7 @@ const userEmailsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       });
 
       const myPrimaryEmails = primaryEmails.filter((n) => n.userId === uuid);
-      const othersPrimaryEmails = primaryEmails.filter((n) => n.userId !== uuid && n.isPrimary && n.email == email);
+      const othersPrimaryEmails = primaryEmails.filter((n) => n.userId !== uuid && n.isPrimary);
 
       if (othersPrimaryEmails.length > 0) {
         Meiling.V1.Error.sendMeilingError(
@@ -162,9 +162,7 @@ const userEmailAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       });
 
       const myPrimaryEmails = primaryEmails.filter((n) => n.userId === uuid);
-      const othersPrimaryEmails = primaryEmails.filter(
-        (n) => n.userId !== uuid && n.isPrimary && n.email == body.email,
-      );
+      const othersPrimaryEmails = primaryEmails.filter((n) => n.userId !== uuid && n.isPrimary);
 
       if (othersPrimaryEmails.length > 0) {
         Meiling.V1.Error.sendMeilingError(

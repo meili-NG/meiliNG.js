@@ -169,8 +169,11 @@ export async function getAuthorizedApps(user: UserModel | string): Promise<OAuth
   });
 
   const rawNotFiltered = await Promise.all(
-    authRaw.map((n) => getPrismaClient().oAuthClient.findUnique({ where: { id: n.id } })),
+    Utils.getUnique(authRaw, (m, n) => m.clientId === n.clientId).map((n) =>
+      getPrismaClient().oAuthClient.findUnique({ where: { id: n.clientId } }),
+    ),
   );
+
   const raw = rawNotFiltered.filter((n) => n !== null) as OAuthClient[];
 
   return Utils.getUnique(raw, (m, n) => m.id === n.id);

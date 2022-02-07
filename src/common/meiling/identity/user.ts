@@ -174,9 +174,7 @@ export async function getAuthorizedApps(user: UserModel | string): Promise<OAuth
     ),
   );
 
-  const raw = rawNotFiltered.filter((n) => n !== null) as OAuthClient[];
-
-  return Utils.getUnique(raw, (m, n) => m.id === n.id);
+  return rawNotFiltered.filter((n) => n !== null) as OAuthClient[];
 }
 
 export async function getOwnedApps(user: UserModel | string): Promise<OAuthClient[] | undefined> {

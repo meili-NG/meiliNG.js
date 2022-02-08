@@ -91,7 +91,7 @@ FASTIFY_USE_PROXY=1
 # The "issuer" on OpenID Connect id_token
 OPENID_ISSUING_AUTHORITY="https://demo.meili.ng"
 
-# Deprecated: use "yarn genkey" will automatically generate certificates for creating JWTs
+# Deprecated: use "yarn keygen" will automatically generate certificates for creating JWTs
 OPENID_SECRET_KEY=""
 
 NOTIFICATION_API_HOST="http://notification.meili.ng"
@@ -117,7 +117,7 @@ These are the secret key to sign your OpenID Token. Please make sure this is lon
 
 **Please Run the following:**  
 ```bash
-yarn genkey
+yarn keygen
 ```
 
 

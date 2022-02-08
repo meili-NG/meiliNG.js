@@ -55,7 +55,7 @@ function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
   app.register(userPlugin, { prefix: '/users' });
   app.register(appsPlugin, { prefix: '/apps' });
 
-  app.register(meilingV1SessionAuthnPlugin, { prefix: '/authorization' });
+  app.register(meilingV1SessionAuthnPlugin, { prefix: '/authn' });
 
   done();
 }

@@ -101,7 +101,7 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
         session.authenticationStatus.email.isVerified = true;
         to = session.authenticationStatus.email.to;
       } else {
-        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNSUPPORTED_AUTHORIZATION_TYPE);
+        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNSUPPORTED_AUTHENTICATION_TYPE);
         return;
       }
 

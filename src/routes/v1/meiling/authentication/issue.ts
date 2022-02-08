@@ -156,7 +156,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
         },
       });
     } else {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNSUPPORTED_AUTHORIZATION_TYPE);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNSUPPORTED_AUTHENTICATION_TYPE);
       return;
     }
   } catch (e) {

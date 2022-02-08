@@ -50,7 +50,7 @@ function getMeilingErrorStatusCode(type: ErrorType) {
     case ErrorType.UNSUPPORTED_SIGNIN_METHOD:
     case ErrorType.UNSUPPORTED_SCOPE:
     case ErrorType.UNSUPPORTED_RESPONSE_TYPE:
-    case ErrorType.UNSUPPORTED_AUTHORIZATION_TYPE:
+    case ErrorType.UNSUPPORTED_AUTHENTICATION_TYPE:
       return 405;
 
     case ErrorType.MORE_THAN_ONE_USER_MATCHED:

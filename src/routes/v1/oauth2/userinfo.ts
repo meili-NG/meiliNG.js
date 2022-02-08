@@ -5,7 +5,7 @@ import { Meiling } from '../../../common';
 export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const type = 'ACCESS_TOKEN';
 
-  let token = Meiling.Authorization.Token.getTokenFromRequest(req);
+  let token = Meiling.Authentication.Token.getTokenFromRequest(req);
   if (!token) {
     if (req.body) {
       const accessToken = (req.body as any).access_token;
@@ -27,9 +27,9 @@ export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyRep
     return;
   }
 
-  const perms = await Meiling.Authorization.Token.getAuthorizedPermissions(token.token, type);
-  const clientId = await Meiling.Authorization.Token.getClient(token.token, type);
-  const user = await Meiling.Authorization.Token.getUser(token.token, type);
+  const perms = await Meiling.Authentication.Token.getAuthorizedPermissions(token.token, type);
+  const clientId = await Meiling.Authentication.Token.getClient(token.token, type);
+  const user = await Meiling.Authentication.Token.getUser(token.token, type);
   if (!user || !perms || !clientId) {
     Meiling.OAuth2.Error.sendOAuth2Error(
       rep,
@@ -39,7 +39,7 @@ export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyRep
     return;
   }
 
-  const isValid = await Meiling.Authorization.Token.isValid(token.token, type);
+  const isValid = await Meiling.Authentication.Token.isValid(token.token, type);
   if (!isValid) {
     Meiling.OAuth2.Error.sendOAuth2Error(
       rep,

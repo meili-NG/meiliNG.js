@@ -105,7 +105,7 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
         return;
       }
 
-      sendBaridegiLog(BaridegiLogType.VERIFY_AUTHORIZATION_REQUEST, {
+      sendBaridegiLog(BaridegiLogType.VERIFY_AUTHENTICATION_REQUEST, {
         type: body.type,
         ip: req.ip,
         to,

@@ -32,13 +32,13 @@ export async function oAuth2RefreshTokenHandler(req: FastifyRequest, rep: Fastif
     return;
   }
 
-  if (!(await Meiling.Authorization.Token.isValid(token, type))) {
+  if (!(await Meiling.Authentication.Token.isValid(token, type))) {
     Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_GRANT, 'expired token');
     return;
   }
 
   // get user
-  const user = await Meiling.Authorization.Token.getUser(token, type);
+  const user = await Meiling.Authentication.Token.getUser(token, type);
   if (!user) {
     Meiling.OAuth2.Error.sendOAuth2Error(
       rep,
@@ -48,7 +48,7 @@ export async function oAuth2RefreshTokenHandler(req: FastifyRequest, rep: Fastif
     return;
   }
 
-  const authorization = await Meiling.Authorization.Token.getAuthorization(token, type);
+  const authorization = await Meiling.Authentication.Token.getAuthorization(token, type);
   if (!authorization) {
     Meiling.OAuth2.Error.sendOAuth2Error(
       rep,
@@ -58,7 +58,7 @@ export async function oAuth2RefreshTokenHandler(req: FastifyRequest, rep: Fastif
     return;
   }
 
-  const permissions = await Meiling.Authorization.Token.getAuthorizedPermissions(token, type);
+  const permissions = await Meiling.Authentication.Token.getAuthorizedPermissions(token, type);
   if (!permissions) {
     Meiling.OAuth2.Error.sendOAuth2Error(
       rep,
@@ -83,6 +83,6 @@ export async function oAuth2RefreshTokenHandler(req: FastifyRequest, rep: Fastif
       scope,
       refresh_token: currentRefreshToken.token,
       token_type: 'Bearer',
-      expires_in: Meiling.Authorization.Token.getValidTimeByType('ACCESS_TOKEN'),
+      expires_in: Meiling.Authentication.Token.getValidTimeByType('ACCESS_TOKEN'),
     });
 }

@@ -694,7 +694,7 @@ export async function prevent2FALockout(user: UserModel | string): Promise<void>
   const data = await getInfo(user);
   if (!data) return undefined;
 
-  const authorizations = await getPrismaClient().authentication.count({
+  const authentications = await getPrismaClient().authentication.count({
     where: {
       AND: [
         {
@@ -712,7 +712,7 @@ export async function prevent2FALockout(user: UserModel | string): Promise<void>
     },
   });
 
-  if (authorizations === 0) {
+  if (authentications === 0) {
     await getPrismaClient().user.update({
       where: {
         id: data.id,

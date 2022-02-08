@@ -9,7 +9,7 @@ const internalAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
       await Meiling.V1.Session.garbageCollect();
 
       Terminal.Log.info('Running Garbage Collect for OAuth2 Tokens...');
-      await Meiling.Authorization.Token.garbageCollect();
+      await Meiling.Authentication.Token.garbageCollect();
 
       Terminal.Log.info('Running Garbage Collect for OAuth2 ACL Data...');
       await Meiling.OAuth2.ClientAuthorization.garbageCollect();

@@ -175,7 +175,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
         return;
       }
 
-      Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.CREATE_AUTHORIZATION_REQUEST, {
+      Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.CREATE_AUTHENTICATION_REQUEST, {
         type: currentMethod,
         notificationApi: {
           rawType: notificationMethod,
@@ -186,7 +186,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
 
       await Notification.sendNotification(notificationMethod, {
         type: 'template',
-        templateId: Notification.TemplateId.AUTHORIZATION_CODE,
+        templateId: Notification.TemplateId.AUTHENTICATION_CODE,
         lang,
         messages: [
           {

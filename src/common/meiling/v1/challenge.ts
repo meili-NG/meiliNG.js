@@ -2,7 +2,7 @@ import { Authentication } from '@prisma/client';
 import { Meiling } from '../..';
 import { ExtendedAuthMethods, SigninType, SigninExtendedAuthentication } from './interfaces';
 import { AuthenticationJSONObject, AuthenticationOTPObject, AuthenticationPGPSSHKeyObject } from '../identity/user';
-import { validateOTP, validatePGPSign } from '../authorization/validate';
+import { validateOTP, validatePGPSign } from '../authentication/validate';
 import config from '../../../resources/config';
 
 export function getMeilingAvailableAuthMethods(
@@ -53,10 +53,10 @@ export function generateChallenge(signinMethod: ExtendedAuthMethods): string | u
   switch (signinMethod) {
     case ExtendedAuthMethods.PGP_SIGNATURE:
     case ExtendedAuthMethods.SECURITY_KEY:
-      return Meiling.Authorization.Token.generateToken();
+      return Meiling.Authentication.Token.generateToken();
     case ExtendedAuthMethods.SMS:
     case ExtendedAuthMethods.EMAIL:
-      return Meiling.Authorization.Token.generateToken(6, '0123456789');
+      return Meiling.Authentication.Token.generateToken(6, '0123456789');
     case ExtendedAuthMethods.OTP:
     default:
       return undefined;

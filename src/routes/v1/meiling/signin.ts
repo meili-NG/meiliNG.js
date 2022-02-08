@@ -238,7 +238,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
                 if (phone.country === 'KR') {
                   await Notification.sendNotification(Notification.NotificationMethod.ALIMTALK, {
                     type: 'template',
-                    templateId: Notification.TemplateId.AUTHORIZATION_CODE,
+                    templateId: Notification.TemplateId.AUTHENTICATION_CODE,
                     lang: 'ko',
                     messages: [
                       {
@@ -252,7 +252,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
                 } else {
                   await Notification.sendNotification(Notification.NotificationMethod.SMS, {
                     type: 'template',
-                    templateId: Notification.TemplateId.AUTHORIZATION_CODE,
+                    templateId: Notification.TemplateId.AUTHENTICATION_CODE,
                     lang: 'ko',
                     messages: [
                       {
@@ -268,7 +268,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
             } else if (signinMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.EMAIL) {
               await Notification.sendNotification(Notification.NotificationMethod.EMAIL, {
                 type: 'template',
-                templateId: Notification.TemplateId.AUTHORIZATION_CODE,
+                templateId: Notification.TemplateId.AUTHENTICATION_CODE,
                 lang: 'ko',
                 messages: [
                   {
@@ -407,7 +407,7 @@ please request this endpoint without challengeResponse field to request challeng
   Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.USER_SIGNIN, {
     ip: req.ip,
     user,
-    token: Meiling.Authorization.Token.getTokenFromRequest(req)?.token,
+    token: Meiling.Authentication.Token.getTokenFromRequest(req)?.token,
   });
 
   rep.status(200).send({

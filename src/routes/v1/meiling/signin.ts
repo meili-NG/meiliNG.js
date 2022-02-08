@@ -215,7 +215,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       ) {
         Meiling.V1.Error.sendMeilingError(
           rep,
-          Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
+          Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_RATE_LIMITED,
           'you have been rate limited. please try again later.',
         );
         return;

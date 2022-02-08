@@ -46,7 +46,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
           ) {
             Meiling.V1.Error.sendMeilingError(
               rep,
-              Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
+              Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_RATE_LIMITED,
               'old token is still valid for email verification. rate_limited',
             );
             return;
@@ -107,7 +107,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
           ) {
             Meiling.V1.Error.sendMeilingError(
               rep,
-              Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
+              Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_RATE_LIMITED,
               'old token is still valid for phone authorization. rate_limited',
             );
             return;

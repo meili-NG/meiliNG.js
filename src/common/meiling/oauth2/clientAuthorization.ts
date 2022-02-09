@@ -1,5 +1,5 @@
 import { OAuthClient, OAuthClientAuthorization, OAuthToken, OAuthTokenType, Permission, User } from '@prisma/client';
-import { Authorization } from '..';
+import { Authentication } from '..';
 import { getPrismaClient } from '../../../resources/prisma';
 
 // TODO: OPTIMIZE
@@ -175,10 +175,10 @@ export async function getUser(authorization: OAuthClientAuthorization | string):
 export async function createToken(
   authorization: OAuthClientAuthorization,
   type: OAuthTokenType,
-  metadata?: Authorization.Token.TokenMetadata,
+  metadata?: Authentication.Token.TokenMetadata,
 ): Promise<OAuthToken> {
   // TODO: allow custom generator for token
-  const tokenKey = Authorization.Token.generateToken();
+  const tokenKey = Authentication.Token.generateToken();
 
   const token = await getPrismaClient().oAuthToken.create({
     data: {
@@ -217,9 +217,9 @@ export async function getToken(authorization: OAuthClientAuthorization, type: OA
 
   if (
     !token ||
-    Authorization.Token.getExpiresInByType(type, token.issuedAt) < Authorization.Token.getValidTimeByType(type) * 0.1
+    Authentication.Token.getExpiresInByType(type, token.issuedAt) < Authentication.Token.getValidTimeByType(type) * 0.1
   ) {
-    token = await createToken(authorization, type, token?.metadata as Authorization.Token.TokenMetadata);
+    token = await createToken(authorization, type, token?.metadata as Authentication.Token.TokenMetadata);
   }
 
   updateLastUpdated(authorization);

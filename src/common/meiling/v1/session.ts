@@ -131,12 +131,12 @@ export async function isToken(token?: string): Promise<boolean> {
 }
 
 export function getTokenFromRequest(req: FastifyRequest): string | undefined {
-  const token = Meiling.Authorization.Token.getTokenFromRequest(req);
+  const token = Meiling.Authentication.Token.getTokenFromRequest(req);
   return token ? token.token : undefined;
 }
 
 export async function createToken(req: FastifyRequest): Promise<string | undefined> {
-  const token = Meiling.Authorization.Token.generateToken();
+  const token = Meiling.Authentication.Token.generateToken();
   const expiration = new Date(new Date().getTime() + config.session.v1.maxAge * 1000);
   const userTimeFieldMinimum = new Date().getTime() - config.session.v1.rateLimit.timeframe * 1000;
 

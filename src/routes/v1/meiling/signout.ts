@@ -33,7 +33,7 @@ export async function signoutHandler(req: FastifyRequest, rep: FastifyReply): Pr
         Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.USER_SIGNOUT, {
           ip: req.ip,
           user: await Meiling.Identity.User.getDetailedInfo(userId),
-          token: Meiling.Authorization.Token.getTokenFromRequest(req)?.token,
+          token: Meiling.Authentication.Token.getTokenFromRequest(req)?.token,
         });
       } else {
         Meiling.V1.Error.sendMeilingError(

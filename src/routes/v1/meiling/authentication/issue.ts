@@ -4,15 +4,17 @@ import { FastifyRequestWithSession } from '..';
 import config from '../../../../resources/config';
 import { Meiling, Event, Notification, Utils } from '../../../../common';
 
-type MeilingV1AuthorizationIssueQuery = MeilingV1AuthorizationIssueEmailQuery | MeilingV1AuthorizationIssuePhoneQuery;
+type MeilingV1AuthenticationIssueQuery =
+  | MeilingV1AuthenticationIssueEmailQuery
+  | MeilingV1AuthenticationIssuePhoneQuery;
 
-interface MeilingV1AuthorizationIssueEmailQuery {
+interface MeilingV1AuthenticationIssueEmailQuery {
   type: 'email';
   lang?: Notification.TemplateLanguage;
   to: string;
 }
 
-interface MeilingV1AuthorizationIssuePhoneQuery {
+interface MeilingV1AuthenticationIssuePhoneQuery {
   type: 'phone';
   lang?: Notification.TemplateLanguage;
   to: string;
@@ -20,10 +22,10 @@ interface MeilingV1AuthorizationIssuePhoneQuery {
 
 export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
-  const body = req.body as MeilingV1AuthorizationIssueQuery;
+  const body = req.body as MeilingV1AuthenticationIssueQuery;
 
   const createdAt = new Date();
-  const challenge = Meiling.Authorization.Token.generateToken(6, '0123456789');
+  const challenge = Meiling.Authentication.Token.generateToken(6, '0123456789');
 
   const lang = body.lang ? body.lang : 'ko';
 
@@ -46,7 +48,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
           ) {
             Meiling.V1.Error.sendMeilingError(
               rep,
-              Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
+              Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_RATE_LIMITED,
               'old token is still valid for email verification. rate_limited',
             );
             return;
@@ -56,7 +58,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
 
       await Notification.sendNotification(Notification.NotificationMethod.EMAIL, {
         type: 'template',
-        templateId: Notification.TemplateId.AUTHORIZATION_CODE,
+        templateId: Notification.TemplateId.AUTHENTICATION_CODE,
         lang,
 
         messages: [
@@ -69,7 +71,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
         ],
       });
 
-      Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.CREATE_AUTHORIZATION_REQUEST, {
+      Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.CREATE_AUTHENTICATION_REQUEST, {
         type: body.type,
         notificationApi: {
           rawType: Notification.NotificationMethod.EMAIL,
@@ -107,7 +109,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
           ) {
             Meiling.V1.Error.sendMeilingError(
               rep,
-              Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
+              Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_RATE_LIMITED,
               'old token is still valid for phone authorization. rate_limited',
             );
             return;
@@ -123,7 +125,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
 
       await Notification.sendNotification(method, {
         type: 'template',
-        templateId: Notification.TemplateId.AUTHORIZATION_CODE,
+        templateId: Notification.TemplateId.AUTHENTICATION_CODE,
         lang,
 
         messages: [
@@ -136,7 +138,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
         ],
       });
 
-      Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.CREATE_AUTHORIZATION_REQUEST, {
+      Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.CREATE_AUTHENTICATION_REQUEST, {
         type: body.type,
         notificationApi: {
           rawType: Notification.NotificationMethod.EMAIL,
@@ -156,7 +158,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
         },
       });
     } else {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNSUPPORTED_AUTHORIZATION_TYPE);
+      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNSUPPORTED_AUTHENTICATION_TYPE);
       return;
     }
   } catch (e) {

@@ -22,7 +22,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     if (!session.passwordReset?.isVerified || !session.passwordReset.passwordResetUser) {
       Meiling.V1.Error.sendMeilingError(
         rep,
-        Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_NOT_COMPLETED,
+        Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_COMPLETED,
         'password reset request not completed yet',
       );
       return;
@@ -126,7 +126,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
       if (!to || !Utils.isValidEmail(to)) {
         Meiling.V1.Error.sendMeilingError(
           rep,
-          Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_INVALID,
+          Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_INVALID,
           'email does not exist on this user',
         );
         return;
@@ -144,7 +144,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
       if (!to) {
         Meiling.V1.Error.sendMeilingError(
           rep,
-          Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_INVALID,
+          Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_INVALID,
           'phone number does not exist on this user',
         );
         return;
@@ -158,7 +158,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
       if (Meiling.V1.Challenge.isChallengeRateLimited(body.method, session.passwordReset?.challengeCreatedAt)) {
         Meiling.V1.Error.sendMeilingError(
           rep,
-          Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED,
+          Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_RATE_LIMITED,
           'You are rate limited',
         );
 
@@ -169,13 +169,13 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
       if (!notificationMethod) {
         Meiling.V1.Error.sendMeilingError(
           rep,
-          Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_INVALID,
+          Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_INVALID,
           'invalid authorization method',
         );
         return;
       }
 
-      Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.CREATE_AUTHORIZATION_REQUEST, {
+      Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.CREATE_AUTHENTICATION_REQUEST, {
         type: currentMethod,
         notificationApi: {
           rawType: notificationMethod,
@@ -186,7 +186,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
 
       await Notification.sendNotification(notificationMethod, {
         type: 'template',
-        templateId: Notification.TemplateId.AUTHORIZATION_CODE,
+        templateId: Notification.TemplateId.AUTHENTICATION_CODE,
         lang,
         messages: [
           {
@@ -222,7 +222,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
   ) {
     Meiling.V1.Error.sendMeilingError(
       rep,
-      Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_NOT_GENERATED,
+      Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED,
       'generation request was not generated in first place.',
     );
     return;
@@ -236,7 +236,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
   ) {
     Meiling.V1.Error.sendMeilingError(
       rep,
-      Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_NOT_GENERATED,
+      Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED,
       'generation request was not generated with particular method',
     );
     return;
@@ -249,7 +249,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
   ) {
     Meiling.V1.Error.sendMeilingError(
       rep,
-      Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_TIMEOUT,
+      Meiling.V1.Error.ErrorType.AUTHENTICATION_TIMEOUT,
       'generated request was timed out',
     );
     return;
@@ -263,7 +263,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
   if (!isValid) {
     Meiling.V1.Error.sendMeilingError(
       rep,
-      Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_INVALID,
+      Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_INVALID,
       'invalid challenge',
     );
     return;

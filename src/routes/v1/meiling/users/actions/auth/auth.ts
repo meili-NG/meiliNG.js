@@ -221,7 +221,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
     rep.send({
       access_token: token.token,
       token_type: 'Bearer',
-      expires_in: Meiling.Authorization.Token.getValidTimeByType('ACCESS_TOKEN'),
+      expires_in: Meiling.Authentication.Token.getValidTimeByType('ACCESS_TOKEN'),
       state: query.state,
       id_token: scopes.includes('openid')
         ? await Meiling.Identity.User.createIDToken(userData, clientId, scopes, query.nonce)

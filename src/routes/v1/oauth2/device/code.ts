@@ -33,9 +33,9 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
     return;
   }
 
-  const device_code = Meiling.Authorization.Token.generateToken();
-  const user_code = Meiling.Authorization.Token.generateToken(8, '0123456789QWERTYUIOPASDFGHJKLZXCVBNM');
-  const metadata: Meiling.Authorization.Token.TokenMetadata = {
+  const device_code = Meiling.Authentication.Token.generateToken();
+  const user_code = Meiling.Authentication.Token.generateToken(8, '0123456789QWERTYUIOPASDFGHJKLZXCVBNM');
+  const metadata: Meiling.Authentication.Token.TokenMetadata = {
     version: 1,
     data: {
       deviceCode: {
@@ -134,7 +134,7 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
 
   rep.send({
     device_code,
-    expires_in: Meiling.Authorization.Token.getExpiresInByType(type, new Date()),
+    expires_in: Meiling.Authentication.Token.getExpiresInByType(type, new Date()),
     // TODO: Make this configurable
     interval: config.meiling.deviceCode.interval,
     user_code: user_code,

@@ -45,7 +45,7 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
     if (Utils.isNotBlank(body.id, body.response, body.response?.attenationObject, body)) {
       // TODO: Implement registration procedure
     } else {
-      const challenge = Meiling.Authorization.Token.generateToken(64);
+      const challenge = Meiling.Authentication.Token.generateToken(64);
 
       await Meiling.V1.Session.setSession(req, {
         ...session,

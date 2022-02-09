@@ -10,8 +10,7 @@ on:
     types: [created]
 
 jobs:
-  build:
-
+  deploy:
     runs-on: ubuntu-latest
     environment: Stella IT Accounts Deployment
     steps:
@@ -51,7 +50,7 @@ jobs:
         DEPLOY_PRODUCTION_KEY_BASE64: ${{ secrets.S4AIT_DEPLOY_KEY_BASE64 }}
         DEPLOY_PRODUCTION_KEY_PATH: ~/.ssh/id_rsa
     - name: 🚧 Deploying to production
-      run: pm2 deploy production > /dev/null
+      run: pm2 deploy production --force > /dev/null
       env:
         DEPLOY_PRODUCTION_HOST: ${{ secrets.S4AIT_DEPLOY_TARGET }}
         DEPLOY_PRODUCTION_KEY_PATH: ~/.ssh/id_rsa

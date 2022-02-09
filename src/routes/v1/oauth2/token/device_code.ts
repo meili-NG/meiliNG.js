@@ -32,12 +32,12 @@ export async function oAuth2DeviceCodeHandler(req: FastifyRequest, rep: FastifyR
     return;
   }
 
-  if (!(await Meiling.Authorization.Token.isValid(token, type))) {
+  if (!(await Meiling.Authentication.Token.isValid(token, type))) {
     Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_GRANT, 'expired token');
     return;
   }
 
-  const authorization = await Meiling.Authorization.Token.getAuthorization(token, type);
+  const authorization = await Meiling.Authentication.Token.getAuthorization(token, type);
   if (!authorization) {
     Meiling.OAuth2.Error.sendOAuth2Error(
       rep,
@@ -47,7 +47,7 @@ export async function oAuth2DeviceCodeHandler(req: FastifyRequest, rep: FastifyR
     return;
   }
 
-  const permissions = await Meiling.Authorization.Token.getAuthorizedPermissions(token, type);
+  const permissions = await Meiling.Authentication.Token.getAuthorizedPermissions(token, type);
   if (!permissions) {
     Meiling.OAuth2.Error.sendOAuth2Error(
       rep,
@@ -57,7 +57,7 @@ export async function oAuth2DeviceCodeHandler(req: FastifyRequest, rep: FastifyR
     return;
   }
 
-  const metadata = await Meiling.Authorization.Token.getMetadata(token, type);
+  const metadata = await Meiling.Authentication.Token.getMetadata(token, type);
   if (!metadata) {
     Meiling.OAuth2.Error.sendOAuth2Error(
       rep,
@@ -103,7 +103,7 @@ export async function oAuth2DeviceCodeHandler(req: FastifyRequest, rep: FastifyR
       scope,
       refresh_token: currentRefreshToken.token,
       token_type: 'Bearer',
-      expires_in: Meiling.Authorization.Token.getValidTimeByType('ACCESS_TOKEN'),
+      expires_in: Meiling.Authentication.Token.getValidTimeByType('ACCESS_TOKEN'),
       id_token: scopes.includes('openid')
         ? await Meiling.Identity.User.createIDToken(user, clientId, scopes)
         : undefined,

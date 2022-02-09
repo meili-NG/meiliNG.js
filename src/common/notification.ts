@@ -6,7 +6,7 @@ import { BaridegiLogType, sendBaridegiLog } from './event/baridegi';
 export type TemplateLanguage = 'ko' | 'en';
 
 export enum TemplateId {
-  AUTHORIZATION_CODE = 'authorization_code',
+  AUTHENTICATION_CODE = 'authentication_code',
 }
 
 export enum NotificationMethod {
@@ -19,7 +19,7 @@ type NotificationPayload = SMSPayload | AlimtalkPayload | CallPayload;
 
 type SMSPayload = SMSPlainPayload | TemplatePayload;
 type AlimtalkPayload = TemplatePayload;
-type CallPayload = AuthorizationCodeCallPayload;
+type CallPayload = AuthentcationCodeCallPayload;
 
 // Not Recommended. Please use Template.
 interface SMSPlainPayload {
@@ -46,7 +46,7 @@ interface PlainMessagePayload {
   message: string;
 }
 
-interface AuthorizationCodeCallPayload {
+interface AuthentcationCodeCallPayload {
   type: 'authorization_code';
   to: string;
   lang: TemplateLanguage;

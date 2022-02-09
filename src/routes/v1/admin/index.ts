@@ -26,7 +26,7 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
       throw new Error('User is not providing proper login credentials for admin');
     }
 
-    const token = Meiling.Authorization.Token.getTokenFromRequest(req);
+    const token = Meiling.Authentication.Token.getTokenFromRequest(req);
     if (!token) {
       rep
         .status(401)

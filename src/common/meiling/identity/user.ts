@@ -49,6 +49,10 @@ interface AuthenticationEmailSMSObject {
   type: 'EMAIL' | 'SMS';
 }
 
+interface UserQueryOptions {
+  includeDeleted?: boolean;
+}
+
 export function getUserId(user: UserModel | string) {
   return typeof user === 'string' ? user : user.id;
 }
@@ -72,18 +76,29 @@ export async function updateLastSignIn(user: UserModel | string) {
     },
   });
 }
-export async function getBasicInfo(user: UserModel | string): Promise<UserModel | undefined> {
+export async function getBasicInfo(
+  user: UserModel | string,
+  queryOptions?: UserQueryOptions,
+): Promise<UserModel | undefined> {
+  const prismaQuery = {
+    isDeleted: queryOptions?.includeDeleted ? undefined : false,
+  };
+
   const userDatabase = await getPrismaClient().user.findFirst({
     where: {
       id: getUserId(user),
+      ...prismaQuery,
     },
   });
   if (!userDatabase) return;
 
   return userDatabase;
 }
-export async function getInfo(user: UserModel | string): Promise<UserInfoObject | undefined> {
-  const userDatabase = await getBasicInfo(user);
+export async function getInfo(
+  user: UserModel | string,
+  queryOptions?: UserQueryOptions,
+): Promise<UserInfoObject | undefined> {
+  const userDatabase = await getBasicInfo(user, queryOptions);
   if (!userDatabase) return;
 
   const emailsPromise = getPrismaClient().email.findMany({
@@ -120,6 +135,29 @@ export async function getInfo(user: UserModel | string): Promise<UserInfoObject 
   return userObj;
 }
 
+export async function getDetailedInfo(
+  user: UserModel | string,
+  queryOptions?: UserQueryOptions,
+): Promise<UserDetailedObject | undefined> {
+  const baseUser = await getInfo(user, queryOptions);
+  if (!baseUser) return;
+
+  const [authorizedAppsRaw, ownedAppsRaw] = await Promise.all([getAuthorizedApps(user), getOwnedApps(user)]);
+
+  if (!authorizedAppsRaw || !ownedAppsRaw) return;
+
+  const authorizedApps = authorizedAppsRaw.map((n) => OAuth2.Client.sanitize(n));
+  const ownedApps = ownedAppsRaw.map((n) => OAuth2.Client.sanitize(n));
+
+  const userObj: UserDetailedObject = {
+    ...baseUser,
+    authorizedApps,
+    ownedApps,
+  };
+
+  return userObj;
+}
+
 export async function getAuthorizedApps(user: UserModel | string): Promise<OAuthClient[] | undefined> {
   const baseUser = await getInfo(user);
   if (!baseUser) return;
@@ -131,11 +169,12 @@ export async function getAuthorizedApps(user: UserModel | string): Promise<OAuth
   });
 
   const rawNotFiltered = await Promise.all(
-    authRaw.map((n) => getPrismaClient().oAuthClient.findUnique({ where: { id: n.id } })),
+    Utils.getUnique(authRaw, (m, n) => m.clientId === n.clientId).map((n) =>
+      getPrismaClient().oAuthClient.findUnique({ where: { id: n.clientId } }),
+    ),
   );
-  const raw = rawNotFiltered.filter((n) => n !== null) as OAuthClient[];
 
-  return Utils.getUnique(raw, (m, n) => m.id === n.id);
+  return rawNotFiltered.filter((n) => n !== null) as OAuthClient[];
 }
 
 export async function getOwnedApps(user: UserModel | string): Promise<OAuthClient[] | undefined> {
@@ -153,26 +192,6 @@ export async function getOwnedApps(user: UserModel | string): Promise<OAuthClien
   });
 
   return Utils.getUnique(raw, (m, n) => m.id === n.id);
-}
-
-export async function getDetailedInfo(user: UserModel | string): Promise<UserDetailedObject | undefined> {
-  const baseUser = await getInfo(user);
-  if (!baseUser) return;
-
-  const [authorizedAppsRaw, ownedAppsRaw] = await Promise.all([getAuthorizedApps(user), getOwnedApps(user)]);
-
-  if (!authorizedAppsRaw || !ownedAppsRaw) return;
-
-  const authorizedApps = authorizedAppsRaw.map((n) => OAuth2.Client.sanitize(n));
-  const ownedApps = ownedAppsRaw.map((n) => OAuth2.Client.sanitize(n));
-
-  const userObj: UserDetailedObject = {
-    ...baseUser,
-    authorizedApps,
-    ownedApps,
-  };
-
-  return userObj;
 }
 
 export async function getAuthentications(user: UserModel | string) {
@@ -231,6 +250,7 @@ interface MeilingMetadataObjectV1Config extends MeilingMetadataObjectBaseConfig 
   version: 1;
   sanitize?: boolean;
   scopes?: string[];
+  value?: any;
 }
 
 export async function checkLockedProps(userId: string, content?: any) {
@@ -254,7 +274,7 @@ export async function checkLockedProps(userId: string, content?: any) {
 }
 
 // TODO: make a proper interface and migrate to common.
-export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = []) {
+export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = []): any | undefined {
   if (!metadata) return metadata;
   if (typeof metadata !== 'object') return metadata;
 
@@ -295,7 +315,13 @@ export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = [
           }
         }
       }
+
+      if (metadataConfig.value && typeof metadataConfig.value !== 'object') {
+        return sanitizeMetadata(metadataConfig.value, _scopes);
+      }
     }
+
+    metadata['_meiling'] = undefined;
   }
 
   for (const key in metadata) {
@@ -637,6 +663,7 @@ export async function createIDToken(
     phone: phonePerm && phone ? phone.phone : undefined,
     phone_verified: phonePerm && phone ? true : undefined,
     metadata: data.metadata ? sanitizeMetadata(data.metadata, permissions) : undefined,
+    birthdate: data.birthday ? Utils.convertDateToISO8601Date(data.birthday) : undefined,
   };
 
   if (config.openid.jwt.privateKey?.key !== undefined) {
@@ -667,7 +694,7 @@ export async function prevent2FALockout(user: UserModel | string): Promise<void>
   const data = await getInfo(user);
   if (!data) return undefined;
 
-  const authorizations = await getPrismaClient().authentication.count({
+  const authentications = await getPrismaClient().authentication.count({
     where: {
       AND: [
         {
@@ -685,7 +712,7 @@ export async function prevent2FALockout(user: UserModel | string): Promise<void>
     },
   });
 
-  if (authorizations === 0) {
+  if (authentications === 0) {
     await getPrismaClient().user.update({
       where: {
         id: data.id,

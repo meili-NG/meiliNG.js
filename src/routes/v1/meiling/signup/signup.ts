@@ -40,7 +40,7 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
   if (signupChallenge === undefined) {
     Meiling.V1.Error.sendMeilingError(
       rep,
-      Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_NOT_GENERATED,
+      Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED,
       'Signup Validation requests were not generated.',
     );
     return;
@@ -94,7 +94,7 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
   // check with validation.
 
   if (!(signupChallenge.email?.isVerified && signupChallenge.phone?.isVerified)) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_NOT_COMPLETED);
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_COMPLETED);
     return;
   }
 
@@ -105,7 +105,7 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
       phone.formatInternational() === libmobilephoneJs(signupChallenge.phone.to)?.formatInternational()
     )
   ) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.AUTHORIZATION_REQUEST_INVALID);
+    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_INVALID);
     return;
   }
 

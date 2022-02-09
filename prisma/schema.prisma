@@ -48,6 +48,8 @@ model User {
   lastAuthenticated  DateTime             @default(now())
   ownedClientSecrets OAuthClientSecrets[]
 
+  isDeleted          Boolean              @default(false)
+
   metadata Json?
 }
 

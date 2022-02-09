@@ -4,12 +4,12 @@ import { Meiling } from '../../../../common';
 export async function refreshTokenInfoHandler(token: string, rep: FastifyReply): Promise<void> {
   const type = 'REFRESH_TOKEN';
 
-  if (!(await Meiling.Authorization.Token.isValid(token, type))) {
+  if (!(await Meiling.Authentication.Token.isValid(token, type))) {
     Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_GRANT, 'token is expired');
     return;
   }
 
-  const data = await Meiling.Authorization.Token.serialize(token, type);
+  const data = await Meiling.Authentication.Token.serialize(token, type);
   if (!data) {
     Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_GRANT, 'invalid token');
     return;

@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { Meiling } from '.';
 import config from '../resources/config';
 import Log from './terminal/log';
-import { generateToken } from './meiling/authorization/token';
+import { generateToken } from './meiling/authentication/token';
 
 export function checkIDTokenIssueCredentials(): true | string {
   if (!config.openid.jwt.algorithm) {
@@ -88,7 +88,7 @@ export async function runStartupGarbageCollection(force?: boolean): Promise<void
     await Meiling.V1.Session.garbageCollect();
 
     Log.info('Garbage Collecting for OAuth2 Tokens...');
-    await Meiling.Authorization.Token.garbageCollect();
+    await Meiling.Authentication.Token.garbageCollect();
 
     console.log('Garbage Collecting for OAuth2 ACL Data... This may take awhile...');
     await Meiling.OAuth2.ClientAuthorization.garbageCollect();

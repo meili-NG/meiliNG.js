@@ -33,14 +33,14 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
     return;
   }
 
-  const data = await Meiling.Authorization.Token.getData(token);
+  const data = await Meiling.Authentication.Token.getData(token);
   if (data?.type !== type) {
     Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_GRANT, 'invalid token type');
     return;
   }
 
-  if (!(await Meiling.Authorization.Token.isValid(token, type))) {
-    const expiresIn = await Meiling.Authorization.Token.getExpiresIn(token, type);
+  if (!(await Meiling.Authentication.Token.isValid(token, type))) {
+    const expiresIn = await Meiling.Authentication.Token.getExpiresIn(token, type);
     Meiling.OAuth2.Error.sendOAuth2Error(
       rep,
       Meiling.OAuth2.Error.ErrorType.INVALID_GRANT,
@@ -50,7 +50,7 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
   }
 
   // get user
-  const user = await Meiling.Authorization.Token.getUser(token, type);
+  const user = await Meiling.Authentication.Token.getUser(token, type);
   if (!user) {
     Meiling.OAuth2.Error.sendOAuth2Error(
       rep,
@@ -60,7 +60,7 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
     return;
   }
 
-  const authorization = await Meiling.Authorization.Token.getAuthorization(token, type);
+  const authorization = await Meiling.Authentication.Token.getAuthorization(token, type);
   if (!authorization) {
     Meiling.OAuth2.Error.sendOAuth2Error(
       rep,
@@ -70,7 +70,7 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
     return;
   }
 
-  const permissions = await Meiling.Authorization.Token.getAuthorizedPermissions(token, type);
+  const permissions = await Meiling.Authentication.Token.getAuthorizedPermissions(token, type);
   if (!permissions) {
     Meiling.OAuth2.Error.sendOAuth2Error(
       rep,
@@ -82,7 +82,7 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
 
   const scopes = permissions.map((p) => p.name);
   const scope = scopes.join(' ');
-  const metadata = await Meiling.Authorization.Token.getMetadata(token, type);
+  const metadata = await Meiling.Authentication.Token.getMetadata(token, type);
 
   // refresh thing
   let nonce = undefined;
@@ -90,8 +90,8 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
 
   // doing manual casting because typescript compiler
   // doesn't know xxxx about types
-  if ((metadata as Meiling.Authorization.Token.TokenMetadataV1)?.version === 1) {
-    const metadataV1 = metadata as Meiling.Authorization.Token.TokenMetadataV1;
+  if ((metadata as Meiling.Authentication.Token.TokenMetadataV1)?.version === 1) {
+    const metadataV1 = metadata as Meiling.Authentication.Token.TokenMetadataV1;
 
     needRefreshToken = metadataV1.options?.offline !== undefined;
 
@@ -171,7 +171,7 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
       scope,
       refresh_token: refresh_token?.token,
       token_type: 'Bearer',
-      expires_in: Meiling.Authorization.Token.getValidTimeByType('ACCESS_TOKEN'),
+      expires_in: Meiling.Authentication.Token.getValidTimeByType('ACCESS_TOKEN'),
       id_token: scopes.includes('openid')
         ? await Meiling.Identity.User.createIDToken(user, clientId, scopes, nonce)
         : undefined,

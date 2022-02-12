@@ -26,8 +26,8 @@ function getMeilingErrorStatusCode(type: ErrorType) {
     case ErrorType.ALREADY_SIGNED_IN:
     case ErrorType.ALREADY_SIGNED_OUT:
     case ErrorType.APPLICATION_REDIRECT_URI_INVALID:
-    case ErrorType.AUTHORIZATION_REQUEST_NOT_GENERATED:
-    case ErrorType.AUTHORIZATION_REQUEST_NOT_COMPLETED:
+    case ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED:
+    case ErrorType.AUTHENTICATION_REQUEST_NOT_COMPLETED:
       return 400;
 
     case ErrorType.UNAUTHORIZED:
@@ -37,7 +37,7 @@ function getMeilingErrorStatusCode(type: ErrorType) {
     case ErrorType.INVALID_SESSION:
     case ErrorType.APPLICATION_NOT_AUTHORIZED_BY_USER:
     case ErrorType.APPLICATION_NOT_AUTHORIZED_SCOPES:
-    case ErrorType.AUTHORIZATION_REQUEST_INVALID:
+    case ErrorType.AUTHENTICATION_REQUEST_INVALID:
       return 401;
 
     case ErrorType.FORBIDDEN:
@@ -50,7 +50,7 @@ function getMeilingErrorStatusCode(type: ErrorType) {
     case ErrorType.UNSUPPORTED_SIGNIN_METHOD:
     case ErrorType.UNSUPPORTED_SCOPE:
     case ErrorType.UNSUPPORTED_RESPONSE_TYPE:
-    case ErrorType.UNSUPPORTED_AUTHORIZATION_TYPE:
+    case ErrorType.UNSUPPORTED_AUTHENTICATION_TYPE:
       return 405;
 
     case ErrorType.MORE_THAN_ONE_USER_MATCHED:
@@ -63,10 +63,9 @@ function getMeilingErrorStatusCode(type: ErrorType) {
       return 409;
 
     case ErrorType.AUTHENTICATION_TIMEOUT:
-    case ErrorType.AUTHORIZATION_REQUEST_TIMEOUT:
       return 410;
 
-    case ErrorType.AUTHORIZATION_REQUEST_RATE_LIMITED:
+    case ErrorType.AUTHENTICATION_REQUEST_RATE_LIMITED:
       return 429;
 
     case ErrorType.INTERNAL_SERVER_ERROR:

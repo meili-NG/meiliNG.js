@@ -35,7 +35,7 @@ export function parseClientInfo(req: FastifyRequest):
       clientSecret?: string;
     }
   | undefined {
-  const token = Meiling.Authorization.Token.getTokenFromRequest(req);
+  const token = Meiling.Authentication.Token.getTokenFromRequest(req);
 
   let clientId: string | undefined = undefined;
   let clientSecret: string | undefined = undefined;

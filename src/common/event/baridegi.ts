@@ -4,8 +4,8 @@ import config from '../../resources/config';
 export enum BaridegiLogType {
   NEW_SESSION = 'new_session',
   AUTHORIZE_APP = 'authorize_app',
-  CREATE_AUTHORIZATION_REQUEST = 'create_authorization_request',
-  VERIFY_AUTHORIZATION_REQUEST = 'verify_authorization_request',
+  CREATE_AUTHENTICATION_REQUEST = 'create_authentication_request',
+  VERIFY_AUTHENTICATION_REQUEST = 'verify_authentication_request',
   CREATE_PASSWORD_RESET_REQUEST = 'create_password_reset_request',
   USER_SIGNIN = 'user_signin',
   USER_SIGNOUT = 'user_signout',

@@ -36,16 +36,16 @@ const tokensAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, do
       throw new Error('session not found');
     }
 
-    const data = await Meiling.Authorization.Token.serialize(tokenData.token, tokenData.type);
+    const data = await Meiling.Authentication.Token.serialize(tokenData.token, tokenData.type);
 
     rep.send({
       ...tokenData,
       ...data,
       expires_at: new Date(
-        Meiling.Authorization.Token.getExpiresInByType(tokenData.type, new Date()) * 1000 +
+        Meiling.Authentication.Token.getExpiresInByType(tokenData.type, new Date()) * 1000 +
           new Date(tokenData.issuedAt).getTime(),
       ),
-      is_valid: await Meiling.Authorization.Token.isValid(token, tokenData.type),
+      is_valid: await Meiling.Authentication.Token.isValid(token, tokenData.type),
       issued_at: tokenData.issuedAt,
       issuedAt: undefined,
     });

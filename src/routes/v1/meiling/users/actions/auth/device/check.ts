@@ -36,7 +36,7 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
     return;
   }
 
-  const minimumIssuedAt = new Date(new Date().getTime() - 1000 * Meiling.Authorization.Token.getValidTimeByType(type));
+  const minimumIssuedAt = new Date(new Date().getTime() - 1000 * Meiling.Authentication.Token.getValidTimeByType(type));
 
   const deviceTokens = await getPrismaClient().oAuthToken.findMany({
     where: {
@@ -49,7 +49,7 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
 
   const matchingUserCodes = deviceTokens.filter(
     (n) =>
-      (n.metadata as unknown as Meiling.Authorization.Token.TokenMetadataV1).data?.deviceCode?.userCode ===
+      (n.metadata as unknown as Meiling.Authentication.Token.TokenMetadataV1).data?.deviceCode?.userCode ===
       query.user_code,
   );
   if (matchingUserCodes.length === 0) {
@@ -74,7 +74,7 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
     Meiling.V1.Error.sendMeilingError(
       rep,
       Meiling.V1.Error.ErrorType.UNAUTHORIZED,
-      "specified oAuth2 application doesn't have proper authorization",
+      "specified oAuth2 application didn't requested this authorization session",
     );
     return;
   }

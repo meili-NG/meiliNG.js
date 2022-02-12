@@ -38,6 +38,8 @@ export function isValidUri(...values: (string | undefined)[]): boolean {
 export function isNotBlank(...values: (string | undefined | null)[]): boolean {
   let isValid = true;
   for (const value of values) {
+    if (!value) return false;
+
     isValid = isValid && !(value === undefined || value === null || value === '' || value.trim().length === 0);
     if (!isValid) return false;
   }

@@ -109,7 +109,7 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
 
     if (!hasRequirementsMet)
       return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Username');
-    if (Utils.isValidName(data.name))
+    if (!Utils.isValidName(data.name))
       return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Name');
 
     const name = data.name;

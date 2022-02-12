@@ -34,10 +34,6 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       return;
     }
 
-    if (typeof body.isVerified === 'string') {
-      body.isVerified = /^true$/gi.test(body.isVerified);
-    }
-
     if (typeof body.isPrimary === 'string') {
       body.isPrimary = /^true$/gi.test(body.isPrimary);
     }

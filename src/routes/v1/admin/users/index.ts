@@ -105,7 +105,10 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
     // TODO: add endpoints to allow CRUD operations on user's authentication method by admin
 
     const data = req.body as any;
-    const hasRequirementsMet = Utils.isNotBlank(data, data.username);
+    if (!data)
+      return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Body');
+
+    const hasRequirementsMet = Utils.isNotBlank(data.username);
 
     if (!hasRequirementsMet)
       return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Username');

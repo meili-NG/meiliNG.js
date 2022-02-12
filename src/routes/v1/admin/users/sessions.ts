@@ -44,7 +44,9 @@ const userSessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptio
           path: '$.user',
           array_contains: userLoggedInJson,
         },
+        ...prismaQuery,
       },
+      ...paginationDetails,
     });
 
     rep.send(userSessions);

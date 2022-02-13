@@ -14,8 +14,14 @@ export async function idTokenInfoHandler(token: string, rep: FastifyReply): Prom
             }
           : config.openid.jwt.publicKey.key;
 
+      let algorithm = config.openid.jwt.algorithm as JWT.Algorithm;
+      if ((algorithm as string) === 'ES256K') {
+        algorithm = 'ES256';
+      }
+
       const result = JWT.verify(token, key, {
         issuer: config.openid.issuingAuthority,
+        algorithms: [algorithm],
       }) as any;
 
       if (new Date(result.exp).getTime() < new Date().getTime()) {

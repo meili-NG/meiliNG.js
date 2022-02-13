@@ -14,9 +14,12 @@ export async function idTokenInfoHandler(token: string, rep: FastifyReply): Prom
             }
           : config.openid.jwt.publicKey.key;
 
+      const algorithm = config.openid.jwt.algorithm as JWT.Algorithm;
+
       const result = JWT.verify(token, key, {
         issuer: config.openid.issuingAuthority,
-      }, { algorithms: [ config.openid.jwt.algorithm ] }) as any;
+        algorithms: [algorithm],
+      }) as any;
 
       if (new Date(result.exp).getTime() < new Date().getTime()) {
         Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_GRANT, 'id_token has expired');

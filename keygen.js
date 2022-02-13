@@ -80,8 +80,8 @@ if (process.env.OPENID_JWT_ALGORITHM || process.env.OPENID_JWT_PUBLIC_KEY || pro
         ? 'secp256k1'
         : algorithm === 'ES384'
         ? 'secp384r1'
-        : algorithm === 'ES521'
-        ? 'secp521r1'
+        : algorithm === 'ES512'
+        ? 'secp512r1'
         : undefined;
 
     if (!namedCurve) {

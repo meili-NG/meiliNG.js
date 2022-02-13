@@ -14,7 +14,10 @@ export async function idTokenInfoHandler(token: string, rep: FastifyReply): Prom
             }
           : config.openid.jwt.publicKey.key;
 
-      const algorithm = config.openid.jwt.algorithm as JWT.Algorithm;
+      let algorithm = config.openid.jwt.algorithm as JWT.Algorithm;
+      if ((algorithm as string) === 'ES256K') {
+        algorithm = 'ES256';
+      }
 
       const result = JWT.verify(token, key, {
         issuer: config.openid.issuingAuthority,

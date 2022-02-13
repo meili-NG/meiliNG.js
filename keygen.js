@@ -26,7 +26,7 @@ if (process.env.OPENID_JWT_ALGORITHM || process.env.OPENID_JWT_PUBLIC_KEY || pro
       choices: [
         { title: 'RS256', description: 'The go-to signing algorithm for JWT', value: 'RS256' },
         { title: 'RS384', value: 'RS384' },
-        { title: 'RS512', value: 'RS384' },
+        { title: 'RS512', value: 'RS512' },
 
         { title: 'ES256K', description: 'The modern signing algorithm for JWT', value: 'ES256K' },
         { title: 'ES384', value: 'ES384' },

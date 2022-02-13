@@ -61,7 +61,7 @@ const userAuthnsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
         allowSingleFactor: data.allowSingleFactor,
         allowTwoFactor: data.allowTwoFactor,
         allowPasswordReset: data.allowPasswordReset,
-        createdAt: data.createdAt,
+        createdAt: data.createdAt ? data.createdAt : undefined,
       },
     });
 
@@ -128,7 +128,7 @@ const userAuthnAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
         allowSingleFactor: data.allowSingleFactor,
         allowTwoFactor: data.allowTwoFactor,
         allowPasswordReset: data.allowPasswordReset,
-        createdAt: data.createdAt,
+        createdAt: data.createdAt ? data.createdAt : undefined,
       },
     });
 

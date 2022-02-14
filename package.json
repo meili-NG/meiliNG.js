@@ -1,7 +1,7 @@
 {
   "name": "meiling",
   "version": "0.8.4",
-  "description": "An easy-to-use, open-source, flexible oAuth2 Authentication Provider and OpenID Connect Server",
+  "description": "An Opensource Next Generation \"Gatekeeper\" with oAuth2 Authentication Provider and OpenID Connect Server",
   "main": "dist/",
   "repository": "https://github.com/meili-ng/meiliNG",
   "author": "Alex4386 <psh010209@gmail.com>",

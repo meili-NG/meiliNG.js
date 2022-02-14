@@ -1,22 +1,22 @@
 <h1 align="center">Install</h1>
-<p align="center">This Guide will help you install Meiling Gatekeeper in no time.</p>
+<p align="center">This Guide will help you install meiliNG in no time.</p>
 <p align="right"><b>Last Update:</b> v.0.7.0-SNAPSHOT</p>
 
 ## Getting Started
-Hello, Welcome to Meiling Gatekeeper, an oAuth2 based authentication engine to build your customized login in no time.
+Hello, Welcome to meiliNG, an oAuth2 based authentication engine to build your customized login in no time.
 
 ## Installing Dependenices
 ### Installing Node
-Meiling engine works best with latest LTS version of Node, Please go [here](https://nodejs.org/en/) to install it by yourself.
+meiliNG works best with latest LTS version of Node, Please go [here](https://nodejs.org/en/) to install it by yourself.
 
 ### Installing Yarn
-Meiling engine uses [yarn](https://yarnpkg.com) for managing dependencies of application.  
+meiliNG uses [yarn](https://yarnpkg.com) for managing dependencies of application.  
 
 > 💡 **Note**  
 > Currently Yarn 1.x is preferred due to compatibility issues. 
 
 ### Installing node_modules
-Meiling engine does depend on lots of packages on npmjs.org which does not come out of box.  
+meiliNG does depend on lots of packages on npmjs.org which does not come out of box.  
 Please install node dependencies with `yarn` command.  
 
 ### (Optional) Generate Prisma Definition Files
@@ -25,13 +25,13 @@ On postinstall of node_modules or any updates, `yarn` should automatically gener
 Please run `yarn generate` if the prisma definition files are not properly generated.  
 
 ## Configuring Environment Variables
-Meiling engine comes with various config methods.  
+meiliNG comes with various config methods.  
 You can use [sample .env file (.env.example)](/.env.example) shipped with this repository. In order to use it, just copy `.env.example` to `.env`
 
 ## Setting up Database
 
 ### Setting up MariaDB (or mySQL)
-Meiling uses [prisma](https://prisma.io), a next-generation ORM for Node.JS with JsonFiltering that does NOT provide universal way to querying JSON filtering at the moment.  
+meiliNG uses [prisma](https://prisma.io), a next-generation ORM for Node.JS with JsonFiltering that does NOT provide universal way to querying JSON filtering at the moment.  
   
 Therefore, support for DBMS other than MariaDB/MySQL was dropped due to recent changes for supporting Json filtering. Sorry!  
 
@@ -64,13 +64,13 @@ DATABASE_URL="mysql://username:password@host:port/database?schema=public"
 
 ### ==== CONFIGURATIONS FOR MEILING ==== 
 
-## Meiling API configs
+## meiliNG API configs
 
-# Hostname of Meiling (where this api will be served)
+# Hostname of meiliNG (where this api will be served)
 MEILING_HOSTNAME="https://demo.meili.ng"
 
 # Allowed Frontend URLs (comma separated)
-# > These are the frontend URLs (the app user faces when using meiling)
+# > These are the frontend URLs (the app user faces when using meiliNG)
 # > These configurations are used for CORS setting of /v1/meiling endpoints
 # > Therefore, preventing others webpages pretend being legitimate account webpage
 FRONTEND_URLS="https://frontend-1.meili.ng,https://frontend-2.meili.ng,http://also.with.ports:3000"
@@ -78,10 +78,10 @@ FRONTEND_URLS="https://frontend-1.meili.ng,https://frontend-2.meili.ng,http://al
 # The frontend URL for device code verification
 MEILING_DEVICE_CODE_VERIFICATION_URL="https://frontend.meili.ng/device"
 
-# The listening port/socket for meiling (UNIX Sockets are supported)
+# The listening port/socket for meiliNG (UNIX Sockets are supported)
 FASTIFY_LISTEN=8080
 
-# Is meiling behind a reverse proxy? (1: yes, 0: no)
+# Is meiliNG behind a reverse proxy? (1: yes, 0: no)
 FASTIFY_USE_PROXY=1
 
 
@@ -99,14 +99,14 @@ NOTIFICATION_API_KEY="notificationAPIMeilingSecret"
 
 
 
-## Meiling Admin Configuration
+## meiliNG Admin Configuration
 
 # The tokens (comma separated) for accessing Administrator endpoints: /v1/admin
 # > These can also be used for Basic Authorization by putting base64-ed username:password format
 ADMIN_TOKENS="HakureiShrine,HongMeiling"
 
 # Allowed Admin Frontend URLs (comma separated)
-# > These are the frontend URLs for administration (the app admin faces when using meiling)
+# > These are the frontend URLs for administration (the app admin faces when using meiliNG)
 # > These configurations are used for CORS setting of /v1/admin endpoints
 ADMIN_FRONTEND_URLS="https://frontend-1.meili.ng,https://frontend-2.meili.ng,http://also.with.ports:3000"
 
@@ -124,14 +124,14 @@ yarn keygen
 ### Configuring Notification API
 TODO
 
-## Start Meiling
+## Start meiliNG
 
 ### Transpile Typescript Code
-In order to start meiling, you should compile Typescript code into JavaScript code to let node to run.  
+In order to start meiliNG, you should compile Typescript code into JavaScript code to let node to run.  
 
 1. Run `yarn build`
 
-You should do this every time you edit your source code or if there is any update of Meiling.
+You should do this every time you edit your source code or if there is any update of meiliNG.
 
 ### Run Application
 You can start application by typing `yarn start`.  

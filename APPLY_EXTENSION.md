@@ -7,4 +7,4 @@ In order to activate License Extension, (in short, use HRPL), add the following 
 MEILING_FORCE_HRPL=true
 ```
 
-Enjoy using Meiling Gatekeeper!  
+Enjoy using meiliNG!  

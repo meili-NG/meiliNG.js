@@ -1,8 +1,8 @@
 # Security Policy
 ## Supported Versions
 
-Meiling Gatekeeper is still in heavy development (equivalent of nightly release),  
-therefore, you should keep your meiling gatekeeper to the latest version as soon as possible if any new version is released.
+meiliNG is still in heavy development (equivalent of nightly release),  
+therefore, you should keep your meiliNG to the latest version as soon as possible if any new version is released.
 
 | Version             | Supported          |
 | ------------------- | ------------------ |
@@ -11,5 +11,5 @@ therefore, you should keep your meiling gatekeeper to the latest version as soon
 
 ## Reporting a Vulnerability
 
-Meiling Gatekeeper is currently developed by [Stella IT OpenSource Team](https://opensource.stella-it.com)  
-To contact us for vulnerability in Meiling Gatekeeper, Please contact us [opensource@stella-it.com](mailto:opensource@stella-it.com)  
+meiliNG is currently developed by [Stella IT OpenSource Team](https://opensource.stella-it.com)  
+To contact us for vulnerability in meiliNG, Please contact us [opensource@stella-it.com](mailto:opensource@stella-it.com)  

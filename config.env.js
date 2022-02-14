@@ -16,7 +16,7 @@ module.exports = {
     issuingAuthority: process.env.OPENID_ISSUING_AUTHORITY || 'http://demo.meili.ng',
     jwt: {
       algorithm: process.env.OPENID_JWT_ALGORITHM || 'RS256',
-      keyId: process.env.OPENID_JWT_KEYID || 'Meiling Gatekeeper OpenID Signature Key',
+      keyId: process.env.OPENID_JWT_KEYID || 'meiliNG OpenID Signature Key',
       publicKey: {
         key: process.env.OPENID_JWT_PUBLIC_KEY || undefined,
         passphrase: process.env.OPENID_JWT_PUBLIC_KEY_PASSPHRASE || undefined,

@@ -67,7 +67,7 @@ const main = async () => {
     }
   }
 
-  Terminal.Log.ok('Meiling Gatekeeper has started up.');
+  Terminal.Log.ok('meiliNG has started up.');
 };
 
 if (require.main === module) {

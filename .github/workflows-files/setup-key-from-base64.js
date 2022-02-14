@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-// Meiling Gatekeeper Continous Deployment Setup Utility
+// meiliNG Continous Deployment Setup Utility
 // base64 to certificate
 //
 // Copyright (c) Alex4386, Distributed under MIT License

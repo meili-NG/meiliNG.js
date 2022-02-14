@@ -29,7 +29,7 @@ Named after [a Gatekeeper in Touhou Project](https://hong.meili.ng),
 meiliNG just gives you session token, everything you do on the front-end is totally free for you*.  
 Just follow the API Specs and You can use whatever front-end design you want.
 
-<sub>* Conditions apply, In order to use full compatibility Meiling Gatekeeper provides with OpenID, you need to follow some specs.</sub>
+<sub>* Conditions apply, In order to use full compatibility meiliNG provides with OpenID, you need to follow some specs.</sub>
 
 ### Written in Node.JS
 meiliNG is written in Node.JS and TypeScript, that you can  understand easily. Tweak it whatever you want.
@@ -45,7 +45,7 @@ meiliNG supports Docker, PM2 out of the box. You just need to run it whatever yo
 ### Modern but compatible
 meiliNG provides Modern APIs, but also provides great compatibility* with oAuth2 and OpenID specifications**.
 
-<sub>* Your mileage may vary due to your server configuration. Also, Meiling gatekeeper is not finalized yet. expect bugs.
+<sub>* Your mileage may vary due to your server configuration. Also, meiliNG is not finalized yet. expect bugs.
 </sub>  
 <sub>** meiliNG is <a href="https://user-images.githubusercontent.com/27724108/123002109-7abecf80-d3ec-11eb-85c8-5a349fe152c0.png">not OpenID Certified</a> at the moment. Please refer to <a href="https://github.com/meiling-gatekeeper/meiling/issues/16">Issue #16</a> for more information.</sub>
 

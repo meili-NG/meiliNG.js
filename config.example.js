@@ -13,7 +13,7 @@ module.exports = {
     /** OPENID JWT encryption/decryption key. */
     jwt: {
       algorithm: 'RS256',
-      keyId: 'Meiling Gatekeeper OpenID Signature Key',
+      keyId: 'meiliNG OpenID Signature Key',
       publicKey: {
         key: '',
         passphrase: undefined,

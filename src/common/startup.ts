@@ -46,7 +46,7 @@ export function checkIDTokenIssueCredentials(): true | string {
     console.log();
     console.warn(
       chalk.redBright(chalk.bold('!IMPORTANT!')),
-      'By current setting, Meiling gatekeeper is generating signing key for OpenID ID Token on runtime.',
+      'By current setting, meiliNG is generating signing key for OpenID ID Token on runtime.',
     );
     Log.warn(
       'This is a BAD PRACTICE and due to how JWT verifications work, All id_tokens issued on this session will be invalidated after restart.',

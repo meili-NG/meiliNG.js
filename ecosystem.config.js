@@ -15,7 +15,7 @@ if (keyOption) keyOption += '-i "' + keyFile + '"';
 module.exports = {
   apps: [
     {
-      name: 'Meiling Gatekeeper',
+      name: 'meiliNG',
       cwd: '.',
       script: 'yarn',
       args: ['start', '--no-cleanup'],
@@ -33,7 +33,7 @@ module.exports = {
       user: process.env.DEPLOY_PRODUCTION_USER,
       host: process.env.DEPLOY_PRODUCTION_HOST,
       ref: 'origin/main',
-      repo: 'https://github.com/meiling-gatekeeper/meiling',
+      repo: 'https://github.com/meili-ng/meiliNG',
       path: process.env.DEPLOY_PRODUCTION_PATH,
       'pre-deploy-local': `node deploy-env.production.js`,
       'post-deploy': `yarn && yarn build && yarn generate && yarn prisma migrate deploy && pm2 startOrRestart ecosystem.config.js`,

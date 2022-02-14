@@ -7,12 +7,12 @@ import { NodeEnvironment } from '../../interface';
 import { Utils } from '..';
 
 export const showBanner = (): void => {
-  console.log(Figlet.textSync('Meiling', 'Small Slant'));
+  console.log(Figlet.textSync('meiliNG', 'Small Slant'));
   console.log();
-  console.log(`${chalk.bold('Meiling Gatekeeper')} - ${chalk.italic(`ver. ${packageJson.version}`)}`);
+  console.log(`${chalk.bold('meiliNG')} - ${chalk.italic(`ver. ${packageJson.version}`)}`);
   console.log(chalk.cyan(chalk.underline(packageJson.repository)));
   console.log();
-  console.log(`Copyright © Meiling Gatekeeper Contributors`);
+  console.log(`Copyright © meiliNG Contributors`);
   console.log(
     `Built with ${chalk.redBright('<3')} by ${chalk.cyan('Stella')} ${chalk.blue('IT')} ${chalk.magenta(
       'Inc.',

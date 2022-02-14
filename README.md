@@ -37,7 +37,7 @@ meiliNG is written in Node.JS and TypeScript, that you can  understand easily. T
 ### Extensible Database with [Prisma](https://prisma.io)
 meiliNG utilizes [Prisma](https://github.com/prisma/prisma), an ORM designed for Node.JS and TypeScript that you can easily extend databases. You can modify and extend databases whatever you want*.
 
-<sub>* Conditions apply, Customizing Database Schema can lead to drift if later versions of Meiling uses different schema, In that case you need to create migrations manually.</sub>
+<sub>* Conditions apply, Customizing Database Schema can lead to drift if later versions of meiliNG uses different schema, In that case you need to create migrations manually.</sub>
 
 ### Built for Modern Infrastructures
 meiliNG supports Docker, PM2 out of the box. You just need to run it whatever you want*.
@@ -60,12 +60,12 @@ meiliNG's API Structure was designed after Google's oAuth2 API.
 If you are familiar with it, Using meiliNG needs just a little code change.  
 
 
-## See Meiling in Production
+## See meiliNG in Production
 
 ### [Stella IT Accounts](https://accounts.stella-it.com)
 > With **its flexibility,** Stella IT can provide **fully home-grown front-end and design** for account system which totally reflects Stella IT's Brand Design and Design Language.
 
-Currently, Stella IT Accounts automatically uses the latest stable version of Meiling by default.  
+Currently, Stella IT Accounts automatically uses the latest stable version of meiliNG by default.  
 <a href="https://github.com/meili-ng/meiliNG/actions/workflows/deploy-s4ait-production.yml"><img src="https://github.com/meili-ng/meiliNG/actions/workflows/deploy-s4ait-production.yml/badge.svg" /></a>
 <p align="right">- <a href="https://github.com/Alex4386">Alex4386</a> - <b>Stella IT Inc.</b></p>
 

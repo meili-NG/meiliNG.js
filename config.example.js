@@ -69,7 +69,7 @@ module.exports = {
     },
   },
   session: {
-    /** Configures Version 1 of the Meiling Session */
+    /** Configures Version 1 of the meiliNG Session */
     v1: {
       /** Maximum Age of Session (in seconds) */
       maxAge: 604800,

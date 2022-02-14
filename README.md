@@ -3,7 +3,7 @@
   <strong>An Opensource Next Generation "Gatekeeper" with oAuth2 Authentication Provider and OpenID Connect Server</strong>
 </p>
 <p align="center">
-  meiliNG is a very flexible, open-source, node.js "Gatekeeper" for next-generation with oAuth2 and OpenID support.
+  meiliNG is a very flexible, open-source "Gatekeeper" for next-generation with oAuth2 and OpenID support written in Node.JS.
 </p>
 
 <p align="center">

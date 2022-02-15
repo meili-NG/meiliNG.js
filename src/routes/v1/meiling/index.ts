@@ -20,6 +20,7 @@ function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done:
   app.addSchema({
     $id: 'MeilingV1Error',
     type: 'object',
+    required: ['type'],
     properties: {
       type: { type: 'string', enum: Object.values(Meiling.V1.Error.ErrorType) },
       description: { type: 'string' },
@@ -40,7 +41,6 @@ function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done:
       if (_err.validation) {
         // if it is validation issue, the error type is INVALID_REQUEST
         const error = new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
-        console.error(_err);
         error.loadError(_err);
 
         return error.sendFastify(rep);

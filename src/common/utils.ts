@@ -95,12 +95,16 @@ export interface MeilingV1SignupName {
   middleName?: string;
 }
 
+export const usernameRegex = /^[A-Za-z0-9-_\.]+$/g;
+export const minPasswordLength = 8;
+
 export function isValidUsername(username: string): boolean {
-  return /^[A-Za-z0-9-_\.]+$/g.test(username);
+  usernameRegex.lastIndex = 0;
+  return usernameRegex.test(username);
 }
 
 export function isValidPassword(password: string): boolean {
-  return password.length >= 8;
+  return password.length >= minPasswordLength;
 }
 
 export function isValidEmail(email: string): boolean {

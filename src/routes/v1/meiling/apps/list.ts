@@ -7,7 +7,7 @@ async function appListHandler(req: FastifyRequest, rep: FastifyReply): Promise<v
 
   const users = await Meiling.V1.Session.getLoggedIn(req);
   if (users.length === 0) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED);
     return;
   }
 

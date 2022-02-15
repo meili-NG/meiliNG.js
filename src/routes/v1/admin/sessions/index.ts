@@ -16,7 +16,7 @@ const sessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
         },
       });
 
-      if (!tokenData) return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      if (!tokenData) throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
       rep.send(tokenData);
       return;
     }
@@ -40,11 +40,7 @@ const sessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
       try {
         prismaQuery = JSON.parse(query);
       } catch (e) {
-        return Meiling.V1.Error.sendMeilingError(
-          rep,
-          Meiling.V1.Error.ErrorType.INVALID_REQUEST,
-          'invalid prisma query',
-        );
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
       }
     }
 

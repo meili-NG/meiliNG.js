@@ -14,7 +14,7 @@ async function permissionsPostHandler(_req: FastifyRequest, rep: FastifyReply): 
   } else if (permissionsRaw instanceof Array) {
     permissionsToAdd = permissionsRaw;
   } else {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 
@@ -42,8 +42,7 @@ async function permissionsPostHandler(_req: FastifyRequest, rep: FastifyReply): 
 
   const toAdd = permissionsToAdd.filter((n) => availables.includes(n));
   if (toAdd.length === 0) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED,
       'provided permissions array does not provide available permissions',
     );

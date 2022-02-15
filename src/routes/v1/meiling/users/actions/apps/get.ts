@@ -13,7 +13,7 @@ async function appGetHandler(req_: FastifyRequest, rep: FastifyReply): Promise<v
   };
 
   if (!req.status.authorized && !req.status.owned) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND);
   }
 
   if (req.status.authorized) {

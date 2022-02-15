@@ -14,7 +14,7 @@ async function permissionsDeleteHandler(_req: FastifyRequest, rep: FastifyReply)
   } else if (permissionsRaw instanceof Array) {
     permissionsToRemove = permissionsRaw;
   } else {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 
@@ -32,8 +32,7 @@ async function permissionsDeleteHandler(_req: FastifyRequest, rep: FastifyReply)
 
   const toRemove = permissionsToRemove.filter((n) => permissions.includes(n));
   if (toRemove.length === 0) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED,
       'provided permissions array does not provide existing permissions',
     );

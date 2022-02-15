@@ -76,7 +76,7 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
         prismaQuery = JSON.parse(query);
       } catch (e) {
         if (rawQuery) {
-          Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
+          throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
           return;
         } else if (typeof query === 'string') {
           prismaQuery = queryBuilder(query);
@@ -105,15 +105,14 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
     // TODO: add endpoints to allow CRUD operations on user's authentication method by admin
 
     const data = req.body as any;
-    if (!data)
-      return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Body');
+    if (!data) throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Body');
 
     const hasRequirementsMet = Utils.isNotBlank(data.username);
 
     if (!hasRequirementsMet)
-      return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Username');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Username');
     if (!Utils.isValidName(data.name))
-      return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Name');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Name');
 
     const name = data.name;
 
@@ -140,7 +139,7 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
         prismaQuery = JSON.parse(query);
       } catch (e) {
         if (rawQuery) {
-          Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
+          throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
           return;
         } else if (typeof query === 'string') {
           prismaQuery = queryBuilder(query);
@@ -168,8 +167,7 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
 
     const user = await Meiling.Identity.User.getDetailedInfo(uuid);
     if (!user) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-      throw new Error('user not found');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND, 'User was not found');
     }
   });
 
@@ -178,8 +176,7 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
 
     const user = await Meiling.Identity.User.getDetailedInfo(uuid);
     if (!user) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-      throw new Error('user not found');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND, 'User was not found');
     }
 
     rep.send(user);
@@ -193,8 +190,7 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
 
     const user = await Meiling.Identity.User.getInfo(uuid);
     if (!user) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-      throw new Error('user not found');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND, 'User was not found');
     }
 
     await getPrismaClient().user.update({

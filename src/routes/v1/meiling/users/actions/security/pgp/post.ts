@@ -10,13 +10,13 @@ const dbType = Meiling.V1.Database.convertAuthentication(Meiling.V1.Interfaces.E
 async function userPGPPostKeys(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = await getUserFromActionRequest(req);
   if (!user) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED);
     return;
   }
 
   const { name, key } = (req.body as any) || {};
   if (!Utils.isNotBlank(name, key)) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 
@@ -50,7 +50,7 @@ async function userPGPPostKeys(req: FastifyRequest, rep: FastifyReply): Promise<
 
     rep.send({ success: true });
   } catch (e) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid pgp key');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid pgp key');
     return;
   }
 }

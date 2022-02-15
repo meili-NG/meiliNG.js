@@ -14,30 +14,29 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
 
   // validations
   if (!query.client_id) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'missing client_id');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'missing client_id');
     return;
   }
 
   if (!query.response_type) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'missing response_type');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'missing response_type');
     return;
   }
 
   if (!query.scope) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'missing scope');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'missing scope');
     return;
   }
 
   if (!query.redirect_uri) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'missing redirect_uri');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'missing redirect_uri');
     return;
   }
 
   // get userData of selected user
   const userData = await Meiling.Identity.User.getDetailedInfo(userBase);
   if (!userData) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR,
       'unable to fetch user from DB.',
     );
@@ -48,8 +47,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
   const clientId = query.client_id;
   const client = await Meiling.OAuth2.Client.getByClientId(clientId);
   if (client === null) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND,
       'oAuth2 application with specified client_id does not exist',
     );
@@ -59,8 +57,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
   // load access control
   const acl = await Meiling.OAuth2.Client.getAccessControl(clientId);
   if (!acl) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR,
       'Failed to get Access Control from Server.',
     );
@@ -70,8 +67,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
   // is this user able to pass client check
   const clientPrivateCheck = await Meiling.OAuth2.ClientAccessControls.checkUsers(acl, userBase);
   if (!clientPrivateCheck) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.UNAUTHORIZED,
       'specified oAuth2 application is inaccessible',
     );
@@ -101,8 +97,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
     .filter((j) => j !== undefined);
   if (unsupportedScopes.length > 0) {
     // invalid permissions found!
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.UNSUPPORTED_SCOPE,
       `the scope: (${unsupportedScopes.join(' ')}) is not supported`,
     );
@@ -112,16 +107,14 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
   const areScopesAllowed = await Meiling.OAuth2.ClientAccessControls.checkPermissions(acl, requestedPermissions);
   if (areScopesAllowed !== true) {
     if (areScopesAllowed === false) {
-      Meiling.V1.Error.sendMeilingError(
-        rep,
+      throw new Meiling.V1.Error.MeilingError(
         Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR,
         'Failed to get Access Control from Server.',
       );
       return;
     } else {
       const deniedScopes = areScopesAllowed.map((n) => n.name);
-      Meiling.V1.Error.sendMeilingError(
-        rep,
+      throw new Meiling.V1.Error.MeilingError(
         Meiling.V1.Error.ErrorType.APPLICATION_NOT_AUTHORIZED_SCOPES,
         `the scope (${deniedScopes.join(' ')}) is not authorized`,
       );
@@ -141,8 +134,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
   // if no redirectUri rule that meets user provided redirectUri
   if (!redirectUriCheck) {
     // callback match failed
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.APPLICATION_REDIRECT_URI_INVALID,
       `${query.redirect_uri} is not in pre-defined redirect uri.`,
     );
@@ -154,8 +146,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
   let code_challenge = false;
   if (query.code_challenge || query.code_challenge_method) {
     if (!Utils.isValidValue(query.code_challenge, query.code_challenge_method)) {
-      Meiling.V1.Error.sendMeilingError(
-        rep,
+      throw new Meiling.V1.Error.MeilingError(
         Meiling.V1.Error.ErrorType.INVALID_REQUEST,
         `code_challenge should send code_challenge_method too.`,
       );
@@ -163,8 +154,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
     }
 
     if (query.code_challenge_method !== 'S256' && query.code_challenge_method !== 'plain') {
-      Meiling.V1.Error.sendMeilingError(
-        rep,
+      throw new Meiling.V1.Error.MeilingError(
         Meiling.V1.Error.ErrorType.INVALID_REQUEST,
         `code_challenge_method should be S256 or plain`,
       );
@@ -173,8 +163,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
 
     if (query.code_challenge_method === 'S256') {
       if (!Utils.checkBase64(query.code_challenge as string)) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.INVALID_REQUEST,
           `code_challenge should be base64 encoded sha256 hash string`,
         );
@@ -229,8 +218,7 @@ export async function meilingV1OAuthClientAuthHandler(req: FastifyRequest, rep: 
     });
     return;
   } else {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.INVALID_REQUEST,
       'invalid response_type: (' + query.response_type + ') .',
     );

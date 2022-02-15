@@ -3,7 +3,7 @@
   "version": "0.8.4",
   "description": "An Opensource Next Generation \"Gatekeeper\" with oAuth2 Authentication Provider and OpenID Connect Server",
   "main": "dist/",
-  "repository": "https://github.com/meili-ng/meiliNG",
+  "repository": "https://github.com/meili-NG/meiliNG",
   "author": "Alex4386 <psh010209@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -57,7 +57,8 @@
     "build": "swc src --out-dir dist/ --sync",
     "build:types": "tsc",
     "build:docker": "docker build .",
-    "start:dev": "nodemon",
+    "dev": "nodemon",
+    "start:dev": "swc src --out-dir dist/ --sync && node ./dist/",
     "start:prod": "swc src --out-dir dist/ --sync && NODE_ENV=production node ./dist/",
     "start": "NODE_ENV=production node ./dist/",
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",

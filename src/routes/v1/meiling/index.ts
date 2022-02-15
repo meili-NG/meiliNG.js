@@ -17,6 +17,33 @@ export interface FastifyRequestWithSession extends FastifyRequest {
 }
 
 function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+  app.setErrorHandler(async (_err, req, rep) => {
+    const err = _err as Error;
+    if ((err as Meiling.V1.Error.MeilingError)._isMeiling === true) {
+      const mlError = err as Meiling.V1.Error.MeilingError;
+
+      return mlError.sendFastify(rep);
+    } else {
+      // This is internal server error.
+      if (_err.validation) {
+        // if it is validation issue, the error type is INVALID_REQUEST
+        const error = new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+        error.loadError(_err);
+
+        return error.sendFastify(rep);
+      } else {
+        const error = new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR);
+        error.loadError(_err);
+
+        return error.sendFastify(rep);
+      }
+    }
+  });
+
+  app.setNotFoundHandler((req, rep) => {
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
+  });
+
   app.register(fastifyCors, {
     origin: config.node.environment === NodeEnvironment.Development ? '*' : config.frontend.url,
   });
@@ -38,7 +65,7 @@ function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
   app.addHook('onRequest', async (req, rep) => {
     const session = await Meiling.V1.Session.getSessionFromRequest(req);
     if (!session) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_SESSION);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_SESSION);
       throw new Error();
     }
 

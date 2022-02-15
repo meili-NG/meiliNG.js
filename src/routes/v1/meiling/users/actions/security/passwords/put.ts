@@ -10,21 +10,20 @@ export async function userPasswordUpdateHandler(req: FastifyRequest, rep: Fastif
 
   const body = req.body as PasswordChangeBody;
   if (!Utils.isValidValue(body, body?.password, body?.newPassword)) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid body.');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid body.');
     return;
   }
 
   const password = body.password;
   const passwordRowsToChange = await Meiling.Identity.User.checkPassword(user, password);
   if (passwordRowsToChange.length === 0) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.WRONG_PASSWORD, 'wrong password.');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.WRONG_PASSWORD, 'wrong password.');
     return;
   }
 
   const newPassword = body.newPassword;
   if ((await Meiling.Identity.User.checkPassword(user, newPassword)).length > 0) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.EXISTING_PASSWORD,
       'existing password is used as new password.',
     );

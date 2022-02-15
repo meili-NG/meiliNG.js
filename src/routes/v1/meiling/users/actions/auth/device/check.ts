@@ -18,7 +18,7 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
   // validate
   if (!Utils.isValidValue(query, query.user_code)) {
     if (!Utils.isValidValue(body, body.user_code)) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'missing user_code.');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'missing user_code.');
       return;
     }
 
@@ -28,8 +28,7 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
   // get userData of selected user
   const userData = await Meiling.Identity.User.getDetailedInfo(userBase);
   if (!userData) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR,
       'unable to fetch user from DB.',
     );
@@ -53,7 +52,7 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
       query.user_code,
   );
   if (matchingUserCodes.length === 0) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'no matching user_code found');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'no matching user_code found');
     return;
   }
 
@@ -61,8 +60,7 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
 
   const client = await Meiling.OAuth2.ClientAuthorization.getClient(userCode.authorizationId);
   if (!client) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND,
       'unable to find proper client',
     );
@@ -71,8 +69,7 @@ export async function deviceCodeCheckHandler(req: FastifyRequest, rep: FastifyRe
 
   const authorization = await Meiling.OAuth2.ClientAuthorization.getById(userCode.authorizationId);
   if (!authorization) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.UNAUTHORIZED,
       "specified oAuth2 application didn't requested this authorization session",
     );

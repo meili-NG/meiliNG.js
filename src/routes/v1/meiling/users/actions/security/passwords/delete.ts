@@ -9,7 +9,7 @@ export async function userPasswordDeleteHandler(req: FastifyRequest, rep: Fastif
   const body = req.body as PasswordBody;
 
   if (!body?.password) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid request.');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid request.');
     return;
   }
 

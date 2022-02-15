@@ -32,7 +32,7 @@ const appsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
         prismaQuery = JSON.parse(query);
       } catch (e) {
         if (rawQuery) {
-          Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
+          throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
           return;
         } else if (typeof query === 'string') {
           prismaQuery = queryBuilder(query);

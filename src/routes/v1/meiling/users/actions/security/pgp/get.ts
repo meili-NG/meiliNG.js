@@ -8,7 +8,7 @@ const dbType = Meiling.V1.Database.convertAuthentication(Meiling.V1.Interfaces.E
 async function userPGPGetKeys(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = await getUserFromActionRequest(req);
   if (!user) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED);
     return;
   }
 

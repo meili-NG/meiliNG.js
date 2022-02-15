@@ -7,8 +7,7 @@ async function appDeleteHandler(req_: FastifyRequest, rep: FastifyReply): Promis
   const req = req_ as MeilingV1ClientRequest;
 
   if (!req.status.owned) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.UNAUTHORIZED,
       "you don't have permission to do this.",
     );

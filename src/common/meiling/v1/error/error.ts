@@ -4,7 +4,7 @@ import { NodeEnvironment } from '../../../../interface';
 import config from '../../../../resources/config';
 import { ErrorResponse } from './interface';
 import { ErrorType } from './type';
-import { Error } from '../..';
+import { Error as CommonError } from '../..';
 
 function getMeilingErrorStatusCode(type: ErrorType) {
   switch (type) {
@@ -80,16 +80,67 @@ function getMeilingErrorStatusCode(type: ErrorType) {
   ((n: never) => { })(type);
 }
 
-export function sendMeilingError(rep: FastifyReply, type: ErrorType, description?: string, code?: string): void {
-  if (config.node.environment === NodeEnvironment.Development)
-    console.error(chalk.red('[ERROR]'), 'Error Report', type);
+// TODO: implement throws
+export class MeilingError extends Error {
+  public _isMeiling: true = true;
 
-  const statusCode = getMeilingErrorStatusCode(type);
+  public type: ErrorType;
+  public description?: string;
+  public details?: any;
+  public debug?: any;
 
-  rep.status(statusCode).send({
-    type,
-    description,
-    code,
-    url: Error.buildErrorCodeURL(code),
-  } as ErrorResponse);
+  constructor(type: ErrorType, description?: string, details?: any, debug?: any) {
+    super(description);
+    this.type = type;
+    this.name = 'meiliNG Error';
+    this.message = description ? description : type;
+    this.description = description;
+    this.details = details;
+    this.debug = debug;
+  }
+
+  public toString() {
+    return this.description;
+  }
+
+  public static load(error: MeilingError) {
+    const mlError = new MeilingError(error.type, error.description, error.details, error.debug);
+    console.log(mlError);
+
+    return mlError;
+  }
+
+  public loadError(error: Error) {
+    this.name = error.name;
+    this.message = error.message;
+    this.description = error.message;
+    this.stack = error.stack;
+  }
+
+  public serialize(): ErrorResponse {
+    let base: ErrorResponse = {
+      type: this.type,
+      description: this.description,
+      details: this.details,
+    };
+
+    if (config.node.environment === NodeEnvironment.Development) {
+      base = {
+        ...base,
+        debug: this.debug,
+        stack: this.stack,
+      };
+    }
+
+    return base;
+  }
+
+  public getStatusCode() {
+    const type = this.type;
+    return getMeilingErrorStatusCode(type);
+  }
+
+  public sendFastify(rep: FastifyReply) {
+    rep.status(this.getStatusCode()).send(this.serialize());
+  }
 }

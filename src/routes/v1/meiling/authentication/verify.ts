@@ -31,7 +31,7 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
   const body = req.body as MeilingV1VerificationQuery;
 
   if (!session.authenticationStatus) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED);
     return;
   }
 
@@ -41,7 +41,7 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
 
   if (body.type === 'phone') {
     if (!session.authenticationStatus.phone) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED);
       return;
     }
 
@@ -55,7 +55,7 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
 
     if (code) {
       if (!session.authenticationStatus.email) {
-        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED);
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED);
         return;
       }
 
@@ -69,7 +69,7 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
       });
 
       if (!data) {
-        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid token');
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid token');
         return;
       }
 
@@ -78,7 +78,7 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
       expiresAt = data.expiresAt;
     }
   } else {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 
@@ -86,7 +86,7 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
     createdAt = createdAt === undefined ? createdAt : new Date(createdAt);
     expiresAt = new Date(createdAt.getTime() + config.token.invalidate.meiling.CHALLENGE_TOKEN * 1000);
   } else if (!expiresAt) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 
@@ -101,7 +101,7 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
         session.authenticationStatus.email.isVerified = true;
         to = session.authenticationStatus.email.to;
       } else {
-        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNSUPPORTED_AUTHENTICATION_TYPE);
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNSUPPORTED_AUTHENTICATION_TYPE);
         return;
       }
 
@@ -111,11 +111,11 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
         to,
       });
     } else {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.AUTHENTICATION_TIMEOUT);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.AUTHENTICATION_TIMEOUT);
       return;
     }
   } else {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_INVALID);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_INVALID);
     return;
   }
 

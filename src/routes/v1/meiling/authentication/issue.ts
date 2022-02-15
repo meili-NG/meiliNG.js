@@ -33,7 +33,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
     if (body.type === 'email') {
       const email = body.to;
       if (!Utils.isValidEmail(email)) {
-        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'email is not valid');
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'email is not valid');
         return;
       }
 
@@ -46,8 +46,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
           if (
             Meiling.V1.Challenge.isChallengeRateLimited(Meiling.V1.Interfaces.ExtendedAuthMethods.EMAIL, prevCreatedAt)
           ) {
-            Meiling.V1.Error.sendMeilingError(
-              rep,
+            throw new Meiling.V1.Error.MeilingError(
               Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_RATE_LIMITED,
               'old token is still valid for email verification. rate_limited',
             );
@@ -94,7 +93,10 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
       const phone = libphonenumberJs(body.to);
 
       if (!phone) {
-        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'phone number is not valid');
+        throw new Meiling.V1.Error.MeilingError(
+          Meiling.V1.Error.ErrorType.INVALID_REQUEST,
+          'phone number is not valid',
+        );
         return;
       }
 
@@ -107,8 +109,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
           if (
             Meiling.V1.Challenge.isChallengeRateLimited(Meiling.V1.Interfaces.ExtendedAuthMethods.SMS, prevCreatedAt)
           ) {
-            Meiling.V1.Error.sendMeilingError(
-              rep,
+            throw new Meiling.V1.Error.MeilingError(
               Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_RATE_LIMITED,
               'old token is still valid for phone authorization. rate_limited',
             );
@@ -158,12 +159,11 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
         },
       });
     } else {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNSUPPORTED_AUTHENTICATION_TYPE);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNSUPPORTED_AUTHENTICATION_TYPE);
       return;
     }
   } catch (e) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR,
       'Failed to communicate with Server',
     );

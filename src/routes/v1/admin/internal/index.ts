@@ -17,7 +17,7 @@ const internalAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
       rep.send({ success: true });
     } catch (e) {
       console.error(e);
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR);
     }
   });
 

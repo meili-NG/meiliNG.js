@@ -30,7 +30,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     const body = req.body as UserPhoneRegisterInterface | undefined;
 
     if (!body?.phone || typeof body.phone !== 'string') {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
       return;
     }
 
@@ -41,7 +41,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     const phone = libPhoneNumberJs(body.phone);
 
     if (!phone) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
       return;
     }
 
@@ -54,7 +54,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     ).filter((n) => n.phone === phone.formatInternational());
 
     if (matchingPhones.length > 0) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.CONFLICT, 'phone number already exists');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.CONFLICT, 'phone number already exists');
       return;
     }
 
@@ -72,8 +72,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       );
 
       if (othersPrimaryPhones.length > 0 && body.force !== true) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.CONFLICT,
           'there is other user who is using this phone as primary phone',
         );
@@ -127,7 +126,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     });
 
     if (phone === null) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 
@@ -152,7 +151,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     });
 
     if (phone === null) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 
@@ -161,7 +160,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     if (typeof body.phone === 'string') {
       const phoneNumberObj = libPhoneNumberJs(body.phone);
       if (!phoneNumberObj) {
-        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
         return;
       }
 
@@ -182,8 +181,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       );
 
       if (othersPrimaryPhones.length > 0) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.CONFLICT,
           'there is other user who is using this phone as primary phone',
         );
@@ -225,13 +223,12 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       });
 
       if (phone === null) {
-        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
         return;
       }
 
       if (phone.isPrimary) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.CONFLICT,
           'you should assign new primary number before deleting it',
         );

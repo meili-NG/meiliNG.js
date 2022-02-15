@@ -10,7 +10,7 @@ async function appInfoHandler(req: FastifyRequest, rep: FastifyReply) {
     const client = await Meiling.OAuth2.Client.getByClientId(clientId);
     const acl = await Meiling.OAuth2.Client.getAccessControl(clientId);
     if (!client || !acl) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND);
       return;
     }
 
@@ -19,7 +19,7 @@ async function appInfoHandler(req: FastifyRequest, rep: FastifyReply) {
       // If no user access controls, returning client info.
       if (!acl.userAclId) rep.send(Meiling.OAuth2.Client.sanitize(client));
       // If not, returning unauthorized error.
-      else Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+      else throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED);
       return;
     }
 
@@ -29,14 +29,14 @@ async function appInfoHandler(req: FastifyRequest, rep: FastifyReply) {
     }
 
     if (!shouldShow) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED);
       return;
     }
 
     rep.send(Meiling.OAuth2.Client.sanitize(client));
     return;
   } else {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 }

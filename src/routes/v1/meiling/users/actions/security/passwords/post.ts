@@ -8,13 +8,13 @@ export async function userPasswordCreateHandler(req: FastifyRequest, rep: Fastif
 
   const body = req.body as PasswordBody;
   if (!Utils.isValidValue(body, body?.password)) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid body.');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid body.');
     return;
   }
 
   const password = body.password;
   if ((await Meiling.Identity.User.checkPassword(user, password)).length > 0) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.EXISTING_PASSWORD, 'existing password.');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.EXISTING_PASSWORD, 'existing password.');
     return;
   }
 

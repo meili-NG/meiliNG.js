@@ -19,8 +19,10 @@ function authorizedAppsActionsPlugin(app: FastifyInstance, opts: FastifyPluginOp
     const req = _req as MeilingV1ClientRequest;
 
     if (!req.status.authorized) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
-      throw new Error('Unauthorized!');
+      throw new Meiling.V1.Error.MeilingError(
+        Meiling.V1.Error.ErrorType.UNAUTHORIZED,
+        'User has not authorized this application.',
+      );
     }
 
     done();
@@ -37,8 +39,10 @@ function appOwnerActionsPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
     const req = _req as MeilingV1ClientRequest;
 
     if (!req.status.owned) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
-      throw new Error('Unauthorized!');
+      throw new Meiling.V1.Error.MeilingError(
+        Meiling.V1.Error.ErrorType.UNAUTHORIZED,
+        'User is not owner of this application.',
+      );
     }
 
     done();

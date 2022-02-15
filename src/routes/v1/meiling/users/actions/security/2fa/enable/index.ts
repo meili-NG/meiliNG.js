@@ -8,7 +8,7 @@ function user2FAEnablePlugin(app: FastifyInstance, opts: FastifyPluginOptions, d
   app.get('/', async (req, rep) => {
     const user = await getUserFromActionRequest(req);
     if (!user) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED);
       return;
     }
 
@@ -20,7 +20,7 @@ function user2FAEnablePlugin(app: FastifyInstance, opts: FastifyPluginOptions, d
   app.post('/', async (req, rep) => {
     const user = await getUserFromActionRequest(req);
     if (!user) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED);
       return;
     }
 
@@ -87,8 +87,7 @@ function user2FAEnablePlugin(app: FastifyInstance, opts: FastifyPluginOptions, d
     const twoFactorReadyMethods = currentAvailables.filter((n) => n.available && n.enabled['2fa']);
 
     if (twoFactorReadyMethods.length === 0) {
-      Meiling.V1.Error.sendMeilingError(
-        rep,
+      throw new Meiling.V1.Error.MeilingError(
         Meiling.V1.Error.ErrorType.UNSUPPORTED_SIGNIN_METHOD,
         'there is no 2fa supported method to login',
       );
@@ -110,7 +109,7 @@ function user2FAEnablePlugin(app: FastifyInstance, opts: FastifyPluginOptions, d
   app.delete('/', async (req, rep) => {
     const user = await getUserFromActionRequest(req);
     if (!user) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED);
       return;
     }
 

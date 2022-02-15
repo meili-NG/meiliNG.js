@@ -16,7 +16,7 @@ export async function validatePGPSign(
     try {
       message = await OpenPGP.message.readArmored(challengeResponse);
     } catch (e) {
-      throw new Error('');
+      throw new Error('Unable to parse PGP Signature');
     }
   }
 

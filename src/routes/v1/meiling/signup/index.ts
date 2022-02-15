@@ -6,7 +6,7 @@ import { signupHandler } from './signup';
 export function signupPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.addHook('onRequest', (req, rep, next) => {
     if (!config.meiling.signup.enabled) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED, 'Signup is disabled');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED, 'Signup is disabled');
       return;
     }
 

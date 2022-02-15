@@ -40,8 +40,10 @@ export function userAppsActionsPlugin(app: FastifyInstance, opts: FastifyPluginO
     const authorized = userDetail.authorizedApps.filter((n) => n.id === clientId).length > 0;
 
     if (!owned && !authorized) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND);
-      throw new Error('You do not own/authorized this');
+      throw new Meiling.V1.Error.MeilingError(
+        Meiling.V1.Error.ErrorType.APPLICATION_NOT_FOUND,
+        'User has not authorized this application yet',
+      );
     }
 
     const client = (await Meiling.OAuth2.Client.getByClientId(clientId)) as OAuthClient;

@@ -24,10 +24,10 @@ export function setupSwaggerUI(app: FastifyInstance) {
       ],
       components: {
         securitySchemes: {
-          apiKey: {
-            type: 'apiKey',
-            name: 'apiKey',
-            in: 'header',
+          sessionV1: {
+            type: 'http',
+            description: 'Session Token for Meiling V1 Endpoints',
+            scheme: 'bearer',
           },
         },
       },

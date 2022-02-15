@@ -29,7 +29,10 @@ const main = async () => {
   Terminal.Log.info('Registering for Fastify Handler for form handling...');
   app.register(fastifyFormbody);
 
-  Terminal.Log.info('Testing database connection...');
+  Terminal.Log.info('Preparing SwaggerUI for API Docs...');
+  setupSwaggerUI(app);
+
+  Terminal.Log.info('Initiating database connection...');
   if (!(await Meiling.Database.testDatabase())) {
     Terminal.Log.error('Failed to connect! Please check if database is online.');
     process.exit(1);
@@ -50,9 +53,6 @@ const main = async () => {
       fs.unlinkSync(config.fastify.listen);
     }
   }
-
-  Terminal.Log.info('Preparing SwaggerUI for API Docs...');
-  setupSwaggerUI(app);
 
   Terminal.Log.info('Starting up fastify...');
   await app.listen(config.fastify.listen, config.fastify.address);

@@ -35,4 +35,37 @@ export function setupSwaggerUI(app: FastifyInstance) {
     hideUntagged: true,
     exposeRoute: true,
   });
+
+  app.addSchema({
+    $id: 'Any',
+    anyOf: [
+      {
+        type: 'string',
+        nullable: true,
+      },
+      {
+        type: 'number',
+        nullable: true,
+      },
+      {
+        type: 'boolean',
+        nullable: true,
+      },
+      {
+        type: 'integer',
+        nullable: true,
+      },
+      {
+        type: 'array',
+        items: {
+          $ref: 'Any#',
+        },
+        nullable: true,
+      },
+      {
+        type: 'object',
+        nullable: true,
+      },
+    ],
+  });
 }

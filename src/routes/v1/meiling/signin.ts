@@ -14,7 +14,6 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
     body = Utils.convertJsonIfNot<Meiling.V1.Interfaces.SigninBody>(req.body);
   } catch (e) {
     throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'body is not a valid JSON.');
-    return;
   }
 
   let userToLogin: UserModel;
@@ -23,7 +22,6 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
 
     if (username === undefined) {
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'body is missing username.');
-      return;
     }
 
     const users = await Meiling.Identity.User.findByCommonUsername(username);

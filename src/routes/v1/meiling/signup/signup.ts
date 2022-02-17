@@ -18,21 +18,7 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
   const session = (req as FastifyRequestWithSession).session;
   const body = req.body as MeilingV1Signup;
 
-  if (!Utils.isValidValue(body.username, body.email, body.phone, body.password)) {
-    // you are out.
-    throw new Meiling.V1.Error.MeilingError(
-      Meiling.V1.Error.ErrorType.INVALID_REQUEST,
-      `Invalid body (${['username', 'email', 'phone', 'password'].filter((n: string) => {
-        return Utils.isValidValue(body[n as keyof MeilingV1Signup]);
-      })})`,
-    );
-    return;
-  }
-
-  if (!Utils.isValidName(body.name)) {
-    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Name');
-    return;
-  }
+  // Validation no longer required
 
   const signupChallenge = await Meiling.V1.Session.getAuthenticationStatus(req);
 
@@ -51,36 +37,11 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
   const phone = libmobilephoneJs(body.phone);
   const username = body.username;
 
-  // check user input is valid.
-
-  if (!Utils.isValidUsername(username)) {
-    throw new Meiling.V1.Error.MeilingError(
-      Meiling.V1.Error.ErrorType.INVALID_REQUEST,
-      'Username should be consisting alphanumeric characters and _, -, .',
-    );
-    return;
-  }
-
-  if (!Utils.isValidPassword(password)) {
-    throw new Meiling.V1.Error.MeilingError(
-      Meiling.V1.Error.ErrorType.INVALID_REQUEST,
-      'password should contain at least 8 characters.',
-    );
-    return;
-  }
-
+  // check if phone input properly parsed.
   if (!phone) {
     throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.INVALID_REQUEST,
       'Phone number should be valid ITU compliant international number',
-    );
-    return;
-  }
-
-  if (!Utils.isValidEmail(email)) {
-    throw new Meiling.V1.Error.MeilingError(
-      Meiling.V1.Error.ErrorType.INVALID_REQUEST,
-      'Entered email is NOT a valid email.',
     );
     return;
   }

@@ -19,6 +19,7 @@ export interface FastifyRequestWithSession extends FastifyRequest {
 function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.addSchema({
     $id: 'MeilingV1Error',
+    description: 'Common error response of meiliNG',
     type: 'object',
     required: ['type'],
     properties: {
@@ -208,7 +209,60 @@ function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
 
   app.register(signupPlugin, { prefix: '/signup' });
 
-  app.post('/lost-password', lostPasswordHandler);
+  app.post(
+    '/lost-password',
+    {
+      schema: {
+        summary: 'Password Recovery (Lost Password)',
+        description: 'Provides Password recovery flow',
+        tags: ['meiling'],
+        security: [{ sessionV1: [] }],
+        params: {},
+        body: {
+          oneOf: [
+            {
+              type: 'object',
+              properties: {
+                password: { type: 'string' },
+              },
+              required: ['password'],
+            },
+            {
+              type: 'object',
+              properties: {
+                context: {
+                  type: 'object',
+                  properties: {
+                    username: { type: 'string' },
+                  },
+                  required: ['username'],
+                },
+                method: {
+                  type: 'string',
+                  enum: Object.values(Meiling.V1.Interfaces.ExtendedAuthMethods),
+                  nullable: true,
+                },
+                data: {
+                  type: 'object',
+                },
+              },
+              required: ['context'],
+            },
+            {},
+          ],
+        },
+        response: {
+          '4xx': {
+            $ref: 'MeilingV1Error#',
+          },
+          '5xx': {
+            $ref: 'MeilingV1Error#',
+          },
+        },
+      },
+    },
+    lostPasswordHandler,
+  );
 
   app.register(signoutPlugin, { prefix: '/signout' });
 

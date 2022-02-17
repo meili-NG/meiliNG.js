@@ -38,9 +38,15 @@ export async function userDelete(req: FastifyRequest, rep: FastifyReply) {
 
         await Promise.all(
           userSessions.map(async (n) => {
-            await getPrismaClient().meilingSessionV1Token.delete({
+            await getPrismaClient().meilingSessionV1Token.update({
               where: {
                 token: n.token,
+              },
+              data: {
+                session: {
+                  ...(n.session as any),
+                  user: (n.session as any).user.filter((o: { id: string }) => o.id !== user?.id),
+                },
               },
             });
           }),

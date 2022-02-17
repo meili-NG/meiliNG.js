@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
 import { Meiling } from '../../../../../common';
 import { userAppPlugin } from './apps';
 import { clientAuthPlugin } from './auth';
+import { userDelete } from './info/delete';
 import { userGetInfo } from './info/get';
 import { userUpdateInfo } from './info/put';
 import userSecurityPlugin from './security';
@@ -24,6 +25,7 @@ export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOpti
 
   app.get('/', userGetInfo);
   app.put('/', userUpdateInfo);
+  app.delete('/', userDelete);
 
   // TODO: Remove this later.
   // legacy compatibility reasons. will be deprecated in future.

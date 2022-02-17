@@ -44,11 +44,11 @@ model User {
   lockedProps  Json?
 
   createdAt          DateTime             @default(now())
+  deletedAt          DateTime?
+  
   lastSignIn         DateTime             @default(now())
   lastAuthenticated  DateTime             @default(now())
   ownedClientSecrets OAuthClientSecrets[]
-
-  isDeleted          Boolean              @default(false)
 
   metadata Json?
 }

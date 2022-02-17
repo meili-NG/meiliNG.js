@@ -80,8 +80,22 @@ export async function getBasicInfo(
   user: UserModel | string,
   queryOptions?: UserQueryOptions,
 ): Promise<UserModel | undefined> {
+  const deletedQuery = queryOptions?.includeDeleted
+    ? {}
+    : {
+        OR: [
+          {
+            deletedAt: null,
+          },
+          {
+            deletedAt: {
+              gte: new Date(),
+            },
+          },
+        ],
+      };
   const prismaQuery = {
-    isDeleted: queryOptions?.includeDeleted ? undefined : false,
+    ...deletedQuery,
   };
 
   const userDatabase = await getPrismaClient().user.findFirst({

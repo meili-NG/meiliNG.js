@@ -211,6 +211,54 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
     rep.send({ success: true });
   });
 
+  app.delete('/', async (req, rep) => {
+    const uuid = (req.params as { uuid: string }).uuid;
+    const user = await getPrismaClient().user.findUnique({
+      where: {
+        id: uuid,
+      },
+    });
+
+    if (user) {
+      await getPrismaClient().user.update({
+        where: {
+          id: uuid,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+
+      const userLoggedInJson = { id: user?.id };
+      const userSessions = await getPrismaClient().meilingSessionV1Token.findMany({
+        where: {
+          session: {
+            path: '$.user',
+            array_contains: userLoggedInJson,
+          },
+        },
+      });
+
+      await Promise.all(
+        userSessions.map(async (n) => {
+          await getPrismaClient().meilingSessionV1Token.delete({
+            where: {
+              token: n.token,
+            },
+          });
+        }),
+      );
+
+      rep.send({ success: true });
+      return;
+    } else {
+      throw new Meiling.V1.Error.MeilingError(
+        Meiling.V1.Error.ErrorType.NOT_FOUND,
+        'specified user was not available.',
+      );
+    }
+  });
+
   app.register(userEmailsAdminHandler, { prefix: '/emails' });
   app.register(userPhonesAdminHandler, { prefix: '/phones' });
   app.register(userSessionsAdminHandler, { prefix: '/sessions' });

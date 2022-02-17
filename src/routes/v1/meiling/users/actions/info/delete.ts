@@ -14,7 +14,7 @@ export async function userDelete(req: FastifyRequest, rep: FastifyReply) {
     if (userId && userId !== '') {
       const users = userRawSession.filter((n) => n.id === userId);
 
-      if (users.length === 1) {
+      if (users.length >= 1) {
         const user = await getSanitizedUser(users[0].id);
 
         await getPrismaClient().user.update({
@@ -25,6 +25,26 @@ export async function userDelete(req: FastifyRequest, rep: FastifyReply) {
             deletedAt: new Date(),
           },
         });
+
+        const userLoggedInJson = { id: user?.id };
+        const userSessions = await getPrismaClient().meilingSessionV1Token.findMany({
+          where: {
+            session: {
+              path: '$.user',
+              array_contains: userLoggedInJson,
+            },
+          },
+        });
+
+        await Promise.all(
+          userSessions.map(async (n) => {
+            await getPrismaClient().meilingSessionV1Token.delete({
+              where: {
+                token: n.token,
+              },
+            });
+          }),
+        );
 
         rep.send({ success: true });
         return;

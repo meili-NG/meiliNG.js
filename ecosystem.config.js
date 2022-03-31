@@ -32,7 +32,7 @@ module.exports = {
     production: {
       user: process.env.DEPLOY_PRODUCTION_USER,
       host: process.env.DEPLOY_PRODUCTION_HOST,
-      ref: 'origin/main',
+      ref: process.env.DEPLOY_PRODUCTION_REF || 'origin/main',
       repo: 'https://github.com/meili-ng/meiliNG',
       path: process.env.DEPLOY_PRODUCTION_PATH,
       'pre-deploy-local': `node deploy-env.production.js`,

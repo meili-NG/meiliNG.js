@@ -1,3 +1,5 @@
+export const nameStylized = 'meiliNG';
+
 export * as Meiling from './meiling';
 export * as Event from './event';
 export * as Terminal from './terminal';

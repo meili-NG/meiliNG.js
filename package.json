@@ -1,6 +1,6 @@
 {
   "name": "meiling",
-  "version": "0.8.4",
+  "version": "0.8.4-snapshot",
   "description": "An Opensource Next Generation \"Gatekeeper\" with oAuth2 Authentication Provider and OpenID Connect Server",
   "main": "dist/",
   "repository": "https://github.com/meili-NG/meiliNG",
@@ -18,6 +18,7 @@
     "fastify-cors": "^5.1.0",
     "fastify-formbody": "^5.0.0",
     "fastify-secure-session": "^2.3.0",
+    "fastify-swagger": "^4.15.0",
     "figlet": "^1.5.0",
     "jsonwebtoken": "^8.5.1",
     "libphonenumber-js": "^1.9.49",
@@ -69,7 +70,8 @@
     "migrate:redeploy": "prisma migrate reset --preview-feature; rm -rf ./prisma/migrations/; prisma migrate dev --preview-feature",
     "generate": "prisma generate",
     "keygen": "node ./keygen.js",
-    "cleanup": "node ./dist/cleanup.js"
+    "cleanup": "node ./dist/cleanup.js",
+    "env:setup": "NODE_OPTIONS=\"--es-module-specifier-resolution=node\""
   },
   "husky": {
     "hooks": {

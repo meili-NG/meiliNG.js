@@ -86,17 +86,13 @@ export class MeilingError extends Error {
 
   public type: ErrorType;
   public description?: string;
-  public details?: any;
-  public debug?: any;
 
-  constructor(type: ErrorType, description?: string, details?: any, debug?: any) {
+  constructor(type: ErrorType, description?: string) {
     super(description);
     this.type = type;
     this.name = 'meiliNG Error';
     this.message = description ? description : type;
     this.description = description;
-    this.details = details;
-    this.debug = debug;
   }
 
   public toString() {
@@ -104,7 +100,7 @@ export class MeilingError extends Error {
   }
 
   public static load(error: MeilingError) {
-    const mlError = new MeilingError(error.type, error.description, error.details, error.debug);
+    const mlError = new MeilingError(error.type, error.description);
     console.log(mlError);
 
     return mlError;
@@ -121,13 +117,11 @@ export class MeilingError extends Error {
     let base: ErrorResponse = {
       type: this.type,
       description: this.description,
-      details: this.details,
     };
 
     if (config.node.environment === NodeEnvironment.Development) {
       base = {
         ...base,
-        debug: this.debug,
         stack: this.stack,
       };
     }

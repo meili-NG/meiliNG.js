@@ -17,6 +17,20 @@ export interface FastifyRequestWithSession extends FastifyRequest {
 }
 
 function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+  app.addSchema({
+    $id: 'MeilingV1Error',
+    description: 'Common error response of meiliNG',
+    type: 'object',
+    required: ['type'],
+    properties: {
+      type: { type: 'string', enum: Object.values(Meiling.V1.Error.ErrorType) },
+      description: { type: 'string' },
+      details: { type: 'string' },
+      debug: { type: 'object', nullable: true },
+      stack: { type: 'string', nullable: true },
+    },
+  });
+
   app.setErrorHandler(async (_err, req, rep) => {
     const err = _err as Error;
     if ((err as Meiling.V1.Error.MeilingError)._isMeiling === true) {
@@ -66,16 +80,189 @@ function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
     const session = await Meiling.V1.Session.getSessionFromRequest(req);
     if (!session) {
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_SESSION);
-      throw new Error();
     }
 
     (req as FastifyRequestWithSession).session = session;
   });
 
-  app.post('/signin', signinHandler);
+  app.addSchema({
+    $id: 'MeilingV1SigninAuthnData',
+    type: 'object',
+    properties: {
+      method: { type: 'string', enum: Object.values(Meiling.V1.Interfaces.ExtendedAuthMethods), nullable: true },
+      challengeResponse: { type: 'string', nullable: true },
+      challengeContext: { $ref: 'Any#' },
+    },
+  });
+
+  app.post(
+    '/signin',
+    {
+      schema: {
+        description: 'Endpoint to sign-in current session into specified account',
+        tags: ['meiling'],
+        summary: 'Signin',
+        security: [{ sessionV1: [] }],
+        params: {},
+        body: {
+          oneOf: [
+            {
+              type: 'object',
+              properties: {
+                type: { type: 'string', enum: [Meiling.V1.Interfaces.SigninType.USERNAME_CHECK] },
+                data: {
+                  type: 'object',
+                  properties: {
+                    username: { type: 'string' },
+                  },
+                },
+              },
+            },
+            {
+              type: 'object',
+              properties: {
+                type: { type: 'string', enum: [Meiling.V1.Interfaces.SigninType.USERNAME_AND_PASSWORD] },
+                data: {
+                  type: 'object',
+                  properties: {
+                    username: { type: 'string' },
+                    password: { type: 'string' },
+                  },
+                },
+              },
+            },
+            {
+              type: 'object',
+              properties: {
+                type: { type: 'string', enum: [Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH] },
+                data: {
+                  $ref: 'MeilingV1SigninAuthnData#',
+                },
+              },
+            },
+          ],
+        },
+        response: {
+          200: {
+            oneOf: [
+              {
+                type: 'object',
+                description:
+                  '(on username check) When the user was previously logged in and matches only one user, returns abstract user info.',
+                properties: {
+                  success: { type: 'boolean' },
+                  data: {
+                    type: 'object',
+                    description: 'abstract user data',
+                    properties: {
+                      id: { type: 'string', format: 'uuid' },
+                      profileId: { type: 'string', format: 'uri', nullable: true },
+                      name: { type: 'string', nullable: true },
+                      username: { type: 'string' },
+                    },
+                    nullable: true,
+                  },
+                },
+              },
+              {
+                type: 'object',
+                description: '(on 2fa session) When user requests available 2fa methods, this is how meiliNG returns.',
+                properties: {
+                  methods: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      enum: Object.values(Meiling.V1.Interfaces.ExtendedAuthMethods),
+                    },
+                  },
+                },
+              },
+              {
+                type: 'object',
+                description:
+                  '(on 2fa session) When user requests challenge of 2fa, this is how server provides challenge or request user to reply with challenge',
+                properties: {
+                  to: { type: 'string', nullable: true },
+                  type: {
+                    type: 'string',
+                    enum: [
+                      Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH,
+                      Meiling.V1.Interfaces.SigninType.PASSWORDLESS,
+                    ],
+                  },
+                  challenge: { $ref: 'Any#' },
+                },
+              },
+            ],
+          },
+          '4xx': {
+            $ref: 'MeilingV1Error#',
+          },
+          '5xx': {
+            $ref: 'MeilingV1Error#',
+          },
+        },
+      },
+    },
+    signinHandler,
+  );
+
   app.register(signupPlugin, { prefix: '/signup' });
 
-  app.post('/lost-password', lostPasswordHandler);
+  app.post(
+    '/lost-password',
+    {
+      schema: {
+        summary: 'Password Recovery (Lost Password)',
+        description: 'Provides Password recovery flow',
+        tags: ['meiling'],
+        security: [{ sessionV1: [] }],
+        params: {},
+        body: {
+          oneOf: [
+            {
+              type: 'object',
+              properties: {
+                password: { type: 'string' },
+              },
+              required: ['password'],
+            },
+            {
+              type: 'object',
+              properties: {
+                context: {
+                  type: 'object',
+                  properties: {
+                    username: { type: 'string' },
+                  },
+                  required: ['username'],
+                },
+                method: {
+                  type: 'string',
+                  enum: Object.values(Meiling.V1.Interfaces.ExtendedAuthMethods),
+                  nullable: true,
+                },
+                data: {
+                  type: 'object',
+                },
+              },
+              required: ['context'],
+            },
+            {},
+          ],
+        },
+        response: {
+          '4xx': {
+            $ref: 'MeilingV1Error#',
+          },
+          '5xx': {
+            $ref: 'MeilingV1Error#',
+          },
+        },
+      },
+    },
+    lostPasswordHandler,
+  );
 
   app.register(signoutPlugin, { prefix: '/signout' });
 

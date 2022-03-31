@@ -127,3 +127,6 @@ config.js
 
 # use prisma db push
 prisma/migrations
+
+# Emacs Temp files
+*~

@@ -248,7 +248,7 @@ function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
               },
               required: ['context'],
             },
-            {},
+            // {},
           ],
         },
         response: {

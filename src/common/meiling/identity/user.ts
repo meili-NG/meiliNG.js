@@ -698,7 +698,7 @@ export async function createIDToken(
     return JWT.sign(jwtData, key, {
       algorithm,
       issuer: config.openid.issuingAuthority,
-      jwtid: config.openid.jwt.keyId,
+      keyid: config.openid.jwt.keyId,
     });
   } else {
     return undefined;

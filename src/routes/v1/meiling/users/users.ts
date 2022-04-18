@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { FastifyRequestWithSession } from '../../..';
-import { Meiling } from '../../../../../../common';
+import { FastifyRequestWithSession } from '..';
+import { Meiling } from '../../../../common';
 
 export async function userGetLoggedInUserInfo(req: FastifyRequest, rep: FastifyReply) {
   const session = (req as FastifyRequestWithSession).session;

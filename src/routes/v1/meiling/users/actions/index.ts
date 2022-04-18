@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
 import { Meiling } from '../../../../../common';
 import { userAppPlugin } from './apps';
 import { clientAuthPlugin } from './auth';
+import userEmailsPlugin from './emails';
 import { userDelete } from './info/delete';
 import { userGetInfo } from './info/get';
 import { userUpdateInfo } from './info/put';
@@ -33,6 +34,8 @@ export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOpti
   app.register(userPasswordsPlugin, { prefix: '/passwords' });
 
   app.register(clientAuthPlugin, { prefix: '/auth' });
+
+  app.register(userEmailsPlugin, { prefix: '/emails' });
   app.register(userAppPlugin, { prefix: '/apps' });
   app.register(userSecurityPlugin, { prefix: '/security' });
 

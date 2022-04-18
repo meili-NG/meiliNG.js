@@ -514,23 +514,43 @@ export async function addEmail(userId: string, email: string, isPrimary = false)
   });
 
   if (isPrimary) {
-    const prevPrimariesPromise = [];
-    for (const prevPrimary of prevPrimaries) {
-      prevPrimariesPromise.push(
-        getPrismaClient().email.update({
-          where: {
-            id: prevPrimary.id,
-          },
-          data: {
-            isPrimary: false,
-          },
-        }),
-      );
-    }
-    await Promise.all(prevPrimariesPromise);
+    await setPrimaryEmail(userId, email);
   }
 
   return true;
+}
+
+export async function setPrimaryEmail(userId: string, email: string) {
+  const emails = await getEmails(userId);
+
+  const targetEmail = emails.find((n) => n.email === email);
+  const prevPrimaries = emails.filter((n) => n.isPrimary);
+
+  if (!targetEmail) return false;
+
+  await getPrismaClient().email.update({
+    where: {
+      id: targetEmail.id,
+    },
+    data: {
+      isPrimary: true,
+    },
+  });
+
+  const prevPrimariesPromise = [];
+  for (const prevPrimary of prevPrimaries) {
+    prevPrimariesPromise.push(
+      getPrismaClient().email.update({
+        where: {
+          id: prevPrimary.id,
+        },
+        data: {
+          isPrimary: false,
+        },
+      }),
+    );
+  }
+  await Promise.all(prevPrimariesPromise);
 }
 
 export async function removeEmail(userId: string, email: string) {
@@ -581,23 +601,43 @@ export async function addPhone(userId: string, phone: string, isPrimary = false)
   });
 
   if (isPrimary) {
-    const prevPrimariesPromise = [];
-    for (const prevPrimary of prevPrimaries) {
-      prevPrimariesPromise.push(
-        getPrismaClient().email.update({
-          where: {
-            id: prevPrimary.id,
-          },
-          data: {
-            isPrimary: false,
-          },
-        }),
-      );
-    }
-    await Promise.all(prevPrimariesPromise);
+    await setPrimaryPhone(userId, phone);
   }
 
   return true;
+}
+
+export async function setPrimaryPhone(userId: string, phone: string) {
+  const phones = await getPhones(userId);
+
+  const targetPhone = phones.find((n) => n.phone === phone);
+  const prevPrimaries = phones.filter((n) => n.isPrimary);
+
+  if (!targetPhone) return false;
+
+  await getPrismaClient().phone.update({
+    where: {
+      id: targetPhone.id,
+    },
+    data: {
+      isPrimary: true,
+    },
+  });
+
+  const prevPrimariesPromise = [];
+  for (const prevPrimary of prevPrimaries) {
+    prevPrimariesPromise.push(
+      getPrismaClient().phone.update({
+        where: {
+          id: prevPrimary.id,
+        },
+        data: {
+          isPrimary: false,
+        },
+      }),
+    );
+  }
+  await Promise.all(prevPrimariesPromise);
 }
 
 export async function removePhone(userId: string, phone: string) {

@@ -6,6 +6,7 @@ import userEmailsPlugin from './emails';
 import { userDelete } from './info/delete';
 import { userGetInfo } from './info/get';
 import { userUpdateInfo } from './info/put';
+import userPhonesPlugin from './phones';
 import userSecurityPlugin from './security';
 import userPasswordsPlugin from './security/passwords';
 
@@ -36,6 +37,8 @@ export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOpti
   app.register(clientAuthPlugin, { prefix: '/auth' });
 
   app.register(userEmailsPlugin, { prefix: '/emails' });
+  app.register(userPhonesPlugin, { prefix: '/phones' });
+
   app.register(userAppPlugin, { prefix: '/apps' });
   app.register(userSecurityPlugin, { prefix: '/security' });
 

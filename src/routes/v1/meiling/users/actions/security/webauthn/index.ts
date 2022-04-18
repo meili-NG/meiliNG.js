@@ -3,6 +3,7 @@ import { getUserFromActionRequest } from '../..';
 import { Meiling, Utils } from '../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../resources/prisma';
 import userWebAuthnActionsPlugin from './actions';
+import crypto from 'crypto';
 
 function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', async (req, rep) => {
@@ -42,16 +43,16 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
       return;
     }
 
-    if (Utils.isNotBlank(body.id, body.response, body.response?.attenationObject, body)) {
+    if (Utils.isNotBlank(body.id, body.hostname, body.response, body.response?.attenationObject, body)) {
       // TODO: Implement registration procedure
     } else {
-      const challenge = Meiling.Authentication.Token.generateToken(64);
+      const challenge = crypto.randomBytes(64);
 
       await Meiling.V1.Session.setSession(req, {
         ...session,
         registering: {
           webAuthn: {
-            challenge,
+            challenge: challenge.toString('base64'),
           },
         },
       });
@@ -63,7 +64,7 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
           displayName: user.name,
           icon: user.profileUrl ? user.profileUrl : undefined,
         },
-        challenge,
+        challenge: challenge.toString('base64'),
       });
     }
   });

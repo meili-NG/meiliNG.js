@@ -1,11 +1,13 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from 'fastify';
 import { FastifyRequestWithSession } from '../../..';
 import { Meiling } from '../../../../../../common';
-import { getSanitizedUser } from '../../../../../../common/meiling/sanitize';
+import userEmailActionPlugin from './actions';
 
 function userEmailsPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', getUserEmails);
   app.post('/', addUserEmail);
+  app.register(userEmailActionPlugin, { prefix: '/:emailId' });
+
   done();
 }
 
@@ -20,7 +22,7 @@ export async function getUserEmails(req: FastifyRequest, rep: FastifyReply) {
   if (userRawSession && userRawSession.filter((n) => n.id === userId).length > 0) {
     const emails = await Meiling.Identity.User.getEmails(userId);
 
-    rep.send(emails);
+    rep.send(emails.map((n) => Meiling.Sanitize.getSanitizedEmail(n)));
   } else {
     throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.NOT_FOUND,

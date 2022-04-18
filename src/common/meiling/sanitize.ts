@@ -1,3 +1,4 @@
+import { Email } from '@prisma/client';
 import { User } from './identity';
 import { Client } from './oauth2';
 
@@ -23,4 +24,8 @@ export async function getSanitizedUser(user: string): Promise<User.UserDetailedO
   }
 
   return userData;
+}
+
+export function getSanitizedEmail(email: Email) {
+  return email;
 }

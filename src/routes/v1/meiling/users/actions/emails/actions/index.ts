@@ -37,9 +37,29 @@ function userEmailActionPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
     rep.send(Meiling.Sanitize.getSanitizedEmail(email));
   });
 
+  app.put('/', async (req, rep) => {
+    const email = (req as any).email as Email;
+    const userId = (req.params as any)?.userId;
+
+    const body = req.body as {
+      isPrimary?: boolean;
+    };
+
+    if (body.isPrimary) {
+      await Meiling.Identity.User.setPrimaryEmail(userId, email.email);
+    }
+
+    rep.send({ success: true });
+  });
+
   app.delete('/', async (req, rep) => {
     const userId = (req.params as any)?.userId;
     const email = (req as any).email as Email;
+
+    const emails = await Meiling.Identity.User.getEmails(userId);
+    if (emails.length === 1) {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.FORBIDDEN, 'at least one email is required');
+    }
 
     await Meiling.Identity.User.removeEmail(userId, email.email);
     rep.send({ success: true });

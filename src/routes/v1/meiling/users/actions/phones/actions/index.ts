@@ -37,9 +37,35 @@ function userPhoneActionPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
     rep.send(Meiling.Sanitize.getSanitizedPhone(phone));
   });
 
+  /*
+  
+  // Not implementing this at the moment. 
+  // since this can seriously affect KRID (Stella IT Internal)
+
+  app.put('/', async (req, rep) => {
+    const phone = (req as any).phone as Phone;
+    const userId = (req.params as any)?.userId;
+
+    const body = req.body as {
+      isPrimary?: boolean;
+    };
+
+    if (body.isPrimary) {
+      await Meiling.Identity.User.setPrimaryPhone(userId, phone.phone);
+    }
+
+    rep.send({ success: true });
+  });
+  */
+
   app.delete('/', async (req, rep) => {
     const userId = (req.params as any)?.userId;
     const phone = (req as any).phone as Phone;
+
+    const phones = await Meiling.Identity.User.getPhones(userId);
+    if (phones.length === 1) {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.FORBIDDEN, 'at least one email is required');
+    }
 
     await Meiling.Identity.User.removePhone(userId, phone.phone);
     rep.send({ success: true });

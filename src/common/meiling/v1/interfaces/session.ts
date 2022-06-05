@@ -7,6 +7,7 @@ export interface MeilingSession {
   authenticationStatus?: SessionAuthenticationStatus;
   passwordReset?: SessionPasswordReset;
   registering?: SessionRegistering;
+  ips?: string[];
 }
 
 export interface SessionRegistering {

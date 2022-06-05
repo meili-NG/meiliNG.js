@@ -37,4 +37,5 @@ export enum ErrorType {
   PHONE_NOT_ALLOWED = 'phone_not_allowed',
   EXISTING_USERNAME = 'existing_username',
   EXISTING_PASSWORD = 'existing_password',
+  RATE_LIMITED = 'rate_limited',
 }

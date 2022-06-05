@@ -66,6 +66,7 @@ function getMeilingErrorStatusCode(type: ErrorType) {
       return 410;
 
     case ErrorType.AUTHENTICATION_REQUEST_RATE_LIMITED:
+    case ErrorType.RATE_LIMITED:
       return 429;
 
     case ErrorType.INTERNAL_SERVER_ERROR:

@@ -30,6 +30,8 @@ let tokenSessions: MeilingV1TokenDataFile = {
   issuedTokens: [],
 };
 
+const lastIssueRequest: Record<string, Date> = {};
+
 export function loadSessionSaveFiles(): void {
   if (config.session.v1.storage) {
     if (config.session.v1.storage.type === 'file') {
@@ -136,6 +138,16 @@ export function getTokenFromRequest(req: FastifyRequest): string | undefined {
 }
 
 export async function createToken(req: FastifyRequest): Promise<string | undefined> {
+  // TODO: make this more configurable
+  if (lastIssueRequest[req.ip] !== undefined) {
+    const date = lastIssueRequest[req.ip];
+    const rateLimitWindow = 100;
+
+    if (date.getTime() + rateLimitWindow > new Date().getTime()) {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.RATE_LIMITED);
+    }
+  }
+
   const token = Meiling.Authentication.Token.generateToken();
   const expiration = new Date(new Date().getTime() + config.session.v1.maxAge * 1000);
   const userTimeFieldMinimum = new Date().getTime() - config.session.v1.rateLimit.timeframe * 1000;
@@ -185,6 +197,7 @@ export async function createToken(req: FastifyRequest): Promise<string | undefin
   }
 
   saveSession();
+  lastIssueRequest[req.ip] = new Date();
 
   return token;
 }
@@ -275,6 +288,36 @@ export async function extendTokenExpiration(token: string): Promise<void> {
         expiresAt: newExpiration,
       },
     });
+  }
+}
+
+export async function updateUserIPs(token: string, ip: string): Promise<void> {
+  if (config.session.v1.storage) {
+    const tokenData = tokenSessions.issuedTokens.find((n) => n.token === token);
+    if (tokenData) {
+      if (!tokenData.session.ips) tokenData.session.ips = [];
+      if (!tokenData.session.ips.includes(ip)) {
+        tokenData.session.ips.push(ip);
+      }
+    }
+  } else {
+    const session = await getPrismaClient().meilingSessionV1Token.findUnique({ where: { token } });
+    if (session) {
+      await getPrismaClient().meilingSessionV1Token.update({
+        where: {
+          token,
+        },
+        data: {
+          session: {
+            ...(session.session as any),
+            ips:
+              ((session.session as any)?.ips as any) === undefined
+                ? [ip]
+                : ((session.session as any).ips as string[]).push(ip),
+          },
+        },
+      });
+    }
   }
 }
 

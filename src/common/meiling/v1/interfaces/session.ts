@@ -11,10 +11,16 @@ export interface MeilingSession {
 
 export interface SessionRegistering {
   webAuthn?: RegisteringWebAuthn;
+  otp?: RegisteringOTP;
 }
 
 export interface RegisteringWebAuthn {
   challenge: string;
+}
+
+export interface RegisteringOTP {
+  secret: string;
+  issuedAt: number;
 }
 
 export interface LoggedInUser {

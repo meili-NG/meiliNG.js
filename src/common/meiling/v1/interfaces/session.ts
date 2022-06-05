@@ -16,6 +16,8 @@ export interface SessionRegistering {
 }
 
 export interface RegisteringWebAuthn {
+  origin: string;
+  hostname: string;
   challenge: string;
 }
 

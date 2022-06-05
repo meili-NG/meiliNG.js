@@ -214,6 +214,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       const to = undefined;
 
       await Meiling.V1.Session.setExtendedAuthenticationSessionMethodAndChallenge(req, signinMethod, challenge);
+      const lang = 'ko';
 
       if (challenge) {
         if (
@@ -228,7 +229,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
                   await Notification.sendNotification(Notification.NotificationMethod.ALIMTALK, {
                     type: 'template',
                     templateId: Notification.TemplateId.AUTHENTICATION_CODE,
-                    lang: 'ko',
+                    lang,
                     messages: [
                       {
                         to,
@@ -242,7 +243,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
                   await Notification.sendNotification(Notification.NotificationMethod.SMS, {
                     type: 'template',
                     templateId: Notification.TemplateId.AUTHENTICATION_CODE,
-                    lang: 'ko',
+                    lang,
                     messages: [
                       {
                         to,
@@ -258,7 +259,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
               await Notification.sendNotification(Notification.NotificationMethod.EMAIL, {
                 type: 'template',
                 templateId: Notification.TemplateId.AUTHENTICATION_CODE,
-                lang: 'ko',
+                lang,
                 messages: [
                   {
                     to,

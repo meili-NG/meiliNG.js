@@ -398,5 +398,6 @@ please request this endpoint without challengeResponse field to request challeng
 
   rep.status(200).send({
     success: true,
+    data: user,
   });
 }

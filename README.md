@@ -78,6 +78,6 @@ These are the documentations for helping you try meiliNG on your hands!
 
 ## License
 Distributed under [MIT License](LICENSE).  
-If the [MIT License](LICENSE) does not cover you, You can use [Hakurei Reimu Public License](https://github.com/Alex4386/HRPL) instead. [(LICENSE_HRPL)](LICENSE_HRPL) An Open-Source License considering all-beings (such as AI, like GitHub Copilot)  
+If the [MIT License](LICENSE) does not cover you, You can use [Hakurei Reimu Public License](https://github.com/Alex4386/HRPL) instead. [(EXT_LICENSE)](EXT_LICENSE) An Open-Source License considering all-beings (such as AI, like GitHub Copilot)  
 
 You can activate License Extension by following this file: [APPLY_EXTENSION.md](APPLY_EXTENSION.md)

@@ -7,7 +7,7 @@ import config from '../../../../../../../../resources/config';
 import { getSessionFromRequest } from '../../../../../../../../common/meiling/v1/session';
 import crypto from 'crypto';
 
-const dbType = Meiling.V1.Database.convertAuthentication(Meiling.V1.Interfaces.ExtendedAuthMethods.SECURITY_KEY);
+const dbType = Meiling.V1.Database.convertAuthentication(Meiling.V1.Interfaces.ExtendedAuthMethods.WEBAUTHN);
 
 async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = await getUserFromActionRequest(req);

@@ -52,7 +52,7 @@ export function isChallengeRateLimited(signinMethod: ExtendedAuthMethods, issued
 export function generateChallenge(signinMethod: ExtendedAuthMethods): string | undefined {
   switch (signinMethod) {
     case ExtendedAuthMethods.PGP_SIGNATURE:
-    case ExtendedAuthMethods.SECURITY_KEY:
+    case ExtendedAuthMethods.WEBAUTHN:
       return Meiling.Authentication.Token.generateToken();
     case ExtendedAuthMethods.SMS:
     case ExtendedAuthMethods.EMAIL:
@@ -66,7 +66,7 @@ export function generateChallenge(signinMethod: ExtendedAuthMethods): string | u
 export function shouldSendChallenge(signinMethod: ExtendedAuthMethods): boolean {
   switch (signinMethod) {
     case ExtendedAuthMethods.PGP_SIGNATURE:
-    case ExtendedAuthMethods.SECURITY_KEY:
+    case ExtendedAuthMethods.WEBAUTHN:
       return true;
     case ExtendedAuthMethods.SMS:
     case ExtendedAuthMethods.EMAIL:
@@ -83,7 +83,7 @@ export function isChallengeMethodAdequate(body: SigninExtendedAuthentication, me
   if (body.type === SigninType.PASSWORDLESS) {
     switch (method) {
       case ExtendedAuthMethods.PGP_SIGNATURE:
-      case ExtendedAuthMethods.SECURITY_KEY:
+      case ExtendedAuthMethods.WEBAUTHN:
         return true;
       case ExtendedAuthMethods.SMS:
       case ExtendedAuthMethods.OTP:
@@ -95,7 +95,7 @@ export function isChallengeMethodAdequate(body: SigninExtendedAuthentication, me
   } else if (body.type === SigninType.TWO_FACTOR_AUTH) {
     switch (method) {
       case ExtendedAuthMethods.PGP_SIGNATURE:
-      case ExtendedAuthMethods.SECURITY_KEY:
+      case ExtendedAuthMethods.WEBAUTHN:
       case ExtendedAuthMethods.SMS:
       case ExtendedAuthMethods.OTP:
       case ExtendedAuthMethods.EMAIL:
@@ -122,7 +122,7 @@ export async function verifyChallenge(
           challengeResponse,
           (data as AuthenticationPGPSSHKeyObject).data.key,
         );
-      case ExtendedAuthMethods.SECURITY_KEY:
+      case ExtendedAuthMethods.WEBAUTHN:
         return false;
       case ExtendedAuthMethods.SMS:
       case ExtendedAuthMethods.EMAIL:

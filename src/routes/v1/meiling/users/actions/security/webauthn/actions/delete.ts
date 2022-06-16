@@ -3,7 +3,7 @@ import { getUserFromActionRequest } from '../../..';
 import { Meiling, Utils } from '../../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
 
-const dbType = Meiling.V1.Database.convertAuthentication(Meiling.V1.Interfaces.ExtendedAuthMethods.SECURITY_KEY);
+const dbType = Meiling.V1.Database.convertAuthentication(Meiling.V1.Interfaces.ExtendedAuthMethods.WEBAUTHN);
 
 async function userWebAuthnActionDeleteKey(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const user = await getUserFromActionRequest(req);

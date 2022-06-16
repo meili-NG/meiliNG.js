@@ -6,8 +6,8 @@ export function convertAuthentication(method?: ExtendedAuthMethods): Authenticat
   switch (method) {
     case ExtendedAuthMethods.SMS:
       return 'SMS';
-    case ExtendedAuthMethods.SECURITY_KEY:
-      return 'SECURITY_KEY';
+    case ExtendedAuthMethods.WEBAUTHN:
+      return 'WEBAUTHN';
     case ExtendedAuthMethods.PGP_SIGNATURE:
       return 'PGP_KEY';
     case ExtendedAuthMethods.OTP:
@@ -27,8 +27,8 @@ export function convertAuthenticationMethod(method: AuthenticationMethod): Exten
       return ExtendedAuthMethods.OTP;
     case 'PGP_KEY':
       return ExtendedAuthMethods.PGP_SIGNATURE;
-    case 'SECURITY_KEY':
-      return ExtendedAuthMethods.SECURITY_KEY;
+    case 'WEBAUTHN':
+      return ExtendedAuthMethods.WEBAUTHN;
     case 'SMS':
       return ExtendedAuthMethods.SMS;
     default:
@@ -41,7 +41,7 @@ export function checkAuthenticationMethod(method: AuthenticationMethod): boolean
     case 'EMAIL':
     case 'OTP':
     case 'PGP_KEY':
-    case 'SECURITY_KEY':
+    case 'WEBAUTHN':
     case 'SMS':
     case 'PASSWORD':
     case 'SSH_KEY':

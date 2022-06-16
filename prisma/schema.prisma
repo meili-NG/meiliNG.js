@@ -80,7 +80,7 @@ enum AuthenticationMethod {
   SSH_KEY
   SMS
   EMAIL
-  SECURITY_KEY
+  WEBAUTHN
 }
 
 model Authentication {

@@ -5,6 +5,7 @@ import { NodeEnvironment } from '../../../interface';
 import config from '../../../resources/config';
 import { info as packageJson } from '../../../resources/package';
 import appsAdminHandler from './apps';
+import authAdminHandler from './auth';
 import internalAdminHandler from './internal';
 import sessionsAdminHandler from './sessions';
 import tokensAdminHandler from './tokens';
@@ -110,6 +111,7 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
 
   app.register(usersAdminHandler, { prefix: '/users' });
   app.register(appsAdminHandler, { prefix: '/apps' });
+  app.register(authAdminHandler, { prefix: '/auth' });
   app.register(tokensAdminHandler, { prefix: '/tokens' });
   app.register(sessionsAdminHandler, { prefix: '/sessions' });
   app.register(internalAdminHandler, { prefix: '/internal' });

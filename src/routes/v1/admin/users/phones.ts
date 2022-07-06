@@ -209,37 +209,37 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
         isPrimary: typeof body.isPrimary === 'boolean' ? body.isPrimary : undefined,
       },
     });
+  });
 
-    app.delete('/', async (req, rep) => {
-      const phoneId = (req.params as { phoneId: string }).phoneId;
+  app.delete('/', async (req, rep) => {
+    const phoneId = (req.params as { phoneId: string }).phoneId;
 
-      const phone = await getPrismaClient().phone.findFirst({
-        where: {
-          user: {
-            id: uuid,
-          },
-          id: phoneId,
+    const phone = await getPrismaClient().phone.findFirst({
+      where: {
+        user: {
+          id: uuid,
         },
-      });
+        id: phoneId,
+      },
+    });
 
-      if (phone === null) {
-        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
-        return;
-      }
+    if (phone === null) {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
+      return;
+    }
 
-      if (phone.isPrimary) {
-        throw new Meiling.V1.Error.MeilingError(
-          Meiling.V1.Error.ErrorType.CONFLICT,
-          'you should assign new primary number before deleting it',
-        );
-        return;
-      }
+    if (phone.isPrimary) {
+      throw new Meiling.V1.Error.MeilingError(
+        Meiling.V1.Error.ErrorType.CONFLICT,
+        'you should assign new primary number before deleting it',
+      );
+      return;
+    }
 
-      await getPrismaClient().phone.delete({
-        where: {
-          id: phoneId,
-        },
-      });
+    await getPrismaClient().phone.delete({
+      where: {
+        id: phoneId,
+      },
     });
   });
 

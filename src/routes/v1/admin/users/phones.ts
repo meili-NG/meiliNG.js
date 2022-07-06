@@ -212,6 +212,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
   });
 
   app.delete('/', async (req, rep) => {
+    const uuid = (req.params as { uuid: string }).uuid;
     const phoneId = (req.params as { phoneId: string }).phoneId;
 
     const phone = await getPrismaClient().phone.findFirst({

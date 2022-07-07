@@ -27,7 +27,7 @@ export async function meilingV1SessionAuthnIssueHandler(req: FastifyRequest, rep
   const createdAt = new Date();
   const challenge = Meiling.Authentication.Token.generateToken(6, '0123456789');
 
-  const lang = body.lang ? body.lang : 'ko';
+  const lang = body.lang && typeof body.lang === 'string' ? body.lang : 'ko';
 
   try {
     if (body.type === 'email') {

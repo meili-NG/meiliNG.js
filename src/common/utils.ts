@@ -39,6 +39,7 @@ export function isNotBlank(...values: (string | undefined | null)[]): boolean {
   let isValid = true;
   for (const value of values) {
     if (!value) return false;
+    if (typeof value !== 'string') return false;
 
     isValid = isValid && !(value === undefined || value === null || value === '' || value.trim().length === 0);
     if (!isValid) return false;
@@ -108,6 +109,8 @@ export function isValidPassword(password: string): boolean {
 }
 
 export function isValidEmail(email: string): boolean {
+  if (typeof email !== 'string') return false;
+
   emailRegex.lastIndex = 0;
   return emailRegex.test(email);
 }

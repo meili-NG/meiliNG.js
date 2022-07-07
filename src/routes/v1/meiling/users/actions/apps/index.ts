@@ -54,6 +54,9 @@ export function userAppsActionsPlugin(app: FastifyInstance, opts: FastifyPluginO
     };
 
     (req as MeilingV1ClientRequest).client = client;
+
+    Object.freeze((req as MeilingV1ClientRequest).status);
+    Object.freeze((req as MeilingV1ClientRequest).client);
   });
 
   app.get('/', appGetHandler);

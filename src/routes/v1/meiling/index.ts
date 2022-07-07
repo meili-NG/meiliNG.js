@@ -83,6 +83,7 @@ function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
     }
 
     (req as FastifyRequestWithSession).session = session;
+    Object.freeze(session);
   });
 
   app.addSchema({

@@ -19,6 +19,10 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
   }
 
   if (body.password) {
+    if (typeof body.password !== 'string') {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+    }
+
     if (!session.passwordReset?.isVerified || !session.passwordReset.passwordResetUser) {
       throw new Meiling.V1.Error.MeilingError(
         Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_COMPLETED,
@@ -55,8 +59,8 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
 
   const username = body?.context?.username;
 
-  if (!username) {
-    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'username is missing');
+  if (!username || typeof username !== 'string') {
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'username is invalid');
     return;
   }
 
@@ -88,6 +92,10 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
       methods,
     });
     return;
+  }
+
+  if (typeof body.method !== 'string') {
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid method');
   }
 
   if (!body.data?.challengeResponse) {

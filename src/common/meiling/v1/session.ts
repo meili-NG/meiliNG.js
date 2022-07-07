@@ -83,6 +83,8 @@ export async function garbageCollect(): Promise<void> {
 }
 
 export async function isValid(token: string): Promise<boolean> {
+  if (typeof token !== 'string') return false;
+
   let matchedToken: MeilingSessionV1Token | MeilingV1TokenData | null;
   if (config.session.v1.storage) {
     const matchedTokens = tokenSessions.issuedTokens.filter((t) => t.token === token);

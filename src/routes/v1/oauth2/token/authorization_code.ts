@@ -27,8 +27,7 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
     return;
   }
 
-  // check token is valid
-  if (!Utils.isValidValue(token)) {
+  if (typeof token !== 'string') {
     Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST, 'invalid token');
     return;
   }
@@ -99,6 +98,14 @@ export async function oAuth2AuthorizationCodeHandler(req: FastifyRequest, rep: F
       const challenge = metadataV1.options.code_challenge;
       if (body.code_verifier) {
         const code_verifier = body.code_verifier;
+        if (typeof code_verifier !== 'string') {
+          return Meiling.OAuth2.Error.sendOAuth2Error(
+            rep,
+            Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST,
+            'invalid code_verifier',
+          );
+        }
+
         if (challenge.method === 'plain') {
           if (challenge.challenge !== code_verifier) {
             Meiling.OAuth2.Error.sendOAuth2Error(

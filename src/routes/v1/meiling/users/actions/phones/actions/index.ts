@@ -29,6 +29,7 @@ function userPhoneActionPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
     }
 
     (req as any).phone = matchingPhone;
+    Object.freeze((req as any).phone);
   });
 
   app.get('/', async (req, rep) => {

@@ -346,6 +346,7 @@ export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = [
 }
 
 export async function checkPassword(user: UserModel | string, password: string) {
+  if (typeof password !== 'string') return [];
   const passwords = await getPasswords(user);
 
   const passwordCheckPromise = passwords.map(async (passwordDB) => {
@@ -394,6 +395,7 @@ export async function hasAuthorizedClient(user: UserModel | string, clientId: st
 }
 
 export async function getClientAuthorizations(user: UserModel | string, clientId?: string) {
+  if (clientId && typeof clientId !== 'string') return undefined;
   const authorizations = await getPrismaClient().oAuthClientAuthorization.findMany({
     where: {
       userId: getUserId(user),
@@ -426,6 +428,7 @@ export async function getClientAuthorizedPermissions(user: UserModel | string, c
 }
 
 export async function findByUsername(username: string): Promise<UserModel[]> {
+  if (typeof username !== 'string') return [];
   return await getPrismaClient().user.findMany({
     where: {
       username: username.toLowerCase(),
@@ -434,6 +437,8 @@ export async function findByUsername(username: string): Promise<UserModel[]> {
 }
 
 export async function findByEmail(email: string, verified: boolean | undefined = true): Promise<UserModel[]> {
+  if (typeof email !== 'string') return [];
+
   const emails = await getPrismaClient().email.findMany({
     where: {
       email: email.toLowerCase(),
@@ -474,6 +479,8 @@ export async function findByCommonUsername(username: string): Promise<UserModel[
 }
 
 export async function getPrimaryEmail(userId: string) {
+  if (typeof userId !== 'string') return;
+
   const email = await getPrismaClient().email.findFirst({
     where: {
       userId,
@@ -481,11 +488,13 @@ export async function getPrimaryEmail(userId: string) {
     },
   });
 
-  if (!email) return undefined;
+  if (!email) return;
   return email;
 }
 
 export async function getEmails(userId: string, isPrimary?: boolean) {
+  if (typeof userId !== 'string') return [];
+
   const emails = await getPrismaClient().email.findMany({
     where: {
       userId,
@@ -563,6 +572,8 @@ export async function removeEmail(userId: string, email: string) {
 }
 
 export async function getPrimaryPhone(userId: string) {
+  if (typeof userId !== 'string') return;
+
   const phone = await getPrismaClient().phone.findFirst({
     where: {
       userId,
@@ -575,6 +586,8 @@ export async function getPrimaryPhone(userId: string) {
 }
 
 export async function getPhones(userId: string, isPrimary?: boolean) {
+  if (typeof userId !== 'string') return [];
+
   const emails = await getPrismaClient().phone.findMany({
     where: {
       userId,
@@ -608,6 +621,7 @@ export async function addPhone(userId: string, phone: string, isPrimary = false)
 }
 
 export async function setPrimaryPhone(userId: string, phone: string) {
+  if (typeof userId !== 'string') return;
   const phones = await getPhones(userId);
 
   const targetPhone = phones.find((n) => n.phone === phone);

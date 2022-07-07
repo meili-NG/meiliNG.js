@@ -136,6 +136,7 @@ export async function getAuthorizedPermissions(
 }
 
 export async function getData(token: string, type?: OAuthTokenType): Promise<OAuthToken | undefined> {
+  if (typeof token !== 'string') return undefined;
   const tokenData = await getPrismaClient().oAuthToken.findUnique({
     where: {
       token,

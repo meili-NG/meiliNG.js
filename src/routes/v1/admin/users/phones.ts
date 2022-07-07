@@ -36,6 +36,8 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
 
     if (typeof body.isPrimary === 'string') {
       body.isPrimary = /^true$/gi.test(body.isPrimary);
+    } else if (typeof body.isPrimary === 'object') {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     }
 
     const phone = libPhoneNumberJs(body.phone);
@@ -99,7 +101,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
           },
         },
         phone: phone.formatInternational(),
-        isPrimary: body.isPrimary || false,
+        isPrimary: body.isPrimary ? true : false,
       },
     });
 

@@ -54,6 +54,8 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
     const token = (body as MeilingV1EmailVerificationTokenQuery).token;
 
     if (code) {
+      if (typeof code !== 'string') throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+
       if (!session.authenticationStatus.email) {
         throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED);
         return;
@@ -62,6 +64,9 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
       verified = session.authenticationStatus.email.challenge.challenge == code;
       createdAt = session.authenticationStatus.email.challenge.challengeCreatedAt;
     } else if (token) {
+      if (typeof token !== 'string')
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+
       const data = await getPrismaClient().meilingV1Verification.findUnique({
         where: {
           token,

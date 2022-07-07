@@ -27,7 +27,7 @@ export async function oAuth2DeviceCodeHandler(req: FastifyRequest, rep: FastifyR
   }
 
   // check token is valid
-  if (!Utils.isValidValue(token)) {
+  if (typeof token !== 'string') {
     Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST, 'invalid token');
     return;
   }

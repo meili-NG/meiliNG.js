@@ -25,7 +25,7 @@ async function appCreateHandler(req: FastifyRequest, rep: FastifyReply): Promise
     return;
   }
 
-  if (!Utils.isValidValue(body?.name, body?.image, body?.privacy, body?.terms, body?.accessControl?.permissions)) {
+  if (!Utils.isNotBlank(body?.name, body?.image, body?.privacy, body?.terms)) {
     throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
@@ -48,6 +48,10 @@ async function appCreateHandler(req: FastifyRequest, rep: FastifyReply): Promise
   const permissionsPromises = [];
 
   for (const permission of permissions) {
+    if (typeof permission !== 'string') {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+    }
+
     permissionsPromises.push(
       await getPrismaClient().permission.findUnique({
         where: {

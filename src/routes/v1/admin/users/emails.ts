@@ -35,10 +35,14 @@ const userEmailsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
 
     if (typeof body.isVerified === 'string') {
       body.isVerified = /^true$/gi.test(body.isVerified);
+    } else if (typeof body.isVerified === 'object') {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     }
 
     if (typeof body.isPrimary === 'string') {
       body.isPrimary = /^true$/gi.test(body.isPrimary);
+    } else if (typeof body.isVerified === 'object') {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     }
 
     const email = body.email.trim();

@@ -14,7 +14,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
   app.get('/', async (req, rep) => {
     const uuid = (req.params as { uuid: string }).uuid;
 
-    const emails = await getPrismaClient().email.findMany({
+    const phones = await getPrismaClient().phone.findMany({
       where: {
         user: {
           id: uuid,
@@ -22,7 +22,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       },
     });
 
-    rep.send(emails);
+    rep.send(phones);
   });
 
   app.post('/', async (req, rep) => {
@@ -143,7 +143,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       isPrimary?: boolean;
     };
 
-    const phone = await getPrismaClient().phone.findFirst({
+    let phone = await getPrismaClient().phone.findFirst({
       where: {
         user: {
           id: uuid,
@@ -211,13 +211,23 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
         isPrimary: typeof body.isPrimary === 'boolean' ? body.isPrimary : undefined,
       },
     });
+
+    phone = await getPrismaClient().phone.findFirst({
+      where: {
+        user: {
+          id: uuid,
+        },
+        id: phoneId,
+      },
+    });
+    rep.send(phone);
   });
 
   app.delete('/', async (req, rep) => {
     const uuid = (req.params as { uuid: string }).uuid;
     const phoneId = (req.params as { phoneId: string }).phoneId;
 
-    const phone = await getPrismaClient().phone.findFirst({
+    let phone = await getPrismaClient().phone.findFirst({
       where: {
         user: {
           id: uuid,
@@ -244,6 +254,16 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
         id: phoneId,
       },
     });
+
+    phone = await getPrismaClient().phone.findFirst({
+      where: {
+        user: {
+          id: uuid,
+        },
+        id: phoneId,
+      },
+    });
+    rep.send({ success: true });
   });
 
   done();

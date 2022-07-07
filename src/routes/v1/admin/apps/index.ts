@@ -12,7 +12,9 @@ function queryBuilder(query: string) {
 
 const appsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.get('/', async (req, rep) => {
-    const { query, pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
+    let { query } = (req.query as any) || {};
+    const { pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
+    if (typeof query !== 'string') query = query.toString();
 
     const paginationDetails: {
       skip?: number;

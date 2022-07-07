@@ -11,7 +11,9 @@ const userSessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptio
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND, 'User was not found');
     }
 
-    const { query, pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
+    let { query } = (req.query as any) || {};
+    const { pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
+    if (typeof query !== 'string') query = query.toString();
 
     const paginationDetails: {
       skip?: number;

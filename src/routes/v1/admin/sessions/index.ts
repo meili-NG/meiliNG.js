@@ -21,7 +21,9 @@ const sessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
       return;
     }
 
-    const { query, pageSize = 20, page = 1 } = (req.query as any) || {};
+    let { query } = (req.query as any) || {};
+    const { pageSize = 20, page = 1 } = (req.query as any) || {};
+    if (typeof query !== 'string') query = query.toString();
 
     const paginationDetails: {
       skip?: number;

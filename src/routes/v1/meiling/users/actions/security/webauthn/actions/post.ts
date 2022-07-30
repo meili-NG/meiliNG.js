@@ -55,6 +55,11 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
     if (!Utils.isNotBlank(body.name))
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
 
+    if (!Utils.checkBase64(challengeResponse.rawId as unknown as string))
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+
+    challengeResponse.rawId = Buffer.from(challengeResponse.rawId as unknown as string, 'base64');
+
     const attensationExpectations = {
       challenge: webAuthnObject.challenge,
       origin: webAuthnObject.origin,

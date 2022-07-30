@@ -67,6 +67,11 @@ module.exports = {
       email: false,
       phone: false,
     },
+    /** Signup configuration - meiliNG Internal */
+    signup: {
+      /** Enable meiliNG Internal Signup? set it to false to disable (e.g. only use custom signup process) */
+      enabled: /^true$/gi.test(process.env.MEILING_SIGNUP_ENABLED) || true,
+    },
   },
   session: {
     /** Configures Version 1 of the meiliNG Session */
@@ -115,6 +120,8 @@ module.exports = {
     },
   },
   notificationApi: {
+    /** Use notification api? (Stella IT Proprietary, Set it to false if you don't use one.) */
+    enable: true,
     version: 1,
     host: 'https://notification.stella-api.dev',
     key: 'YOUR NOTIFICATION API KEY',

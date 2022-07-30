@@ -105,6 +105,7 @@ export interface ConfigInterface {
     };
   };
   notificationApi?: {
+    enable: boolean;
     version: 1;
     host: string;
     key: string;

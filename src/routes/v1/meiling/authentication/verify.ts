@@ -35,6 +35,8 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
     return;
   }
 
+  const notificationApiEnabled = config.notificationApi?.enable;
+
   let verified = false;
   let createdAt = undefined;
   let expiresAt = undefined;
@@ -93,6 +95,13 @@ export async function meilingV1SessionAuthnVerifyHandler(req: FastifyRequest, re
   } else if (!expiresAt) {
     throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
+  }
+
+  // bypass notification api and authentication issuing
+  if (!notificationApiEnabled) {
+    if (body.type === 'phone' || body.type === 'email') {
+      verified = true;
+    }
   }
 
   if (verified) {

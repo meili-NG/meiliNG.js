@@ -103,6 +103,7 @@ module.exports = {
     },
   },
   notificationApi: {
+    enable: !/^false/gi.test(process.env.NOTIFICATION_API_ENABLE),
     version: Number(process.env.NOTIFICATION_API_VERSION) || 1,
     host: process.env.NOTIFICATION_API_HOST || 'https://notification.meili.ng',
     key: process.env.NOTIFICATION_API_KEY || 'YOUR NOTIFICATION API KEY',

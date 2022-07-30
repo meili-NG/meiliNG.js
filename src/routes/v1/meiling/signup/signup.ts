@@ -19,7 +19,6 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
   const body = req.body as MeilingV1Signup;
 
   // Validation no longer required
-
   const signupChallenge = await Meiling.V1.Session.getAuthenticationStatus(req);
 
   if (signupChallenge === undefined) {
@@ -47,7 +46,6 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
   }
 
   // check with validation.
-
   if (!(signupChallenge.email?.isVerified && signupChallenge.phone?.isVerified)) {
     throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_COMPLETED);
     return;

@@ -56,7 +56,16 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED);
 
     if (!Utils.isNotBlank(body.name))
-      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+      throw new Meiling.V1.Error.MeilingError(
+        Meiling.V1.Error.ErrorType.INVALID_REQUEST,
+        'missing webauthn token name',
+      );
+
+    if (!Utils.isNotBlank(challengeResponse.id))
+      throw new Meiling.V1.Error.MeilingError(
+        Meiling.V1.Error.ErrorType.INVALID_REQUEST,
+        'malformed challengeResponse',
+      );
 
     const attensationExpectations = {
       challenge: webAuthnObject.challenge,
@@ -65,6 +74,8 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
     };
 
     try {
+      challengeResponse.rawId = Buffer.from(challengeResponse.id as string, 'base64');
+
       const result = await f2l.attestationResult(challengeResponse as AttestationResult, attensationExpectations);
       console.log('FIDO Attestation Result', result);
 

@@ -80,21 +80,14 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
 
       const result = await verifyRegistrationResponse({
         credential: challengeResponse,
-        expectedChallenge: webAuthnObject.challenge,
+        expectedChallenge: Buffer.from(webAuthnObject.challenge).toString('base64url'),
         expectedOrigin: webAuthnObject.origin,
       });
       console.log('FIDO Attestation Result', result);
 
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED);
     } catch (e) {
-      if ((e as Error).message.includes('clientData challenge mismatch')) {
-        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'challenge mismatch');
-      }
-
-      // TODO: further debugging required.
-      console.error('FIDO Attestation Error', e);
-
-      throw e;
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, (e as Error).message);
     }
   } else {
     const challenge = Meiling.Authentication.Token.generateToken(128);

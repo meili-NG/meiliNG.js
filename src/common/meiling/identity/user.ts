@@ -83,17 +83,17 @@ export async function getBasicInfo(
   const deletedQuery = queryOptions?.includeDeleted
     ? {}
     : {
-      OR: [
-        {
-          deletedAt: null,
-        },
-        {
-          deletedAt: {
-            gte: new Date(),
+        OR: [
+          {
+            deletedAt: null,
           },
-        },
-      ],
-    };
+          {
+            deletedAt: {
+              gte: new Date(),
+            },
+          },
+        ],
+      };
   const prismaQuery = {
     ...deletedQuery,
   };
@@ -156,7 +156,10 @@ export async function getDetailedInfo(
   const baseUser = await getInfo(user, queryOptions);
   if (!baseUser) return;
 
-  const [authorizedAppsRaw, ownedAppsRaw] = await Promise.all([getAuthorizedApps(user, queryOptions), getOwnedApps(user, queryOptions)]);
+  const [authorizedAppsRaw, ownedAppsRaw] = await Promise.all([
+    getAuthorizedApps(user, queryOptions),
+    getOwnedApps(user, queryOptions),
+  ]);
 
   if (!authorizedAppsRaw || !ownedAppsRaw) return;
 
@@ -458,10 +461,10 @@ export async function findByEmail(email: string, verified: boolean | undefined =
       n.userId === undefined || n.userId === null
         ? undefined
         : getPrismaClient().user.findFirst({
-          where: {
-            id: n.userId,
-          },
-        }),
+            where: {
+              id: n.userId,
+            },
+          }),
     )
     .filter((n) => n !== undefined && n !== null);
 
@@ -744,9 +747,9 @@ export async function createIDToken(
     const key =
       config.openid.jwt.privateKey.passphrase !== undefined
         ? {
-          key: config.openid.jwt.privateKey.key,
-          passphrase: config.openid.jwt.privateKey.passphrase,
-        }
+            key: config.openid.jwt.privateKey.key,
+            passphrase: config.openid.jwt.privateKey.passphrase,
+          }
         : config.openid.jwt.privateKey.key;
 
     // edge case handling

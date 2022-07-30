@@ -2,10 +2,11 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { getUserFromActionRequest } from '../../..';
 import { Meiling, Utils } from '../../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../../resources/prisma';
-import { AttestationResult, Factor, Fido2Lib } from 'fido2-lib';
 import config from '../../../../../../../../resources/config';
 import { getSessionFromRequest } from '../../../../../../../../common/meiling/v1/session';
 import crypto from 'crypto';
+import SimpleWebAuthnServer from '@simplewebauthn/server';
+import { RegistrationCredentialJSON } from '@simplewebauthn/typescript-types';
 
 const dbType = Meiling.V1.Database.convertAuthentication(Meiling.V1.Interfaces.ExtendedAuthMethods.WEBAUTHN);
 
@@ -21,10 +22,9 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
   interface RegisterRequest {
     hostname: string;
     name?: string;
-    id?: string;
   }
 
-  type RegisterProcess = RegisterRequest & AttestationResult;
+  type RegisterProcess = RegisterRequest & RegistrationCredentialJSON;
   type RegisterBody = RegisterRequest | RegisterProcess;
 
   const body = req.body as RegisterBody | undefined;
@@ -55,9 +55,6 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
   const challengeResponse = body as RegisterProcess;
 
   const registering = challengeResponse.response !== undefined;
-  const f2l = new Fido2Lib({
-    rpId: 'https://' + hostname,
-  });
 
   if (registering && body) {
     const webAuthnObject = session?.registering?.webAuthn;
@@ -77,20 +74,15 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
         'malformed challengeResponse',
       );
 
-    const attestationExpectations = {
-      // Note: this should be matched with clientDataJSON.
-      // basically fido2-lib is only doing string comparison
-      challenge: Buffer.from(webAuthnObject.challenge).toString('base64url'),
-      origin: webAuthnObject.origin,
-      factor: 'either' as Factor,
-    };
-
     try {
-      challengeResponse.rawId = Buffer.from(challengeResponse.id as string, 'base64url').buffer;
+      if (!challengeResponse.rawId)
+        challengeResponse.rawId = Buffer.from(challengeResponse.id as string, 'base64url').toString('base64url');
 
-      console.log('Expecting:', attestationExpectations);
-
-      const result = await f2l.attestationResult(challengeResponse as AttestationResult, attestationExpectations);
+      const result = await SimpleWebAuthnServer.verifyRegistrationResponse({
+        credential: challengeResponse,
+        expectedChallenge: webAuthnObject.challenge,
+        expectedOrigin: webAuthnObject.origin,
+      });
       console.log('FIDO Attestation Result', result);
 
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED);

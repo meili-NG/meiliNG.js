@@ -76,7 +76,7 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
     };
 
     try {
-      challengeResponse.rawId = Buffer.from(challengeResponse.id as string, 'base64').buffer;
+      challengeResponse.rawId = Buffer.from(challengeResponse.id as string, 'base64url').buffer;
 
       console.log('Expecting:', attestationExpectations);
 

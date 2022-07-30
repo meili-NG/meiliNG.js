@@ -7,6 +7,7 @@ import { getSessionFromRequest } from '../../../../../../../../common/meiling/v1
 import crypto from 'crypto';
 import { verifyRegistrationResponse } from '@simplewebauthn/server';
 import { RegistrationCredentialJSON } from '@simplewebauthn/typescript-types';
+import { AuthenticationMethod } from '@prisma/client';
 
 const dbType = Meiling.V1.Database.convertAuthentication(Meiling.V1.Interfaces.ExtendedAuthMethods.WEBAUTHN);
 
@@ -21,7 +22,7 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
 
   interface RegisterRequest {
     hostname: string;
-    name?: string;
+    name: string;
   }
 
   type RegisterProcess = RegisterRequest & RegistrationCredentialJSON;
@@ -85,7 +86,28 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
       });
       console.log('FIDO Attestation Result', result);
 
-      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED);
+      const converted = Meiling.Identity.User.convertToWebAuthnJSONObject(body.name, result);
+      if (!converted) {
+        throw new Meiling.V1.Error.MeilingError(
+          Meiling.V1.Error.ErrorType.UNAUTHORIZED,
+          'failed to verify webauthn registration request',
+        );
+      }
+
+      const keyData = await getPrismaClient().authentication.create({
+        data: {
+          user: {
+            connect: { id: user.id },
+          },
+          method: dbType as AuthenticationMethod,
+          allowPasswordReset: true,
+          allowTwoFactor: true,
+          allowSingleFactor: true,
+          data: converted as any,
+        },
+      });
+
+      rep.send({ success: true });
     } catch (e) {
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, (e as Error).message);
     }

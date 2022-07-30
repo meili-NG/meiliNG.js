@@ -6,6 +6,7 @@ import { Meiling, Utils, Notification } from '../../../common';
 import config from '../../../resources/config';
 import { getPrismaClient } from '../../../resources/prisma';
 import { Event } from '../../../common';
+import { AuthenticationJSONObject } from '../../../common/meiling/identity/user';
 
 export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
@@ -152,9 +153,6 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
         );
         return;
       }
-    } else {
-      // TODO: Create Lost Password flow for other method.
-      // but I think common flow can cover this?
     }
 
     if (to !== undefined) {
@@ -207,9 +205,43 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
       passwordResetUser: user.id,
     });
 
+    const extras = {
+      challenge: Meiling.V1.Challenge.shouldSendChallenge(body.method) ? challenge : undefined,
+
+      // Webauthn only.
+      webauthn:
+        currentMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.WEBAUTHN
+          ? {
+              allowCredentials: (
+                await getPrismaClient().authentication.findMany({
+                  where: {
+                    user: {
+                      id: user.id,
+                    },
+                    method: 'WEBAUTHN',
+                    allowPasswordReset: true,
+                  },
+                })
+              )
+                .map((n) => {
+                  const data = n.data as unknown as AuthenticationJSONObject;
+                  if (data.type !== 'WEBAUTHN') {
+                    return;
+                  }
+
+                  return {
+                    id: data.data.key.id,
+                    type: 'public-key',
+                  };
+                })
+                .filter((n) => n !== undefined),
+            }
+          : undefined,
+    };
+
     rep.send({
       success: true,
-      challenge: Meiling.V1.Challenge.shouldSendChallenge(body.method) ? challenge : undefined,
+      ...extras,
     });
     return;
   }
@@ -253,10 +285,30 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     return;
   }
 
+  let data = undefined;
+  if (passwordReset.method === Meiling.V1.Interfaces.ExtendedAuthMethods.WEBAUTHN) {
+    const id = (passwordReset.challenge as any).id;
+    data = await getPrismaClient().authentication.findFirst({
+      where: {
+        user: {
+          id: user.id,
+        },
+        method: 'WEBAUTHN',
+        allowPasswordReset: true,
+        data: {
+          path: '$.data.key.id',
+          equals: id,
+        },
+      },
+    });
+    data = data?.data;
+  }
+
   const isValid = await Meiling.V1.Challenge.verifyChallenge(
     passwordReset.method,
     passwordReset.challenge,
     body.data.challengeResponse,
+    data as unknown as AuthenticationJSONObject | undefined,
   );
   if (!isValid) {
     throw new Meiling.V1.Error.MeilingError(

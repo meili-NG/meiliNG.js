@@ -5,6 +5,9 @@ import { FastifyRequestWithSession } from '.';
 import { Meiling, Utils, Event, Notification } from '../../../common';
 import config from '../../../resources/config';
 import libmobilephoneJs from 'libphonenumber-js';
+import { ExtendedAuthMethods, SigninType } from '../../../common/meiling/v1/interfaces';
+import { getPrismaClient } from '../../../resources/prisma';
+import { AuthenticationJSONObject } from '../../../common/meiling/identity/user';
 
 export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
@@ -109,6 +112,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
   ) {
     const signinMethod = body?.data?.method;
     const authMethods = [];
+    const targetUsers = [];
 
     if (body.type === Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH) {
       if (session.extendedAuthentication?.type !== Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH) {
@@ -139,6 +143,8 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
         return;
       }
 
+      targetUsers.push(user);
+
       authMethods.push(
         ...(await Meiling.V1.User.getAvailableExtendedAuthenticationMethods(user, body.type, signinMethod)),
       );
@@ -152,6 +158,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
           throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.WRONG_USERNAME, 'Wrong username.');
           return;
         }
+        targetUsers.push(...users);
 
         for (const user of users) {
           const thisMethods = await Meiling.V1.User.getAvailableExtendedAuthenticationMethods(user, body.type);
@@ -274,10 +281,50 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
         }
       }
 
-      rep.send({
+      const extras = {
+        // SMS, Email flows. that requires which phone did the caller sent
         to,
-        type: body.type,
+
+        // some that requires challenges to be received
         challenge: Meiling.V1.Challenge.shouldSendChallenge(signinMethod) ? challenge : undefined,
+
+        // Webauthn only.
+        webauthn:
+          signinMethod === ExtendedAuthMethods.WEBAUTHN
+            ? {
+                allowCredentials: (
+                  await getPrismaClient().authentication.findMany({
+                    where: {
+                      user: {
+                        id: {
+                          in: targetUsers.filter((n) => n !== undefined).map((n) => (n as UserModel).id),
+                        },
+                      },
+                      method: 'WEBAUTHN',
+                      allowSingleFactor: body.type === SigninType.PASSWORDLESS,
+                      allowTwoFactor: body.type === SigninType.TWO_FACTOR_AUTH,
+                    },
+                  })
+                )
+                  .map((n) => {
+                    const data = n.data as unknown as AuthenticationJSONObject;
+                    if (data.type !== 'WEBAUTHN') {
+                      return;
+                    }
+
+                    return {
+                      id: data.data.key.id,
+                      type: 'public-key',
+                    };
+                  })
+                  .filter((n) => n !== undefined),
+              }
+            : undefined,
+      };
+
+      rep.send({
+        type: body.type,
+        ...extras,
       });
       return;
     }
@@ -328,23 +375,74 @@ please request this endpoint without challengeResponse field to request challeng
     const authMethodCheckPromises = [];
     const authMethodCheckUsers: string[] = [];
 
-    // authMethod
-    for (const authMethod of authMethods) {
-      // if authMethod is current authMethod:
-      if (Meiling.V1.Database.convertAuthenticationMethod(authMethod.method) === signinMethod) {
-        // check database is not corrupted.
-        if (authMethod.data !== null) {
-          const data = Utils.convertJsonIfNot<Meiling.Identity.User.AuthenticationJSONObject>(authMethod.data);
+    if (signinMethod !== ExtendedAuthMethods.WEBAUTHN) {
+      // authMethod
+      for (const authMethod of authMethods) {
+        // if authMethod is current authMethod:
+        if (Meiling.V1.Database.convertAuthenticationMethod(authMethod.method) === signinMethod) {
+          // check database is not corrupted.
+          if (authMethod.data !== null) {
+            const data = Utils.convertJsonIfNot<Meiling.Identity.User.AuthenticationJSONObject>(authMethod.data);
 
-          if (authMethod.userId !== null) {
-            // add promise to array
-            authMethodCheckPromises.push(
-              Meiling.V1.Challenge.verifyChallenge(signinMethod, challenge, challengeResponse, data),
-            );
-            authMethodCheckUsers.push(authMethod.userId);
+            if (authMethod.userId !== null) {
+              // add promise to array
+              authMethodCheckPromises.push(
+                Meiling.V1.Challenge.verifyChallenge(signinMethod, challenge, challengeResponse, data),
+              );
+              authMethodCheckUsers.push(authMethod.userId);
+            }
           }
         }
       }
+    } else {
+      if (typeof challengeResponse !== 'object')
+        throw new Meiling.V1.Error.MeilingError(
+          Meiling.V1.Error.ErrorType.INVALID_REQUEST,
+          'invalid challengeResponse type',
+        );
+
+      const id = challengeResponse.id;
+      if (typeof id !== 'string')
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid WebAuthn ID');
+
+      const webauthn = await getPrismaClient().authentication.findFirst({
+        where: {
+          user: {
+            id: {
+              in: targetUsers.filter((n) => n !== undefined).map((n) => (n as UserModel).id),
+            },
+          },
+          method: 'WEBAUTHN',
+          allowSingleFactor: body.type === SigninType.PASSWORDLESS,
+          allowTwoFactor: body.type === SigninType.TWO_FACTOR_AUTH,
+          data: {
+            path: '$.data.key.id',
+            equals: id,
+          },
+        },
+      });
+
+      if (!webauthn)
+        throw new Meiling.V1.Error.MeilingError(
+          Meiling.V1.Error.ErrorType.NOT_FOUND,
+          'WebAuthn token with specified id was not found',
+        );
+
+      if (!webauthn.userId)
+        throw new Meiling.V1.Error.MeilingError(
+          Meiling.V1.Error.ErrorType.NOT_FOUND,
+          'WebAuthn token with specified id has no user to authorize with',
+        );
+
+      authMethodCheckPromises.push(
+        Meiling.V1.Challenge.verifyChallenge(
+          signinMethod,
+          challenge,
+          challengeResponse,
+          webauthn.data as unknown as AuthenticationJSONObject,
+        ),
+      );
+      authMethodCheckUsers.push(webauthn.userId);
     }
 
     const authMethodCheckResults = await Promise.all(authMethodCheckPromises);

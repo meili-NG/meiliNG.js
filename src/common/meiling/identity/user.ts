@@ -1,4 +1,7 @@
 import { Email, Group, OAuthTokenType, Phone, prisma, User as UserModel, OAuthClient } from '@prisma/client';
+import { VerifiedAuthenticationResponse, VerifiedRegistrationResponse } from '@simplewebauthn/server/./dist';
+import { AttestationFormat } from '@simplewebauthn/server/dist/helpers/decodeAttestationObject';
+import { CredentialDeviceType } from '@simplewebauthn/typescript-types';
 import bcrypt from 'bcryptjs';
 import JWT from 'jsonwebtoken';
 import { OAuth2 } from '..';
@@ -22,7 +25,24 @@ export type AuthenticationJSONObject =
   | AuthenticationPasswordObject
   | AuthenticationPGPSSHKeyObject
   | AuthenticationOTPObject
-  | AuthenticationEmailSMSObject;
+  | AuthenticationEmailSMSObject
+  | AuthenticationWebAuthnObject;
+
+export interface AuthenticationWebAuthnObject {
+  type: 'WEBAUTHN';
+  data: {
+    name: string;
+    key: {
+      fmt: AttestationFormat;
+      aaguid: string;
+      id: string;
+      publicKey: string;
+      deviceType: CredentialDeviceType;
+      isBackedUp: boolean;
+      counter: number;
+    };
+  };
+}
 
 interface AuthenticationPasswordObject {
   type: 'PASSWORD';
@@ -56,6 +76,32 @@ interface UserQueryOptions {
 export function getUserId(user: UserModel | string) {
   return typeof user === 'string' ? user : user.id;
 }
+
+export function convertToWebAuthnJSONObject(
+  name: string,
+  payload: VerifiedRegistrationResponse,
+): AuthenticationWebAuthnObject | undefined {
+  if (payload.verified && payload.registrationInfo) {
+    return {
+      type: 'WEBAUTHN',
+      data: {
+        name,
+        key: {
+          fmt: payload.registrationInfo.fmt,
+          aaguid: payload.registrationInfo.aaguid,
+          id: payload.registrationInfo.credentialID.toString('base64'),
+          publicKey: payload.registrationInfo.credentialPublicKey.toString('base64'),
+          deviceType: payload.registrationInfo.credentialDeviceType,
+          isBackedUp: payload.registrationInfo.credentialBackedUp,
+          counter: payload.registrationInfo.counter,
+        },
+      },
+    };
+  } else {
+    return;
+  }
+}
+
 export async function updateLastAuthenticated(user: UserModel | string) {
   await getPrismaClient().user.update({
     where: {
@@ -66,6 +112,7 @@ export async function updateLastAuthenticated(user: UserModel | string) {
     },
   });
 }
+
 export async function updateLastSignIn(user: UserModel | string) {
   await getPrismaClient().user.update({
     where: {

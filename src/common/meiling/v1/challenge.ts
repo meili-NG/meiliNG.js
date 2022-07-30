@@ -1,8 +1,13 @@
 import { Authentication } from '@prisma/client';
 import { Meiling } from '../..';
 import { ExtendedAuthMethods, SigninType, SigninExtendedAuthentication } from './interfaces';
-import { AuthenticationJSONObject, AuthenticationOTPObject, AuthenticationPGPSSHKeyObject } from '../identity/user';
-import { validateOTP, validatePGPSign } from '../authentication/validate';
+import {
+  AuthenticationJSONObject,
+  AuthenticationOTPObject,
+  AuthenticationPGPSSHKeyObject,
+  AuthenticationWebAuthnObject,
+} from '../identity/user';
+import { validateOTP, validatePGPSign, validateWebAuthn } from '../authentication/validate';
 import config from '../../../resources/config';
 
 export function getMeilingAvailableAuthMethods(
@@ -123,7 +128,7 @@ export async function verifyChallenge(
           (data as AuthenticationPGPSSHKeyObject).data.key,
         );
       case ExtendedAuthMethods.WEBAUTHN:
-        return false;
+        return await validateWebAuthn(challenge as string, challengeResponse, data as AuthenticationWebAuthnObject);
       case ExtendedAuthMethods.SMS:
       case ExtendedAuthMethods.EMAIL:
         return (challenge as string).trim() === challengeResponse.trim();

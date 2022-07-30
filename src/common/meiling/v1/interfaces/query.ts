@@ -60,6 +60,6 @@ interface SigninPasswordLess {
 
 interface SigninAuthenticationData {
   method?: ExtendedAuthMethods;
-  challengeResponse?: string;
+  challengeResponse?: any;
   challengeContext?: any;
 }

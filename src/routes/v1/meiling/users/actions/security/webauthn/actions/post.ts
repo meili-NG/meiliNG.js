@@ -18,13 +18,16 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
 
   const session = await getSessionFromRequest(req);
 
-  const body = req.body as
-    | {
-        hostname: string;
-        challengeResponse?: AttestationResult;
-        name?: string;
-      }
-    | undefined;
+  interface RegisterRequest {
+    hostname: string;
+    name?: string;
+    id?: string;
+  }
+
+  type RegisterProcess = RegisterRequest & AttestationResult;
+  type RegisterBody = RegisterRequest | RegisterProcess;
+
+  const body = req.body as RegisterBody | undefined;
 
   let hostname = body?.hostname;
   if (!hostname || !Utils.isNotBlank(hostname)) {
@@ -38,9 +41,9 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
     );
   }
 
-  const challengeResponse = body?.challengeResponse;
+  const challengeResponse = body as RegisterProcess;
 
-  const registering = challengeResponse !== undefined;
+  const registering = challengeResponse.response !== undefined;
   const f2l = new Fido2Lib({});
 
   if (registering && body) {
@@ -59,10 +62,14 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
     };
 
     try {
-      const result = await f2l.attestationResult(challengeResponse, attensationExpectations);
+      const result = await f2l.attestationResult(challengeResponse as AttestationResult, attensationExpectations);
+      console.log('FIDO Attestation Result', result);
+
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED);
     } catch (e) {
       // TODO: further debugging required.
+      console.error('FIDO Attestation Error', e);
+
       throw e;
     }
   } else {

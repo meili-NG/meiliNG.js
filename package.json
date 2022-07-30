@@ -19,7 +19,7 @@
     "fastify-formbody": "^5.0.0",
     "fastify-secure-session": "^2.3.0",
     "fastify-swagger": "^4.15.0",
-    "fido2-lib": "^3.1.7",
+    "fido2-lib": "3.2.5",
     "figlet": "^1.5.0",
     "jsonwebtoken": "^8.5.1",
     "libphonenumber-js": "^1.9.49",

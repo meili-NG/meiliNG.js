@@ -31,10 +31,13 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
 
   let hostname = body?.hostname;
   if (!hostname || !Utils.isNotBlank(hostname)) {
-    hostname = config.frontend.url[0];
+    hostname = new URL(config.frontend.url[0]).hostname;
   }
 
-  if (!config.frontend.url.includes(hostname)) {
+  const allowedHostnames = config.frontend.url.map((n) => new URL(n).hostname);
+  console.log(allowedHostnames);
+
+  if (!allowedHostnames.includes(hostname)) {
     throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.INVALID_REQUEST,
       'provided hostname is not supported',
@@ -54,11 +57,6 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
 
     if (!Utils.isNotBlank(body.name))
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
-
-    if (!Utils.checkBase64(challengeResponse.rawId as unknown as string))
-      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
-
-    challengeResponse.rawId = Buffer.from(challengeResponse.rawId as unknown as string, 'base64');
 
     const attensationExpectations = {
       challenge: webAuthnObject.challenge,

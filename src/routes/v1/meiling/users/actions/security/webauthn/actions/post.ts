@@ -74,7 +74,7 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
     };
 
     try {
-      challengeResponse.rawId = Buffer.from(challengeResponse.id as string, 'base64');
+      challengeResponse.rawId = Buffer.from(challengeResponse.id as string, 'base64').buffer;
 
       const result = await f2l.attestationResult(challengeResponse as AttestationResult, attensationExpectations);
       console.log('FIDO Attestation Result', result);

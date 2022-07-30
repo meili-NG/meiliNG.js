@@ -34,6 +34,14 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
     hostname = new URL(config.frontend.url[0]).hostname;
   }
 
+  try {
+    if (hostname !== new URL('https://' + hostname).hostname) {
+      throw new Error();
+    }
+  } catch (e) {
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid hostname');
+  }
+
   const allowedHostnames = config.frontend.url.map((n) => new URL(n).hostname);
   console.log(allowedHostnames);
 
@@ -47,7 +55,9 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
   const challengeResponse = body as RegisterProcess;
 
   const registering = challengeResponse.response !== undefined;
-  const f2l = new Fido2Lib({});
+  const f2l = new Fido2Lib({
+    rpId: 'https://' + hostname,
+  });
 
   if (registering && body) {
     const webAuthnObject = session?.registering?.webAuthn;

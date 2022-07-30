@@ -67,8 +67,10 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
         'malformed challengeResponse',
       );
 
-    const attensationExpectations = {
-      challenge: webAuthnObject.challenge,
+    const attestationExpectations = {
+      // Note: this should be matched with clientDataJSON.
+      // basically fido2-lib is only doing string comparison
+      challenge: Buffer.from(webAuthnObject.challenge).toString('base64url'),
       origin: webAuthnObject.origin,
       factor: 'either' as Factor,
     };
@@ -76,14 +78,14 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
     try {
       challengeResponse.rawId = Buffer.from(challengeResponse.id as string, 'base64').buffer;
 
-      console.log('Expecting:', attensationExpectations);
+      console.log('Expecting:', attestationExpectations);
 
-      const result = await f2l.attestationResult(challengeResponse as AttestationResult, attensationExpectations);
+      const result = await f2l.attestationResult(challengeResponse as AttestationResult, attestationExpectations);
       console.log('FIDO Attestation Result', result);
 
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED);
     } catch (e) {
-      if ((e as Error).name.includes('clientData challenge mismatch')) {
+      if ((e as Error).message.includes('clientData challenge mismatch')) {
         throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'challenge mismatch');
       }
 

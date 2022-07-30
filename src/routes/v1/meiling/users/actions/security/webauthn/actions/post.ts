@@ -81,6 +81,10 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
 
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_IMPLEMENTED);
     } catch (e) {
+      if ((e as Error).name.includes('clientData challenge mismatch')) {
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'challenge mismatch');
+      }
+
       // TODO: further debugging required.
       console.error('FIDO Attestation Error', e);
 

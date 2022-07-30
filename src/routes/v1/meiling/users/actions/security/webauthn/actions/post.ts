@@ -5,7 +5,7 @@ import { getPrismaClient } from '../../../../../../../../resources/prisma';
 import config from '../../../../../../../../resources/config';
 import { getSessionFromRequest } from '../../../../../../../../common/meiling/v1/session';
 import crypto from 'crypto';
-import SimpleWebAuthnServer from '@simplewebauthn/server';
+import { verifyRegistrationResponse } from '@simplewebauthn/server';
 import { RegistrationCredentialJSON } from '@simplewebauthn/typescript-types';
 
 const dbType = Meiling.V1.Database.convertAuthentication(Meiling.V1.Interfaces.ExtendedAuthMethods.WEBAUTHN);
@@ -78,7 +78,7 @@ async function userWebAuthnActionPostKey(req: FastifyRequest, rep: FastifyReply)
       if (!challengeResponse.rawId)
         challengeResponse.rawId = Buffer.from(challengeResponse.id as string, 'base64url').toString('base64url');
 
-      const result = await SimpleWebAuthnServer.verifyRegistrationResponse({
+      const result = await verifyRegistrationResponse({
         credential: challengeResponse,
         expectedChallenge: webAuthnObject.challenge,
         expectedOrigin: webAuthnObject.origin,

@@ -223,6 +223,8 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
       },
     });
 
+    const permanent = (req.query as any).permanent === 'true';
+
     if (user) {
       await getPrismaClient().user.update({
         where: {
@@ -258,6 +260,16 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
           });
         }),
       );
+
+      // actually delete if admin requested permanent deletion
+      // note: this could lead possible uuid collision for other apps.
+      if (permanent) {
+        await getPrismaClient().user.delete({
+          where: {
+            id: uuid,
+          },
+        });
+      }
 
       rep.send({ success: true });
       return;

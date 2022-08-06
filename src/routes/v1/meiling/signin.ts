@@ -407,9 +407,11 @@ please request this endpoint without challengeResponse field to request challeng
           'invalid challengeResponse type',
         );
 
-      const id = challengeResponse.id;
-      if (typeof id !== 'string')
+      const idRaw = challengeResponse.id;
+      if (typeof idRaw !== 'string' || !Utils.checkBase64(idRaw))
         throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid WebAuthn ID');
+
+      const id = Buffer.from(idRaw, 'base64url').toString('base64');
 
       const webauthn = await getPrismaClient().authentication.findFirst({
         where: {
@@ -419,8 +421,8 @@ please request this endpoint without challengeResponse field to request challeng
             },
           },
           method: 'WEBAUTHN',
-          allowSingleFactor: body.type === SigninType.PASSWORDLESS,
-          allowTwoFactor: body.type === SigninType.TWO_FACTOR_AUTH,
+          allowSingleFactor: body.type === SigninType.PASSWORDLESS ? true : undefined,
+          allowTwoFactor: body.type === SigninType.TWO_FACTOR_AUTH ? true : undefined,
           data: {
             path: '$.data.key.id',
             equals: id,

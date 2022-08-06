@@ -1,4 +1,3 @@
-import { verifyAuthenticationResponse } from '@simplewebauthn/server/./dist';
 import { PhoneNumber } from 'libphonenumber-js';
 import * as OpenPGP from 'openpgp';
 import * as SpeakEasy from 'speakeasy';
@@ -6,6 +5,7 @@ import config from '../../../resources/config';
 import { getPrismaClient } from '../../../resources/prisma';
 import * as Notification from '../../notification';
 import { AuthenticationWebAuthnObject } from '../identity/user';
+import SimpleWebAuthn, { verifyAuthenticationResponse } from '@simplewebauthn/server';
 
 export async function validatePGPSign(
   challenge: string,

@@ -8,6 +8,7 @@ import libmobilephoneJs from 'libphonenumber-js';
 import { ExtendedAuthMethods, SigninType } from '../../../common/meiling/v1/interfaces';
 import { getPrismaClient } from '../../../resources/prisma';
 import { AuthenticationJSONObject } from '../../../common/meiling/identity/user';
+import { NodeEnvironment } from '../../../interface';
 
 export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
@@ -457,6 +458,18 @@ please request this endpoint without challengeResponse field to request challeng
     const authMethodCheckIndex = authMethodCheckResults
       .map((n, i) => (n === true ? i : undefined))
       .filter((n) => n !== undefined) as number[];
+
+    if (config.node.environment === NodeEnvironment.Development) {
+      console.log(
+        'signin debug: ',
+        'idx',
+        authMethodCheckIndex,
+        'results',
+        authMethodCheckResults,
+        'users',
+        authMethodCheckUsers,
+      );
+    }
 
     for (const index of authMethodCheckIndex) {
       const userId = authMethodCheckUsers[index];

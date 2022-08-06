@@ -316,6 +316,17 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     data = data?.data;
   }
 
+  const challengeResponse = body.data.challengeResponse;
+  if (typeof challengeResponse !== 'object')
+    throw new Meiling.V1.Error.MeilingError(
+      Meiling.V1.Error.ErrorType.INVALID_REQUEST,
+      'invalid challengeResponse type',
+    );
+
+  if (challengeResponse.type !== 'public-key') {
+    challengeResponse.type = 'public-key';
+  }
+
   const isValid = await Meiling.V1.Challenge.verifyChallenge(
     passwordReset.method,
     passwordReset.challenge,

@@ -408,6 +408,10 @@ please request this endpoint without challengeResponse field to request challeng
           'invalid challengeResponse type',
         );
 
+      if (challengeResponse.type !== 'public-key') {
+        challengeResponse.type = 'public-key';
+      }
+
       const idRaw = challengeResponse.id;
       if (typeof idRaw !== 'string' || !Utils.checkShortenedBase64(idRaw))
         throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid WebAuthn ID');

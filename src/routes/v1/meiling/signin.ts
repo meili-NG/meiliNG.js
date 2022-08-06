@@ -219,7 +219,7 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
       }
 
       const challenge = Meiling.V1.Challenge.generateChallenge(signinMethod);
-      const to = undefined;
+      let to: string | undefined = undefined;
 
       await Meiling.V1.Session.setExtendedAuthenticationSessionMethodAndChallenge(req, signinMethod, challenge);
       const lang = 'ko';
@@ -229,6 +229,17 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
           signinMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.EMAIL ||
           signinMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.SMS
         ) {
+          if (!to) {
+            if (targetUsers.length === 1) {
+              const user = targetUsers[0] as UserModel;
+              if (signinMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.EMAIL) {
+                to = (await Meiling.Identity.User.getPrimaryEmail(user.id))?.email;
+              } else if (signinMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.SMS) {
+                to = (await Meiling.Identity.User.getPrimaryPhone(user.id))?.phone;
+              }
+            }
+          }
+
           if (to) {
             if (signinMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.SMS) {
               const phone = libmobilephoneJs(to);

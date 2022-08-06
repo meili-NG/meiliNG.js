@@ -9,6 +9,7 @@ import {
 } from '../identity/user';
 import { validateOTP, validatePGPSign, validateWebAuthn } from '../authentication/validate';
 import config from '../../../resources/config';
+import { NodeEnvironment } from '../../../interface';
 
 export function getMeilingAvailableAuthMethods(
   authMethods: Authentication[],
@@ -136,6 +137,8 @@ export async function verifyChallenge(
         return validateOTP(challengeResponse, (data as AuthenticationOTPObject).data.secret);
     }
   } catch (e) {
+    if (config.node.environment === NodeEnvironment.Development)
+      console.error('challenge validation failed with error:', e);
     return false;
   }
 }

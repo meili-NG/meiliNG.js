@@ -351,6 +351,12 @@ please request this endpoint without challengeResponse field to request challeng
 
     // is challenge expired
     if (extendedAuthSession.challengeCreatedAt) {
+      if (typeof extendedAuthSession.challengeCreatedAt !== 'object') {
+        extendedAuthSession.challengeCreatedAt = new Date(
+          extendedAuthSession.challengeCreatedAt as unknown as string | number,
+        );
+      }
+
       if (
         new Date().getTime() >
         extendedAuthSession.challengeCreatedAt.getTime() + config.token.invalidate.meiling.CHALLENGE_TOKEN * 1000

@@ -260,6 +260,12 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     return;
   }
 
+  if (session.passwordReset && typeof session.passwordReset?.challengeCreatedAt !== 'object') {
+    session.passwordReset.challengeCreatedAt = new Date(
+      session.passwordReset.challengeCreatedAt as unknown as string | number,
+    );
+  }
+
   const passwordReset = session.passwordReset as Meiling.V1.Interfaces.SessionPasswordReset;
   if (
     !passwordReset.method ||

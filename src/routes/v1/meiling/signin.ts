@@ -408,7 +408,7 @@ please request this endpoint without challengeResponse field to request challeng
         );
 
       const idRaw = challengeResponse.id;
-      if (typeof idRaw !== 'string' || !Utils.checkBase64(idRaw))
+      if (typeof idRaw !== 'string' || !Utils.checkShortenedBase64(idRaw))
         throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid WebAuthn ID');
 
       const id = Buffer.from(idRaw, 'base64url').toString('base64');

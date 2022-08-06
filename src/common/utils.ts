@@ -142,6 +142,18 @@ export function checkBase64(string: string) {
   return regex.test(convertedString);
 }
 
+export function checkShortenedBase64(string: string) {
+  let convertedString = string;
+  if (string.includes('-') || string.includes('_')) {
+    convertedString = convertedString.replace(/\-/g, '+').replace(/\_/g, '/');
+    convertedString = convertedString.padEnd(Math.ceil(convertedString.length / 4) * 4, '=');
+    console.log(convertedString);
+  }
+
+  const regex = /^([A-Za-z0-9+/=]+)$/;
+  return regex.test(convertedString);
+}
+
 export function convertDateToISO8601Date(date: Date) {
   return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date
     .getDate()

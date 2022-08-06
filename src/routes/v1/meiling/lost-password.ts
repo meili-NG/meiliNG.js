@@ -295,7 +295,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
 
   if (passwordReset.method === Meiling.V1.Interfaces.ExtendedAuthMethods.WEBAUTHN) {
     const idRaw = (passwordReset.challenge as any).id;
-    if (typeof idRaw !== 'string' || !Utils.checkBase64(idRaw))
+    if (typeof idRaw !== 'string' || !Utils.checkShortenedBase64(idRaw))
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid WebAuthn ID');
 
     const id = Buffer.from(idRaw, 'base64url').toString('base64');

@@ -301,8 +301,8 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
                         },
                       },
                       method: 'WEBAUTHN',
-                      allowSingleFactor: body.type === SigninType.PASSWORDLESS,
-                      allowTwoFactor: body.type === SigninType.TWO_FACTOR_AUTH,
+                      allowSingleFactor: body.type === SigninType.PASSWORDLESS ? true : undefined,
+                      allowTwoFactor: body.type === SigninType.TWO_FACTOR_AUTH ? true : undefined,
                     },
                   })
                 )

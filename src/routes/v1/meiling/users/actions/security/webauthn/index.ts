@@ -29,7 +29,7 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
     rep.send(
       securityKeys.map((n) => ({
         id: n.id,
-        name: (n.data as any)?.name,
+        name: (n.data as any)?.data?.name,
         createdAt: n.createdAt,
       })),
     );

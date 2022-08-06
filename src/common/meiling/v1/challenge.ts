@@ -137,8 +137,10 @@ export async function verifyChallenge(
         return validateOTP(challengeResponse, (data as AuthenticationOTPObject).data.secret);
     }
   } catch (e) {
+    /*
     if (config.node.environment === NodeEnvironment.Development)
       console.error('challenge validation failed with error:', e);
+    */
     return false;
   }
 }

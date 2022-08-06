@@ -463,18 +463,6 @@ please request this endpoint without challengeResponse field to request challeng
       .map((n, i) => (n === true ? i : undefined))
       .filter((n) => n !== undefined) as number[];
 
-    if (config.node.environment === NodeEnvironment.Development) {
-      console.log(
-        'signin debug: ',
-        'idx',
-        authMethodCheckIndex,
-        'results',
-        authMethodCheckResults,
-        'users',
-        authMethodCheckUsers,
-      );
-    }
-
     for (const index of authMethodCheckIndex) {
       const userId = authMethodCheckUsers[index];
 

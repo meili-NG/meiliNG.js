@@ -119,15 +119,7 @@ export async function deviceCodeAuthorizeHandler(req: FastifyRequest, rep: Fasti
   }
 
   metadata.data.deviceCode.isAuthorized = true;
-
-  await getPrismaClient().oAuthToken.update({
-    where: {
-      token: userCode.token,
-    },
-    data: {
-      metadata: metadata as any,
-    },
-  });
+  await Meiling.Authentication.Token.setMetadata(userCode.token, metadata);
 
   rep.send({
     success: true,

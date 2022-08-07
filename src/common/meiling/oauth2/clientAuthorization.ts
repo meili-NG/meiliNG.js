@@ -1,4 +1,12 @@
-import { OAuthClient, OAuthClientAuthorization, OAuthToken, OAuthTokenType, Permission, User } from '@prisma/client';
+import {
+  OAuthClient,
+  OAuthClientAuthorization,
+  OAuthToken,
+  OAuthTokenType,
+  Permission,
+  Prisma,
+  User,
+} from '@prisma/client';
 import { Authentication } from '..';
 import { getPrismaClient } from '../../../resources/prisma';
 
@@ -191,7 +199,7 @@ export async function createToken(
       token: tokenKey,
 
       // TODO: FIX LATER. I KNOW THIS IS BAD!
-      metadata: metadata as any,
+      metadata: !metadata ? Prisma.DbNull : (metadata as any),
     },
   });
 

@@ -111,6 +111,8 @@ export function registerSentryTransaction(app: FastifyInstance, opts: FastifyPlu
       }
     });
   });
+  
+  done();
 }
 
 export function sentryErrorHandler(error: Error, req: FastifyRequest, rep: FastifyReply) {

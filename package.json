@@ -8,6 +8,8 @@
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "4",
+    "@sentry/node": "^7.9.0",
+    "@sentry/tracing": "^7.9.0",
     "@simplewebauthn/server": "^5.4.0",
     "@xmldom/xmldom": "^0.8.0",
     "ansi-regex": "^6.0.1",

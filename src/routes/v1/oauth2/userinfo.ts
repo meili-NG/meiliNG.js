@@ -1,6 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import JWT from 'jsonwebtoken';
 import { Meiling } from '../../../common';
+import * as Sentry from '@sentry/node';
+import { isSentryAvailable } from '../../../common/sentry/tracer';
 
 export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const type = 'ACCESS_TOKEN';
@@ -37,6 +39,14 @@ export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyRep
       'provided access_token is invalid',
     );
     return;
+  }
+
+  if (isSentryAvailable()) {
+    Sentry.setUser({
+      id: user.id,
+      username: user.username,
+      ip_address: req.ip,
+    });
   }
 
   const isValid = await Meiling.Authentication.Token.isValid(token.token, type);

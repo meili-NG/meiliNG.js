@@ -9,6 +9,8 @@ import { userUpdateInfo } from './info/put';
 import userPhonesPlugin from './phones';
 import userSecurityPlugin from './security';
 import userPasswordsPlugin from './security/passwords';
+import * as Sentry from '@sentry/node';
+import { isSentryAvailable } from '../../../../../common/sentry/tracer';
 
 export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
   // /v1/meiling/user/:userId/action
@@ -22,6 +24,15 @@ export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOpti
         Meiling.V1.Error.ErrorType.UNAUTHORIZED,
         'you are not logged in as specified user.',
       );
+    }
+
+    if (isSentryAvailable()) {
+      Sentry.setUser({
+        id: userBase.id,
+        username: userBase.username,
+        email: userBase.emails.find((n) => n.isPrimary)?.email,
+        ip_address: req.ip,
+      });
     }
   });
 

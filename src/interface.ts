@@ -113,6 +113,10 @@ export interface ConfigInterface {
       useAlimtalkForSouthKorea?: boolean;
     };
   };
+  sentry?: {
+    serverName?: string;
+    dsn: string;
+  };
   baridegiApi?: {
     version: 1;
     host: string;

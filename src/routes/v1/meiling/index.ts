@@ -11,6 +11,7 @@ import { signinHandler } from './signin';
 import { signoutPlugin } from './signout';
 import { signupPlugin } from './signup/';
 import { userPlugin } from './users';
+import { sentryErrorHandler } from '../../../common/sentry/tracer';
 
 export interface FastifyRequestWithSession extends FastifyRequest {
   session: Meiling.V1.Interfaces.MeilingSession;
@@ -33,6 +34,8 @@ function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done:
 
   app.setErrorHandler(async (_err, req, rep) => {
     const err = _err as Error;
+    sentryErrorHandler(err, req, rep);
+
     if ((err as Meiling.V1.Error.MeilingError)._isMeiling === true) {
       const mlError = err as Meiling.V1.Error.MeilingError;
 

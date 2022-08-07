@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fastifyCors from 'fastify-cors';
 import { Meiling, Utils } from '../../../common';
+import { sentryErrorHandler } from '../../../common/sentry/tracer';
 import { NodeEnvironment } from '../../../interface';
 import config from '../../../resources/config';
 import { info as packageJson } from '../../../resources/package';
@@ -14,6 +15,8 @@ import usersAdminHandler from './users';
 const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.setErrorHandler(async (_err, req, rep) => {
     const err = _err as Error;
+    sentryErrorHandler(err, req, rep);
+
     if ((err as Meiling.V1.Error.MeilingError)._isMeiling === true) {
       const mlError = err as Meiling.V1.Error.MeilingError;
 

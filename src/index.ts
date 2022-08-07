@@ -3,6 +3,7 @@ import fastifyFormbody from 'fastify-formbody';
 import fs from 'fs';
 import { Meiling, Startup, Terminal } from './common';
 import { setupSwaggerUI } from './common/fastify';
+import { isSentryAvailable, registerSentryTransaction } from './common/sentry/tracer';
 import config from './resources/config';
 import meilingPlugin from './routes';
 
@@ -31,6 +32,11 @@ const main = async () => {
 
   Terminal.Log.info('Preparing SwaggerUI for API Docs...');
   setupSwaggerUI(app);
+
+  if (isSentryAvailable()) {
+    Terminal.Log.info('Registering Sentry...');
+    app.register(registerSentryTransaction);
+  }
 
   Terminal.Log.info('Initiating database connection...');
   if (!(await Meiling.Database.testDatabase())) {

@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } f
 import * as Sentry from '@sentry/node';
 import Tracing, { Transaction } from '@sentry/tracing';
 import config from '../../resources/config';
-import { FastifyRequestWithSession } from '../../routes/v1/meiling';
+import { FastifyRequestWithSession, FastifyRequestWithUser } from '../../routes/v1/meiling';
 import { getSessionFromRequest } from '../meiling/v1/session';
 import { Meiling } from '..';
 
@@ -86,41 +86,79 @@ export function registerSentryTransaction(app: FastifyInstance, opts: FastifyPlu
         request: req4Sentry,
       },
     );
-
-    Sentry.setUser({
-      ip_address: req.ip,
-    });
   });
 
   app.addHook('onResponse', async (req, rep) => {
-    setImmediate(() => {
-      const tx = getSentryTransaction(req);
-      if (tx) {
-        tx.setData('url', req.url);
-        tx.setData('query', req.query);
-        if (typeof req.body === 'object') {
-          tx.setData('body', req.body);
-        }
-        tx.setHttpStatus(rep.statusCode);
+    Sentry.withScope(async (scope) => {
+      setImmediate(async () => {
+        const tx = getSentryTransaction(req);
 
-        if ((req as FastifyRequestWithSession).session) {
-          tx.setData('session', getSessionFromRequest(req));
-        }
+        if (tx) {
+          const session = (req as FastifyRequestWithSession).session;
+          if (session) {
+            const userBase = (req as FastifyRequestWithUser).user;
 
-        tx.finish();
-      }
+            if (userBase) {
+              const user = await Meiling.Identity.User.getDetailedInfo(userBase);
+              scope.setUser({
+                id: user?.id,
+                ip: req.ip,
+                username: user?.username,
+                email: user?.emails.find((n) => n.isPrimary)?.email,
+              });
+            }
+
+            tx.setData('session', session);
+          }
+
+          tx.setData('url', req.url);
+          tx.setData('query', req.query);
+
+          if (typeof req.body === 'object') {
+            tx.setData('body', req.body);
+          }
+
+          tx.setHttpStatus(rep.statusCode);
+
+          tx.finish();
+        }
+      });
     });
   });
-  
+
   done();
 }
 
 export function sentryErrorHandler(error: Error, req: FastifyRequest, rep: FastifyReply) {
-  Sentry.withScope((scope) => {
-    if ((error as Meiling.V1.Error.MeilingError)._isMeiling === true) {
-      scope.setTag('is_meiling', true);
-      Sentry.captureException(error);
+  Sentry.withScope(async (scope) => {
+    const session = (req as FastifyRequestWithSession).session;
+    if (session) {
+      const userBase = (req as FastifyRequestWithUser).user;
+
+      if (userBase) {
+        const user = await Meiling.Identity.User.getDetailedInfo(userBase);
+        scope.setUser({
+          id: user?.id,
+          ip: req.ip,
+          username: user?.username,
+          email: user?.emails.find((n) => n.isPrimary)?.email,
+        });
+      } else {
+        scope.setUser({
+          ip: req.ip,
+        });
+      }
+      scope.setTag('path', req.url);
+      scope.setContext('query', req.query || ({} as any));
+
+      scope.setContext('session', session as any);
     }
+
+    if ((error as Meiling.V1.Error.MeilingError)._isMeiling === true) {
+      scope.setTag('meiling', true);
+    }
+
+    Sentry.captureException(error);
   });
 }
 

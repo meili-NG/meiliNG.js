@@ -12,13 +12,14 @@ import { signoutPlugin } from './signout';
 import { signupPlugin } from './signup/';
 import { userPlugin } from './users';
 import { sentryErrorHandler } from '../../../common/sentry/tracer';
+import { User as UserModel } from '@prisma/client';
 
 export interface FastifyRequestWithSession extends FastifyRequest {
   session: Meiling.V1.Interfaces.MeilingSession;
 }
 
 export interface FastifyRequestWithUser extends FastifyRequestWithSession {
-  user: Meiling.Identity.User.UserInfoObject;
+  user: UserModel;
 }
 
 function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {

@@ -11,6 +11,7 @@ import userSecurityPlugin from './security';
 import userPasswordsPlugin from './security/passwords';
 import * as Sentry from '@sentry/node';
 import { isSentryAvailable } from '../../../../../common/sentry/tracer';
+import { FastifyRequestWithUser } from '../..';
 
 export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
   // /v1/meiling/user/:userId/action
@@ -26,14 +27,7 @@ export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOpti
       );
     }
 
-    if (isSentryAvailable()) {
-      Sentry.setUser({
-        id: userBase.id,
-        username: userBase.username,
-        email: userBase.emails.find((n) => n.isPrimary)?.email,
-        ip_address: req.ip,
-      });
-    }
+    (req as FastifyRequestWithUser).user = userBase;
   });
 
   app.get('/', userGetInfo);

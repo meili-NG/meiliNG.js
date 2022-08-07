@@ -112,6 +112,10 @@ module.exports = {
         /^true$/gi.test(process.env.NOTIFICATION_API_SETTINGS_USE_ALIMTALK_FOR_SOUTH_KOREA) || false,
     },
   },
+  sentry: {
+    serverName: process.env.SENTRY_SERVERNAME || undefined,
+    dsn: process.env.SENTRY_DSN || undefined,
+  },
   baridegiApi: {
     version: Number(process.env.BARIDEGI_API_VERSION) || 1,
     host: process.env.BARIDEGI_API_HOST || 'https://baridegi.stella-api.dev',

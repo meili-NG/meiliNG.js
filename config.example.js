@@ -119,6 +119,10 @@ module.exports = {
       },
     },
   },
+  sentry: {
+    serverName: undefined,
+    dsn: 'https://this-is-example-dsn.ingest.sentry.io/sample-baby',
+  },
   notificationApi: {
     /** Use notification api? (Stella IT Proprietary, Set it to false if you don't use one.) */
     enable: true,

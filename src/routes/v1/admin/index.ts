@@ -15,10 +15,11 @@ import usersAdminHandler from './users';
 const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.setErrorHandler(async (_err, req, rep) => {
     const err = _err as Error;
-    sentryErrorHandler(err, req, rep);
 
     if ((err as Meiling.V1.Error.MeilingError)._isMeiling === true) {
       const mlError = err as Meiling.V1.Error.MeilingError;
+
+      if (mlError.type === Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR) sentryErrorHandler(err, req, rep);
 
       return mlError.sendFastify(rep);
     } else {
@@ -33,6 +34,7 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
         const error = new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR);
         error.loadError(_err);
 
+        sentryErrorHandler(err, req, rep);
         return error.sendFastify(rep);
       }
     }

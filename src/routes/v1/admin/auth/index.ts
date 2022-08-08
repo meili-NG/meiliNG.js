@@ -62,7 +62,18 @@ const authAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
 
       rep.send({ success: true });
     } else {
-      // TODO: Implement it properly
+      await Meiling.V1.Session.setExtendedAuthenticationSession(
+        {
+          headers: {
+            authorization: 'Bearer ' + token,
+          },
+        } as any,
+        {
+          id: user.id,
+          type: Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH,
+        },
+      );
+
       throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.TWO_FACTOR_AUTHENTICATION_REQUIRED);
     }
   });

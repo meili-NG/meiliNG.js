@@ -144,6 +144,15 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
             data: {
               type: 'SMS',
             },
+            allowPasswordReset: false,
+            allowSingleFactor: false,
+            allowTwoFactor: false,
+          },
+          {
+            method: 'EMAIL',
+            data: {
+              type: 'EMAIL',
+            },
             allowPasswordReset: true,
             allowSingleFactor: false,
             allowTwoFactor: true,

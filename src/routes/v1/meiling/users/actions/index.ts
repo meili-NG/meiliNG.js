@@ -14,6 +14,10 @@ import { isSentryAvailable } from '../../../../../common/sentry/tracer';
 import { FastifyRequestWithUser } from '../..';
 
 export function userActionsHandler(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void) {
+  if (!app.hasRequestDecorator('user')) {
+    app.decorateRequest('user', undefined);
+  }
+
   // /v1/meiling/user/:userId/action
   // TODO: Implement authentication
   app.addHook('onRequest', async (req, rep) => {

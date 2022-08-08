@@ -4,6 +4,8 @@ import { FastifyRequestWithSession } from '../../../..';
 import { Meiling } from '../../../../../../../common';
 
 function userEmailActionPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+  app.decorateRequest('email', undefined);
+
   app.addHook('onRequest', async (req, rep) => {
     const session = (req as FastifyRequestWithSession).session;
     const userRawSession = session.user;

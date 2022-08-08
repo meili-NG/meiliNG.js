@@ -87,6 +87,8 @@ function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done:
 }
 
 function sessionRequiredPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+  app.decorateRequest('session', undefined);
+
   app.addHook('onRequest', async (req, rep) => {
     const session = await Meiling.V1.Session.getSessionFromRequest(req);
     if (!session) {

@@ -4,6 +4,8 @@ import { FastifyRequestWithSession } from '../../../..';
 import { Meiling } from '../../../../../../../common';
 
 function userPhoneActionPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
+  app.decorateRequest('phone', undefined);
+
   app.addHook('onRequest', async (req, rep) => {
     const session = (req as FastifyRequestWithSession).session;
     const userRawSession = session.user;
@@ -29,6 +31,7 @@ function userPhoneActionPlugin(app: FastifyInstance, opts: FastifyPluginOptions,
     }
 
     (req as any).phone = matchingPhone;
+
     Object.freeze((req as any).phone);
   });
 

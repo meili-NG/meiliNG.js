@@ -67,6 +67,8 @@ export function registerSentryTransaction(app: FastifyInstance, opts: FastifyPlu
     integrations: [new Sentry.Integrations.Http({ tracing: true })],
   });
 
+  app.decorateRequest('sentryTransaction', undefined);
+
   app.addHook('onRequest', async (req) => {
     let traceData;
     if (req.headers && typeof req.headers['sentry-trace'] === 'string') {
@@ -75,8 +77,7 @@ export function registerSentryTransaction(app: FastifyInstance, opts: FastifyPlu
     }
 
     const req4Sentry = convertReq4Sentry(req);
-
-    (req as any).sentryTransaction = Sentry.startTransaction(
+    (app as any).sentryTransaction = Sentry.startTransaction(
       {
         op: 'http.server',
         name: `${req.method} ${req.url}`,
@@ -148,10 +149,16 @@ export function sentryErrorHandler(error: Error, req: FastifyRequest, rep: Fasti
           ip: req.ip,
         });
       }
-      scope.setTag('path', req.url);
-      scope.setContext('query', req.query || ({} as any));
+      scope.setExtra('session', session as any);
+    }
 
-      scope.setContext('session', session as any);
+    scope.setLevel('error');
+    scope.setTag('method', req.method);
+    scope.setTag('path', req.url);
+    scope.setExtra('query', req.query || ({} as any));
+
+    if (req.headers['content-type'] === 'application/json' && req.body && typeof req.body === 'object') {
+      scope.setExtra('body', req.body);
     }
 
     if ((error as Meiling.V1.Error.MeilingError)._isMeiling === true) {

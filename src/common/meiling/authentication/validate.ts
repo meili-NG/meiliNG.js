@@ -110,6 +110,10 @@ export async function validateWebAuthn(
 }
 
 export function validateOTP(challengeResponse: string, secret: string) {
+  if (challengeResponse.includes(' ')) {
+    challengeResponse = challengeResponse.replace(/ /g, '');
+  }
+
   return SpeakEasy.totp.verify({
     secret,
     encoding: 'base32',

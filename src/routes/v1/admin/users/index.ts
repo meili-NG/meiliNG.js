@@ -58,7 +58,7 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
   app.get('/', async (req, rep) => {
     let { query } = (req.query as any) || {};
     const { pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
-    if (typeof query !== 'string') query = query.toString();
+    if (['bigint', 'boolean', 'number'].includes(typeof query)) query = query.toString();
 
     const paginationDetails: {
       skip?: number;
@@ -134,7 +134,7 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
   app.get('/count', async (req, rep) => {
     let { query } = (req.query as any) || {};
     const { rawQuery = false } = (req.query as any) || {};
-    if (typeof query === 'number') query = query.toString();
+    if (typeof query !== 'string' && query !== undefined) query = query.toString();
 
     let prismaQuery = undefined;
 

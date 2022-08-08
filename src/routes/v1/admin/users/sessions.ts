@@ -13,7 +13,7 @@ const userSessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptio
 
     let { query } = (req.query as any) || {};
     const { pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
-    if (typeof query !== 'string') query = query.toString();
+    if (['bigint', 'boolean', 'number'].includes(typeof query)) query = query.toString();
 
     const paginationDetails: {
       skip?: number;

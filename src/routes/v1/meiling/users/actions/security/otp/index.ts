@@ -30,7 +30,7 @@ function userOTPPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: (
       otps.map((n) => ({
         id: n.id,
         createdAt: n.createdAt,
-        name: (n.data as any)?.name,
+        name: (n.data as any)?.data?.name,
       })),
     );
   });

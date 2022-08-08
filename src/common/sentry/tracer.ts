@@ -155,7 +155,10 @@ export function sentryErrorHandler(error: Error, req: FastifyRequest, rep: Fasti
     scope.setLevel('error');
     scope.setTag('method', req.method);
     scope.setTag('path', req.url);
-    scope.setExtra('query', req.query || ({} as any));
+
+    if (typeof req.query === 'object') {
+      scope.setExtra('query', req.query);
+    }
 
     if (req.headers['content-type'] === 'application/json' && req.body && typeof req.body === 'object') {
       scope.setExtra('body', req.body);

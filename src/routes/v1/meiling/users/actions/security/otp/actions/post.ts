@@ -67,8 +67,11 @@ async function userOTPActionPostKey(req: FastifyRequest, rep: FastifyReply): Pro
           },
         },
         data: {
-          name,
-          secret,
+          type: 'OTP',
+          data: {
+            name,
+            secret,
+          },
         },
         method: dbType as AuthenticationMethod,
         allowTwoFactor: true,

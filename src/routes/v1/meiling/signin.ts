@@ -385,9 +385,11 @@ please request this endpoint without challengeResponse field to request challeng
     const challenge = extendedAuthSession.challenge;
     const authorizedUsers: UserModel[] = [];
 
-    if (challenge === undefined) {
-      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, `challenge is missing.`);
-      return;
+    if (signinMethod !== ExtendedAuthMethods.OTP) {
+      if (challenge === undefined) {
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, `challenge is missing.`);
+        return;
+      }
     }
 
     const authMethodCheckPromises = [];

@@ -23,20 +23,15 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
 
       return mlError.sendFastify(rep);
     } else {
-      // This is internal server error.
-      if (_err.validation) {
-        // if it is validation issue, the error type is INVALID_REQUEST
-        const error = new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
-        error.loadError(_err);
 
-        return error.sendFastify(rep);
-      } else {
-        const error = new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR);
-        error.loadError(_err);
+      const type = (_err.validation) ?
+        Meiling.V1.Error.ErrorType.INVALID_REQUEST :
+        Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR;
 
-        sentryErrorHandler(err, req, rep);
-        return error.sendFastify(rep);
-      }
+      const error = new Meiling.V1.Error.MeilingError(type);
+      error.loadError(_err);
+
+      return error.sendFastify(rep);
     }
   });
 
@@ -49,8 +44,8 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
       config.node.environment === NodeEnvironment.Development
         ? '*'
         : config?.admin?.frontend?.url
-        ? config.admin.frontend.url
-        : config.frontend.url,
+          ? config.admin.frontend.url
+          : config.frontend.url,
   });
 
   app.addHook('onRequest', (req, rep, next) => {

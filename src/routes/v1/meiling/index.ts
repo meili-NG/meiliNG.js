@@ -47,21 +47,15 @@ function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done:
 
       return mlError.sendFastify(rep);
     } else {
-      // This is internal server error.
-      if (_err.validation) {
-        // if it is validation issue, the error type is INVALID_REQUEST
-        const error = new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
-        error.loadError(_err);
 
-        return error.sendFastify(rep);
-      } else {
-        const error = new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR);
-        error.loadError(_err);
+      const type = (_err.validation) ?
+        Meiling.V1.Error.ErrorType.INVALID_REQUEST :
+        Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR;
 
-        sentryErrorHandler(err, req, rep);
+      const error = new Meiling.V1.Error.MeilingError(type);
+      error.loadError(_err);
 
-        return error.sendFastify(rep);
-      }
+      return error.sendFastify(rep);
     }
   });
 

@@ -89,10 +89,12 @@ export class MeilingError extends Error {
   public description?: string;
 
   constructor(type: ErrorType, description?: string) {
-    super(description);
+    const internalDesc = description ? description : type;
+
+    super(internalDesc);
     this.type = type;
     this.name = 'meiliNG Error';
-    this.message = description ? description : type;
+    this.message = internalDesc;
     this.description = description;
   }
 
@@ -102,7 +104,6 @@ export class MeilingError extends Error {
 
   public static load(error: MeilingError) {
     const mlError = new MeilingError(error.type, error.description);
-    console.log(mlError);
 
     return mlError;
   }

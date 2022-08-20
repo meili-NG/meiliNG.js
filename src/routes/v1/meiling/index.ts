@@ -47,10 +47,9 @@ function meilingV1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done:
 
       return mlError.sendFastify(rep);
     } else {
-
-      const type = (_err.validation) ?
-        Meiling.V1.Error.ErrorType.INVALID_REQUEST :
-        Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR;
+      const type = _err.validation
+        ? Meiling.V1.Error.ErrorType.INVALID_REQUEST
+        : Meiling.V1.Error.ErrorType.INTERNAL_SERVER_ERROR;
 
       const error = new Meiling.V1.Error.MeilingError(type);
       error.loadError(_err);

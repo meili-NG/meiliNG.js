@@ -1,6 +1,6 @@
 {
   "name": "meiling",
-  "version": "0.9.0-snapshot",
+  "version": "0.9.0",
   "description": "An Opensource Next Generation \"Gatekeeper\" with oAuth2 Authentication Provider and OpenID Connect Server",
   "main": "dist/",
   "repository": "https://github.com/meili-NG/meiliNG",

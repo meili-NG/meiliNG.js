@@ -14,6 +14,8 @@ import { getPrismaClient } from '../../../resources/prisma';
 import { ClientACLRules, getAccessControlRules } from './clientAccessControls';
 
 export async function getByClientId(clientId: string): Promise<ClientModel | null> {
+  if (typeof clientId !== 'string') return null;
+
   const client = await getPrismaClient().oAuthClient.findFirst({
     where: {
       id: clientId,
@@ -24,6 +26,8 @@ export async function getByClientId(clientId: string): Promise<ClientModel | nul
 }
 
 export async function getClientOwners(clientId: string): Promise<UserModel[]> {
+  if (typeof clientId !== 'string') return [];
+
   const owners = await getPrismaClient().user.findMany({
     where: {
       ownedClients: {

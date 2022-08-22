@@ -7,14 +7,23 @@ export interface MeilingSession {
   authenticationStatus?: SessionAuthenticationStatus;
   passwordReset?: SessionPasswordReset;
   registering?: SessionRegistering;
+  ips?: string[];
 }
 
 export interface SessionRegistering {
   webAuthn?: RegisteringWebAuthn;
+  otp?: RegisteringOTP;
 }
 
 export interface RegisteringWebAuthn {
+  origin: string;
+  hostname: string;
   challenge: string;
+}
+
+export interface RegisteringOTP {
+  secret: string;
+  issuedAt: number;
 }
 
 export interface LoggedInUser {

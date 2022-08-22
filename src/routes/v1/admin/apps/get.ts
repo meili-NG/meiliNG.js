@@ -10,7 +10,7 @@ async function appAdminInfoHandler(req: FastifyRequest, rep: FastifyReply) {
     rep.send(client);
     return;
   } else {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 }

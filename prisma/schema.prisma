@@ -44,11 +44,11 @@ model User {
   lockedProps  Json?
 
   createdAt          DateTime             @default(now())
+  deletedAt          DateTime?
+  
   lastSignIn         DateTime             @default(now())
   lastAuthenticated  DateTime             @default(now())
   ownedClientSecrets OAuthClientSecrets[]
-
-  isDeleted          Boolean              @default(false)
 
   metadata Json?
 }
@@ -80,7 +80,7 @@ enum AuthenticationMethod {
   SSH_KEY
   SMS
   EMAIL
-  SECURITY_KEY
+  WEBAUTHN
 }
 
 model Authentication {

@@ -105,12 +105,17 @@ export interface ConfigInterface {
     };
   };
   notificationApi?: {
+    enable: boolean;
     version: 1;
     host: string;
     key: string;
     settings?: {
       useAlimtalkForSouthKorea?: boolean;
     };
+  };
+  sentry?: {
+    serverName?: string;
+    dsn: string;
   };
   baridegiApi?: {
     version: 1;

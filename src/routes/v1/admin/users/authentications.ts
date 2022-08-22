@@ -41,12 +41,12 @@ const userAuthnsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     const uuid = (req.params as { uuid: string }).uuid;
     const user = await Meiling.Identity.User.getInfo(uuid);
 
-    if (!user) return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND, 'missing user');
+    if (!user) throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND, 'missing user');
 
     const data = req.body as AuthenticationBody;
 
     if (!validateBody(data))
-      return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid body');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid body');
     const method = data.method;
 
     const authn = await getPrismaClient().authentication.create({
@@ -88,7 +88,7 @@ const userAuthnAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     });
 
     if (authn === null) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 
@@ -109,14 +109,14 @@ const userAuthnAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       },
     });
 
-    if (authn === null) return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-    if (!user) return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND, 'missing user');
+    if (authn === null) throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
+    if (!user) throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND, 'missing user');
 
     const data = req.body as AuthenticationBody;
     const method = authn.method;
 
     if (!validateBody(data, method))
-      return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid body');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid body');
 
     await getPrismaClient().authentication.update({
       where: {
@@ -149,7 +149,7 @@ const userAuthnAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     });
 
     if (authn === null) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 

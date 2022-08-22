@@ -39,6 +39,7 @@ export function isNotBlank(...values: (string | undefined | null)[]): boolean {
   let isValid = true;
   for (const value of values) {
     if (!value) return false;
+    if (typeof value !== 'string') return false;
 
     isValid = isValid && !(value === undefined || value === null || value === '' || value.trim().length === 0);
     if (!isValid) return false;
@@ -95,15 +96,21 @@ export interface MeilingV1SignupName {
   middleName?: string;
 }
 
+export const usernameRegex = /^[A-Za-z0-9-_\.]+$/g;
+export const minPasswordLength = 8;
+
 export function isValidUsername(username: string): boolean {
-  return /^[A-Za-z0-9-_\.]+$/g.test(username);
+  usernameRegex.lastIndex = 0;
+  return usernameRegex.test(username);
 }
 
 export function isValidPassword(password: string): boolean {
-  return password.length >= 8;
+  return password.length >= minPasswordLength;
 }
 
 export function isValidEmail(email: string): boolean {
+  if (typeof email !== 'string') return false;
+
   emailRegex.lastIndex = 0;
   return emailRegex.test(email);
 }
@@ -132,6 +139,18 @@ export function checkBase64(string: string) {
   }
 
   const regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$/;
+  return regex.test(convertedString);
+}
+
+export function checkShortenedBase64(string: string) {
+  let convertedString = string;
+  if (string.includes('-') || string.includes('_')) {
+    convertedString = convertedString.replace(/\-/g, '+').replace(/\_/g, '/');
+    convertedString = convertedString.padEnd(Math.ceil(convertedString.length / 4) * 4, '=');
+    console.log(convertedString);
+  }
+
+  const regex = /^([A-Za-z0-9+/=]+)$/;
   return regex.test(convertedString);
 }
 

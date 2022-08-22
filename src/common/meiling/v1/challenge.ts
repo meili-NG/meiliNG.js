@@ -1,9 +1,15 @@
 import { Authentication } from '@prisma/client';
 import { Meiling } from '../..';
 import { ExtendedAuthMethods, SigninType, SigninExtendedAuthentication } from './interfaces';
-import { AuthenticationJSONObject, AuthenticationOTPObject, AuthenticationPGPSSHKeyObject } from '../identity/user';
-import { validateOTP, validatePGPSign } from '../authentication/validate';
+import {
+  AuthenticationJSONObject,
+  AuthenticationOTPObject,
+  AuthenticationPGPSSHKeyObject,
+  AuthenticationWebAuthnObject,
+} from '../identity/user';
+import { validateOTP, validatePGPSign, validateWebAuthn } from '../authentication/validate';
 import config from '../../../resources/config';
+import { NodeEnvironment } from '../../../interface';
 
 export function getMeilingAvailableAuthMethods(
   authMethods: Authentication[],
@@ -52,7 +58,7 @@ export function isChallengeRateLimited(signinMethod: ExtendedAuthMethods, issued
 export function generateChallenge(signinMethod: ExtendedAuthMethods): string | undefined {
   switch (signinMethod) {
     case ExtendedAuthMethods.PGP_SIGNATURE:
-    case ExtendedAuthMethods.SECURITY_KEY:
+    case ExtendedAuthMethods.WEBAUTHN:
       return Meiling.Authentication.Token.generateToken();
     case ExtendedAuthMethods.SMS:
     case ExtendedAuthMethods.EMAIL:
@@ -66,7 +72,7 @@ export function generateChallenge(signinMethod: ExtendedAuthMethods): string | u
 export function shouldSendChallenge(signinMethod: ExtendedAuthMethods): boolean {
   switch (signinMethod) {
     case ExtendedAuthMethods.PGP_SIGNATURE:
-    case ExtendedAuthMethods.SECURITY_KEY:
+    case ExtendedAuthMethods.WEBAUTHN:
       return true;
     case ExtendedAuthMethods.SMS:
     case ExtendedAuthMethods.EMAIL:
@@ -83,7 +89,7 @@ export function isChallengeMethodAdequate(body: SigninExtendedAuthentication, me
   if (body.type === SigninType.PASSWORDLESS) {
     switch (method) {
       case ExtendedAuthMethods.PGP_SIGNATURE:
-      case ExtendedAuthMethods.SECURITY_KEY:
+      case ExtendedAuthMethods.WEBAUTHN:
         return true;
       case ExtendedAuthMethods.SMS:
       case ExtendedAuthMethods.OTP:
@@ -95,7 +101,7 @@ export function isChallengeMethodAdequate(body: SigninExtendedAuthentication, me
   } else if (body.type === SigninType.TWO_FACTOR_AUTH) {
     switch (method) {
       case ExtendedAuthMethods.PGP_SIGNATURE:
-      case ExtendedAuthMethods.SECURITY_KEY:
+      case ExtendedAuthMethods.WEBAUTHN:
       case ExtendedAuthMethods.SMS:
       case ExtendedAuthMethods.OTP:
       case ExtendedAuthMethods.EMAIL:
@@ -122,8 +128,8 @@ export async function verifyChallenge(
           challengeResponse,
           (data as AuthenticationPGPSSHKeyObject).data.key,
         );
-      case ExtendedAuthMethods.SECURITY_KEY:
-        return false;
+      case ExtendedAuthMethods.WEBAUTHN:
+        return await validateWebAuthn(challenge as string, challengeResponse, data as AuthenticationWebAuthnObject);
       case ExtendedAuthMethods.SMS:
       case ExtendedAuthMethods.EMAIL:
         return (challenge as string).trim() === challengeResponse.trim();
@@ -131,6 +137,10 @@ export async function verifyChallenge(
         return validateOTP(challengeResponse, (data as AuthenticationOTPObject).data.secret);
     }
   } catch (e) {
+    /*
+    if (config.node.environment === NodeEnvironment.Development)
+      console.error('challenge validation failed with error:', e);
+    */
     return false;
   }
 }

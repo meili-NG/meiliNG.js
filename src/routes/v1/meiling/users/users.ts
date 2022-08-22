@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { FastifyRequestWithSession } from '../../..';
-import { Meiling } from '../../../../../../common';
+import { FastifyRequestWithSession } from '..';
+import { Meiling } from '../../../../common';
 
 export async function userGetLoggedInUserInfo(req: FastifyRequest, rep: FastifyReply) {
   const session = (req as FastifyRequestWithSession).session;
@@ -9,7 +9,7 @@ export async function userGetLoggedInUserInfo(req: FastifyRequest, rep: FastifyR
   if (userRawSession && userRawSession.length > 0) {
     const users = session.user;
     if (!users) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'You are not logged in.');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'You are not logged in.');
       return;
     }
 
@@ -22,6 +22,6 @@ export async function userGetLoggedInUserInfo(req: FastifyRequest, rep: FastifyR
 
     rep.send(result);
   } else {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'You are not logged in.');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'You are not logged in.');
   }
 }

@@ -12,7 +12,7 @@ async function clientSecretPostHandler(_req: FastifyRequest, rep: FastifyReply):
   const secret = Meiling.Authentication.Token.generateToken(64);
 
   if (!user) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED);
     return;
   }
 

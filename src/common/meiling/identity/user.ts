@@ -1,4 +1,7 @@
 import { Email, Group, OAuthTokenType, Phone, prisma, User as UserModel, OAuthClient } from '@prisma/client';
+import { VerifiedAuthenticationResponse, VerifiedRegistrationResponse } from '@simplewebauthn/server/./dist';
+import { AttestationFormat } from '@simplewebauthn/server/dist/helpers/decodeAttestationObject';
+import { CredentialDeviceType } from '@simplewebauthn/typescript-types';
 import bcrypt from 'bcryptjs';
 import JWT from 'jsonwebtoken';
 import { OAuth2 } from '..';
@@ -22,7 +25,24 @@ export type AuthenticationJSONObject =
   | AuthenticationPasswordObject
   | AuthenticationPGPSSHKeyObject
   | AuthenticationOTPObject
-  | AuthenticationEmailSMSObject;
+  | AuthenticationEmailSMSObject
+  | AuthenticationWebAuthnObject;
+
+export interface AuthenticationWebAuthnObject {
+  type: 'WEBAUTHN';
+  data: {
+    name: string;
+    key: {
+      fmt: AttestationFormat;
+      aaguid: string;
+      id: string;
+      publicKey: string;
+      deviceType: CredentialDeviceType;
+      isBackedUp: boolean;
+      counter: number;
+    };
+  };
+}
 
 interface AuthenticationPasswordObject {
   type: 'PASSWORD';
@@ -56,6 +76,32 @@ interface UserQueryOptions {
 export function getUserId(user: UserModel | string) {
   return typeof user === 'string' ? user : user.id;
 }
+
+export function convertToWebAuthnJSONObject(
+  name: string,
+  payload: VerifiedRegistrationResponse,
+): AuthenticationWebAuthnObject | undefined {
+  if (payload.verified && payload.registrationInfo) {
+    return {
+      type: 'WEBAUTHN',
+      data: {
+        name,
+        key: {
+          fmt: payload.registrationInfo.fmt,
+          aaguid: payload.registrationInfo.aaguid,
+          id: payload.registrationInfo.credentialID.toString('base64'),
+          publicKey: payload.registrationInfo.credentialPublicKey.toString('base64'),
+          deviceType: payload.registrationInfo.credentialDeviceType,
+          isBackedUp: payload.registrationInfo.credentialBackedUp,
+          counter: payload.registrationInfo.counter,
+        },
+      },
+    };
+  } else {
+    return;
+  }
+}
+
 export async function updateLastAuthenticated(user: UserModel | string) {
   await getPrismaClient().user.update({
     where: {
@@ -66,6 +112,7 @@ export async function updateLastAuthenticated(user: UserModel | string) {
     },
   });
 }
+
 export async function updateLastSignIn(user: UserModel | string) {
   await getPrismaClient().user.update({
     where: {
@@ -80,8 +127,22 @@ export async function getBasicInfo(
   user: UserModel | string,
   queryOptions?: UserQueryOptions,
 ): Promise<UserModel | undefined> {
+  const deletedQuery = queryOptions?.includeDeleted
+    ? {}
+    : {
+        OR: [
+          {
+            deletedAt: null,
+          },
+          {
+            deletedAt: {
+              gte: new Date(),
+            },
+          },
+        ],
+      };
   const prismaQuery = {
-    isDeleted: queryOptions?.includeDeleted ? undefined : false,
+    ...deletedQuery,
   };
 
   const userDatabase = await getPrismaClient().user.findFirst({
@@ -142,7 +203,10 @@ export async function getDetailedInfo(
   const baseUser = await getInfo(user, queryOptions);
   if (!baseUser) return;
 
-  const [authorizedAppsRaw, ownedAppsRaw] = await Promise.all([getAuthorizedApps(user), getOwnedApps(user)]);
+  const [authorizedAppsRaw, ownedAppsRaw] = await Promise.all([
+    getAuthorizedApps(user, queryOptions),
+    getOwnedApps(user, queryOptions),
+  ]);
 
   if (!authorizedAppsRaw || !ownedAppsRaw) return;
 
@@ -158,8 +222,11 @@ export async function getDetailedInfo(
   return userObj;
 }
 
-export async function getAuthorizedApps(user: UserModel | string): Promise<OAuthClient[] | undefined> {
-  const baseUser = await getInfo(user);
+export async function getAuthorizedApps(
+  user: UserModel | string,
+  queryOptions?: UserQueryOptions,
+): Promise<OAuthClient[] | undefined> {
+  const baseUser = await getInfo(user, queryOptions);
   if (!baseUser) return;
 
   const authRaw = await getPrismaClient().oAuthClientAuthorization.findMany({
@@ -177,8 +244,11 @@ export async function getAuthorizedApps(user: UserModel | string): Promise<OAuth
   return rawNotFiltered.filter((n) => n !== null) as OAuthClient[];
 }
 
-export async function getOwnedApps(user: UserModel | string): Promise<OAuthClient[] | undefined> {
-  const baseUser = await getInfo(user);
+export async function getOwnedApps(
+  user: UserModel | string,
+  queryOptions?: UserQueryOptions,
+): Promise<OAuthClient[] | undefined> {
+  const baseUser = await getInfo(user, queryOptions);
   if (!baseUser) return;
 
   const raw = await getPrismaClient().oAuthClient.findMany({
@@ -332,6 +402,7 @@ export function sanitizeMetadata(metadata?: any, _scopes: string[] | boolean = [
 }
 
 export async function checkPassword(user: UserModel | string, password: string) {
+  if (typeof password !== 'string') return [];
   const passwords = await getPasswords(user);
 
   const passwordCheckPromise = passwords.map(async (passwordDB) => {
@@ -380,6 +451,7 @@ export async function hasAuthorizedClient(user: UserModel | string, clientId: st
 }
 
 export async function getClientAuthorizations(user: UserModel | string, clientId?: string) {
+  if (clientId && typeof clientId !== 'string') return undefined;
   const authorizations = await getPrismaClient().oAuthClientAuthorization.findMany({
     where: {
       userId: getUserId(user),
@@ -412,6 +484,7 @@ export async function getClientAuthorizedPermissions(user: UserModel | string, c
 }
 
 export async function findByUsername(username: string): Promise<UserModel[]> {
+  if (typeof username !== 'string') return [];
   return await getPrismaClient().user.findMany({
     where: {
       username: username.toLowerCase(),
@@ -420,6 +493,8 @@ export async function findByUsername(username: string): Promise<UserModel[]> {
 }
 
 export async function findByEmail(email: string, verified: boolean | undefined = true): Promise<UserModel[]> {
+  if (typeof email !== 'string') return [];
+
   const emails = await getPrismaClient().email.findMany({
     where: {
       email: email.toLowerCase(),
@@ -460,6 +535,8 @@ export async function findByCommonUsername(username: string): Promise<UserModel[
 }
 
 export async function getPrimaryEmail(userId: string) {
+  if (typeof userId !== 'string') return;
+
   const email = await getPrismaClient().email.findFirst({
     where: {
       userId,
@@ -467,11 +544,13 @@ export async function getPrimaryEmail(userId: string) {
     },
   });
 
-  if (!email) return undefined;
+  if (!email) return;
   return email;
 }
 
 export async function getEmails(userId: string, isPrimary?: boolean) {
+  if (typeof userId !== 'string') return [];
+
   const emails = await getPrismaClient().email.findMany({
     where: {
       userId,
@@ -500,23 +579,43 @@ export async function addEmail(userId: string, email: string, isPrimary = false)
   });
 
   if (isPrimary) {
-    const prevPrimariesPromise = [];
-    for (const prevPrimary of prevPrimaries) {
-      prevPrimariesPromise.push(
-        getPrismaClient().email.update({
-          where: {
-            id: prevPrimary.id,
-          },
-          data: {
-            isPrimary: false,
-          },
-        }),
-      );
-    }
-    await Promise.all(prevPrimariesPromise);
+    await setPrimaryEmail(userId, email);
   }
 
   return true;
+}
+
+export async function setPrimaryEmail(userId: string, email: string) {
+  const emails = await getEmails(userId);
+
+  const targetEmail = emails.find((n) => n.email === email);
+  const prevPrimaries = emails.filter((n) => n.isPrimary);
+
+  if (!targetEmail) return false;
+
+  await getPrismaClient().email.update({
+    where: {
+      id: targetEmail.id,
+    },
+    data: {
+      isPrimary: true,
+    },
+  });
+
+  const prevPrimariesPromise = [];
+  for (const prevPrimary of prevPrimaries) {
+    prevPrimariesPromise.push(
+      getPrismaClient().email.update({
+        where: {
+          id: prevPrimary.id,
+        },
+        data: {
+          isPrimary: false,
+        },
+      }),
+    );
+  }
+  await Promise.all(prevPrimariesPromise);
 }
 
 export async function removeEmail(userId: string, email: string) {
@@ -529,6 +628,8 @@ export async function removeEmail(userId: string, email: string) {
 }
 
 export async function getPrimaryPhone(userId: string) {
+  if (typeof userId !== 'string') return;
+
   const phone = await getPrismaClient().phone.findFirst({
     where: {
       userId,
@@ -541,6 +642,8 @@ export async function getPrimaryPhone(userId: string) {
 }
 
 export async function getPhones(userId: string, isPrimary?: boolean) {
+  if (typeof userId !== 'string') return [];
+
   const emails = await getPrismaClient().phone.findMany({
     where: {
       userId,
@@ -567,23 +670,44 @@ export async function addPhone(userId: string, phone: string, isPrimary = false)
   });
 
   if (isPrimary) {
-    const prevPrimariesPromise = [];
-    for (const prevPrimary of prevPrimaries) {
-      prevPrimariesPromise.push(
-        getPrismaClient().email.update({
-          where: {
-            id: prevPrimary.id,
-          },
-          data: {
-            isPrimary: false,
-          },
-        }),
-      );
-    }
-    await Promise.all(prevPrimariesPromise);
+    await setPrimaryPhone(userId, phone);
   }
 
   return true;
+}
+
+export async function setPrimaryPhone(userId: string, phone: string) {
+  if (typeof userId !== 'string') return;
+  const phones = await getPhones(userId);
+
+  const targetPhone = phones.find((n) => n.phone === phone);
+  const prevPrimaries = phones.filter((n) => n.isPrimary);
+
+  if (!targetPhone) return false;
+
+  await getPrismaClient().phone.update({
+    where: {
+      id: targetPhone.id,
+    },
+    data: {
+      isPrimary: true,
+    },
+  });
+
+  const prevPrimariesPromise = [];
+  for (const prevPrimary of prevPrimaries) {
+    prevPrimariesPromise.push(
+      getPrismaClient().phone.update({
+        where: {
+          id: prevPrimary.id,
+        },
+        data: {
+          isPrimary: false,
+        },
+      }),
+    );
+  }
+  await Promise.all(prevPrimariesPromise);
 }
 
 export async function removePhone(userId: string, phone: string) {
@@ -684,6 +808,7 @@ export async function createIDToken(
     return JWT.sign(jwtData, key, {
       algorithm,
       issuer: config.openid.issuingAuthority,
+      keyid: config.openid.jwt.keyId,
     });
   } else {
     return undefined;

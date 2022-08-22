@@ -8,7 +8,7 @@ function v1Plugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => 
   app.get('/', (req, rep) => {
     rep.send({
       version: 1,
-      engine: 'Meiling Project',
+      engine: 'meiliNG',
     });
   });
 

@@ -12,7 +12,7 @@ export enum ExtendedAuthMethods {
   OTP = 'otp',
   SMS = 'sms',
   EMAIL = 'email',
-  SECURITY_KEY = 'security_key',
+  WEBAUTHN = 'webauthn',
 }
 
 export type SigninBody = SigninUsernameCheck | SigninUsernameAndPassword | SigninExtendedAuthentication;
@@ -60,6 +60,6 @@ interface SigninPasswordLess {
 
 interface SigninAuthenticationData {
   method?: ExtendedAuthMethods;
-  challengeResponse?: string;
+  challengeResponse?: any;
   challengeContext?: any;
 }

@@ -7,7 +7,7 @@ async function appAdminPutHandler(req: FastifyRequest, rep: FastifyReply) {
 
   if (clientId) {
     const client = await Meiling.OAuth2.Client.getByClientId(clientId);
-    if (!client) return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+    if (!client) throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
 
     // TODO: Implement updates later.
     const data = req.body as any;
@@ -26,7 +26,7 @@ async function appAdminPutHandler(req: FastifyRequest, rep: FastifyReply) {
     rep.send({ success: true });
     return;
   } else {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     return;
   }
 }

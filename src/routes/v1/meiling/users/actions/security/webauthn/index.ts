@@ -3,16 +3,18 @@ import { getUserFromActionRequest } from '../..';
 import { Meiling, Utils } from '../../../../../../../common';
 import { getPrismaClient } from '../../../../../../../resources/prisma';
 import userWebAuthnActionsPlugin from './actions';
+import crypto from 'crypto';
+import userWebAuthnActionPostKey from './actions/post';
 
 function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void {
   app.get('/', async (req, rep) => {
     const user = await getUserFromActionRequest(req);
     if (!user) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED);
       return;
     }
 
-    const dbType = Meiling.V1.Database.convertAuthentication(Meiling.V1.Interfaces.ExtendedAuthMethods.SECURITY_KEY);
+    const dbType = Meiling.V1.Database.convertAuthentication(Meiling.V1.Interfaces.ExtendedAuthMethods.WEBAUTHN);
 
     const securityKeys = await getPrismaClient().authentication.findMany({
       where: {
@@ -27,46 +29,13 @@ function userWebAuthnPlugin(app: FastifyInstance, opts: FastifyPluginOptions, do
     rep.send(
       securityKeys.map((n) => ({
         id: n.id,
+        name: (n.data as any)?.data?.name,
         createdAt: n.createdAt,
       })),
     );
   });
 
-  app.post('/', async (req, rep) => {
-    const body = req.body as any;
-    const session = await Meiling.V1.Session.getSessionFromRequest(req);
-    const user = await getUserFromActionRequest(req);
-
-    if (!user || !session) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED);
-      return;
-    }
-
-    if (Utils.isNotBlank(body.id, body.response, body.response?.attenationObject, body)) {
-      // TODO: Implement registration procedure
-    } else {
-      const challenge = Meiling.Authentication.Token.generateToken(64);
-
-      await Meiling.V1.Session.setSession(req, {
-        ...session,
-        registering: {
-          webAuthn: {
-            challenge,
-          },
-        },
-      });
-
-      rep.send({
-        user: {
-          id: user.id,
-          name: user.username,
-          displayName: user.name,
-          icon: user.profileUrl ? user.profileUrl : undefined,
-        },
-        challenge,
-      });
-    }
-  });
+  app.post('/', userWebAuthnActionPostKey);
 
   app.register(userWebAuthnActionsPlugin, { prefix: '/:tokenId' });
 

@@ -4,7 +4,7 @@ import { NodeEnvironment } from '../../../../interface';
 import config from '../../../../resources/config';
 import { ErrorResponse } from './interface';
 import { ErrorType } from './type';
-import { Error } from '../..';
+import { Error as CommonError } from '../..';
 
 function getMeilingErrorStatusCode(type: ErrorType) {
   switch (type) {
@@ -66,6 +66,7 @@ function getMeilingErrorStatusCode(type: ErrorType) {
       return 410;
 
     case ErrorType.AUTHENTICATION_REQUEST_RATE_LIMITED:
+    case ErrorType.RATE_LIMITED:
       return 429;
 
     case ErrorType.INTERNAL_SERVER_ERROR:
@@ -80,16 +81,62 @@ function getMeilingErrorStatusCode(type: ErrorType) {
   ((n: never) => { })(type);
 }
 
-export function sendMeilingError(rep: FastifyReply, type: ErrorType, description?: string, code?: string): void {
-  if (config.node.environment === NodeEnvironment.Development)
-    console.error(chalk.red('[ERROR]'), 'Error Report', type);
+// TODO: implement throws
+export class MeilingError extends Error {
+  public _isMeiling: true = true;
 
-  const statusCode = getMeilingErrorStatusCode(type);
+  public type: ErrorType;
+  public description?: string;
 
-  rep.status(statusCode).send({
-    type,
-    description,
-    code,
-    url: Error.buildErrorCodeURL(code),
-  } as ErrorResponse);
+  constructor(type: ErrorType, description?: string) {
+    const internalDesc = description ? description : type;
+
+    super(internalDesc);
+    this.type = type;
+    this.name = 'meiliNG Error';
+    this.message = internalDesc;
+    this.description = description;
+  }
+
+  public toString() {
+    return this.description;
+  }
+
+  public static load(error: MeilingError) {
+    const mlError = new MeilingError(error.type, error.description);
+
+    return mlError;
+  }
+
+  public loadError(error: Error) {
+    this.name = error.name;
+    this.message = error.message;
+    this.description = error.message;
+    this.stack = error.stack;
+  }
+
+  public serialize(): ErrorResponse {
+    let base: ErrorResponse = {
+      type: this.type,
+      description: this.description,
+    };
+
+    if (config.node.environment === NodeEnvironment.Development) {
+      base = {
+        ...base,
+        stack: this.stack,
+      };
+    }
+
+    return base;
+  }
+
+  public getStatusCode() {
+    const type = this.type;
+    return getMeilingErrorStatusCode(type);
+  }
+
+  public sendFastify(rep: FastifyReply) {
+    rep.status(this.getStatusCode()).send(this.serialize());
+  }
 }

@@ -29,16 +29,20 @@ const userEmailsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     const body = req.body as UserEmailRegisterInterface | undefined;
 
     if (!body?.email || typeof body.email !== 'string') {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
       return;
     }
 
     if (typeof body.isVerified === 'string') {
       body.isVerified = /^true$/gi.test(body.isVerified);
+    } else if (typeof body.isVerified === 'object') {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     }
 
     if (typeof body.isPrimary === 'string') {
       body.isPrimary = /^true$/gi.test(body.isPrimary);
+    } else if (typeof body.isVerified === 'object') {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     }
 
     const email = body.email.trim();
@@ -52,7 +56,7 @@ const userEmailsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     ).filter((n) => n.email === email);
 
     if (matchingEmails.length > 0) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.CONFLICT, 'email already exists');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.CONFLICT, 'email already exists');
       return;
     }
 
@@ -68,8 +72,7 @@ const userEmailsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       const othersPrimaryEmails = primaryEmails.filter((n) => n.userId !== uuid && n.isPrimary && n.email === email);
 
       if (othersPrimaryEmails.length > 0) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.CONFLICT,
           'there is other user who is using this email as primary email',
         );
@@ -124,7 +127,7 @@ const userEmailAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     });
 
     if (email === null) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 
@@ -150,12 +153,12 @@ const userEmailAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     });
 
     if (email === null) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 
     if (!body.email) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
       return;
     }
 
@@ -173,8 +176,7 @@ const userEmailAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       );
 
       if (othersPrimaryEmails.length > 0) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.CONFLICT,
           'there is other user who is using this email as primary email',
         );
@@ -217,13 +219,12 @@ const userEmailAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       });
 
       if (email === null) {
-        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
         return;
       }
 
       if (email.isPrimary) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.CONFLICT,
           'you should assign new primary email before deleting it',
         );

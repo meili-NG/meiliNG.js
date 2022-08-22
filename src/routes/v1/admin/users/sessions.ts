@@ -8,11 +8,12 @@ const userSessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptio
 
     const user = await Meiling.Identity.User.getDetailedInfo(uuid);
     if (!user) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-      throw new Error('user not found');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND, 'User was not found');
     }
 
-    const { query, pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
+    let { query } = (req.query as any) || {};
+    const { pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
+    if (['bigint', 'boolean', 'number'].includes(typeof query)) query = query.toString();
 
     const paginationDetails: {
       skip?: number;
@@ -31,7 +32,7 @@ const userSessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptio
       try {
         prismaQuery = JSON.parse(query);
       } catch (e) {
-        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
         return;
       }
     }

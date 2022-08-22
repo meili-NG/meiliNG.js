@@ -60,6 +60,14 @@ export function parseClientInfo(req: FastifyRequest):
 
     clientId = body.client_id;
     clientSecret = body.client_secret;
+
+    if (typeof clientId !== 'string') {
+      clientId = undefined;
+    }
+
+    if (typeof clientSecret !== 'string') {
+      clientSecret = undefined;
+    }
   }
 
   if (clientId) {

@@ -18,28 +18,11 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
   const session = (req as FastifyRequestWithSession).session;
   const body = req.body as MeilingV1Signup;
 
-  if (!Utils.isValidValue(body.username, body.email, body.phone, body.password)) {
-    // you are out.
-    Meiling.V1.Error.sendMeilingError(
-      rep,
-      Meiling.V1.Error.ErrorType.INVALID_REQUEST,
-      `Invalid body (${['username', 'email', 'phone', 'password'].filter((n: string) => {
-        return Utils.isValidValue(body[n as keyof MeilingV1Signup]);
-      })})`,
-    );
-    return;
-  }
-
-  if (!Utils.isValidName(body.name)) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Name');
-    return;
-  }
-
+  // Validation no longer required
   const signupChallenge = await Meiling.V1.Session.getAuthenticationStatus(req);
 
   if (signupChallenge === undefined) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED,
       'Signup Validation requests were not generated.',
     );
@@ -53,48 +36,18 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
   const phone = libmobilephoneJs(body.phone);
   const username = body.username;
 
-  // check user input is valid.
-
-  if (!Utils.isValidUsername(username)) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
-      Meiling.V1.Error.ErrorType.INVALID_REQUEST,
-      'Username should be consisting alphanumeric characters and _, -, .',
-    );
-    return;
-  }
-
-  if (!Utils.isValidPassword(password)) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
-      Meiling.V1.Error.ErrorType.INVALID_REQUEST,
-      'password should contain at least 8 characters.',
-    );
-    return;
-  }
-
+  // check if phone input properly parsed.
   if (!phone) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.INVALID_REQUEST,
       'Phone number should be valid ITU compliant international number',
     );
     return;
   }
 
-  if (!Utils.isValidEmail(email)) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
-      Meiling.V1.Error.ErrorType.INVALID_REQUEST,
-      'Entered email is NOT a valid email.',
-    );
-    return;
-  }
-
   // check with validation.
-
   if (!(signupChallenge.email?.isVerified && signupChallenge.phone?.isVerified)) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_COMPLETED);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_COMPLETED);
     return;
   }
 
@@ -105,20 +58,19 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
       phone.formatInternational() === libmobilephoneJs(signupChallenge.phone.to)?.formatInternational()
     )
   ) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_INVALID);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_INVALID);
     return;
   }
 
   const user = await Meiling.Identity.User.findByUsername(username);
   if (user.length > 0) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.EXISTING_USERNAME);
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.EXISTING_USERNAME);
     return;
   }
 
   const userByEmail = await Meiling.Identity.User.findByUsername(email);
   if (userByEmail.length > 0) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.EXISTING_USERNAME,
       'there is already a user using same email',
     );
@@ -134,7 +86,7 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
     });
 
     if (emails.length > 0) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.EMAIL_NOT_ALLOWED);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.EMAIL_NOT_ALLOWED);
       return;
     }
   }
@@ -147,7 +99,7 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
     });
 
     if (phones.length > 0) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.PHONE_NOT_ALLOWED);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.PHONE_NOT_ALLOWED);
       return;
     }
   }
@@ -191,6 +143,15 @@ export async function signupHandler(req: FastifyRequest, rep: FastifyReply): Pro
             method: 'SMS',
             data: {
               type: 'SMS',
+            },
+            allowPasswordReset: false,
+            allowSingleFactor: false,
+            allowTwoFactor: false,
+          },
+          {
+            method: 'EMAIL',
+            data: {
+              type: 'EMAIL',
             },
             allowPasswordReset: true,
             allowSingleFactor: false,

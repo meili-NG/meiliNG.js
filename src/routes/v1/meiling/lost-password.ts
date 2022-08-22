@@ -6,6 +6,7 @@ import { Meiling, Utils, Notification } from '../../../common';
 import config from '../../../resources/config';
 import { getPrismaClient } from '../../../resources/prisma';
 import { Event } from '../../../common';
+import { AuthenticationJSONObject } from '../../../common/meiling/identity/user';
 
 export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const session = (req as FastifyRequestWithSession).session;
@@ -14,14 +15,17 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
   try {
     body = Utils.convertJsonIfNot<Meiling.V1.Interfaces.PasswordResetBody>(req.body);
   } catch (e) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'body is not a valid JSON.');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'body is not a valid JSON.');
     return;
   }
 
   if (body.password) {
+    if (typeof body.password !== 'string') {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+    }
+
     if (!session.passwordReset?.isVerified || !session.passwordReset.passwordResetUser) {
-      Meiling.V1.Error.sendMeilingError(
-        rep,
+      throw new Meiling.V1.Error.MeilingError(
         Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_COMPLETED,
         'password reset request not completed yet',
       );
@@ -47,8 +51,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
   }
 
   if (!body.context?.username) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.INVALID_REQUEST,
       'body does not contain context: username',
     );
@@ -57,8 +60,8 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
 
   const username = body?.context?.username;
 
-  if (!username) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'username is missing');
+  if (!username || typeof username !== 'string') {
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'username is invalid');
     return;
   }
 
@@ -69,14 +72,13 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
   }
 
   if (users.length > 1) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.MORE_THAN_ONE_USER_MATCHED,
       'more than one user has matched',
     );
     return;
   } else if (users.length < 1) {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.WRONG_USERNAME, 'no user was found!');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.WRONG_USERNAME, 'no user was found!');
     return;
   }
 
@@ -93,6 +95,10 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     return;
   }
 
+  if (typeof body.method !== 'string') {
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid method');
+  }
+
   if (!body.data?.challengeResponse) {
     const methods = await Meiling.V1.User.getAvailableExtendedAuthenticationMethods(user, 'password_reset');
 
@@ -107,14 +113,14 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
 
     const challenge = Meiling.V1.Challenge.generateChallenge(currentMethod);
     if (!challenge) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNSUPPORTED_SIGNIN_METHOD);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNSUPPORTED_SIGNIN_METHOD);
       return;
     }
 
     if (
       methods.map((n) => n.method.toLowerCase() as string).filter((n) => n === currentMethod.toLowerCase()).length === 0
     ) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNSUPPORTED_SIGNIN_METHOD);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNSUPPORTED_SIGNIN_METHOD);
       return;
     }
 
@@ -124,8 +130,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
       const to = (await Meiling.Identity.User.getPrimaryEmail(user.id))?.email;
 
       if (!to || !Utils.isValidEmail(to)) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_INVALID,
           'email does not exist on this user',
         );
@@ -142,22 +147,17 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
       }
 
       if (!to) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_INVALID,
           'phone number does not exist on this user',
         );
         return;
       }
-    } else {
-      // TODO: Create Lost Password flow for other method.
-      // but I think common flow can cover this?
     }
 
     if (to !== undefined) {
       if (Meiling.V1.Challenge.isChallengeRateLimited(body.method, session.passwordReset?.challengeCreatedAt)) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_RATE_LIMITED,
           'You are rate limited',
         );
@@ -167,8 +167,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
 
       const notificationMethod = Meiling.V1.Notification.convertToNotificationMethod(currentMethod);
       if (!notificationMethod) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_INVALID,
           'invalid authorization method',
         );
@@ -206,9 +205,43 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
       passwordResetUser: user.id,
     });
 
+    const extras = {
+      challenge: Meiling.V1.Challenge.shouldSendChallenge(body.method) ? challenge : undefined,
+
+      // Webauthn only.
+      webauthn:
+        currentMethod === Meiling.V1.Interfaces.ExtendedAuthMethods.WEBAUTHN
+          ? {
+              allowCredentials: (
+                await getPrismaClient().authentication.findMany({
+                  where: {
+                    user: {
+                      id: user.id,
+                    },
+                    method: 'WEBAUTHN',
+                    allowPasswordReset: true,
+                  },
+                })
+              )
+                .map((n) => {
+                  const data = n.data as unknown as AuthenticationJSONObject;
+                  if (data.type !== 'WEBAUTHN') {
+                    return;
+                  }
+
+                  return {
+                    id: data.data.key.id,
+                    type: 'public-key',
+                  };
+                })
+                .filter((n) => n !== undefined),
+            }
+          : undefined,
+    };
+
     rep.send({
       success: true,
-      challenge: Meiling.V1.Challenge.shouldSendChallenge(body.method) ? challenge : undefined,
+      ...extras,
     });
     return;
   }
@@ -220,12 +253,17 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
       session.passwordReset?.challengeCreatedAt,
     )
   ) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED,
       'generation request was not generated in first place.',
     );
     return;
+  }
+
+  if (session.passwordReset && typeof session.passwordReset?.challengeCreatedAt !== 'object') {
+    session.passwordReset.challengeCreatedAt = new Date(
+      session.passwordReset.challengeCreatedAt as unknown as string | number,
+    );
   }
 
   const passwordReset = session.passwordReset as Meiling.V1.Interfaces.SessionPasswordReset;
@@ -234,8 +272,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     passwordReset.method.toLowerCase() !== body.method.toLowerCase() ||
     !passwordReset.passwordResetUser
   ) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_NOT_GENERATED,
       'generation request was not generated with particular method',
     );
@@ -247,22 +284,57 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
     new Date().getTime() - new Date(passwordReset.challengeCreatedAt).getTime() >
       1000 * config.token.invalidate.meiling.CHALLENGE_TOKEN
   ) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.AUTHENTICATION_TIMEOUT,
       'generated request was timed out',
     );
     return;
   }
 
+  let data = undefined;
+
+  if (passwordReset.method === Meiling.V1.Interfaces.ExtendedAuthMethods.WEBAUTHN) {
+    const idRaw = (passwordReset.challenge as any).id;
+    if (typeof idRaw !== 'string' || !Utils.checkShortenedBase64(idRaw))
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid WebAuthn ID');
+
+    const id = Buffer.from(idRaw, 'base64url').toString('base64');
+
+    data = await getPrismaClient().authentication.findFirst({
+      where: {
+        user: {
+          id: user.id,
+        },
+        method: 'WEBAUTHN',
+        allowPasswordReset: true,
+        data: {
+          path: '$.data.key.id',
+          equals: id,
+        },
+      },
+    });
+    data = data?.data;
+  }
+
+  const challengeResponse = body.data.challengeResponse;
+  if (typeof challengeResponse !== 'object')
+    throw new Meiling.V1.Error.MeilingError(
+      Meiling.V1.Error.ErrorType.INVALID_REQUEST,
+      'invalid challengeResponse type',
+    );
+
+  if (challengeResponse.type !== 'public-key') {
+    challengeResponse.type = 'public-key';
+  }
+
   const isValid = await Meiling.V1.Challenge.verifyChallenge(
     passwordReset.method,
     passwordReset.challenge,
     body.data.challengeResponse,
+    data as unknown as AuthenticationJSONObject | undefined,
   );
   if (!isValid) {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.AUTHENTICATION_REQUEST_INVALID,
       'invalid challenge',
     );

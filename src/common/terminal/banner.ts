@@ -4,15 +4,15 @@ import { info as packageJson } from '../../resources/package';
 import Figlet from 'figlet';
 import chalk from 'chalk';
 import { NodeEnvironment } from '../../interface';
-import { Utils } from '..';
+import { nameStylized, Utils } from '..';
 
 export const showBanner = (): void => {
-  console.log(Figlet.textSync('meiliNG', 'Small Slant'));
+  console.log(Figlet.textSync(nameStylized, 'Small Slant'));
   console.log();
-  console.log(`${chalk.bold('meiliNG')} - ${chalk.italic(`ver. ${packageJson.version}`)}`);
+  console.log(`${chalk.bold(nameStylized)} - ${chalk.italic(`ver. ${packageJson.version}`)}`);
   console.log(chalk.cyan(chalk.underline(packageJson.repository)));
   console.log();
-  console.log(`Copyright © meiliNG Contributors`);
+  console.log(`Copyright © ${nameStylized} Contributors`);
   console.log(
     `Built with ${chalk.redBright('<3')} by ${chalk.cyan('Stella')} ${chalk.blue('IT')} ${chalk.magenta(
       'Inc.',

@@ -1,6 +1,9 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import JWT from 'jsonwebtoken';
 import { Meiling } from '../../../common';
+import * as Sentry from '@sentry/node';
+import { isSentryAvailable } from '../../../common/sentry/tracer';
+import { FastifyRequestWithUser } from '../meiling';
 
 export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const type = 'ACCESS_TOKEN';
@@ -38,6 +41,8 @@ export async function oAuth2UserInfoHandler(req: FastifyRequest, rep: FastifyRep
     );
     return;
   }
+
+  (req as FastifyRequestWithUser).user = user;
 
   const isValid = await Meiling.Authentication.Token.isValid(token.token, type);
   if (!isValid) {

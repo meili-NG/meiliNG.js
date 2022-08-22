@@ -1,7 +1,11 @@
 import { PhoneNumber } from 'libphonenumber-js';
 import * as OpenPGP from 'openpgp';
 import * as SpeakEasy from 'speakeasy';
+import config from '../../../resources/config';
+import { getPrismaClient } from '../../../resources/prisma';
 import * as Notification from '../../notification';
+import { AuthenticationWebAuthnObject } from '../identity/user';
+import SimpleWebAuthn, { verifyAuthenticationResponse } from '@simplewebauthn/server';
 
 export async function validatePGPSign(
   challenge: string,
@@ -16,7 +20,7 @@ export async function validatePGPSign(
     try {
       message = await OpenPGP.message.readArmored(challengeResponse);
     } catch (e) {
-      throw new Error('');
+      throw new Error('Unable to parse PGP Signature');
     }
   }
 
@@ -35,7 +39,81 @@ export async function validatePGPSign(
   return recoveredChallenge.trim() == challenge.trim() && isSignaturesValid;
 }
 
+export async function validateWebAuthn(
+  challenge: string,
+  challengeResponse: any,
+  data: AuthenticationWebAuthnObject,
+): Promise<boolean> {
+  const hostnames = config.frontend.url
+    .map((n) => {
+      try {
+        return new URL(n).hostname;
+      } catch (e) {
+        return;
+      }
+    })
+    .filter((n) => n !== undefined) as string[];
+
+  const res = await verifyAuthenticationResponse({
+    credential: challengeResponse,
+    expectedChallenge: Buffer.from(challenge).toString('base64url'),
+    authenticator: {
+      credentialID: Buffer.from(data.data.key.id, 'base64'),
+      credentialPublicKey: Buffer.from(data.data.key.publicKey, 'base64'),
+      counter: data.data.key.counter,
+    },
+    expectedOrigin: hostnames.map((n) => 'https://' + n),
+    expectedRPID: hostnames,
+  });
+
+  if (res.verified) {
+    // TODO: mitigate very unlikely situation when webauthn id collision occurrs.
+    const updateTargets = await getPrismaClient().authentication.findMany({
+      where: {
+        data: {
+          path: '$.data.key.id',
+          equals: data.data.key.id,
+        },
+        method: 'WEBAUTHN',
+      },
+    });
+
+    const affected = updateTargets.filter((n) => {
+      const localData = n.data as unknown as AuthenticationWebAuthnObject;
+      if (localData.data.key.counter === data.data.key.counter) {
+        return true;
+      }
+    });
+
+    if (affected.length > 1) {
+      // oops. this is bad.
+      throw new Error('authentication processing error');
+    }
+
+    const toUpdate = affected[0];
+    const updateData = toUpdate.data as unknown as AuthenticationWebAuthnObject;
+
+    updateData.data.key.counter = res.authenticationInfo.newCounter;
+    await getPrismaClient().authentication.update({
+      where: {
+        id: toUpdate.id,
+      },
+      data: {
+        data: updateData as any,
+      },
+    });
+
+    return true;
+  }
+
+  return false;
+}
+
 export function validateOTP(challengeResponse: string, secret: string) {
+  if (challengeResponse.includes(' ')) {
+    challengeResponse = challengeResponse.replace(/ /g, '');
+  }
+
   return SpeakEasy.totp.verify({
     secret,
     encoding: 'base32',

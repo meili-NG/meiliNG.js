@@ -4,6 +4,7 @@ import {
   OAuthToken,
   OAuthTokenType,
   Permission,
+  Prisma,
   User as UserModel,
 } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
@@ -136,6 +137,7 @@ export async function getAuthorizedPermissions(
 }
 
 export async function getData(token: string, type?: OAuthTokenType): Promise<OAuthToken | undefined> {
+  if (typeof token !== 'string') return undefined;
   const tokenData = await getPrismaClient().oAuthToken.findUnique({
     where: {
       token,
@@ -204,16 +206,17 @@ export async function getMetadata(token: string, type?: OAuthTokenType): Promise
   }
 }
 
-export async function setMetadata(token: string, metadata: Token.TokenMetadata): Promise<void> {
+export async function setMetadata(token: string, metadata?: Token.TokenMetadata): Promise<void> {
   await getPrismaClient().oAuthToken.update({
     where: {
       token,
     },
     data: {
-      metadata: metadata as any,
+      metadata: !metadata ? Prisma.DbNull : (metadata as any),
     },
   });
 }
+
 export function getValidTimeByType(type: OAuthTokenType): number {
   return config?.token?.invalidate?.oauth[type] === undefined
     ? Number.MAX_SAFE_INTEGER

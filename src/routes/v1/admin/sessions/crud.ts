@@ -6,8 +6,7 @@ const sessionAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, d
   app.addHook('onRequest', async (req, rep) => {
     const token = (req.query as { token: string }).token;
     if (!token || token.trim() === '') {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
-      throw new Error('invalid query');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid query');
     }
 
     const tokenData = await getPrismaClient().meilingSessionV1Token.findFirst({
@@ -17,8 +16,7 @@ const sessionAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, d
     });
 
     if (!tokenData) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-      throw new Error('session not found');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND, 'Session was not found');
     }
   });
 
@@ -33,8 +31,7 @@ const sessionAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, d
     });
 
     if (!tokenDataOld) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-      throw new Error('session not found');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND, 'Session was not found');
     }
 
     if (body?.ip) {

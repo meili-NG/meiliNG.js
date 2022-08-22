@@ -2,7 +2,11 @@ import { ErrorType } from './type';
 
 export interface ErrorResponse {
   type: ErrorType;
-  description: string;
-  code: string;
-  url: string;
+  description?: string;
+  details?: any;
+  debug?: any;
+  stack?: string;
+
+  code?: string;
+  url?: string;
 }

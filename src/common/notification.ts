@@ -59,6 +59,8 @@ export async function sendNotification(method: NotificationMethod, query: Notifi
     throw new Error('Notification API was not configured properly.');
   }
 
+  if (!notificationApi.enable) return;
+
   const version = notificationApi.version;
 
   const host = notificationApi.host;

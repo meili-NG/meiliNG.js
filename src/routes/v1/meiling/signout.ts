@@ -36,8 +36,7 @@ export async function signoutHandler(req: FastifyRequest, rep: FastifyReply): Pr
           token: Meiling.Authentication.Token.getTokenFromRequest(req)?.token,
         });
       } else {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.ALREADY_SIGNED_OUT,
           'you are already signed out.',
         );
@@ -45,8 +44,7 @@ export async function signoutHandler(req: FastifyRequest, rep: FastifyReply): Pr
       }
     }
   } else {
-    Meiling.V1.Error.sendMeilingError(
-      rep,
+    throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.ALREADY_SIGNED_OUT,
       'you are already signed out.',
     );

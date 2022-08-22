@@ -103,6 +103,7 @@ module.exports = {
     },
   },
   notificationApi: {
+    enable: !/^false/gi.test(process.env.NOTIFICATION_API_ENABLE),
     version: Number(process.env.NOTIFICATION_API_VERSION) || 1,
     host: process.env.NOTIFICATION_API_HOST || 'https://notification.meili.ng',
     key: process.env.NOTIFICATION_API_KEY || 'YOUR NOTIFICATION API KEY',
@@ -110,6 +111,10 @@ module.exports = {
       useAlimtalkForSouthKorea:
         /^true$/gi.test(process.env.NOTIFICATION_API_SETTINGS_USE_ALIMTALK_FOR_SOUTH_KOREA) || false,
     },
+  },
+  sentry: {
+    serverName: process.env.SENTRY_SERVERNAME || undefined,
+    dsn: process.env.SENTRY_DSN || undefined,
   },
   baridegiApi: {
     version: Number(process.env.BARIDEGI_API_VERSION) || 1,

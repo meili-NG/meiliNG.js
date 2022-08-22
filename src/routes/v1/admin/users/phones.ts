@@ -14,7 +14,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
   app.get('/', async (req, rep) => {
     const uuid = (req.params as { uuid: string }).uuid;
 
-    const emails = await getPrismaClient().email.findMany({
+    const phones = await getPrismaClient().phone.findMany({
       where: {
         user: {
           id: uuid,
@@ -22,7 +22,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       },
     });
 
-    rep.send(emails);
+    rep.send(phones);
   });
 
   app.post('/', async (req, rep) => {
@@ -30,18 +30,20 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     const body = req.body as UserPhoneRegisterInterface | undefined;
 
     if (!body?.phone || typeof body.phone !== 'string') {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
       return;
     }
 
     if (typeof body.isPrimary === 'string') {
       body.isPrimary = /^true$/gi.test(body.isPrimary);
+    } else if (typeof body.isPrimary === 'object') {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST);
     }
 
     const phone = libPhoneNumberJs(body.phone);
 
     if (!phone) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
       return;
     }
 
@@ -54,7 +56,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
     ).filter((n) => n.phone === phone.formatInternational());
 
     if (matchingPhones.length > 0) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.CONFLICT, 'phone number already exists');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.CONFLICT, 'phone number already exists');
       return;
     }
 
@@ -72,8 +74,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
       );
 
       if (othersPrimaryPhones.length > 0 && body.force !== true) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.CONFLICT,
           'there is other user who is using this phone as primary phone',
         );
@@ -100,7 +101,7 @@ const userPhonesAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions
           },
         },
         phone: phone.formatInternational(),
-        isPrimary: body.isPrimary || false,
+        isPrimary: body.isPrimary ? true : false,
       },
     });
 
@@ -127,7 +128,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     });
 
     if (phone === null) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 
@@ -142,7 +143,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       isPrimary?: boolean;
     };
 
-    const phone = await getPrismaClient().phone.findFirst({
+    let phone = await getPrismaClient().phone.findFirst({
       where: {
         user: {
           id: uuid,
@@ -152,7 +153,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     });
 
     if (phone === null) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
       return;
     }
 
@@ -161,7 +162,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     if (typeof body.phone === 'string') {
       const phoneNumberObj = libPhoneNumberJs(body.phone);
       if (!phoneNumberObj) {
-        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid phone number');
         return;
       }
 
@@ -182,8 +183,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       );
 
       if (othersPrimaryPhones.length > 0) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.CONFLICT,
           'there is other user who is using this phone as primary phone',
         );
@@ -212,38 +212,58 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       },
     });
 
-    app.delete('/', async (req, rep) => {
-      const phoneId = (req.params as { phoneId: string }).phoneId;
-
-      const phone = await getPrismaClient().phone.findFirst({
-        where: {
-          user: {
-            id: uuid,
-          },
-          id: phoneId,
+    phone = await getPrismaClient().phone.findFirst({
+      where: {
+        user: {
+          id: uuid,
         },
-      });
-
-      if (phone === null) {
-        Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-        return;
-      }
-
-      if (phone.isPrimary) {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
-          Meiling.V1.Error.ErrorType.CONFLICT,
-          'you should assign new primary number before deleting it',
-        );
-        return;
-      }
-
-      await getPrismaClient().phone.delete({
-        where: {
-          id: phoneId,
-        },
-      });
+        id: phoneId,
+      },
     });
+    rep.send(phone);
+  });
+
+  app.delete('/', async (req, rep) => {
+    const uuid = (req.params as { uuid: string }).uuid;
+    const phoneId = (req.params as { phoneId: string }).phoneId;
+
+    let phone = await getPrismaClient().phone.findFirst({
+      where: {
+        user: {
+          id: uuid,
+        },
+        id: phoneId,
+      },
+    });
+
+    if (phone === null) {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
+      return;
+    }
+
+    if (phone.isPrimary) {
+      throw new Meiling.V1.Error.MeilingError(
+        Meiling.V1.Error.ErrorType.CONFLICT,
+        'you should assign new primary number before deleting it',
+      );
+      return;
+    }
+
+    await getPrismaClient().phone.delete({
+      where: {
+        id: phoneId,
+      },
+    });
+
+    phone = await getPrismaClient().phone.findFirst({
+      where: {
+        user: {
+          id: uuid,
+        },
+        id: phoneId,
+      },
+    });
+    rep.send({ success: true });
   });
 
   done();

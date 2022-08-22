@@ -21,7 +21,7 @@ async function clientSecretDeleteHandler(_req: FastifyRequest, rep: FastifyReply
     })) === 1;
 
   if (!res) {
-    return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND, 'secret not found');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND, 'secret not found');
   }
 
   await getPrismaClient().oAuthClientSecrets.delete({

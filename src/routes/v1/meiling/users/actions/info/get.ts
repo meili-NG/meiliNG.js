@@ -19,20 +19,18 @@ export async function userGetInfo(req: FastifyRequest, rep: FastifyReply) {
         rep.send(user);
         return;
       } else {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.NOT_FOUND,
           'specified user uuid was not available.',
         );
       }
     } else {
-      Meiling.V1.Error.sendMeilingError(
-        rep,
+      throw new Meiling.V1.Error.MeilingError(
         Meiling.V1.Error.ErrorType.INVALID_REQUEST,
         'required field (user uuid) is missing',
       );
     }
   } else {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'You are not logged in.');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'You are not logged in.');
   }
 }

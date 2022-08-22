@@ -16,12 +16,14 @@ const sessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
         },
       });
 
-      if (!tokenData) return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
+      if (!tokenData) throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
       rep.send(tokenData);
       return;
     }
 
-    const { query, pageSize = 20, page = 1 } = (req.query as any) || {};
+    let { query } = (req.query as any) || {};
+    const { pageSize = 20, page = 1 } = (req.query as any) || {};
+    if (['bigint', 'boolean', 'number'].includes(typeof query)) query = query.toString();
 
     const paginationDetails: {
       skip?: number;
@@ -40,11 +42,7 @@ const sessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
       try {
         prismaQuery = JSON.parse(query);
       } catch (e) {
-        return Meiling.V1.Error.sendMeilingError(
-          rep,
-          Meiling.V1.Error.ErrorType.INVALID_REQUEST,
-          'invalid prisma query',
-        );
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
       }
     }
 
@@ -54,6 +52,27 @@ const sessionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, 
     });
 
     rep.send(sessions);
+  });
+
+  app.get('/count', async (req, rep) => {
+    const { query } = (req.query as any) || {};
+    let prismaQuery = undefined;
+
+    if (query !== undefined) {
+      try {
+        prismaQuery = JSON.parse(query);
+      } catch (e) {
+        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
+      }
+    }
+
+    const count = await getPrismaClient().meilingSessionV1Token.count({
+      where: prismaQuery,
+    });
+
+    rep.send({
+      count,
+    });
   });
 
   app.register(sessionAdminHandler);

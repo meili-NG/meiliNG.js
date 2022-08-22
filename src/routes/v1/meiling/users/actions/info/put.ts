@@ -31,8 +31,7 @@ export async function userUpdateInfo(req: FastifyRequest, rep: FastifyReply) {
         });
 
         if (!user) {
-          Meiling.V1.Error.sendMeilingError(
-            rep,
+          throw new Meiling.V1.Error.MeilingError(
             Meiling.V1.Error.ErrorType.NOT_FOUND,
             'specified user uuid was not available.',
           );
@@ -41,8 +40,7 @@ export async function userUpdateInfo(req: FastifyRequest, rep: FastifyReply) {
 
         const isLockOK = await Meiling.Identity.User.checkLockedProps(user.id, body);
         if (!isLockOK) {
-          Meiling.V1.Error.sendMeilingError(
-            rep,
+          throw new Meiling.V1.Error.MeilingError(
             Meiling.V1.Error.ErrorType.FORBIDDEN,
             'you can not update locked prop fields',
           );
@@ -65,20 +63,18 @@ export async function userUpdateInfo(req: FastifyRequest, rep: FastifyReply) {
         rep.send(await getSanitizedUser(user.id));
         return;
       } else {
-        Meiling.V1.Error.sendMeilingError(
-          rep,
+        throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.NOT_FOUND,
           'specified user uuid was not available.',
         );
       }
     } else {
-      Meiling.V1.Error.sendMeilingError(
-        rep,
+      throw new Meiling.V1.Error.MeilingError(
         Meiling.V1.Error.ErrorType.INVALID_REQUEST,
         'required field (user uuid) is missing',
       );
     }
   } else {
-    Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'You are not logged in.');
+    throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.UNAUTHORIZED, 'You are not logged in.');
   }
 }

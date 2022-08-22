@@ -14,11 +14,11 @@ interface OAuth2QueryTokenInfoBody {
 export async function oAuth2TokenInfoHandler(req: FastifyRequest, rep: FastifyReply): Promise<void> {
   const body = (req.body ? req.body : req.query) as OAuth2QueryTokenInfoBody;
 
-  if (body?.id_token) {
+  if (typeof body?.id_token === 'string') {
     await idTokenInfoHandler(body.id_token, rep);
-  } else if (body?.access_token) {
+  } else if (typeof body?.access_token === 'string') {
     await accessTokenInfoHandler(body.access_token, rep);
-  } else if (body?.refresh_token) {
+  } else if (typeof body?.refresh_token === 'string') {
     await refreshTokenInfoHandler(body.refresh_token, rep);
   } else {
     Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST, 'missing proper query');

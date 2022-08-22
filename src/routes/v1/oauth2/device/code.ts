@@ -22,7 +22,7 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
   const body = req.body as DeviceCodeRequestBody;
   const type = 'DEVICE_CODE';
 
-  if (!Utils.isValidValue(body, clientId, body.scope)) {
+  if (!Utils.isValidValue(body, clientId, body.scope) && Utils.isNotBlank(clientId)) {
     Meiling.OAuth2.Error.sendOAuth2Error(rep, Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST);
     return;
   }
@@ -45,6 +45,15 @@ export async function meilingV1OAuth2DeviceCodeHandler(req: FastifyRequest, rep:
       },
     },
   };
+
+  if (typeof body.scope !== 'string') {
+    Meiling.OAuth2.Error.sendOAuth2Error(
+      rep,
+      Meiling.OAuth2.Error.ErrorType.INVALID_REQUEST,
+      'scope is not a valid string',
+    );
+    return;
+  }
 
   // check permissions are valid or not
   const scopes = Utils.getUnique(body.scope.split(' '), (m, n) => m === n);

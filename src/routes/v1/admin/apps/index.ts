@@ -12,7 +12,9 @@ function queryBuilder(query: string) {
 
 const appsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.get('/', async (req, rep) => {
-    const { query, pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
+    let { query } = (req.query as any) || {};
+    const { pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
+    if (['bigint', 'boolean', 'number'].includes(typeof query)) query = query.toString();
 
     const paginationDetails: {
       skip?: number;
@@ -32,7 +34,7 @@ const appsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
         prismaQuery = JSON.parse(query);
       } catch (e) {
         if (rawQuery) {
-          Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
+          throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
           return;
         } else if (typeof query === 'string') {
           prismaQuery = queryBuilder(query);

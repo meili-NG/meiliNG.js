@@ -56,7 +56,9 @@ const queryBuilder = (query: string) => ({
 
 const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done: () => void): void => {
   app.get('/', async (req, rep) => {
-    const { query, pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
+    let { query } = (req.query as any) || {};
+    const { pageSize = 20, page = 1, rawQuery = false } = (req.query as any) || {};
+    if (['bigint', 'boolean', 'number'].includes(typeof query)) query = query.toString();
 
     const paginationDetails: {
       skip?: number;
@@ -76,7 +78,7 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
         prismaQuery = JSON.parse(query);
       } catch (e) {
         if (rawQuery) {
-          Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
+          throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
           return;
         } else if (typeof query === 'string') {
           prismaQuery = queryBuilder(query);
@@ -92,7 +94,7 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
     rep.send(
       await Promise.all(
         users.map(async (user) => {
-          return await Meiling.Identity.User.getDetailedInfo(user);
+          return await Meiling.Identity.User.getDetailedInfo(user, { includeDeleted: true });
         }),
       ),
     );
@@ -105,15 +107,14 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
     // TODO: add endpoints to allow CRUD operations on user's authentication method by admin
 
     const data = req.body as any;
-    if (!data)
-      return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Body');
+    if (!data) throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Body');
 
     const hasRequirementsMet = Utils.isNotBlank(data.username);
 
     if (!hasRequirementsMet)
-      return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Username');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Username');
     if (!Utils.isValidName(data.name))
-      return Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Name');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'Invalid Name');
 
     const name = data.name;
 
@@ -127,11 +128,13 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
       },
     });
 
-    rep.send(await Meiling.Identity.User.getDetailedInfo(user));
+    rep.send(await Meiling.Identity.User.getDetailedInfo(user, { includeDeleted: true }));
   });
 
   app.get('/count', async (req, rep) => {
-    const { query, rawQuery = false } = (req.query as any) || {};
+    let { query } = (req.query as any) || {};
+    const { rawQuery = false } = (req.query as any) || {};
+    if (typeof query !== 'string' && query !== undefined) query = query.toString();
 
     let prismaQuery = undefined;
 
@@ -140,7 +143,7 @@ const usersAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, don
         prismaQuery = JSON.parse(query);
       } catch (e) {
         if (rawQuery) {
-          Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
+          throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.INVALID_REQUEST, 'invalid prisma query');
           return;
         } else if (typeof query === 'string') {
           prismaQuery = queryBuilder(query);
@@ -166,20 +169,18 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
   app.addHook('onRequest', async (req, rep) => {
     const uuid = (req.params as { uuid: string }).uuid;
 
-    const user = await Meiling.Identity.User.getDetailedInfo(uuid);
+    const user = await Meiling.Identity.User.getDetailedInfo(uuid, { includeDeleted: true });
     if (!user) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-      throw new Error('user not found');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND, 'User was not found');
     }
   });
 
   app.get('/', async (req, rep) => {
     const uuid = (req.params as { uuid: string }).uuid;
 
-    const user = await Meiling.Identity.User.getDetailedInfo(uuid);
+    const user = await Meiling.Identity.User.getDetailedInfo(uuid, { includeDeleted: true });
     if (!user) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-      throw new Error('user not found');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND, 'User was not found');
     }
 
     rep.send(user);
@@ -191,10 +192,9 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
     const uuid = (req.params as { uuid: string }).uuid;
     const body = req.body as any;
 
-    const user = await Meiling.Identity.User.getInfo(uuid);
+    const user = await Meiling.Identity.User.getInfo(uuid, { includeDeleted: true });
     if (!user) {
-      Meiling.V1.Error.sendMeilingError(rep, Meiling.V1.Error.ErrorType.NOT_FOUND);
-      throw new Error('user not found');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND, 'User was not found');
     }
 
     await getPrismaClient().user.update({
@@ -213,6 +213,72 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
     });
 
     rep.send({ success: true });
+  });
+
+  app.delete('/', async (req, rep) => {
+    const uuid = (req.params as { uuid: string }).uuid;
+    const user = await getPrismaClient().user.findUnique({
+      where: {
+        id: uuid,
+      },
+    });
+
+    const permanent = (req.query as any).permanent === 'true';
+
+    if (user) {
+      await getPrismaClient().user.update({
+        where: {
+          id: uuid,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+
+      const userLoggedInJson = { id: user?.id };
+      const userSessions = await getPrismaClient().meilingSessionV1Token.findMany({
+        where: {
+          session: {
+            path: '$.user',
+            array_contains: userLoggedInJson,
+          },
+        },
+      });
+
+      await Promise.all(
+        userSessions.map(async (n) => {
+          await getPrismaClient().meilingSessionV1Token.update({
+            where: {
+              token: n.token,
+            },
+            data: {
+              session: {
+                ...(n.session as any),
+                user: (n.session as any).user.filter((o: { id: string }) => o.id !== user?.id),
+              },
+            },
+          });
+        }),
+      );
+
+      // actually delete if admin requested permanent deletion
+      // note: this could lead possible uuid collision for other apps.
+      if (permanent) {
+        await getPrismaClient().user.delete({
+          where: {
+            id: uuid,
+          },
+        });
+      }
+
+      rep.send({ success: true });
+      return;
+    } else {
+      throw new Meiling.V1.Error.MeilingError(
+        Meiling.V1.Error.ErrorType.NOT_FOUND,
+        'specified user was not available.',
+      );
+    }
   });
 
   app.register(userEmailsAdminHandler, { prefix: '/emails' });

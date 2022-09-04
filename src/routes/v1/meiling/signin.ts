@@ -21,6 +21,8 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
   }
 
   let userToLogin: UserModel;
+  let markToSkip2FA = false;
+
   if (body.type === Meiling.V1.Interfaces.SigninType.USERNAME_CHECK) {
     const username = body?.data?.username;
 
@@ -89,22 +91,27 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
     }
 
     const user = userToLogin;
+    const shouldSkip2FA = await Meiling.V1.Session.canSkip2FA(req, user);
     if (user.useTwoFactor) {
-      const twoFactorMethods = await Meiling.V1.User.getAvailableExtendedAuthenticationMethods(user, body.type);
+      if (shouldSkip2FA) {
+        const twoFactorMethods = await Meiling.V1.User.getAvailableExtendedAuthenticationMethods(user, body.type);
 
-      if (twoFactorMethods.length > 0) {
-        // set the session for two factor authentication
+        if (twoFactorMethods.length > 0) {
+          // set the session for two factor authentication
 
-        await Meiling.V1.Session.setExtendedAuthenticationSession(req, {
-          id: user.id,
-          type: Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH,
-        });
+          await Meiling.V1.Session.setExtendedAuthenticationSession(req, {
+            id: user.id,
+            type: Meiling.V1.Interfaces.SigninType.TWO_FACTOR_AUTH,
+          });
 
-        throw new Meiling.V1.Error.MeilingError(
-          Meiling.V1.Error.ErrorType.TWO_FACTOR_AUTHENTICATION_REQUIRED,
-          'two factor authentication is required.',
-        );
-        return;
+          throw new Meiling.V1.Error.MeilingError(
+            Meiling.V1.Error.ErrorType.TWO_FACTOR_AUTHENTICATION_REQUIRED,
+            'two factor authentication is required.',
+          );
+          return;
+        }
+      } else {
+        markToSkip2FA = true;
       }
     }
   } else if (
@@ -491,6 +498,10 @@ please request this endpoint without challengeResponse field to request challeng
 
     if (authorizedUsers.length === 1) {
       userToLogin = authorizedUsers[0];
+
+      if ((body as Meiling.V1.Interfaces.SigninTwoFactor).skip2FA === true) {
+        markToSkip2FA = true;
+      }
     } else if (authorizedUsers.length > 1) {
       throw new Meiling.V1.Error.MeilingError(
         Meiling.V1.Error.ErrorType.MORE_THAN_ONE_USER_MATCHED,
@@ -498,7 +509,7 @@ please request this endpoint without challengeResponse field to request challeng
       );
       return;
     } else {
-      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.SIGNIN_FAILED, 'No matching users');
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.SIGNIN_FAILED, 'invalid 2fa');
       return;
     }
   } else {
@@ -506,7 +517,7 @@ please request this endpoint without challengeResponse field to request challeng
     return;
   }
 
-  await Meiling.V1.Session.login(req, userToLogin);
+  await Meiling.V1.Session.login(req, userToLogin, markToSkip2FA);
   await Meiling.V1.Session.setExtendedAuthenticationSession(req, undefined);
 
   Meiling.Identity.User.updateLastAuthenticated(userToLogin);

@@ -444,6 +444,29 @@ export async function setExtendedAuthenticationSessionMethodAndChallenge(
   }
 }
 
+export async function canSkip2FA(req: FastifyRequest, user: UserModel | string): Promise<boolean> {
+  const session = await getSessionFromRequest(req);
+
+  if (session) {
+    if (session.previouslyLoggedIn === undefined) {
+      session.previouslyLoggedIn = [];
+    }
+
+    const userData = await Meiling.Identity.User.getBasicInfo(user);
+    if (userData === null || userData === undefined) {
+      return false;
+    }
+
+    const userId = userData.id;
+
+    const result = session.previouslyLoggedIn.find((n) => n.id === userId);
+
+    return result !== null && result?.skip2FA === true;
+  } else {
+    return false;
+  }
+}
+
 export async function getPreviouslyLoggedIn(req: FastifyRequest, user: UserModel | string): Promise<boolean> {
   const session = await getSessionFromRequest(req);
 
@@ -467,7 +490,7 @@ export async function getPreviouslyLoggedIn(req: FastifyRequest, user: UserModel
   }
 }
 
-export async function login(req: FastifyRequest, user: UserModel | string): Promise<void> {
+export async function login(req: FastifyRequest, user: UserModel | string, skip2FA = false): Promise<void> {
   const session = await getSessionFromRequest(req);
 
   if (session) {
@@ -493,6 +516,7 @@ export async function login(req: FastifyRequest, user: UserModel | string): Prom
     if (session.previouslyLoggedIn.map((user) => user.id === userData.id).indexOf(true) < 0) {
       session.previouslyLoggedIn.push({
         id: userData.id,
+        skip2FA,
       });
     }
 

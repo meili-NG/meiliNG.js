@@ -3,7 +3,7 @@ import { ExtendedAuthMethods, SigninType } from './query';
 export interface MeilingSession {
   user?: LoggedInUser[];
   extendedAuthentication?: ExtendedAuthentication;
-  previouslyLoggedIn?: LoggedInUser[];
+  previouslyLoggedIn?: PreviouslyLoggedInUser[];
   authenticationStatus?: SessionAuthenticationStatus;
   passwordReset?: SessionPasswordReset;
   registering?: SessionRegistering;
@@ -28,6 +28,11 @@ export interface RegisteringOTP {
 
 export interface LoggedInUser {
   id: string;
+}
+
+export interface PreviouslyLoggedInUser {
+  id: string;
+  skip2FA?: boolean;
 }
 
 export interface SessionPasswordReset extends SessionChallengeBody {

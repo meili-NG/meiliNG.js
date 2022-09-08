@@ -47,7 +47,7 @@ export interface PasswordResetBody {
 export interface SigninTwoFactor {
   type: SigninType.TWO_FACTOR_AUTH;
   data?: SigninAuthenticationData;
-  skip2FA?: boolean;
+  remember2FA?: boolean;
 }
 
 interface SigninPasswordLess {

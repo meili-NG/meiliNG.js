@@ -32,7 +32,7 @@ export interface LoggedInUser {
 
 export interface PreviouslyLoggedInUser {
   id: string;
-  skip2FA?: boolean;
+  remember2FA?: boolean;
 }
 
 export interface SessionPasswordReset extends SessionChallengeBody {

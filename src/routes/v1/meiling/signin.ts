@@ -94,6 +94,8 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
     const shouldSkip2FA = await Meiling.V1.Session.canSkip2FA(req, user);
     if (user.useTwoFactor) {
       if (shouldSkip2FA) {
+        markToSkip2FA = true;
+      } else {
         const twoFactorMethods = await Meiling.V1.User.getAvailableExtendedAuthenticationMethods(user, body.type);
 
         if (twoFactorMethods.length > 0) {
@@ -110,8 +112,6 @@ export async function signinHandler(req: FastifyRequest, rep: FastifyReply): Pro
           );
           return;
         }
-      } else {
-        markToSkip2FA = true;
       }
     }
   } else if (

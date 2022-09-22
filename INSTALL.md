@@ -1,6 +1,6 @@
 <h1 align="center">Install</h1>
 <p align="center">This Guide will help you install meiliNG in no time.</p>
-<p align="right"><b>Last Update:</b> v.0.7.0-SNAPSHOT</p>
+<p align="right"><b>Last Update:</b> v.0.9.0-SNAPSHOT</p>
 
 ## Getting Started
 Hello, Welcome to meiliNG, an oAuth2 based authentication engine to build your customized login in no time.
@@ -31,10 +31,7 @@ You can use [sample .env file (.env.example)](/.env.example) shipped with this r
 ## Setting up Database
 
 ### Setting up MariaDB (or mySQL)
-meiliNG uses [prisma](https://prisma.io), a next-generation ORM for Node.JS with JsonFiltering that does NOT provide universal way to querying JSON filtering at the moment.  
-  
-Therefore, support for DBMS other than MariaDB/MySQL was dropped due to recent changes for supporting Json filtering. Sorry!  
-
+meiliNG uses [prisma](https://prisma.io), a next-generation ORM for Node.JS.
 Install MariaDB or mySQL depending on your platform.
 
 ### Setting Database URL

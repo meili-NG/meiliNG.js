@@ -47,6 +47,8 @@ You should set environment variable `DATABASE_URL` or edit [`.env` file](/.env) 
 
 ### Setting up automatically
 
+Run `yarn configure` and follow the directions on screen.  
+
 > **Note**  
 > [@ldmsys](https://github.com/ldmsys) is currently working on automatic installer for meiliNG.  
 > If you looking for one, Check [Issue#49](https://github.com/meili-NG/meiliNG/issues/49)  

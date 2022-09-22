@@ -75,7 +75,8 @@
     "generate": "prisma generate",
     "keygen": "node ./keygen.js",
     "cleanup": "node ./dist/cleanup.js",
-    "env:setup": "NODE_OPTIONS=\"--es-module-specifier-resolution=node\""
+    "env:setup": "NODE_OPTIONS=\"--es-module-specifier-resolution=node\"",
+    "configure": "node ./configure.js"
   },
   "husky": {
     "hooks": {

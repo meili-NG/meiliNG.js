@@ -12,7 +12,7 @@ meiliNG works best with latest LTS version of Node, Please go [here](https://nod
 ### Installing Yarn
 meiliNG uses [yarn](https://yarnpkg.com) for managing dependencies of application.  
 
-> 💡 **Note**  
+> **Note**  
 > Currently Yarn 1.x is preferred due to compatibility issues. 
 
 ### Installing node_modules
@@ -39,18 +39,26 @@ Prisma by default uses environment variables to get URL for connecting database.
 
 You should set environment variable `DATABASE_URL` or edit [`.env` file](/.env) to following:
 * MySQL/MariaDB: `mysql://username:password@host:port/database`
+
+<!--
 * PostgreSQL: `postgresql://username:password@host:port/database?schema=public`
 * Microsoft SQL Server, mongoDB: Please refer to [Prisma: Getting Started with Microsoft SQL Server](https://www.prisma.io/docs/concepts/components/preview-features/sql-server/sql-server-start-from-scratch-typescript#connect-your-database)
+-->
 
-### Deploy Database
+### Setting up automatically
+
+> **Note**  
+> [@ldmsys](https://github.com/ldmsys) is currently working on automatic installer for meiliNG.  
+> If you looking for one, Check [Issue#49](https://github.com/meili-NG/meiliNG/issues/49)  
+
+### Setting up manually (Deploy Database)
 Use `prisma db push` to deploy database to specified database you declared above.
 
-## Configurations
+### Setting up manually (Configuration)
 From v0.4.0, Usage of `.env` is recommended than using `config.js`.  
 
 The following is a example .env files.
 
-### Things to configure on `.env` file
 ```env
 ### ==== CONFIGURATIONS FOR PRISMA ====
 
@@ -109,7 +117,7 @@ ADMIN_FRONTEND_URLS="https://frontend-1.meili.ng,https://frontend-2.meili.ng,htt
 
 ```
 
-#### Configuring OpenID JWT SecretKey
+### Setting up Manually (Configuring OpenID JWT SecretKey)
 These are the secret key to sign your OpenID Token. Please make sure this is long enough and random enough.
 
 **Please Run the following:**  
@@ -119,7 +127,7 @@ yarn keygen
 
 
 ### Configuring Notification API
-TODO
+--- Deprecated will fully removed on 0.10.0 ---
 
 ## Start meiliNG
 

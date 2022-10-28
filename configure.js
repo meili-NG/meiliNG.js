@@ -3,6 +3,7 @@ const Figlet = require('figlet');
 const chalk = require('chalk');
 
 const fs = require('fs');
+const prompts = require('prompts');
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -15,20 +16,39 @@ console.log(`${chalk.bold(productName)} Configuration Utility - ${chalk.italic`v
 console.log();
 
 (async () => {
-  try {
-    const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient();
-  
-    const perms = ['openid', 'profile', 'name', 'email', 'address'];
-    await Promise.all(perms.map(n => prisma.permission.create({
-      data: {
-        name: n,
-      },
-    })));
+  const { PrismaClient } = require('@prisma/client');
+  const prisma = new PrismaClient();
 
-    
-  } catch(e) {
-    console.error('prisma client not generated. run yarn generate to generate files')
+  if (!process.env.DATABASE_URL?.trim()) {
+    console.error(chalk.redBright('x'), 'Database URL is not properly configured.');
+    process.exit(1);
   }
   
+  try {  
+    await prisma.$connect();
+  } catch(e) {
+    console.error(chalk.redBright('x'), 'Failed to connect database');
+    process.exit(1);
+  }
+
+  try {  
+    const perms = ['openid', 'profile', 'name', 'email', 'address'];
+    await Promise.all(perms.map(async n => {
+      const perm = await prisma.permission.findUnique({
+        where: {
+          name: n,
+        },
+      });
+
+      if (!perm) {
+        await prisma.permission.create({
+          data: {
+            name: n,
+          },
+        });
+      }
+    }));
+  } catch(e) {
+    console.error(chalk.redBright('x'), 'Failed to generate required permission/scope on database');
+  }
 })();

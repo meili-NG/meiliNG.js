@@ -8,6 +8,7 @@ import { info as packageJson } from '../../../resources/package';
 import appsAdminHandler from './apps';
 import authAdminHandler from './auth';
 import internalAdminHandler from './internal';
+import permissionsAdminHandler from './permissions';
 import sessionsAdminHandler from './sessions';
 import tokensAdminHandler from './tokens';
 import usersAdminHandler from './users';
@@ -43,8 +44,8 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
       config.node.environment === NodeEnvironment.Development
         ? '*'
         : config?.admin?.frontend?.url
-        ? config.admin.frontend.url
-        : config.frontend.url,
+          ? config.admin.frontend.url
+          : config.frontend.url,
   });
 
   app.addHook('onRequest', (req, rep, next) => {
@@ -114,6 +115,7 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
   app.register(tokensAdminHandler, { prefix: '/tokens' });
   app.register(sessionsAdminHandler, { prefix: '/sessions' });
   app.register(internalAdminHandler, { prefix: '/internal' });
+  app.register(permissionsAdminHandler, { prefix: '/permissions' });
 
   done();
 };

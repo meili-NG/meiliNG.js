@@ -14,4 +14,21 @@ console.log(Figlet.textSync(productName, 'Small Slant'));
 console.log(`${chalk.bold(productName)} Configuration Utility - ${chalk.italic`v${packageJson.version}`}`);
 console.log();
 
-console.error('Working in progress!');
+(async () => {
+  try {
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+  
+    const perms = ['openid', 'profile', 'name', 'email', 'address'];
+    await Promise.all(perms.map(n => prisma.permission.create({
+      data: {
+        name: n,
+      },
+    })));
+
+    
+  } catch(e) {
+    console.error('prisma client not generated. run yarn generate to generate files')
+  }
+  
+})();

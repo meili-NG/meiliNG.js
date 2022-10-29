@@ -23,32 +23,34 @@ console.log();
     console.error(chalk.redBright('x'), 'Database URL is not properly configured.');
     process.exit(1);
   }
-  
-  try {  
+
+  try {
     await prisma.$connect();
-  } catch(e) {
+  } catch (e) {
     console.error(chalk.redBright('x'), 'Failed to connect database');
     process.exit(1);
   }
 
-  try {  
+  try {
     const perms = ['openid', 'profile', 'name', 'email', 'address'];
-    await Promise.all(perms.map(async n => {
-      const perm = await prisma.permission.findUnique({
-        where: {
-          name: n,
-        },
-      });
-
-      if (!perm) {
-        await prisma.permission.create({
-          data: {
+    await Promise.all(
+      perms.map(async (n) => {
+        const perm = await prisma.permission.findUnique({
+          where: {
             name: n,
           },
         });
-      }
-    }));
-  } catch(e) {
+
+        if (!perm) {
+          await prisma.permission.create({
+            data: {
+              name: n,
+            },
+          });
+        }
+      }),
+    );
+  } catch (e) {
     console.error(chalk.redBright('x'), 'Failed to generate required permission/scope on database');
   }
 })();

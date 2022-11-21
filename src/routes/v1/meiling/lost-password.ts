@@ -317,7 +317,7 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
   }
 
   const challengeResponse = body.data.challengeResponse;
-  if (typeof challengeResponse !== 'object')
+  if (!['string', 'object'].includes(typeof challengeResponse))
     throw new Meiling.V1.Error.MeilingError(
       Meiling.V1.Error.ErrorType.INVALID_REQUEST,
       'invalid challengeResponse type',

@@ -422,7 +422,7 @@ please request this endpoint without challengeResponse field to request challeng
         }
       }
     } else {
-      if (typeof challengeResponse !== 'object')
+      if (!['string', 'object'].includes(typeof challengeResponse))
         throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.INVALID_REQUEST,
           'invalid challengeResponse type',

@@ -23,9 +23,9 @@ const permissionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOption
     } =
       pageSize && page
         ? {
-          skip: (Number(pageSize) * (Number(page) - 1)) as number,
-          take: Number(pageSize) as number,
-        }
+            skip: (Number(pageSize) * (Number(page) - 1)) as number,
+            take: Number(pageSize) as number,
+          }
         : {};
 
     let prismaQuery = undefined;
@@ -45,19 +45,19 @@ const permissionsAdminHandler = (app: FastifyInstance, opts: FastifyPluginOption
 
     const apps = await getPrismaClient().permission.findMany({
       where: prismaQuery,
-      ...paginationDetails
+      ...paginationDetails,
     });
 
     rep.send(apps);
   });
 
   app.post('/', async (req, rep) => {
-    const body = req.body as { name: string; isAvailable?: boolean; };
+    const body = req.body as { name: string; isAvailable?: boolean };
     const res = await getPrismaClient().permission.create({
       data: {
         name: body.name,
         isAvailable: body.isAvailable,
-      }
+      },
     });
 
     rep.send(res);

@@ -44,8 +44,8 @@ const adminV1Plugin = (app: FastifyInstance, opts: FastifyPluginOptions, done: (
       config.node.environment === NodeEnvironment.Development
         ? '*'
         : config?.admin?.frontend?.url
-          ? config.admin.frontend.url
-          : config.frontend.url,
+        ? config.admin.frontend.url
+        : config.frontend.url,
   });
 
   app.addHook('onRequest', (req, rep, next) => {

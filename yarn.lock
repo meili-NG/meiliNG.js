@@ -442,10 +442,10 @@
     "@typescript-eslint/types" "5.31.0"
     eslint-visitor-keys "^3.3.0"
 
-"@xmldom/xmldom@^0.8.0":
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.8.1.tgz#70c239275fc6d6a84e41b9a8d623a93c0d59b6b4"
-  integrity sha512-4wOae+5N2RZ+CZXd9ZKwkaDi55IxrSTOjHpxTvQQ4fomtOJmqVxbmICA9jE1jvnqNhpfgz8cnfFagG86wV/xLQ==
+"@xmldom/xmldom@^0.8.3":
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.8.3.tgz#beaf980612532aa9a3004aff7e428943aeaa0711"
+  integrity sha512-Lv2vySXypg4nfa51LY1nU8yDAGo/5YwF+EY/rUZgIbfvwVARcd67ttCM8SMsTeJy51YhHYavEq+FS6R0hW9PFQ==
 
 abbrev@1:
   version "1.1.1"

@@ -17,8 +17,7 @@ module.exports = {
     {
       name: 'meiliNG',
       cwd: '.',
-      script: 'yarn',
-      args: ['start', '--no-cleanup'],
+      script: './dist/index.js',
       env: {
         // You should configure it here.
         NODE_ENV: 'production',

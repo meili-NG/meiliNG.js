@@ -1,4 +1,4 @@
-import fastify from 'fastify';
+import fastify, { FastifyListenOptions } from 'fastify';
 import fastifyFormbody from '@fastify/formbody';
 import fs from 'fs';
 import { Meiling, Startup, Terminal } from './common';
@@ -77,11 +77,17 @@ const main = async () => {
   }
 
   Terminal.Log.info('Starting up fastify...');
-  await app.listen({
-    port: typeof config.fastify.listen === 'number' ? config.fastify.listen : undefined,
-    path: typeof config.fastify.listen === 'string' ? config.fastify.listen : undefined,
+  const startupConfig: FastifyListenOptions = {
     host: config.fastify.address ?? '0.0.0.0',
-  });
+  };
+
+  if (typeof config.fastify.listen === 'number') {
+    startupConfig.port = config.fastify.listen;
+  } else {
+    startupConfig.path = config.fastify.listen;
+  }
+
+  await app.listen(startupConfig);
 
   if (typeof config.fastify.listen === 'string') {
     if (config.fastify.unixSocket?.chown?.uid !== undefined && config.fastify.unixSocket?.chown?.gid !== undefined) {

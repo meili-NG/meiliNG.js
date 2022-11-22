@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { FastifyReply } from 'fastify/types/reply';
 import { NodeEnvironment } from '../../../../interface';
 import config from '../../../../resources/config';
@@ -83,7 +82,7 @@ function getMeilingErrorStatusCode(type: ErrorType) {
 
 // TODO: implement throws
 export class MeilingError extends Error {
-  public _isMeiling: true = true;
+  public _isMeiling = true;
 
   public type: ErrorType;
   public description?: string;

@@ -1,17 +1,23 @@
 import chalk from 'chalk';
+import { NodeEnvironment } from '../../interface';
+import config from '../../resources/config';
 
 const Log = {
   info: (...msg: any[]) => {
-    console.log(`${chalk.cyanBright(chalk.bold('i'))}`, ...msg);
+    if (config.node.environment !== NodeEnvironment.Production)
+      console.log(`${chalk.cyanBright(chalk.bold('i'))}`, ...msg);
   },
   warn: (...msg: any[]) => {
-    console.log(`${chalk.yellowBright(chalk.bold('!'))}`, ...msg);
+    if (config.node.environment !== NodeEnvironment.Production)
+      console.log(`${chalk.yellowBright(chalk.bold('!'))}`, ...msg);
   },
   error: (...msg: any[]) => {
-    console.log(`${chalk.redBright(chalk.bold('×'))}`, ...msg);
+    if (config.node.environment !== NodeEnvironment.Production)
+      console.log(`${chalk.redBright(chalk.bold('×'))}`, ...msg);
   },
   ok: (...msg: any[]) => {
-    console.log(`${chalk.greenBright(chalk.bold('√'))}`, ...msg);
+    if (config.node.environment !== NodeEnvironment.Production)
+      console.log(`${chalk.greenBright(chalk.bold('√'))}`, ...msg);
   },
 };
 

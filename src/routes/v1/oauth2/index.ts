@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import fastifyCors from 'fastify-cors';
+import fastifyCors from '@fastify/cors';
 import { oAuth2AuthHandler } from './auth';
 import oAuth2CertsHandler from './certs';
 import { oAuth2DeviceHandler } from './device';

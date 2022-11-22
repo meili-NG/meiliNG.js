@@ -1,10 +1,11 @@
 import { FastifyInstance } from 'fastify';
-import fastifySwagger from 'fastify-swagger';
+import fastifySwagger from '@fastify/swagger';
 import { nameStylized } from '..';
 import { info as packageJson } from '../../resources/package';
 import config from '../../resources/config';
 
-export function setupSwaggerUI(app: FastifyInstance) {
+// TODO: Typescript sucks. fix later.
+export function setupSwaggerUI(app: any) {
   app.register(fastifySwagger, {
     routePrefix: '/docs',
     openapi: {

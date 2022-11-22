@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from 'fastify';
-import fastifyCors from 'fastify-cors';
+import fastifyCors from '@fastify/cors';
 import { NodeEnvironment } from '../../../interface';
 import config from '../../../resources/config';
 import { appsPlugin } from './apps';

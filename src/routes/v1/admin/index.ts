@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import fastifyCors from 'fastify-cors';
+import fastifyCors from '@fastify/cors';
 import { Meiling, Utils } from '../../../common';
 import { sentryErrorHandler } from '../../../common/sentry/tracer';
 import { NodeEnvironment } from '../../../interface';

@@ -323,8 +323,10 @@ export async function lostPasswordHandler(req: FastifyRequest, rep: FastifyReply
       'invalid challengeResponse type',
     );
 
-  if (challengeResponse.type !== 'public-key') {
-    challengeResponse.type = 'public-key';
+  if (typeof challengeResponse === 'object') {
+    if (challengeResponse.type !== 'public-key') {
+      challengeResponse.type = 'public-key';
+    }
   }
 
   const isValid = await Meiling.V1.Challenge.verifyChallenge(

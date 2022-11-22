@@ -422,15 +422,11 @@ please request this endpoint without challengeResponse field to request challeng
         }
       }
     } else {
-      if (!['string', 'object'].includes(typeof challengeResponse))
+      if (typeof challengeResponse === 'object')
         throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.INVALID_REQUEST,
-          'invalid challengeResponse type',
+          'challengeResponse is not object on webauthn signin method',
         );
-
-      if (challengeResponse.type !== 'public-key') {
-        challengeResponse.type = 'public-key';
-      }
 
       const idRaw = challengeResponse.id;
       if (typeof idRaw !== 'string' || !Utils.checkShortenedBase64(idRaw))

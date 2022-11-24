@@ -422,7 +422,7 @@ please request this endpoint without challengeResponse field to request challeng
         }
       }
     } else {
-      if (typeof challengeResponse === 'object')
+      if (typeof challengeResponse !== 'object')
         throw new Meiling.V1.Error.MeilingError(
           Meiling.V1.Error.ErrorType.INVALID_REQUEST,
           'challengeResponse is not object on webauthn signin method',

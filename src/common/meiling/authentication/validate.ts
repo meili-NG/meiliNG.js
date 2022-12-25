@@ -54,8 +54,10 @@ export async function validateWebAuthn(
     })
     .filter((n) => n !== undefined) as string[];
 
+  if (typeof challengeResponse !== 'object') return false;
+
   const res = await verifyAuthenticationResponse({
-    credential: challengeResponse,
+    credential: { type: 'public-key', ...challengeResponse },
     expectedChallenge: Buffer.from(challenge).toString('base64url'),
     authenticator: {
       credentialID: Buffer.from(data.data.key.id, 'base64'),

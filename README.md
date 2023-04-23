@@ -2,9 +2,6 @@
 <p align="center">
   <strong>meiliNG</strong>: Easy Identity/Login Infrastructure, Next Generation
 </p>
-<p align="center">
-  meiliNG is a very flexible, open-source "Gatekeeper" infrastructure for next-generation with oAuth2 and OpenID support written in Node.JS.
-</p>
 
 <p align="center">
   <a href="https://github.com/meili-ng/meiliNG/actions/workflows/eslint.yml"><img src="https://github.com/meili-ng/meiliNG/actions/workflows/eslint.yml/badge.svg" /></a>
@@ -22,7 +19,7 @@
 
 ## What is meiliNG?
 Named after [a Gatekeeper in Touhou Project](https://hong.meili.ng), (pronounced: meh-i-[ling](https://www.lingscars.com))  
-**meiliNG is an easy-to-use "next generation" identity/login provider that support oAuth2 and OpenID Connect specs.** designed for customization and tweakability from ground-up.**
+**meiliNG is an easy-to-use "next generation" identity/login provider that supports oAuth2 and OpenID Connect specs designed for customization and tweakability from ground-up.**
 
 ## Why should I use meiliNG?
 ### Unbeatable customizability

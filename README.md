@@ -10,11 +10,6 @@
 
 <hr>
 
-<p align="right">
-  Fueled by Stella IT OpenSource Project Team with ❤️<br>
-  <a href="https://opensource.stella-it.com/discord/">Join our Community</a>
-</p> 
-
 <hr>
 
 ## What is meiliNG?
@@ -55,16 +50,6 @@ meiliNG contains several security features such as:
 ### Easy and Familiarity
 meiliNG's API Structure was designed after Google's oAuth2 API.  
 If you are familiar with it, Using meiliNG needs just a little code change.  
-
-
-## See meiliNG in Production
-
-### [Stella IT Accounts](https://accounts.stella-it.com)
-> With **its flexibility,** Stella IT can provide **fully home-grown front-end and design** for account system which totally reflects Stella IT's Brand Design and Design Language.
-
-Currently, Stella IT Accounts automatically uses the latest stable version of meiliNG by default.  
-<a href="https://github.com/meili-ng/meiliNG/actions/workflows/deploy-s4ait-production.yml"><img src="https://github.com/meili-ng/meiliNG/actions/workflows/deploy-s4ait-production.yml/badge.svg" /></a>
-<p align="right">- <a href="https://github.com/Alex4386">Alex4386</a> - <b>Stella IT Inc.</b></p>
 
 
 ## Documentations

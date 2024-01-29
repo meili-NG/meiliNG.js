@@ -10,6 +10,8 @@
 
 <hr>
 
+**Roadmap:** Currently planning to create a "Go" version of the meiliNG for further performance boost! APIs will be backwards compatible with meiliNG.js.  
+
 <hr>
 
 ## What is meiliNG?

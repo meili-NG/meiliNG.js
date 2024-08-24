@@ -519,7 +519,7 @@ please request this endpoint without challengeResponse field to request challeng
   Meiling.Identity.User.updateLastAuthenticated(userToLogin);
   Meiling.Identity.User.updateLastSignIn(userToLogin);
 
-  const user = await Meiling.Identity.User.getDetailedInfo(userToLogin);
+  const user = await Meiling.Sanitize.getSanitizedUser(userToLogin.id);
 
   Event.Baridegi.sendBaridegiLog(Event.Baridegi.BaridegiLogType.USER_SIGNIN, {
     ip: req.ip,

@@ -434,11 +434,16 @@ please request this endpoint without challengeResponse field to request challeng
 
       const id = Buffer.from(idRaw, 'base64url').toString('base64');
 
+      const userIds = targetUsers.filter((n) => n !== undefined).map((n) => (n as UserModel).id);
+      if (userIds.length === 0 && challengeResponse.response?.userHandle) {
+        const userHandle = Buffer.from(challengeResponse.response.userHandle, 'base64').toString('utf-8');
+        userIds.push(userHandle);
+      }
       const webauthn = await getPrismaClient().authentication.findFirst({
         where: {
           user: {
             id: {
-              in: targetUsers.filter((n) => n !== undefined).map((n) => (n as UserModel).id),
+              in: userIds,
             },
           },
           method: 'WEBAUTHN',

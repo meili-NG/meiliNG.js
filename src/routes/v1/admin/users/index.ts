@@ -264,10 +264,38 @@ const userAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions, done
       // actually delete if admin requested permanent deletion
       // note: this could lead possible uuid collision for other apps.
       if (permanent) {
-        await getPrismaClient().user.delete({
-          where: {
-            id: uuid,
-          },
+        const userId = uuid;
+        await getPrismaClient().$transaction(async (tx) => {
+          await tx.email.deleteMany({ where: { userId } });
+          await tx.phone.deleteMany({ where: { userId } });
+          await tx.authentication.deleteMany({ where: { userId } });
+          await tx.oAuthClientSecrets.deleteMany({ where: { userId } });
+          await tx.policyConsent.deleteMany({ where: { userId } });
+
+          const authorizations = await tx.oAuthClientAuthorization.findMany({ where: { userId } });
+          for (const auth of authorizations) {
+            await tx.oAuthToken.deleteMany({ where: { authorizationId: auth.id } });
+          }
+          await tx.oAuthClientAuthorization.deleteMany({ where: { userId } });
+
+          await tx.user.update({
+            where: { id: userId },
+            data: { groups: { set: [] } },
+          });
+
+          const ownedClients = await tx.oAuthClient.findMany({ where: { owners: { some: { id: userId } } } });
+          for (const client of ownedClients) {
+            await tx.oAuthClient.update({
+              where: { id: client.id },
+              data: {
+                owners: {
+                  disconnect: { id: userId },
+                },
+              },
+            });
+          }
+
+          await tx.user.delete({ where: { id: userId } });
         });
       }
 

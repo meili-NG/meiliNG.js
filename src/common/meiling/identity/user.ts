@@ -1,4 +1,4 @@
-import { Email, Group, OAuthTokenType, Phone, prisma, User as UserModel, OAuthClient } from '@prisma/client';
+import { Email, Group, OAuthTokenType, Phone, User as UserModel, OAuthClient } from '@prisma/client';
 import { VerifiedAuthenticationResponse, VerifiedRegistrationResponse } from '@simplewebauthn/server/./dist';
 import { AttestationFormat } from '@simplewebauthn/server/dist/helpers/decodeAttestationObject';
 import { CredentialDeviceType } from '@simplewebauthn/typescript-types';

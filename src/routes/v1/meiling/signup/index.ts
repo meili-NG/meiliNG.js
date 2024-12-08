@@ -45,7 +45,11 @@ export function signupPlugin(app: FastifyInstance, opts: FastifyPluginOptions, d
         },
         response: {
           200: {
-            type: 'number',
+            description: 'Sign up success',
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+            },
           },
         },
       },

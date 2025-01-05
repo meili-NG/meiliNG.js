@@ -10,6 +10,7 @@ interface UserUpdateRequestBody {
   givenName?: string;
   middleName?: string | null;
   name?: string;
+  username?: string;
 }
 
 export async function userUpdateInfo(req: FastifyRequest, rep: FastifyReply) {
@@ -57,6 +58,7 @@ export async function userUpdateInfo(req: FastifyRequest, rep: FastifyReply) {
             givenName: Utils.isNotBlank(body.givenName) ? body.givenName : undefined,
             middleName: Utils.isNotBlank(body.middleName) ? body.middleName?.normalize('NFC') : undefined,
             name: Utils.isNotBlank(body.name) ? body.name : undefined,
+            username: Utils.isNotBlank(body.username) ? body.username : undefined,
           },
         });
 

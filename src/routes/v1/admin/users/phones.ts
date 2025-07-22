@@ -226,6 +226,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
   app.delete('/', async (req, rep) => {
     const uuid = (req.params as { uuid: string }).uuid;
     const phoneId = (req.params as { phoneId: string }).phoneId;
+    const force = ((req.query as { force?: string }).force ?? 'false') === 'true';
 
     let phone = await getPrismaClient().phone.findFirst({
       where: {
@@ -241,7 +242,7 @@ const userPhoneAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
       return;
     }
 
-    if (phone.isPrimary) {
+    if (phone.isPrimary && !force) {
       throw new Meiling.V1.Error.MeilingError(
         Meiling.V1.Error.ErrorType.CONFLICT,
         'you should assign new primary number before deleting it',

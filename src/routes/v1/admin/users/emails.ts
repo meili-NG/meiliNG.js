@@ -205,6 +205,7 @@ const userEmailAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
         verified: typeof body.isVerified === 'boolean' ? body.isVerified : undefined,
       },
     });
+  });
 
     app.delete('/', async (req, rep) => {
       const emailId = (req.params as { emailId: string }).emailId;
@@ -237,7 +238,6 @@ const userEmailAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
         },
       });
     });
-  });
 
   done();
 };

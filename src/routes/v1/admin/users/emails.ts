@@ -207,37 +207,49 @@ const userEmailAdminHandler = (app: FastifyInstance, opts: FastifyPluginOptions,
     });
   });
 
-    app.delete('/', async (req, rep) => {
-      const emailId = (req.params as { emailId: string }).emailId;
+  app.delete('/', async (req, rep) => {
+    const uuid = (req.params as { uuid: string }).uuid;
+    const emailId = (req.params as { emailId: string }).emailId;
+    const force = ((req.query as { force?: string }).force ?? 'false') === 'true';
 
-      const email = await getPrismaClient().email.findFirst({
-        where: {
-          user: {
-            id: uuid,
-          },
-          id: emailId,
+    let email = await getPrismaClient().email.findFirst({
+      where: {
+        user: {
+          id: uuid,
         },
-      });
-
-      if (email === null) {
-        throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
-        return;
-      }
-
-      if (email.isPrimary) {
-        throw new Meiling.V1.Error.MeilingError(
-          Meiling.V1.Error.ErrorType.CONFLICT,
-          'you should assign new primary email before deleting it',
-        );
-        return;
-      }
-
-      await getPrismaClient().email.delete({
-        where: {
-          id: emailId,
-        },
-      });
+        id: emailId,
+      },
     });
+
+    if (email === null) {
+      throw new Meiling.V1.Error.MeilingError(Meiling.V1.Error.ErrorType.NOT_FOUND);
+      return;
+    }
+
+    if (email.isPrimary && !force) {
+      throw new Meiling.V1.Error.MeilingError(
+        Meiling.V1.Error.ErrorType.CONFLICT,
+        'you should assign new primary email before deleting it',
+      );
+      return;
+    }
+
+    await getPrismaClient().email.delete({
+      where: {
+        id: emailId,
+      },
+    });
+
+    email = await getPrismaClient().email.findFirst({
+      where: {
+        user: {
+          id: uuid,
+        },
+        id: emailId,
+      },
+    });
+    rep.send({ success: true });
+  });
 
   done();
 };

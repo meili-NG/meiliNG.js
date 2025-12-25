@@ -561,7 +561,7 @@ export async function getEmails(userId: string, isPrimary?: boolean) {
   return emails;
 }
 
-export async function addEmail(userId: string, email: string, isPrimary = false) {
+export async function addEmail(userId: string, email: string, isPrimary = false, verified = false) {
   const prevPrimaries = (await getEmails(userId)).filter((n) => n.isPrimary);
 
   await getPrismaClient().email.create({
@@ -572,7 +572,7 @@ export async function addEmail(userId: string, email: string, isPrimary = false)
           id: userId,
         },
       },
-      verified: false,
+      verified,
       allowUse: false,
       isPrimary,
     },

@@ -26,7 +26,7 @@
     "jsonwebtoken": "^8.5.1",
     "libphonenumber-js": "^1.9.49",
     "mysql2": "^2.2.5",
-    "node-ssh": "^12.0.3",
+    "node-ssh": "^13.2.1",
     "nodemon": "^2.0.20",
     "openpgp": "^4.10.9",
     "pem2jwk": "^1.0.2",

@@ -69,7 +69,7 @@ export async function addUserEmail(req: FastifyRequest, rep: FastifyReply) {
     let isPrimary = false;
     if (!isTherePrimary) isPrimary = true;
 
-    await Meiling.Identity.User.addEmail(userId, email.trim(), isPrimary);
+    await Meiling.Identity.User.addEmail(userId, email.trim(), isPrimary, true);
 
     rep.send({ success: true });
   } else {
